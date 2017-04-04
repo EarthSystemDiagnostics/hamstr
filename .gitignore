@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+.DS_Store
+*.Rproj
+
+*_cache
+
+Read-and-delete-me

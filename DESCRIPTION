@@ -1,0 +1,17 @@
+Package: baconr
+Type: Package
+Title: A Stan Implementation of the Bacon Age-Depth Model
+Version: 0.1
+Date: 2017-04-04
+Encoding: UTF-8
+Authors@R: c(person("Andrew", "Dolman", email = "andrew.dolman@awi.de", role = c("aut", "cre")))
+Description: baconr implements the Bayesian Age-Depth model described in 
+  "Blaauw, Maarten, and J. Andrés Christen. 2011. 
+  'Flexible Paleoclimate Age-Depth Models Using an Autoregressive Gamma Process.'
+  Bayesian Analysis 6 (3): 457-74. doi:10.1214/ba/1339616472." as a Stan model. 
+License: GPL-3
+Depends: R (>= 3.0.2), Rcpp (>= 0.12.9), methods
+Imports: rstan (>= 2.14.2), rstantools (>= 1.2.0)
+LinkingTo: StanHeaders (>= 2.14.0.1), rstan (>= 2.14.2), BH (>= 1.62.0.1), Rcpp (>= 0.12.9), RcppEigen (>= 0.3.2.9.0)
+LazyData: TRUE
+RoxygenNote: 6.0.1
