@@ -18,15 +18,16 @@
 #'   acc.shape = 1.5 parameter in Bacon 2.2
 #' @param mem_mean Hyper-parameter: a parameter of the Beta prior distribution 
 #'   on "memory", i.e. the autocorrelation parameter in the underlying AR1 
-#'   model. The prior on the correlation between layers is scaled according to the 
-#'   thickness of the layers *delta_c*, which is determined by the total length of the
-#'   profile and the parameter *K*. mem_mean sets the mean value for *R*
-#'   (defaults to 0.7), while *w* = R^(delta_c/1)
+#'   model. The prior on the correlation between layers is scaled according to
+#'   the thickness of the layers *delta_c*, which is determined by the total
+#'   length of the profile and the parameter *K*. mem_mean sets the mean value
+#'   for *R* (defaults to 0.7), while *w* = R^(delta_c/1)
 #' @param mem_strength Hyper-parameter: sets the strength of the memory prior, 
 #'   defaults to 4 as in Bacon 2.2
 #' @inheritParams rstan::sampling
 #'   
-#' @return
+#' @return Returns a list composed of the output from the Stan sampler .$fit,
+#'   and the list of data passed to the sampler
 #' @export
 #' 
 #' @examples
@@ -43,6 +44,6 @@ stan_bacon <- function(depth, obs_age, obs_err, K = 10, nu = 6,
               data = stan_dat, iter = iter, chains = chains,
               verbose = FALSE)
   
-  return(fit)
+  return(list(fit=fit, data=stan_dat))
 
   }

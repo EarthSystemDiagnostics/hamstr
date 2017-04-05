@@ -2,10 +2,18 @@
 .Rhistory
 .RData
 .Ruserdata
-
-.DS_Store
 *.Rproj
 
+# mac files
+.DS_Store
+
+# knitr artefacts
 *_cache
 
+# rstan::rstan.package.skeleton() instruction files
 Read-and-delete-me
+
+# Cpp build objects
+*.hpp
+*.dll
+*.o

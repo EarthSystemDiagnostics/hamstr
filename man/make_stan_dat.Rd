@@ -5,7 +5,7 @@
 \title{make_stan_dat}
 \usage{
 make_stan_dat(depth, obs_age, obs_err, K = 10, nu = 6, acc_mean,
-  acc_var = "default", mem_mean = 0.7, mem_strength = 4)
+  acc_var = "default", mem_mean = 0.7, mem_strength = 4, ...)
 }
 \arguments{
 \item{depth}{Vector of depths from and observed age-depth profile}
@@ -31,14 +31,28 @@ acc.shape = 1.5 parameter in Bacon 2.2}
 
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
 on "memory", i.e. the autocorrelation parameter in the underlying AR1
-model. The prior on the correlation between layers is scaled according to the
-thickness of the layers \emph{delta_c}, which is determined by the total length of the
-profile and the parameter \emph{K}. mem_mean sets the mean value for \emph{R}
-(defaults to 0.7), while \emph{w} = R^(delta_c/1)}
+model. The prior on the correlation between layers is scaled according to
+the thickness of the layers \emph{delta_c}, which is determined by the total
+length of the profile and the parameter \emph{K}. mem_mean sets the mean value
+for \emph{R} (defaults to 0.7), while \emph{w} = R^(delta_c/1)}
 
 \item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 }
+\value{
+a list of data, and parameters to be passed as data to the Stan sampler
+}
 \description{
 make_stan_dat
+}
+\examples{
+# Get number of sections K, so that they will be ~ 5cm
+K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
+
+make_stan_dat(depth = MSB2K$depth,
+              obs_age = MSB2K$age,
+              obs_err = MSB2K$error,
+              K = K_for_5cm, nu = 6,
+              acc_mean = 20, acc_var = "default",
+              mem_mean = 0.7, mem_strength = 4)
 }

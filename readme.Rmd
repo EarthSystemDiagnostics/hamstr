@@ -1,5 +1,5 @@
 ---
-title: "baconr: An rstan implementation of the *Bacon* Age-Depth model of Blaauw and Christen (2011)."
+title: "baconr: An rstan implementation of the Bayesian Age-Depth model *Bacon* (Blaauw and Christen, 2011)."
 author: "Andrew M. Dolman"
 date: "`r Sys.Date()`"
 output: 
@@ -7,18 +7,30 @@ output:
     keep_md: yes
 ---
 
-```{r}
+```{r, message = FALSE, warning=FALSE}
 library(tidyverse)
 library(baconr)
 library(knitr)
 
-opts_chunk$set(echo=FALSE, message = FALSE, warning = FALSE, cache = TRUE,
+opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
                fig.width = 7, fig.pos = "H", dpi = 150, autodep = TRUE)
 ```
 
 ```{r}
+# Get number of sections K, so that they will be ~ 5cm
 K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 
+make_stan_dat(depth = MSB2K$depth, 
+  obs_age = MSB2K$age, 
+  obs_err = MSB2K$error,
+  K = K_for_5cm, nu = 6,
+  acc_mean = 20, acc_var = "default",
+  mem_mean = 0.7, mem_strength = 4)
+
+```
+
+```{r}
+system.time(
 fit <- stan_bacon(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age, 
@@ -27,9 +39,17 @@ fit <- stan_bacon(
   acc_mean = 20, acc_var = "default",
   mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 4)
+)
 ```
 
+
+
 ```{r}
-print(fit, par = c("c_ages"))
+print(fit$fit, par = c("c_ages"))
+```
+
+
+```{r}
+plot_stan_bacon(fit, 100)
 ```
 

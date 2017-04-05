@@ -2,10 +2,21 @@
 #'
 #' @inheritParams stan_bacon
 #'
-#' @return
+#' @return a list of data, and parameters to be passed as data to the Stan sampler
 #' @export
 #'
 #' @examples
+#' # Get number of sections K, so that they will be ~ 5cm
+#' K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
+#' 
+#' make_stan_dat(depth = MSB2K$depth,
+#'               obs_age = MSB2K$age,
+#'               obs_err = MSB2K$error,
+#'               K = K_for_5cm, nu = 6,
+#'               acc_mean = 20, acc_var = "default",
+#'               mem_mean = 0.7, mem_strength = 4)
+
+
 make_stan_dat <- function(depth, obs_age, obs_err, K = 10, nu = 6,
                           acc_mean, acc_var = "default",
                           mem_mean = 0.7, mem_strength = 4, ...) {

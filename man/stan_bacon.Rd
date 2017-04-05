@@ -32,10 +32,10 @@ acc.shape = 1.5 parameter in Bacon 2.2}
 
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
 on "memory", i.e. the autocorrelation parameter in the underlying AR1
-model. The prior on the correlation between layers is scaled according to the
-thickness of the layers \emph{delta_c}, which is determined by the total length of the
-profile and the parameter \emph{K}. mem_mean sets the mean value for \emph{R}
-(defaults to 0.7), while \emph{w} = R^(delta_c/1)}
+model. The prior on the correlation between layers is scaled according to
+the thickness of the layers \emph{delta_c}, which is determined by the total
+length of the profile and the parameter \emph{K}. mem_mean sets the mean value
+for \emph{R} (defaults to 0.7), while \emph{w} = R^(delta_c/1)}
 
 \item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
@@ -45,6 +45,10 @@ defaults to 4 as in Bacon 2.2}
 
 \item{chains}{A positive integer specifying the number of Markov chains. 
     The default is 4.}
+}
+\value{
+Returns a list composed of the output from the Stan sampler .$fit,
+and the list of data passed to the sampler
 }
 \description{
 stan_bacon
