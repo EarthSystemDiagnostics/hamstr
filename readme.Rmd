@@ -14,8 +14,8 @@ to convert between ^14^C ages and calibrated calendar ages.
 
 There are currently just three exported functions: 
 
-* `make_stan_dat` prepares data, and paramter values to be passed as data, into the correct format for the Stan model 
-* `stan_bacon` calls a precompiled Stan implementation of Bacon and estimates the age model
+* `make_stan_dat` prepares data, and parameter values to be passed as data, into the correct format for the Stan model 
+* `stan_bacon` calls a pre-compiled Stan implementation of Bacon and estimates the age model
 * `plot_stan_bacon` plots a sample from the posterior distribution of the estimated age model
 
 **baconr** also includes the example data, core MSB2K, included in the existing C++ implementation of [Bacon v2.2](http://www.chrono.qub.ac.uk/blaauw/bacon.html)

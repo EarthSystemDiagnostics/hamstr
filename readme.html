@@ -128,8 +128,8 @@ $(document).ready(function () {
 <p><strong>baconr</strong> implements the Bayesian Age~Depth model, <strong>Bacon</strong>, in the <strong>Stan</strong> probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). There is as yet no ability to convert between <sup>14</sup>C ages and calibrated calendar ages.</p>
 <p>There are currently just three exported functions:</p>
 <ul>
-<li><code>make_stan_dat</code> prepares data, and paramter values to be passed as data, into the correct format for the Stan model</li>
-<li><code>stan_bacon</code> calls a precompiled Stan implementation of Bacon and estimates the age model</li>
+<li><code>make_stan_dat</code> prepares data, and parameter values to be passed as data, into the correct format for the Stan model</li>
+<li><code>stan_bacon</code> calls a pre-compiled Stan implementation of Bacon and estimates the age model</li>
 <li><code>plot_stan_bacon</code> plots a sample from the posterior distribution of the estimated age model</li>
 </ul>
 <p><strong>baconr</strong> also includes the example data, core MSB2K, included in the existing C++ implementation of <a href="http://www.chrono.qub.ac.uk/blaauw/bacon.html">Bacon v2.2</a></p>
