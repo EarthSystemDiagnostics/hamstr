@@ -1,7 +1,5 @@
 ---
 title: "baconr: An rstan implementation of the Bayesian Age-Depth model *Bacon* (Blaauw and Christen, 2011)."
-author: "Andrew M. Dolman"
-date: "`r Sys.Date()`"
 output: 
   html_document: 
     keep_md: yes

@@ -1,6 +1,4 @@
 # baconr: An rstan implementation of the Bayesian Age-Depth model *Bacon* (Blaauw and Christen, 2011).
-Andrew M. Dolman  
-`r Sys.Date()`  
 
 -------------------------------
 
