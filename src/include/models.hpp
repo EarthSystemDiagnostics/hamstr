@@ -192,9 +192,13 @@ public:
         stan::math::fill(mem_beta,DUMMY_VAR__);
 
         try {
+            current_statement_begin__ = 33;
             stan::math::assign(acc_alpha, (pow(acc_mean,2) / acc_var));
+            current_statement_begin__ = 34;
             stan::math::assign(acc_beta, (acc_mean / acc_var));
+            current_statement_begin__ = 36;
             stan::math::assign(mem_alpha, (mem_strength * mem_mean));
+            current_statement_begin__ = 37;
             stan::math::assign(mem_beta, (mem_strength * (1 - mem_mean)));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e,current_statement_begin__);
@@ -344,17 +348,24 @@ public:
 
 
         try {
+            current_statement_begin__ = 55;
             stan::math::assign(w, pow(R,(delta_c / 1)));
+            current_statement_begin__ = 57;
             stan::math::assign(get_base1_lhs(x,1,"x",1), get_base1(alpha,1,"alpha",1));
+            current_statement_begin__ = 60;
             for (int i = 2; i <= K; ++i) {
 
+                current_statement_begin__ = 61;
                 stan::math::assign(get_base1_lhs(x,i,"x",1), ((w * get_base1(x,(i - 1),"x",1)) + ((1 - w) * get_base1(alpha,i,"alpha",1))));
             }
+            current_statement_begin__ = 65;
             stan::math::assign(get_base1_lhs(c_ages,1,"c_ages",1), age0);
+            current_statement_begin__ = 66;
             stan::model::assign(c_ages, 
                         stan::model::cons_list(stan::model::index_min_max(2, (K + 1)), stan::model::nil_index_list()), 
                         add(age0,cumulative_sum(multiply(alpha,delta_c))), 
                         "assigning variable c_ages");
+            current_statement_begin__ = 67;
             stan::math::assign(Mod_age, add(stan::model::rvalue(c_ages, stan::model::cons_list(stan::model::index_multi(which_c), stan::model::nil_index_list()), "c_ages"),elt_multiply(stan::model::rvalue(alpha, stan::model::cons_list(stan::model::index_multi(which_c), stan::model::nil_index_list()), "alpha"),subtract(depth,stan::model::rvalue(c_depth_top, stan::model::cons_list(stan::model::index_multi(which_c), stan::model::nil_index_list()), "c_depth_top")))));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e,current_statement_begin__);
@@ -398,9 +409,13 @@ public:
         // model body
         try {
 
+            current_statement_begin__ = 70;
             lp_accum__.add(normal_log<propto__>(age0, get_base1(obs_age,1,"obs_age",1), 100));
+            current_statement_begin__ = 71;
             lp_accum__.add(beta_log<propto__>(R, mem_alpha, mem_beta));
+            current_statement_begin__ = 72;
             lp_accum__.add(gamma_log<propto__>(alpha, acc_alpha, acc_beta));
+            current_statement_begin__ = 74;
             lp_accum__.add(student_t_log<propto__>(obs_age, nu, Mod_age, obs_err));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e,current_statement_begin__);
@@ -510,17 +525,24 @@ public:
 
 
         try {
+            current_statement_begin__ = 55;
             stan::math::assign(w, pow(R,(delta_c / 1)));
+            current_statement_begin__ = 57;
             stan::math::assign(get_base1_lhs(x,1,"x",1), get_base1(alpha,1,"alpha",1));
+            current_statement_begin__ = 60;
             for (int i = 2; i <= K; ++i) {
 
+                current_statement_begin__ = 61;
                 stan::math::assign(get_base1_lhs(x,i,"x",1), ((w * get_base1(x,(i - 1),"x",1)) + ((1 - w) * get_base1(alpha,i,"alpha",1))));
             }
+            current_statement_begin__ = 65;
             stan::math::assign(get_base1_lhs(c_ages,1,"c_ages",1), age0);
+            current_statement_begin__ = 66;
             stan::model::assign(c_ages, 
                         stan::model::cons_list(stan::model::index_min_max(2, (K + 1)), stan::model::nil_index_list()), 
                         add(age0,cumulative_sum(multiply(alpha,delta_c))), 
                         "assigning variable c_ages");
+            current_statement_begin__ = 67;
             stan::math::assign(Mod_age, add(stan::model::rvalue(c_ages, stan::model::cons_list(stan::model::index_multi(which_c), stan::model::nil_index_list()), "c_ages"),elt_multiply(stan::model::rvalue(alpha, stan::model::cons_list(stan::model::index_multi(which_c), stan::model::nil_index_list()), "alpha"),subtract(depth,stan::model::rvalue(c_depth_top, stan::model::cons_list(stan::model::index_multi(which_c), stan::model::nil_index_list()), "c_depth_top")))));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e,current_statement_begin__);

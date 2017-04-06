@@ -7,13 +7,60 @@ output:
     keep_md: yes
 ---
 
+-------------------------------
+
+**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). There is as yet no ability 
+to convert between ^14^C ages and calibrated calendar ages.
+
+There are currently just three exported functions: 
+
+* `make_stan_dat` prepares data, and paramter values to be passed as data, into the correct format for the Stan model 
+* `stan_bacon` calls a precompiled Stan implementation of Bacon and estimates the age model
+* `plot_stan_bacon` plots a sample from the posterior distribution of the estimated age model
+
+**baconr** also includes the example data, core MSB2K, included in the existing C++ implementation of [Bacon v2.2](http://www.chrono.qub.ac.uk/blaauw/bacon.html)
+
+The motivation for creating this package is to make use of the Bacon age modelling routine more flexible, and to make further development 
+of the age model itself easier, by coding it in a widely used higher-level probabilistic programming language.
+
+
+
+*  Blaauw, Maarten, and J. Andrés Christen. 2011. Flexible Paleoclimate Age-Depth Models Using an Autoregressive Gamma Process. Bayesian Analysis 6 (3): 457-74. doi:10.1214/ba/1339616472.
+
+*  Stan Development Team. 2016. Stan Modeling Language Users Guide and Reference Manual, Version 2.14.0.   http://mc-stan.org
+
+
+
+## Installation
+
+**baconr** can be installed directly from github
+
+```{r, eval=FALSE}
+if (!require("devtools")) {
+  install.packages("devtools")
+}
+
+devtools::install_github("andrewdolman/baconr")
+```
+
+
+## Development
+
+We aim to develop this package following the [Guidelines for R packages providing interfaces to Stan](https://cran.r-project.org/web/packages/rstantools/vignettes/developer-guidelines.html)
+
+
+## Example
+
+
 ```{r, message = FALSE, warning=FALSE}
-library(tidyverse)
 library(baconr)
 library(knitr)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
 
 opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
-               fig.width = 7, fig.pos = "H", dpi = 150, autodep = TRUE)
+               fig.width = 6, fig.pos = "H", dpi = 150, autodep = TRUE)
 ```
 
 ```{r}
@@ -30,7 +77,6 @@ make_stan_dat(depth = MSB2K$depth,
 ```
 
 ```{r}
-system.time(
 fit <- stan_bacon(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age, 
@@ -39,7 +85,6 @@ fit <- stan_bacon(
   acc_mean = 20, acc_var = "default",
   mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 4)
-)
 ```
 
 
@@ -50,6 +95,7 @@ print(fit$fit, par = c("c_ages"))
 
 
 ```{r}
+set.seed(20170406)
 plot_stan_bacon(fit, 100)
 ```
 
