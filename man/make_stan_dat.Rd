@@ -8,7 +8,7 @@ make_stan_dat(depth, obs_age, obs_err, K = 10, nu = 6, acc_mean,
   acc_var = "default", mem_mean = 0.7, mem_strength = 4, ...)
 }
 \arguments{
-\item{depth}{Vector of depths from and observed age-depth profile}
+\item{depth}{Vector of depths from an observed age-depth profile}
 
 \item{obs_age}{Observed age at each depth}
 
@@ -26,7 +26,7 @@ Gamma prior on sedimentation rate innovations}
 
 \item{acc_var}{Hyper-parameter: the variance of the sediment accumulation
 rate for the Gamma prior on sedimentation rate innovations. If set to
-"default" acc_var = acc_mean^2 / 1.5, which is equivalent to the default
+"default" acc_var = acc_mean^2^ / 1.5, which is equivalent to the default
 acc.shape = 1.5 parameter in Bacon 2.2}
 
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
@@ -34,7 +34,7 @@ on "memory", i.e. the autocorrelation parameter in the underlying AR1
 model. The prior on the correlation between layers is scaled according to
 the thickness of the layers \emph{delta_c}, which is determined by the total
 length of the profile and the parameter \emph{K}. mem_mean sets the mean value
-for \emph{R} (defaults to 0.7), while \emph{w} = R^(delta_c/1)}
+for \emph{R} (defaults to 0.7), while \emph{w} = R^(delta_c)}
 
 \item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}

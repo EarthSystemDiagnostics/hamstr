@@ -52,11 +52,14 @@ transformed parameters{
   vector[K+1] c_ages;
   vector[N] Mod_age;
 
-  w = R^(delta_c/1);
+  w = R^(delta_c);
 
   x[1] = alpha[1];
 
-  //tail(x, N - 1) = w*head(x, N - 1) + (1-w)*alpha;
+  // call to sampling function is already vectorised below so there is no 
+  // advantage to vectorising here
+  // x[2:K] = w * x[1:(K-1)] + (1-w) * alpha[2:K];
+  
   for(i in 2:K){
     x[i] = w*x[i-1] + (1-w)*alpha[i];
     }

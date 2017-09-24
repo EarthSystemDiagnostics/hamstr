@@ -2,7 +2,7 @@
 #' @md
 #' @useDynLib baconr, .registration = TRUE
 #' @exportPattern("^[[:alpha:]]+")
-#' @param depth Vector of depths from and observed age-depth profile
+#' @param depth Vector of depths from an observed age-depth profile
 #' @param obs_age Observed age at each depth
 #' @param obs_err Error associated with each observed age (1 standard error)
 #' @param K Number of sections into which the profile will be divided
@@ -14,14 +14,14 @@
 #'   Gamma prior on sedimentation rate innovations
 #' @param acc_var Hyper-parameter: the variance of the sediment accumulation 
 #'   rate for the Gamma prior on sedimentation rate innovations. If set to 
-#'   "default" acc_var = acc_mean^2 / 1.5, which is equivalent to the default 
+#'   "default" acc_var = acc_mean^2^ / 1.5, which is equivalent to the default 
 #'   acc.shape = 1.5 parameter in Bacon 2.2
 #' @param mem_mean Hyper-parameter: a parameter of the Beta prior distribution 
 #'   on "memory", i.e. the autocorrelation parameter in the underlying AR1 
 #'   model. The prior on the correlation between layers is scaled according to
 #'   the thickness of the layers *delta_c*, which is determined by the total
 #'   length of the profile and the parameter *K*. mem_mean sets the mean value
-#'   for *R* (defaults to 0.7), while *w* = R^(delta_c/1)
+#'   for *R* (defaults to 0.7), while *w* = R^(delta_c) 
 #' @param mem_strength Hyper-parameter: sets the strength of the memory prior, 
 #'   defaults to 4 as in Bacon 2.2
 #' @inheritParams rstan::sampling

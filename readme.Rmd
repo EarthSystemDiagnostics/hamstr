@@ -7,12 +7,11 @@ output:
 
 -------------------------------
 
-**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). There is as yet no ability 
-to convert between ^14^C ages and calibrated calendar ages.
+**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). There is as yet no ability to convert between ^14^C ages and calibrated calendar ages.
 
 There are currently just three exported functions: 
 
-* `make_stan_dat` prepares data, and parameter values to be passed as data, into the correct format for the Stan model 
+* `make_stan_dat` prepares data and parameter values into the correct format to be passed to the Stan model 
 * `stan_bacon` calls a pre-compiled Stan implementation of Bacon and estimates the age model
 * `plot_stan_bacon` plots a sample from the posterior distribution of the estimated age model
 
@@ -59,7 +58,12 @@ library(dplyr)
 
 opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
                fig.width = 6, fig.pos = "H", dpi = 150, autodep = TRUE)
+
 ```
+
+### Data and parameters
+
+the output from `make_stan_dat` is shown here to illustrate the required data and parameter format, but a separate call to `make_stan_dat` is not normally necessary as it is used internally by `stan_bacon`
 
 ```{r}
 # Get number of sections K, so that they will be ~ 5cm
@@ -74,6 +78,9 @@ make_stan_dat(depth = MSB2K$depth,
 
 ```
 
+
+### Fit the bacon model with `stan_bacon`
+
 ```{r}
 fit <- stan_bacon(
   depth = MSB2K$depth, 
@@ -86,14 +93,37 @@ fit <- stan_bacon(
 ```
 
 
+```{r}
+options(width = 85)
+print(fit$fit, par = c("c_ages"))
+```
+
+
+### Plot the estimated age model
 
 ```{r}
-print(fit$fit, par = c("c_ages"))
+set.seed(20170406)
+plot_stan_bacon(fit, 100)
+```
+
+
+### Fit again at higher vertical resolution
+
+
+```{r results='hide'}
+fit2 <- stan_bacon(
+  depth = MSB2K$depth, 
+  obs_age = MSB2K$age, 
+  obs_err = MSB2K$error,
+  K = K_for_5cm*10, nu = 6,
+  acc_mean = 20, acc_var = "default",
+  mem_mean = 0.7, mem_strength = 4,
+  iter = 2000, chains = 4)
 ```
 
 
 ```{r}
 set.seed(20170406)
-plot_stan_bacon(fit, 100)
+plot_stan_bacon(fit2, 100)
 ```
 

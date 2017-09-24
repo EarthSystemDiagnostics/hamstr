@@ -2,12 +2,11 @@
 
 -------------------------------
 
-**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). There is as yet no ability 
-to convert between ^14^C ages and calibrated calendar ages.
+**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). There is as yet no ability to convert between ^14^C ages and calibrated calendar ages.
 
 There are currently just three exported functions: 
 
-* `make_stan_dat` prepares data, and parameter values to be passed as data, into the correct format for the Stan model 
+* `make_stan_dat` prepares data and parameter values into the correct format to be passed to the Stan model 
 * `stan_bacon` calls a pre-compiled Stan implementation of Bacon and estimates the age model
 * `plot_stan_bacon` plots a sample from the posterior distribution of the estimated age model
 
@@ -57,6 +56,10 @@ library(dplyr)
 opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
                fig.width = 6, fig.pos = "H", dpi = 150, autodep = TRUE)
 ```
+
+### Data and parameters
+
+the output from `make_stan_dat` is shown here to illustrate the required data and parameter format, but a separate call to `make_stan_dat` is not normally necessary as it is used internally by `stan_bacon`
 
 
 ```r
@@ -133,6 +136,9 @@ make_stan_dat(depth = MSB2K$depth,
 ```
 
 
+### Fit the bacon model with `stan_bacon`
+
+
 ```r
 fit <- stan_bacon(
   depth = MSB2K$depth, 
@@ -160,9 +166,9 @@ fit <- stan_bacon(
 ## Chain 1, Iteration: 1600 / 2000 [ 80%]  (Sampling)
 ## Chain 1, Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Chain 1, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.415 seconds (Warm-up)
-##                0.786 seconds (Sampling)
-##                2.201 seconds (Total)
+##  Elapsed Time: 1.712 seconds (Warm-up)
+##                1.119 seconds (Sampling)
+##                2.831 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 2).
@@ -179,9 +185,9 @@ fit <- stan_bacon(
 ## Chain 2, Iteration: 1600 / 2000 [ 80%]  (Sampling)
 ## Chain 2, Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Chain 2, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.519 seconds (Warm-up)
-##                1.037 seconds (Sampling)
-##                2.556 seconds (Total)
+##  Elapsed Time: 1.617 seconds (Warm-up)
+##                0.932 seconds (Sampling)
+##                2.549 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 3).
@@ -198,9 +204,9 @@ fit <- stan_bacon(
 ## Chain 3, Iteration: 1600 / 2000 [ 80%]  (Sampling)
 ## Chain 3, Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Chain 3, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.524 seconds (Warm-up)
-##                0.789 seconds (Sampling)
-##                2.313 seconds (Total)
+##  Elapsed Time: 1.816 seconds (Warm-up)
+##                0.825 seconds (Sampling)
+##                2.641 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 4).
@@ -217,15 +223,15 @@ fit <- stan_bacon(
 ## Chain 4, Iteration: 1600 / 2000 [ 80%]  (Sampling)
 ## Chain 4, Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Chain 4, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.442 seconds (Warm-up)
-##                0.717 seconds (Sampling)
-##                2.159 seconds (Total)
+##  Elapsed Time: 1.671 seconds (Warm-up)
+##                0.824 seconds (Sampling)
+##                2.495 seconds (Total)
 ```
 
 
 
-
 ```r
+options(width = 85)
 print(fit$fit, par = c("c_ages"))
 ```
 
@@ -234,57 +240,37 @@ print(fit$fit, par = c("c_ages"))
 ## 4 chains, each with iter=2000; warmup=1000; thin=1; 
 ## post-warmup draws per chain=1000, total post-warmup draws=4000.
 ## 
-##               mean se_mean    sd    2.5%     25%     50%     75%   97.5%
-## c_ages[1]  4039.88    0.68 38.00 3957.44 4016.82 4042.67 4065.56 4106.66
-## c_ages[2]  4079.28    0.48 30.30 4012.99 4060.52 4080.06 4099.54 4134.67
-## c_ages[3]  4110.93    0.44 27.71 4055.91 4093.26 4111.04 4128.93 4164.56
-## c_ages[4]  4149.50    0.46 28.81 4097.25 4129.38 4147.66 4168.41 4210.27
-## c_ages[5]  4294.94    0.62 38.97 4219.86 4268.50 4294.87 4320.38 4372.01
-## c_ages[6]  4434.93    1.35 70.84 4310.50 4382.69 4432.61 4482.90 4578.78
-## c_ages[7]  4608.68    0.65 41.35 4529.86 4581.21 4608.70 4636.49 4687.50
-## c_ages[8]  4750.93    0.89 44.59 4662.08 4721.01 4752.01 4781.50 4835.49
-## c_ages[9]  4853.97    0.63 39.61 4776.34 4827.93 4853.50 4880.85 4932.24
-## c_ages[10] 4961.58    0.61 38.70 4888.53 4934.46 4960.88 4987.93 5038.01
-## c_ages[11] 5093.46    0.75 40.09 5019.35 5065.35 5092.30 5120.86 5174.14
-## c_ages[12] 5227.27    0.54 34.07 5157.39 5203.94 5228.20 5251.04 5291.26
-## c_ages[13] 5299.24    0.63 39.64 5225.53 5272.55 5297.66 5324.95 5382.50
-## c_ages[14] 5370.13    0.91 48.06 5281.47 5336.57 5368.11 5401.75 5471.60
-## c_ages[15] 5498.39    0.58 36.83 5421.66 5474.38 5499.72 5523.55 5566.43
-## c_ages[16] 5569.93    0.57 36.27 5502.53 5544.79 5568.63 5594.33 5644.10
-## c_ages[17] 5654.47    0.96 60.99 5550.54 5610.23 5649.78 5693.51 5782.91
-## c_ages[18] 5733.10    1.09 68.92 5603.52 5683.47 5732.68 5780.12 5868.20
-## c_ages[19] 5810.04    1.04 66.09 5673.27 5767.58 5812.43 5855.87 5931.03
-## c_ages[20] 5887.31    0.79 50.27 5793.45 5856.24 5884.41 5916.76 5993.22
-## c_ages[21] 5990.81    1.48 93.39 5851.08 5925.01 5976.40 6038.06 6210.41
-##            n_eff Rhat
-## c_ages[1]   3086    1
-## c_ages[2]   4000    1
-## c_ages[3]   4000    1
-## c_ages[4]   4000    1
-## c_ages[5]   4000    1
-## c_ages[6]   2747    1
-## c_ages[7]   4000    1
-## c_ages[8]   2509    1
-## c_ages[9]   4000    1
-## c_ages[10]  4000    1
-## c_ages[11]  2835    1
-## c_ages[12]  4000    1
-## c_ages[13]  4000    1
-## c_ages[14]  2765    1
-## c_ages[15]  4000    1
-## c_ages[16]  4000    1
-## c_ages[17]  4000    1
-## c_ages[18]  4000    1
-## c_ages[19]  4000    1
-## c_ages[20]  4000    1
-## c_ages[21]  4000    1
+##               mean se_mean    sd    2.5%     25%     50%     75%   97.5% n_eff Rhat
+## c_ages[1]  4040.77    0.66 37.98 3957.99 4017.04 4042.84 4067.20 4108.76  3300    1
+## c_ages[2]  4079.74    0.49 31.07 4016.36 4060.29 4080.49 4100.41 4139.14  4000    1
+## c_ages[3]  4111.90    0.45 28.53 4053.41 4093.63 4112.29 4130.84 4166.58  4000    1
+## c_ages[4]  4149.89    0.45 28.46 4095.81 4130.67 4148.79 4168.32 4206.66  4000    1
+## c_ages[5]  4296.00    0.61 38.61 4223.39 4270.09 4294.94 4321.39 4374.47  4000    1
+## c_ages[6]  4434.75    1.49 69.98 4308.64 4383.32 4430.91 4483.76 4576.38  2209    1
+## c_ages[7]  4607.35    0.66 41.61 4522.37 4579.91 4608.32 4635.67 4688.63  4000    1
+## c_ages[8]  4751.98    0.83 45.32 4662.49 4720.88 4753.28 4784.78 4835.30  3007    1
+## c_ages[9]  4854.75    0.62 39.03 4780.67 4828.09 4854.98 4880.98 4932.76  4000    1
+## c_ages[10] 4962.82    0.66 38.47 4889.30 4935.95 4962.13 4989.38 5038.84  3379    1
+## c_ages[11] 5093.19    0.68 39.18 5018.92 5065.34 5092.63 5119.55 5170.67  3340    1
+## c_ages[12] 5226.69    0.61 34.70 5156.86 5204.15 5228.23 5251.17 5290.33  3254    1
+## c_ages[13] 5299.73    0.61 38.42 5229.16 5273.59 5298.26 5324.77 5379.59  4000    1
+## c_ages[14] 5369.80    0.89 47.21 5284.10 5335.62 5367.39 5400.46 5468.02  2823    1
+## c_ages[15] 5499.72    0.60 37.78 5418.84 5475.69 5501.95 5526.03 5568.11  4000    1
+## c_ages[16] 5570.30    0.57 36.21 5502.21 5545.03 5569.11 5593.65 5644.60  4000    1
+## c_ages[17] 5653.86    0.95 59.87 5550.89 5610.79 5648.97 5692.50 5779.95  4000    1
+## c_ages[18] 5730.44    1.06 67.34 5603.81 5682.38 5728.39 5777.73 5861.26  4000    1
+## c_ages[19] 5806.81    1.02 64.79 5673.26 5764.76 5808.65 5850.92 5925.55  4000    1
+## c_ages[20] 5885.37    0.79 49.67 5792.14 5854.12 5883.47 5914.12 5986.11  4000    1
+## c_ages[21] 5990.52    1.47 92.91 5851.80 5925.86 5976.34 6037.73 6215.64  4000    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Thu Apr 06 22:50:23 2017.
+## Samples were drawn using NUTS(diag_e) at Sun Sep 24 16:55:38 2017.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).
 ```
 
+
+### Plot the estimated age model
 
 
 ```r
@@ -293,4 +279,29 @@ plot_stan_bacon(fit, 100)
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+
+### Fit again at higher vertical resolution
+
+
+
+```r
+fit2 <- stan_bacon(
+  depth = MSB2K$depth, 
+  obs_age = MSB2K$age, 
+  obs_err = MSB2K$error,
+  K = K_for_5cm*10, nu = 6,
+  acc_mean = 20, acc_var = "default",
+  mem_mean = 0.7, mem_strength = 4,
+  iter = 2000, chains = 4)
+```
+
+
+
+```r
+set.seed(20170406)
+plot_stan_bacon(fit2, 100)
+```
+
+![](readme_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
