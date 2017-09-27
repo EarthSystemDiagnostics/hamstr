@@ -107,7 +107,7 @@ plot_stan_bacon(fit, 100)
 ```
 
 
-### Fit again at higher vertical resolution
+### Fit again at higher vertical resolution and with more variable accumulation rates
 
 
 ```{r results='hide'}
@@ -116,36 +116,47 @@ fit2 <- stan_bacon(
   obs_age = MSB2K$age, 
   obs_err = MSB2K$error,
   K = K_for_5cm*10, nu = 6,
-  acc_mean = 20, acc_var = "default",
+  acc_mean = 20, acc_var = 2000,
   mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 4)
 ```
 
 
 ```{r}
-set.seed(20170406)
 plot_stan_bacon(fit2, 100)
 ```
 
-```{r, echo=FALSE}
-# print(fit2$fit, par = c("x"))
-# tmp <- rstan::extract(fit2$fit)
-# names(tmp)
-# 
-# 
-# hist(tmp$w)
-# mean(tmp$w)
-# tmp$w[1]
-# 
-# plot(tmp[["x"]][1,], type = "b")
-# hist(tmp[["x"]][1,])
-# #plot(tmp[["alpha"]][1,], type = "b")
-# 
-# acf(tmp[["x"]][1,], plot = T)
-# acf(tmp[["alpha"]][1,], plot = T)
-# 
-# cat(rstan::get_stancode(fit2$fit))
-```
 
+### Distribution of sediment accumulation rates
+
+```{r}
+age.fit <- fit2$fit
+age.mod <- rstan::extract(age.fit)
+
+bp.dat <- age.mod$x[1:100,] %>% 
+  as_tibble() %>% 
+  tibble::rownames_to_column("Rep") %>% 
+  gather(Depth, value, -Rep) %>% 
+  mutate(Depth = as.numeric(gsub("V", "", Depth)),
+         Depth = Depth * age.fit$data$delta_c,
+         Rep = as.numeric(Rep))
+
+bp.dat %>% 
+  ggplot(aes(x = Depth, y = 1/value, group = Depth)) + 
+  geom_violin() +
+  #geom_boxplot() +
+  #geom_point(alpha = 0.15)
+  scale_y_continuous("Sediment accumulation rate [cm/yr]",
+                     trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
+  expand_limits(y = 0.01) + 
+  theme_bw()
+
+# bp.dat %>% 
+#   filter(Rep %in% sample(Rep, 110)) %>%  
+#   ggplot(aes(x = Depth, y = 1/value, group = Rep, colour = as.factor(Rep))) + 
+#   geom_line(alpha = 0.51) +
+#   scale_y_continuous(trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
+#   expand_limits(y = 0.01)
+```
 
 
