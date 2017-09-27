@@ -281,7 +281,7 @@ plot_stan_bacon(fit, 100)
 ![](readme_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
 
-### Fit again at higher vertical resolution
+### Fit again at higher vertical resolution and with more variable accumulation rates
 
 
 
@@ -291,7 +291,7 @@ fit2 <- stan_bacon(
   obs_age = MSB2K$age, 
   obs_err = MSB2K$error,
   K = K_for_5cm*10, nu = 6,
-  acc_mean = 20, acc_var = "default",
+  acc_mean = 20, acc_var = 2000,
   mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 4)
 ```
@@ -299,12 +299,39 @@ fit2 <- stan_bacon(
 
 
 ```r
-set.seed(20170406)
 plot_stan_bacon(fit2, 100)
 ```
 
 ![](readme_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
+
+### Distribution of sediment accumulation rates
+
+
+```r
+age.fit <- fit2
+age.mod <- rstan::extract(age.fit$fit)
+
+bp.dat <- age.mod$x[1:100,] %>% 
+  as_tibble() %>% 
+  tibble::rownames_to_column("Rep") %>% 
+  gather(Depth, value, -Rep) %>% 
+  mutate(Depth = as.numeric(gsub("V", "", Depth)),
+         Depth = Depth * age.fit$data$delta_c,
+         Rep = as.numeric(Rep))
+
+bp.dat %>% 
+  ggplot(aes(x = Depth, y = 1/value, group = Depth)) + 
+  geom_violin() +
+  #geom_boxplot() +
+  #geom_point(alpha = 0.15)
+  scale_y_continuous("Sediment accumulation rate [cm/yr]",
+                     trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
+  expand_limits(y = 0.01) + 
+  theme_bw()
+```
+
+![](readme_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
 
 
 

@@ -130,8 +130,8 @@ plot_stan_bacon(fit2, 100)
 ### Distribution of sediment accumulation rates
 
 ```{r}
-age.fit <- fit2$fit
-age.mod <- rstan::extract(age.fit)
+age.fit <- fit2
+age.mod <- rstan::extract(age.fit$fit)
 
 bp.dat <- age.mod$x[1:100,] %>% 
   as_tibble() %>% 
@@ -150,13 +150,21 @@ bp.dat %>%
                      trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
   expand_limits(y = 0.01) + 
   theme_bw()
+```
 
+```{r, echo=FALSE}
 # bp.dat %>% 
 #   filter(Rep %in% sample(Rep, 110)) %>%  
 #   ggplot(aes(x = Depth, y = 1/value, group = Rep, colour = as.factor(Rep))) + 
 #   geom_line(alpha = 0.51) +
 #   scale_y_continuous(trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
 #   expand_limits(y = 0.01)
+
+# plot(density(age.mod$alpha[,]), xlim = c(0, 50))
+# lines(seq(0.1, 50, length.out = 100), dgamma(seq(0.1, 50, length.out = 100),
+#                     shape = age.fit$data$acc_mean^2 / age.fit$data$acc_var,
+#                     rate = age.fit$data$acc_mean/age.fit$data$acc_var),
+#       col = "Red")
 ```
 
 
