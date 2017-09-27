@@ -66,8 +66,8 @@ transformed parameters{
 
   // Get the Mod_ages
   c_ages[1] = age0;
-  c_ages[2:(K+1)] = age0 + cumulative_sum(alpha * delta_c);
-  Mod_age = c_ages[which_c] + alpha[which_c] .* (depth - c_depth_top[which_c]);
+  c_ages[2:(K+1)] = age0 + cumulative_sum(x * delta_c);
+  Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
 }
 model {
   age0 ~ normal(obs_age[1], 100);

@@ -127,3 +127,25 @@ set.seed(20170406)
 plot_stan_bacon(fit2, 100)
 ```
 
+```{r, echo=FALSE}
+# print(fit2$fit, par = c("x"))
+# tmp <- rstan::extract(fit2$fit)
+# names(tmp)
+# 
+# 
+# hist(tmp$w)
+# mean(tmp$w)
+# tmp$w[1]
+# 
+# plot(tmp[["x"]][1,], type = "b")
+# hist(tmp[["x"]][1,])
+# #plot(tmp[["alpha"]][1,], type = "b")
+# 
+# acf(tmp[["x"]][1,], plot = T)
+# acf(tmp[["alpha"]][1,], plot = T)
+# 
+# cat(rstan::get_stancode(fit2$fit))
+```
+
+
+
