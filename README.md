@@ -154,78 +154,102 @@ fit <- stan_bacon(
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 1).
 ## 
-## Chain 1, Iteration:    1 / 2000 [  0%]  (Warmup)
-## Chain 1, Iteration:  200 / 2000 [ 10%]  (Warmup)
-## Chain 1, Iteration:  400 / 2000 [ 20%]  (Warmup)
-## Chain 1, Iteration:  600 / 2000 [ 30%]  (Warmup)
-## Chain 1, Iteration:  800 / 2000 [ 40%]  (Warmup)
-## Chain 1, Iteration: 1000 / 2000 [ 50%]  (Warmup)
-## Chain 1, Iteration: 1001 / 2000 [ 50%]  (Sampling)
-## Chain 1, Iteration: 1200 / 2000 [ 60%]  (Sampling)
-## Chain 1, Iteration: 1400 / 2000 [ 70%]  (Sampling)
-## Chain 1, Iteration: 1600 / 2000 [ 80%]  (Sampling)
-## Chain 1, Iteration: 1800 / 2000 [ 90%]  (Sampling)
-## Chain 1, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.67088 seconds (Warm-up)
-##                0.911892 seconds (Sampling)
-##                2.58277 seconds (Total)
+## Gradient evaluation took 0 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 1.736 seconds (Warm-up)
+##                1.291 seconds (Sampling)
+##                3.027 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 2).
 ## 
-## Chain 2, Iteration:    1 / 2000 [  0%]  (Warmup)
-## Chain 2, Iteration:  200 / 2000 [ 10%]  (Warmup)
-## Chain 2, Iteration:  400 / 2000 [ 20%]  (Warmup)
-## Chain 2, Iteration:  600 / 2000 [ 30%]  (Warmup)
-## Chain 2, Iteration:  800 / 2000 [ 40%]  (Warmup)
-## Chain 2, Iteration: 1000 / 2000 [ 50%]  (Warmup)
-## Chain 2, Iteration: 1001 / 2000 [ 50%]  (Sampling)
-## Chain 2, Iteration: 1200 / 2000 [ 60%]  (Sampling)
-## Chain 2, Iteration: 1400 / 2000 [ 70%]  (Sampling)
-## Chain 2, Iteration: 1600 / 2000 [ 80%]  (Sampling)
-## Chain 2, Iteration: 1800 / 2000 [ 90%]  (Sampling)
-## Chain 2, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.64393 seconds (Warm-up)
-##                1.041 seconds (Sampling)
-##                2.68493 seconds (Total)
+## Gradient evaluation took 0 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 1.663 seconds (Warm-up)
+##                1.165 seconds (Sampling)
+##                2.828 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 3).
 ## 
-## Chain 3, Iteration:    1 / 2000 [  0%]  (Warmup)
-## Chain 3, Iteration:  200 / 2000 [ 10%]  (Warmup)
-## Chain 3, Iteration:  400 / 2000 [ 20%]  (Warmup)
-## Chain 3, Iteration:  600 / 2000 [ 30%]  (Warmup)
-## Chain 3, Iteration:  800 / 2000 [ 40%]  (Warmup)
-## Chain 3, Iteration: 1000 / 2000 [ 50%]  (Warmup)
-## Chain 3, Iteration: 1001 / 2000 [ 50%]  (Sampling)
-## Chain 3, Iteration: 1200 / 2000 [ 60%]  (Sampling)
-## Chain 3, Iteration: 1400 / 2000 [ 70%]  (Sampling)
-## Chain 3, Iteration: 1600 / 2000 [ 80%]  (Sampling)
-## Chain 3, Iteration: 1800 / 2000 [ 90%]  (Sampling)
-## Chain 3, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.64543 seconds (Warm-up)
-##                0.870987 seconds (Sampling)
-##                2.51642 seconds (Total)
+## Gradient evaluation took 0 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 1.648 seconds (Warm-up)
+##                1.114 seconds (Sampling)
+##                2.762 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 4).
 ## 
-## Chain 4, Iteration:    1 / 2000 [  0%]  (Warmup)
-## Chain 4, Iteration:  200 / 2000 [ 10%]  (Warmup)
-## Chain 4, Iteration:  400 / 2000 [ 20%]  (Warmup)
-## Chain 4, Iteration:  600 / 2000 [ 30%]  (Warmup)
-## Chain 4, Iteration:  800 / 2000 [ 40%]  (Warmup)
-## Chain 4, Iteration: 1000 / 2000 [ 50%]  (Warmup)
-## Chain 4, Iteration: 1001 / 2000 [ 50%]  (Sampling)
-## Chain 4, Iteration: 1200 / 2000 [ 60%]  (Sampling)
-## Chain 4, Iteration: 1400 / 2000 [ 70%]  (Sampling)
-## Chain 4, Iteration: 1600 / 2000 [ 80%]  (Sampling)
-## Chain 4, Iteration: 1800 / 2000 [ 90%]  (Sampling)
-## Chain 4, Iteration: 2000 / 2000 [100%]  (Sampling)
-##  Elapsed Time: 1.53988 seconds (Warm-up)
-##                1.14574 seconds (Sampling)
-##                2.68562 seconds (Total)
+## Gradient evaluation took 0 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Adjust your expectations accordingly!
+## 
+## 
+## Iteration:    1 / 2000 [  0%]  (Warmup)
+## Iteration:  200 / 2000 [ 10%]  (Warmup)
+## Iteration:  400 / 2000 [ 20%]  (Warmup)
+## Iteration:  600 / 2000 [ 30%]  (Warmup)
+## Iteration:  800 / 2000 [ 40%]  (Warmup)
+## Iteration: 1000 / 2000 [ 50%]  (Warmup)
+## Iteration: 1001 / 2000 [ 50%]  (Sampling)
+## Iteration: 1200 / 2000 [ 60%]  (Sampling)
+## Iteration: 1400 / 2000 [ 70%]  (Sampling)
+## Iteration: 1600 / 2000 [ 80%]  (Sampling)
+## Iteration: 1800 / 2000 [ 90%]  (Sampling)
+## Iteration: 2000 / 2000 [100%]  (Sampling)
+## 
+##  Elapsed Time: 1.632 seconds (Warm-up)
+##                1.164 seconds (Sampling)
+##                2.796 seconds (Total)
 ```
 
 
@@ -241,29 +265,29 @@ print(fit$fit, par = c("c_ages"))
 ## post-warmup draws per chain=1000, total post-warmup draws=4000.
 ## 
 ##               mean se_mean    sd    2.5%     25%     50%     75%   97.5% n_eff Rhat
-## c_ages[1]  4041.02    0.73 37.90 3960.39 4017.93 4044.09 4067.19 4106.82  2673    1
-## c_ages[2]  4080.40    0.47 30.00 4019.61 4061.23 4081.73 4100.48 4137.84  4000    1
-## c_ages[3]  4111.98    0.45 28.22 4054.92 4093.59 4112.12 4130.88 4165.30  4000    1
-## c_ages[4]  4150.62    0.57 28.93 4098.50 4130.62 4149.65 4168.90 4213.13  2603    1
-## c_ages[5]  4295.08    0.62 39.09 4219.98 4269.03 4294.89 4320.81 4373.65  4000    1
-## c_ages[6]  4437.23    1.48 70.15 4314.94 4384.69 4432.17 4485.10 4581.57  2235    1
-## c_ages[7]  4607.79    0.65 41.02 4523.55 4581.56 4608.16 4635.81 4685.87  4000    1
-## c_ages[8]  4752.08    0.86 44.23 4664.12 4722.01 4753.11 4783.56 4835.89  2670    1
-## c_ages[9]  4855.39    0.62 39.11 4778.57 4829.12 4854.89 4881.35 4932.37  4000    1
-## c_ages[10] 4961.50    0.67 38.64 4888.94 4933.75 4961.00 4987.61 5039.87  3376    1
-## c_ages[11] 5095.19    0.81 41.28 5017.39 5066.65 5094.51 5122.67 5177.09  2575    1
-## c_ages[12] 5226.19    0.55 34.56 5154.36 5203.20 5227.76 5249.73 5293.04  4000    1
-## c_ages[13] 5300.44    0.62 39.00 5227.16 5274.40 5299.07 5325.09 5383.11  4000    1
-## c_ages[14] 5368.57    0.86 47.86 5280.96 5334.78 5365.35 5401.21 5469.37  3114    1
-## c_ages[15] 5499.40    0.58 36.57 5424.45 5475.37 5500.84 5524.55 5567.04  4000    1
-## c_ages[16] 5570.90    0.58 36.51 5501.23 5546.73 5570.36 5594.16 5647.03  4000    1
-## c_ages[17] 5655.82    0.96 60.68 5551.38 5611.81 5650.56 5694.80 5787.02  4000    1
-## c_ages[18] 5731.34    1.05 66.19 5606.47 5683.28 5729.79 5778.83 5862.69  4000    1
-## c_ages[19] 5808.08    0.99 62.80 5682.07 5766.60 5810.73 5849.95 5927.91  4000    1
-## c_ages[20] 5884.40    0.79 49.71 5788.84 5852.77 5883.87 5914.92 5986.18  4000    1
-## c_ages[21] 5986.43    1.48 93.81 5841.57 5921.55 5973.04 6037.41 6206.30  4000    1
+## c_ages[1]  4045.16    0.57 35.96 3966.58 4023.08 4048.16 4069.39 4110.27  4000    1
+## c_ages[2]  4074.61    0.46 29.09 4016.15 4055.90 4075.59 4094.14 4130.27  4000    1
+## c_ages[3]  4108.41    0.43 27.08 4055.01 4089.89 4108.28 4126.69 4160.98  4000    1
+## c_ages[4]  4157.33    0.44 28.04 4105.39 4137.80 4156.11 4176.20 4212.87  4000    1
+## c_ages[5]  4292.10    0.54 34.42 4226.11 4269.31 4292.29 4314.53 4359.48  4000    1
+## c_ages[6]  4438.87    0.81 49.18 4336.98 4409.18 4440.04 4470.06 4533.68  3723    1
+## c_ages[7]  4601.83    0.52 32.79 4538.99 4580.61 4601.73 4623.50 4667.55  4000    1
+## c_ages[8]  4741.30    0.52 33.17 4677.10 4719.52 4740.31 4762.04 4810.13  4000    1
+## c_ages[9]  4856.80    0.48 30.37 4795.56 4837.38 4857.48 4876.75 4915.84  4000    1
+## c_ages[10] 4969.69    0.48 30.14 4906.03 4949.85 4970.90 4990.63 5025.84  4000    1
+## c_ages[11] 5095.92    0.47 29.76 5033.78 5076.85 5096.44 5115.34 5152.81  4000    1
+## c_ages[12] 5215.66    0.43 27.49 5161.66 5197.77 5215.85 5233.63 5269.96  4000    1
+## c_ages[13] 5305.82    0.49 31.24 5242.97 5285.41 5306.42 5326.25 5366.60  4000    1
+## c_ages[14] 5389.39    0.58 36.70 5309.68 5367.42 5391.46 5414.24 5456.02  4000    1
+## c_ages[15] 5490.83    0.48 30.37 5429.03 5471.17 5490.66 5510.55 5551.79  4000    1
+## c_ages[16] 5572.91    0.50 31.55 5511.98 5552.05 5571.74 5593.39 5635.76  4000    1
+## c_ages[17] 5654.75    0.72 45.79 5568.91 5625.42 5652.34 5681.23 5754.73  4000    1
+## c_ages[18] 5731.91    0.82 52.00 5627.92 5699.08 5731.82 5764.72 5838.79  4000    1
+## c_ages[19] 5809.49    0.83 52.27 5702.99 5777.05 5810.33 5841.82 5913.19  4000    1
+## c_ages[20] 5890.39    0.76 48.34 5800.57 5859.05 5887.69 5919.21 5990.50  4000    1
+## c_ages[21] 5985.97    1.20 75.86 5860.70 5935.27 5977.39 6027.41 6154.97  4000    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Wed Sep 27 11:14:10 2017.
+## Samples were drawn using NUTS(diag_e) at Fri Sep 29 22:28:03 2017.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).
