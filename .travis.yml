@@ -3,7 +3,7 @@ sudo: false
 r: devel
 cache: packages
 
-latex: false
+latex: true
 r_build_args: '--no-build-vignettes'
 r_check_args: '--ignore-vignettes --no-examples'
 
@@ -25,15 +25,15 @@ before_install:
 
 script: 
   - |
-    travis_wait R CMD build .
-    travis_wait 40 R CMD check baconr*tar.gz
+    travis_wait 42 R CMD build .
+    travis_wait 59 R CMD check anRpackage*tar.gz
 
 after_script:
-  - tar -ztvf baconr_*.tar.gz
+  - tar -ztvf anRpackage_*.tar.gz
   - echo ${NOT_CRAN}
 
 after_success:
   - travis_wait 40 tar -C .. -xf $PKG_TARBALL
 
 after_failure:
-  - cat baconr.Rcheck/00*
+  - cat anRpackage.Rcheck/00*
