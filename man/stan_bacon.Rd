@@ -5,7 +5,7 @@
 \title{stan_bacon}
 \usage{
 stan_bacon(depth, obs_age, obs_err, K = 10, nu = 6, acc_mean,
-  acc_var = "default", mem_mean = 0.7, mem_strength = 4, iter = 2000,
+  acc_alpha = 1.5, mem_mean = 0.7, mem_strength = 4, iter = 2000,
   chains = 4)
 }
 \arguments{
@@ -22,13 +22,13 @@ Defaults to 6, which is equivalent to the default parameterisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
 
-\item{acc_mean}{Hyper-parameter: the mean sediment accumulation rate for the
+\item{acc_mean}{the mean sediment accumulation rate for the
 Gamma prior on sedimentation rate innovations}
 
-\item{acc_var}{Hyper-parameter: the variance of the sediment accumulation
-rate for the Gamma prior on sedimentation rate innovations. If set to
-"default" acc_var = acc_mean^2^ / 1.5, which is equivalent to the default
-acc.shape = 1.5 parameter in Bacon 2.2}
+\item{acc_alpha}{sets the alpha (shape) parameter for the Gamma prior on
+sedimentation rate innovations. The variance of the innovations
+acc_var = acc_mean^2^ / acc_alpha. The default is acc_alpha = 1.5
+which is equivalent to the default shape = 1.5 parameter in Bacon 2.2}
 
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
 on "memory", i.e. the autocorrelation parameter in the underlying AR1

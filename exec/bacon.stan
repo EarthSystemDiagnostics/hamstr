@@ -14,24 +14,20 @@ data {
 
   // hyperparameters
   real<lower = 0> acc_mean;
-  real<lower = 0> acc_var;
+
+  real<lower = 0> acc_alpha;
+  real<lower = 0> acc_beta;
 
   real<lower = 0> mem_mean;
   real<lower = 0> mem_strength;
 }
 transformed data{
 // transformed hyperparameters
-  real<lower=0> acc_alpha;
-  real<lower=0> acc_beta;
-
   real<lower=0> mem_alpha;
   real<lower=0> mem_beta;
 
 // depths corresponding to c_ages
 //  vector[K+1] c_depths;
-
-  acc_alpha = acc_mean^2 / acc_var;
-  acc_beta = acc_mean / acc_var;
 
   mem_alpha = mem_strength * mem_mean;
   mem_beta = mem_strength * (1-mem_mean);

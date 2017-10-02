@@ -18,7 +18,7 @@
 
 
 make_stan_dat <- function(depth, obs_age, obs_err, K = 10, nu = 6,
-                          acc_mean, acc_var = "default",
+                          acc_mean, acc_alpha = 1.5,
                           mem_mean = 0.7, mem_strength = 4, ...) {
   
   # Pretty sure nu = 6 is equivalent to the default parameterisation of t.a = 3, t.b = 4 in Bacon
@@ -29,10 +29,8 @@ make_stan_dat <- function(depth, obs_age, obs_err, K = 10, nu = 6,
   # Transformed arguments
   l$N <- length(l$depth)
   
-  if (acc_var == "default") {
-    l$acc_var = acc_mean^2 / 1.5}else{
-      l$acc_var = acc_var
-    }
+  l$acc_beta =  acc_alpha / acc_mean
+  
   l$mem_alpha = mem_strength * mem_mean
   l$mem_beta = mem_strength * (1-mem_mean)
   
