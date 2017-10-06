@@ -49,16 +49,20 @@ transformed parameters{
   vector[N] Mod_age;
 
   w = R^(delta_c);
+  // pretty sure now this is the correct scaling 
+  // if the correlation between 2 1cm layers is 0.5
+  // the correlation between 2 0.1cm layers would be 0.5^0.1 = 0.933
+  // after 10 0.1 cm layers the correlation would be 0.933^10 = 0.5
 
   x[1] = alpha[1];
 
-  // call to sampling function is already vectorised below so there is no 
-  // advantage to vectorising here
-  // x[2:K] = w * x[1:(K-1)] + (1-w) * alpha[2:K];
-  
   for(i in 2:K){
     x[i] = w*x[i-1] + (1-w)*alpha[i];
     }
+  
+  // call to sampling function is already vectorised below so there is only a small 
+  // advantage to vectorising here
+  //x[2:K] = w * x[1:(K-1)] + (1-w) * alpha[2:K];
 
   // Get the Mod_ages
   c_ages[1] = age0;

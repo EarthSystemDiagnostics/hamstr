@@ -38,6 +38,8 @@ if (!require("devtools")) {
 }
 
 devtools::install_github("andrewdolman/baconr")
+
+opts_chunk$set(cache = TRUE)
 ```
 
 
@@ -69,13 +71,38 @@ the output from `make_stan_dat` is shown here to illustrate the required data an
 # Get number of sections K, so that they will be ~ 5cm
 K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 
-make_stan_dat(depth = MSB2K$depth, 
+stan_dat <- make_stan_dat(depth = MSB2K$depth, 
   obs_age = MSB2K$age, 
   obs_err = MSB2K$error,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.7, mem_strength = 4)
+  mem_mean = 0.1, mem_strength = 4)
 
+stan_dat
+```
+
+```{r, echo=FALSE}
+# Examine scaling behaviour of memory prior
+# Behaves very strangely when deltaC is small and mem.mean is small
+
+# baconr does not match output of Bacon2.2 when mem_mean = 0.1, mem_strength = 4
+# in baconr the prior is strong and dominates, in Bacon2.2 the data dominate the prior
+
+#(0.1^0.1)^10
+
+# priorwU <- function(w, deltaC, alpha, beta) {
+# 			    ds=1.0
+# 			    logw=log(w)
+# 			    tmp <- (ds/deltaC)*(1.0-alpha)*logw + (1.0-beta)*log(1.0-exp((ds/deltaC)*logw))
+# 			    tmp #/ sum(tmp, na.rm = T)
+# 			}
+# x <- seq(0, 1, length.out = 1000)
+# 
+# plot(x, dbeta(x, stan_dat$mem_alpha, stan_dat$mem_beta), type = "l")
+# plot(x, exp(-priorwU(w = x, deltaC = 1, alpha = stan_dat$mem_alpha, beta = stan_dat$mem_beta))
+#      , type = "l", col = "Green")
+# plot(x, exp(-priorwU(w = x, deltaC = 5, alpha = stan_dat$mem_alpha, beta = stan_dat$mem_beta))
+#      , type = "l", col = "Red")
 ```
 
 
@@ -88,14 +115,14 @@ fit <- stan_bacon(
   obs_err = MSB2K$error,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.7, mem_strength = 4,
+  mem_mean = 0.1, mem_strength = 4,
   iter = 2000, chains = 4)
 ```
 
 
 ```{r}
 options(width = 85)
-print(fit$fit, par = c("c_ages"))
+print(fit$fit, par = c("R", "w", "c_ages"))
 ```
 
 
@@ -115,9 +142,9 @@ fit2 <- stan_bacon(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age, 
   obs_err = MSB2K$error,
-  K = K_for_5cm*10, nu = 6,
+  K = K_for_5cm*2, nu = 6,
   acc_mean = 20, acc_alpha = 0.2,
-  mem_mean = 0.7, mem_strength = 4,
+  mem_mean = 0.2, mem_strength = 4,
   iter = 2000, chains = 4)
 ```
 
@@ -130,10 +157,10 @@ plot_stan_bacon(fit2, 100)
 ### Distribution of sediment accumulation rates
 
 ```{r}
-age.fit <- fit2
+age.fit <- fit
 age.mod <- rstan::extract(age.fit$fit)
 
-bp.dat <- age.mod$x[1:100,] %>% 
+bp.dat <- age.mod$x[1:4000,] %>% 
   as_tibble() %>% 
   tibble::rownames_to_column("Rep") %>% 
   gather(Depth, value, -Rep) %>% 
@@ -141,16 +168,46 @@ bp.dat <- age.mod$x[1:100,] %>%
          Depth = Depth * age.fit$data$delta_c,
          Rep = as.numeric(Rep))
 
+# bp.dat.bw <- bp.dat %>% 
+#   group_by(Depth) %>% 
+#   summarise(mean.val = mean(value),
+#             upr = quantile(value, 0.9),
+#             lwr = quantile(value, 0.1))
+# 
+# bp.dat.bw %>% 
+#   ggplot(aes(x = Depth)) + 
+#   geom_pointrange(aes(y = mean.val, ymax = upr, ymin = lwr))
+```
+
+```{r}
 bp.dat %>% 
   ggplot(aes(x = Depth, y = 1/value, group = Depth)) + 
   geom_violin() +
   #geom_boxplot() +
   #geom_point(alpha = 0.15)
+  scale_x_continuous("Depth [cm]")+
   scale_y_continuous("Sediment accumulation rate [cm/yr]",
                      trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
+  annotation_logticks(sides = "l") +
   expand_limits(y = 0.01) + 
   theme_bw()
 ```
+
+```{r}
+bp.dat %>% 
+  ggplot(aes(x = Depth, y = value, group = Depth)) + 
+  geom_violin() +
+  #geom_boxplot() +
+  #geom_point(alpha = 0.15)
+  scale_x_continuous("Depth [cm]")+
+  scale_y_continuous("Sedimentation interval [yr/cm]",
+                     trans = "log10", breaks = c(1, 5, 10, 20, 50)) +
+  annotation_logticks(sides = "l") +
+#  expand_limits(y = 0.01) + 
+  theme_bw()
+```
+
+
 
 ```{r, echo=FALSE}
 # bp.dat %>% 
