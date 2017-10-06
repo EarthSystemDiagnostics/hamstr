@@ -18,7 +18,7 @@ Read-and-delete-me
 *.o
 
 # build on installation
-src/*
+src*
 
 !src/Makevars
 !src/Makevars.win
