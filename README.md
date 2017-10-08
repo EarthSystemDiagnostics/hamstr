@@ -34,6 +34,8 @@ if (!require("devtools")) {
 }
 
 devtools::install_github("andrewdolman/baconr")
+
+opts_chunk$set(cache = TRUE)
 ```
 
 
@@ -54,7 +56,7 @@ library(tidyr)
 library(dplyr)
 
 opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
-               fig.width = 6, fig.pos = "H", dpi = 150, autodep = TRUE)
+               fig.width = 6, fig.pos = "H", dpi = 300, autodep = TRUE)
 ```
 
 ### Data and parameters
@@ -66,12 +68,14 @@ the output from `make_stan_dat` is shown here to illustrate the required data an
 # Get number of sections K, so that they will be ~ 5cm
 K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 
-make_stan_dat(depth = MSB2K$depth, 
+stan_dat <- make_stan_dat(depth = MSB2K$depth, 
   obs_age = MSB2K$age, 
   obs_err = MSB2K$error,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.7, mem_strength = 4)
+  mem_mean = 0.1, mem_strength = 4)
+
+stan_dat
 ```
 
 ```
@@ -102,7 +106,7 @@ make_stan_dat(depth = MSB2K$depth,
 ## [1] 1.5
 ## 
 ## $mem_mean
-## [1] 0.7
+## [1] 0.1
 ## 
 ## $mem_strength
 ## [1] 4
@@ -114,10 +118,10 @@ make_stan_dat(depth = MSB2K$depth,
 ## [1] 0.075
 ## 
 ## $mem_alpha
-## [1] 2.8
+## [1] 0.4
 ## 
 ## $mem_beta
-## [1] 1.2
+## [1] 3.6
 ## 
 ## $c
 ##  [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20
@@ -137,6 +141,8 @@ make_stan_dat(depth = MSB2K$depth,
 ##  [1]  1  1  2  3  3  3  3  4  4  5  5  5  6  7  7  7  7  8  8  8  9  9 10
 ## [24] 10 10 10 11 11 11 11 12 12 13 14 14 15 15 15 16 20
 ```
+
+
 
 
 ### Fit the bacon model with `stan_bacon`
@@ -175,9 +181,9 @@ fit <- stan_bacon(
 ## Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Iteration: 2000 / 2000 [100%]  (Sampling)
 ## 
-##  Elapsed Time: 1.922 seconds (Warm-up)
-##                1.268 seconds (Sampling)
-##                3.19 seconds (Total)
+##  Elapsed Time: 1.939 seconds (Warm-up)
+##                1.401 seconds (Sampling)
+##                3.34 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 2).
@@ -200,9 +206,9 @@ fit <- stan_bacon(
 ## Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Iteration: 2000 / 2000 [100%]  (Sampling)
 ## 
-##  Elapsed Time: 1.876 seconds (Warm-up)
-##                1.357 seconds (Sampling)
-##                3.233 seconds (Total)
+##  Elapsed Time: 2.177 seconds (Warm-up)
+##                1.403 seconds (Sampling)
+##                3.58 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 3).
@@ -225,9 +231,9 @@ fit <- stan_bacon(
 ## Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Iteration: 2000 / 2000 [100%]  (Sampling)
 ## 
-##  Elapsed Time: 1.916 seconds (Warm-up)
-##                1.22 seconds (Sampling)
-##                3.136 seconds (Total)
+##  Elapsed Time: 1.98 seconds (Warm-up)
+##                1.389 seconds (Sampling)
+##                3.369 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 4).
@@ -250,16 +256,16 @@ fit <- stan_bacon(
 ## Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Iteration: 2000 / 2000 [100%]  (Sampling)
 ## 
-##  Elapsed Time: 1.868 seconds (Warm-up)
-##                1.3 seconds (Sampling)
-##                3.168 seconds (Total)
+##  Elapsed Time: 2.058 seconds (Warm-up)
+##                1.299 seconds (Sampling)
+##                3.357 seconds (Total)
 ```
 
 
 
 ```r
 options(width = 85)
-print(fit$fit, par = c("c_ages"))
+print(fit$fit, par = c("R", "w", "c_ages"))
 ```
 
 ```
@@ -268,29 +274,31 @@ print(fit$fit, par = c("c_ages"))
 ## post-warmup draws per chain=1000, total post-warmup draws=4000.
 ## 
 ##               mean se_mean    sd    2.5%     25%     50%     75%   97.5% n_eff Rhat
-## c_ages[1]  4044.25    0.61 38.42 3962.28 4020.19 4046.65 4071.36 4112.12  4000    1
-## c_ages[2]  4073.57    0.49 31.20 4009.78 4053.62 4074.74 4094.94 4131.36  4000    1
-## c_ages[3]  4108.31    0.44 27.74 4053.39 4089.85 4108.71 4127.15 4161.73  4000    1
-## c_ages[4]  4158.40    0.46 29.07 4102.03 4138.88 4158.53 4177.60 4217.85  4000    1
-## c_ages[5]  4291.07    0.54 34.45 4224.10 4268.22 4291.01 4314.45 4360.43  4000    1
-## c_ages[6]  4437.79    0.78 49.50 4335.20 4407.92 4440.44 4469.05 4534.60  4000    1
-## c_ages[7]  4601.66    0.53 33.27 4536.58 4579.81 4601.45 4622.84 4668.67  4000    1
-## c_ages[8]  4741.00    0.52 32.97 4675.24 4719.78 4740.38 4761.83 4808.33  4000    1
-## c_ages[9]  4857.01    0.49 31.17 4793.04 4837.44 4857.77 4877.68 4915.42  4000    1
-## c_ages[10] 4971.08    0.49 31.13 4904.03 4951.94 4973.37 4992.25 5027.51  4000    1
-## c_ages[11] 5096.33    0.47 29.91 5033.73 5077.49 5097.49 5115.53 5153.43  4000    1
-## c_ages[12] 5215.49    0.43 27.00 5164.32 5197.03 5215.49 5232.42 5272.10  4000    1
-## c_ages[13] 5304.85    0.49 30.88 5243.60 5284.78 5304.56 5324.49 5367.91  4000    1
-## c_ages[14] 5388.93    0.58 36.88 5309.26 5366.40 5391.28 5413.97 5456.14  4000    1
-## c_ages[15] 5490.14    0.47 29.98 5430.68 5470.89 5490.42 5510.09 5548.25  4000    1
-## c_ages[16] 5572.58    0.51 32.44 5509.72 5550.68 5572.29 5593.56 5637.20  4000    1
-## c_ages[17] 5653.50    0.72 45.35 5567.25 5623.83 5652.58 5681.75 5748.71  4000    1
-## c_ages[18] 5730.49    0.81 51.32 5630.97 5697.70 5729.92 5762.43 5835.43  4000    1
-## c_ages[19] 5808.12    0.80 50.87 5706.32 5776.85 5808.18 5839.83 5909.57  4000    1
-## c_ages[20] 5889.55    0.75 47.19 5800.34 5859.71 5887.08 5917.57 5989.11  4000    1
-## c_ages[21] 5983.50    1.14 72.38 5863.23 5935.16 5977.91 6023.48 6150.32  4000    1
+## R             0.79    0.00  0.17    0.33    0.73    0.86    0.91    0.96  2038    1
+## w             0.41    0.01  0.25    0.00    0.19    0.45    0.62    0.79  1939    1
+## c_ages[1]  4044.35    0.59 37.09 3964.17 4021.93 4046.61 4070.10 4108.81  4000    1
+## c_ages[2]  4073.67    0.47 29.90 4012.42 4054.58 4074.56 4093.98 4128.59  4000    1
+## c_ages[3]  4108.54    0.43 27.37 4054.00 4090.47 4108.75 4126.63 4162.04  4000    1
+## c_ages[4]  4158.33    0.46 29.25 4103.45 4137.93 4157.46 4178.19 4216.07  4000    1
+## c_ages[5]  4291.49    0.55 35.08 4222.45 4268.03 4291.11 4314.87 4358.93  4000    1
+## c_ages[6]  4437.53    0.82 48.91 4336.04 4406.89 4438.89 4469.35 4530.24  3590    1
+## c_ages[7]  4601.59    0.52 32.69 4536.83 4580.44 4601.13 4623.17 4666.30  4000    1
+## c_ages[8]  4741.57    0.52 32.89 4678.76 4719.46 4741.39 4762.07 4808.82  4000    1
+## c_ages[9]  4856.90    0.50 31.88 4791.48 4837.02 4856.81 4877.89 4919.04  4000    1
+## c_ages[10] 4970.62    0.50 31.64 4903.90 4950.49 4972.54 4992.33 5028.48  4000    1
+## c_ages[11] 5096.60    0.47 29.61 5035.85 5078.33 5097.25 5115.25 5155.14  4000    1
+## c_ages[12] 5215.05    0.44 28.07 5159.57 5196.13 5214.70 5233.73 5271.03  4000    1
+## c_ages[13] 5304.57    0.49 31.26 5240.83 5284.43 5305.51 5324.93 5364.78  4000    1
+## c_ages[14] 5388.31    0.59 37.15 5309.34 5366.51 5390.94 5412.80 5455.41  4000    1
+## c_ages[15] 5490.18    0.47 29.91 5429.16 5471.02 5490.32 5509.07 5549.93  4000    1
+## c_ages[16] 5572.91    0.50 31.83 5512.08 5551.24 5572.20 5593.18 5638.40  4000    1
+## c_ages[17] 5653.57    0.71 44.60 5568.48 5624.80 5652.43 5681.45 5745.15  4000    1
+## c_ages[18] 5731.53    0.83 52.68 5626.21 5697.67 5732.79 5764.50 5836.54  4000    1
+## c_ages[19] 5809.72    0.82 51.83 5707.18 5776.16 5810.32 5842.50 5915.10  4000    1
+## c_ages[20] 5890.49    0.75 47.51 5799.68 5860.52 5888.56 5918.83 5989.50  4000    1
+## c_ages[21] 5982.02    1.12 71.06 5857.25 5935.23 5975.66 6021.79 6141.54  4000    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Sun Oct 01 17:44:10 2017.
+## Samples were drawn using NUTS(diag_e) at Sun Oct 08 16:26:51 2017.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).
@@ -305,10 +313,10 @@ set.seed(20170406)
 plot_stan_bacon(fit, 100)
 ```
 
-![](readme_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+![](readme_files/figure-html/bacon_defaults-1.png)<!-- -->
 
 
-### Fit again at higher vertical resolution and with more variable accumulation rates
+### Fit again with stronger prior on accumulation rates
 
 
 
@@ -317,8 +325,8 @@ fit2 <- stan_bacon(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age, 
   obs_err = MSB2K$error,
-  K = K_for_5cm*10, nu = 6,
-  acc_mean = 20, acc_alpha = 0.2,
+  K = K_for_5cm, nu = 6,
+  acc_mean = 20, acc_alpha = 25,
   mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 4)
 ```
@@ -329,17 +337,74 @@ fit2 <- stan_bacon(
 plot_stan_bacon(fit2, 100)
 ```
 
-![](readme_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+![](readme_files/figure-html/stronger_prior-1.png)<!-- -->
+
+
+### Fit again with strong prior for lower memory
+
+
+
+```r
+fit3 <- stan_bacon(
+  depth = MSB2K$depth, 
+  obs_age = MSB2K$age, 
+  obs_err = MSB2K$error,
+  K = K_for_5cm, nu = 6,
+  acc_mean = 20, acc_alpha = 1.5,
+  mem_mean = 0.1, mem_strength = 4,
+  iter = 2000, chains = 4)
+```
+
+
+
+```r
+plot_stan_bacon(fit3, 100)
+```
+
+![](readme_files/figure-html/weaker_prior-1.png)<!-- -->
+
+
+### Add tephras at 25 and 90 cm
+
+
+
+
+```r
+teph <- data.frame(depth = c(25, 87.5), age = c(4500, 5700), error = c(3, 5))
+MSB2K.2 <- bind_rows(MSB2K, teph) %>% 
+  arrange(age)
+  
+
+fit3 <- stan_bacon(
+  depth = MSB2K.2$depth, 
+  obs_age = MSB2K.2$age, 
+  obs_err = MSB2K.2$error,
+  K = K_for_5cm, nu = 6,
+  acc_mean = 20, acc_alpha = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  iter = 2000, chains = 4)
+```
+
+
+
+```r
+plot_stan_bacon(fit3, 100) +
+  geom_pointrange(data = teph,
+                  aes(x = depth, y = age, ymax = age + error, ymin = age - error),
+                  group = NA, colour = "Blue", alpha = 0.5) 
+```
+
+![](readme_files/figure-html/tephras-1.png)<!-- -->
 
 
 ### Distribution of sediment accumulation rates
 
 
 ```r
-age.fit <- fit2
+age.fit <- fit
 age.mod <- rstan::extract(age.fit$fit)
 
-bp.dat <- age.mod$x[1:100,] %>% 
+bp.dat <- age.mod$x[1:4000,] %>% 
   as_tibble() %>% 
   tibble::rownames_to_column("Rep") %>% 
   gather(Depth, value, -Rep) %>% 
@@ -347,18 +412,52 @@ bp.dat <- age.mod$x[1:100,] %>%
          Depth = Depth * age.fit$data$delta_c,
          Rep = as.numeric(Rep))
 
+# bp.dat.bw <- bp.dat %>% 
+#   group_by(Depth) %>% 
+#   summarise(mean.val = mean(value),
+#             upr = quantile(value, 0.9),
+#             lwr = quantile(value, 0.1))
+# 
+# bp.dat.bw %>% 
+#   ggplot(aes(x = Depth)) + 
+#   geom_pointrange(aes(y = mean.val, ymax = upr, ymin = lwr))
+```
+
+
+```r
 bp.dat %>% 
   ggplot(aes(x = Depth, y = 1/value, group = Depth)) + 
   geom_violin() +
   #geom_boxplot() +
   #geom_point(alpha = 0.15)
+  scale_x_continuous("Depth [cm]")+
   scale_y_continuous("Sediment accumulation rate [cm/yr]",
                      trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
+  annotation_logticks(sides = "l") +
   expand_limits(y = 0.01) + 
   theme_bw()
 ```
 
-![](readme_files/figure-html/unnamed-chunk-9-1.png)<!-- -->
+![](readme_files/figure-html/acc_rates-1.png)<!-- -->
+
+
+```r
+bp.dat %>% 
+  ggplot(aes(x = Depth, y = value, group = Depth)) + 
+  geom_violin() +
+  #geom_boxplot() +
+  #geom_point(alpha = 0.15)
+  scale_x_continuous("Depth [cm]")+
+  scale_y_continuous("Sedimentation interval [yr/cm]",
+                     trans = "log10", breaks = c(1, 5, 10, 20, 50)) +
+  annotation_logticks(sides = "l") +
+#  expand_limits(y = 0.01) + 
+  theme_bw()
+```
+
+![](readme_files/figure-html/acc_intervals-1.png)<!-- -->
+
+
 
 
 

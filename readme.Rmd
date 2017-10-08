@@ -59,7 +59,7 @@ library(tidyr)
 library(dplyr)
 
 opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
-               fig.width = 6, fig.pos = "H", dpi = 150, autodep = TRUE)
+               fig.width = 6, fig.pos = "H", dpi = 300, autodep = TRUE)
 
 ```
 
@@ -115,7 +115,7 @@ fit <- stan_bacon(
   obs_err = MSB2K$error,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.1, mem_strength = 4,
+  mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 4)
 ```
 
@@ -128,29 +128,78 @@ print(fit$fit, par = c("R", "w", "c_ages"))
 
 ### Plot the estimated age model
 
-```{r}
+```{r bacon_defaults, fig.height=4}
 set.seed(20170406)
 plot_stan_bacon(fit, 100)
 ```
 
 
-### Fit again at higher vertical resolution and with more variable accumulation rates
+### Fit again with stronger prior on accumulation rates
 
 
-```{r results='hide'}
+```{r, results='hide'}
 fit2 <- stan_bacon(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age, 
   obs_err = MSB2K$error,
-  K = K_for_5cm*2, nu = 6,
-  acc_mean = 20, acc_alpha = 0.2,
-  mem_mean = 0.2, mem_strength = 4,
+  K = K_for_5cm, nu = 6,
+  acc_mean = 20, acc_alpha = 25,
+  mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 4)
 ```
 
 
-```{r}
+```{r stronger_prior}
 plot_stan_bacon(fit2, 100)
+```
+
+
+### Fit again with strong prior for lower memory
+
+
+```{r, results='hide'}
+fit3 <- stan_bacon(
+  depth = MSB2K$depth, 
+  obs_age = MSB2K$age, 
+  obs_err = MSB2K$error,
+  K = K_for_5cm, nu = 6,
+  acc_mean = 20, acc_alpha = 1.5,
+  mem_mean = 0.1, mem_strength = 4,
+  iter = 2000, chains = 4)
+```
+
+
+```{r weaker_prior}
+plot_stan_bacon(fit3, 100)
+```
+
+
+### Add tephras at 25 and 90 cm
+
+
+
+```{r, results='hide'}
+teph <- data.frame(depth = c(25, 87.5), age = c(4500, 5700), error = c(3, 5))
+MSB2K.2 <- bind_rows(MSB2K, teph) %>% 
+  arrange(age)
+  
+
+fit3 <- stan_bacon(
+  depth = MSB2K.2$depth, 
+  obs_age = MSB2K.2$age, 
+  obs_err = MSB2K.2$error,
+  K = K_for_5cm, nu = 6,
+  acc_mean = 20, acc_alpha = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  iter = 2000, chains = 4)
+```
+
+
+```{r tephras}
+plot_stan_bacon(fit3, 100) +
+  geom_pointrange(data = teph,
+                  aes(x = depth, y = age, ymax = age + error, ymin = age - error),
+                  group = NA, colour = "Blue", alpha = 0.5) 
 ```
 
 
@@ -179,7 +228,7 @@ bp.dat <- age.mod$x[1:4000,] %>%
 #   geom_pointrange(aes(y = mean.val, ymax = upr, ymin = lwr))
 ```
 
-```{r}
+```{r acc_rates}
 bp.dat %>% 
   ggplot(aes(x = Depth, y = 1/value, group = Depth)) + 
   geom_violin() +
@@ -193,7 +242,7 @@ bp.dat %>%
   theme_bw()
 ```
 
-```{r}
+```{r acc_intervals}
 bp.dat %>% 
   ggplot(aes(x = Depth, y = value, group = Depth)) + 
   geom_violin() +
