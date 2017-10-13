@@ -9,7 +9,7 @@ plot_stan_bacon(stan_bacon_fit, n.iter = 1000)
 \arguments{
 \item{stan_bacon_fit}{The object returned from \code{stan_bacon}.}
 
-\item{n.iter}{The number of iterations of the model to plot, defaults to 100.}
+\item{n.iter}{The number of iterations of the model to plot, defaults to 1000.}
 }
 \value{
 A ggplot2 object

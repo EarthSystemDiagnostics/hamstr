@@ -1,7 +1,7 @@
 #' Title
 #'
 #' @param stan_bacon_fit The object returned from \code{stan_bacon}.
-#' @param n.iter The number of iterations of the model to plot, defaults to 100.
+#' @param n.iter The number of iterations of the model to plot, defaults to 1000.
 #' 
 #' @description Plots the Bacon modelled Age~Depth relationship together with
 #'   the depths, ages, and age uncertainties in the observed data. A sample of
