@@ -4,7 +4,7 @@
 \alias{plot_stan_bacon}
 \title{Title}
 \usage{
-plot_stan_bacon(stan_bacon_fit, n.iter = 100)
+plot_stan_bacon(stan_bacon_fit, n.iter = 1000)
 }
 \arguments{
 \item{stan_bacon_fit}{The object returned from \code{stan_bacon}.}

@@ -11,7 +11,7 @@
 #' @return A ggplot2 object
 #' @export
 #' @examples
-plot_stan_bacon <- function(stan_bacon_fit, n.iter = 100) {
+plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000) {
   
   fit_data <- stan_bacon_fit$data
   
@@ -36,7 +36,7 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 100) {
   p <- post_depth_age %>%
     dplyr::filter(Iter %in% sample(unique(.$Iter), n.iter, replace = FALSE)) %>%
     ggplot2::ggplot(aes(x = Depth, y = Age, group = Iter)) +
-    ggplot2::geom_line(alpha = 1 / sqrt(n.iter))  +
+    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter))  +
     ggplot2::geom_pointrange(
       data = obs_ages,
       aes(y = Age, ymax = Age_upr, ymin = Age_lwr),
