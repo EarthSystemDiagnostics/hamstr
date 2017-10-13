@@ -7,7 +7,8 @@ output:
 
 -------------------------------
 
-**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). There is as yet no ability to convert between ^14^C ages and calibrated calendar ages.
+**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). Functions from the R package **Bchron** (Parnell 2016) can be used to calibrate ^14^C ages to calendar ages.
+
 
 There are currently just three exported functions: 
 
@@ -21,6 +22,7 @@ The motivation for creating this package is to make use of the Bacon age modelli
 of the age model itself easier, by coding it in a widely used higher-level probabilistic programming language.
 
 
+*  Parnell, Andrew. 2016. Bchron: Radiocarbon Dating, Age-Depth Modelling, Relative Sea Level Rate Estimation, and Non-Parametric Phase Modelling. R package version 4.2.6. https://CRAN.R-project.org/package=Bchron
 
 *  Blaauw, Maarten, and J. Andrés Christen. 2011. Flexible Paleoclimate Age-Depth Models Using an Autoregressive Gamma Process. Bayesian Analysis 6 (3): 457-74. doi:10.1214/ba/1339616472.
 
@@ -28,9 +30,10 @@ of the age model itself easier, by coding it in a widely used higher-level proba
 
 
 
+
 ## Installation
 
-**baconr** can be installed directly from github
+**baconr** can be installed directly from Github
 
 ```{r, eval=FALSE}
 if (!require("devtools")) {
@@ -39,7 +42,7 @@ if (!require("devtools")) {
 
 devtools::install_github("andrewdolman/baconr")
 
-opts_chunk$set(cache = TRUE)
+opts_chunk$set(cache = TRUE, autodep = TRUE)
 ```
 
 
@@ -57,6 +60,7 @@ library(knitr)
 library(ggplot2)
 library(tidyr)
 library(dplyr)
+library(Bchron)
 
 opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
                fig.width = 6, fig.pos = "H", dpi = 300, autodep = TRUE)
@@ -65,6 +69,21 @@ opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
 
 ### Data and parameters
 
+First convert ^14^C ages to calendar ages. Functions from the R package **Bchron** can be used for this.
+
+```{r}
+cal.ages <- Bchron::BchronCalibrate(ages=MSB2K$age,
+                            ageSds=MSB2K$error,
+                            calCurves=rep("intcal13", nrow(MSB2K)),
+                            ids=paste0("Date-", 1:nrow(MSB2K)))
+
+age.samples <- Bchron::SampleAges(cal.ages)
+
+MSB2K$age.cal <- apply(age.samples, 2, median)
+MSB2K$age.cal.sd <- apply(age.samples, 2, sd)
+```
+
+
 the output from `make_stan_dat` is shown here to illustrate the required data and parameter format, but a separate call to `make_stan_dat` is not normally necessary as it is used internally by `stan_bacon`
 
 ```{r}
@@ -72,8 +91,8 @@ the output from `make_stan_dat` is shown here to illustrate the required data an
 K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 
 stan_dat <- make_stan_dat(depth = MSB2K$depth, 
-  obs_age = MSB2K$age, 
-  obs_err = MSB2K$error,
+  obs_age = MSB2K$age.cal, 
+  obs_err = MSB2K$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.1, mem_strength = 4)
@@ -111,8 +130,8 @@ stan_dat
 ```{r}
 fit <- stan_bacon(
   depth = MSB2K$depth, 
-  obs_age = MSB2K$age, 
-  obs_err = MSB2K$error,
+  obs_age = MSB2K$age.cal, 
+  obs_err = MSB2K$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -128,9 +147,9 @@ print(fit$fit, par = c("R", "w", "c_ages"))
 
 ### Plot the estimated age model
 
-```{r bacon_defaults, fig.height=4}
+```{r bacon_defaults}
 set.seed(20170406)
-plot_stan_bacon(fit, 100)
+plot_stan_bacon(fit, 1000)
 ```
 
 
@@ -140,8 +159,8 @@ plot_stan_bacon(fit, 100)
 ```{r, results='hide'}
 fit2 <- stan_bacon(
   depth = MSB2K$depth, 
-  obs_age = MSB2K$age, 
-  obs_err = MSB2K$error,
+  obs_age = MSB2K$age.cal, 
+  obs_err = MSB2K$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 25,
   mem_mean = 0.7, mem_strength = 4,
@@ -150,7 +169,7 @@ fit2 <- stan_bacon(
 
 
 ```{r stronger_prior}
-plot_stan_bacon(fit2, 100)
+plot_stan_bacon(fit2, 1000)
 ```
 
 
@@ -160,8 +179,8 @@ plot_stan_bacon(fit2, 100)
 ```{r, results='hide'}
 fit3 <- stan_bacon(
   depth = MSB2K$depth, 
-  obs_age = MSB2K$age, 
-  obs_err = MSB2K$error,
+  obs_age = MSB2K$age.cal, 
+  obs_err = MSB2K$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.1, mem_strength = 4,
@@ -170,7 +189,7 @@ fit3 <- stan_bacon(
 
 
 ```{r weaker_prior}
-plot_stan_bacon(fit3, 100)
+plot_stan_bacon(fit3, 1000)
 ```
 
 
@@ -179,15 +198,15 @@ plot_stan_bacon(fit3, 100)
 
 
 ```{r, results='hide'}
-teph <- data.frame(depth = c(25, 87.5), age = c(4500, 5700), error = c(3, 5))
+teph <- data.frame(depth = c(25, 87.5), age.cal = c(5000, 6500), age.cal.sd = c(3, 5))
 MSB2K.2 <- bind_rows(MSB2K, teph) %>% 
-  arrange(age)
+  arrange(age.cal)
   
 
 fit3 <- stan_bacon(
   depth = MSB2K.2$depth, 
-  obs_age = MSB2K.2$age, 
-  obs_err = MSB2K.2$error,
+  obs_age = MSB2K.2$age.cal, 
+  obs_err = MSB2K.2$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -196,9 +215,9 @@ fit3 <- stan_bacon(
 
 
 ```{r tephras}
-plot_stan_bacon(fit3, 100) +
+plot_stan_bacon(fit3, 1000) +
   geom_pointrange(data = teph,
-                  aes(x = depth, y = age, ymax = age + error, ymin = age - error),
+                  aes(x = depth, y = age.cal, ymax = age.cal + age.cal.sd, ymin = age.cal - age.cal.sd),
                   group = NA, colour = "Blue", alpha = 0.5) 
 ```
 
