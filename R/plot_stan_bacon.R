@@ -73,8 +73,8 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000) {
   
   p.mem <- mem.prior %>% 
     ggplot(aes(x = mem, y = mem.dens)) +
-    geom_density(data = mem.post, aes(x = R), fill = "Grey", inherit.aes = FALSE) +
-    #geom_density(data = mem.post, aes(x = w), fill = "Grey", inherit.aes = FALSE) +
+    geom_density(data = mem.post, aes(x = R), fill = "Blue", inherit.aes = FALSE) +
+    geom_density(data = mem.post, aes(x = w), fill = "Grey", inherit.aes = FALSE) +
     geom_line(colour = "Red") + 
     scale_x_continuous("Memory [correlation at 1 cm]", limits = c(0, 1)) + 
     scale_y_continuous("") +

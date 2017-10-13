@@ -95,7 +95,7 @@ stan_dat <- make_stan_dat(depth = MSB2K$depth,
   obs_err = MSB2K$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.1, mem_strength = 4)
+  mem_mean = 0.7, mem_strength = 4)
 
 stan_dat
 ```
