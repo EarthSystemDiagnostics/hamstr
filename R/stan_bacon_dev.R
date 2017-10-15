@@ -10,7 +10,7 @@
 #' @export
 #' 
 #' @examples
-stan_bacon <- function(depth, obs_age, obs_err, K = 10, nu = 6,
+stan_bacon_dev <- function(depth, obs_age, obs_err, K = 10, nu = 6,
                   acc_mean, acc_alpha = 1.5,
                   mem_mean = 0.7, mem_strength = 4,
                   iter = 2000, chains = 4){

@@ -3,6 +3,7 @@
 export(make_stan_dat)
 export(plot_stan_bacon)
 export(stan_bacon)
+export(stan_bacon_dev)
 exportPattern("(\"^[[:alpha:]]+\")")
 importFrom(ggpubr,ggarrange)
 importFrom(rstan,extract)
