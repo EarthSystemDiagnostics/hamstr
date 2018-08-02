@@ -67,7 +67,7 @@ opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
 
 ### Data and parameters
 
-First convert ^14^C ages to calendar ages. Functions from the R package **Bchron** can be used for this.
+First convert 14^C ages to calendar ages. Functions from the R package **Bchron** can be used for this.
 
 ```{r}
 cal.ages <- Bchron::BchronCalibrate(ages=MSB2K$age,
@@ -75,10 +75,22 @@ cal.ages <- Bchron::BchronCalibrate(ages=MSB2K$age,
                             calCurves=rep("intcal13", nrow(MSB2K)),
                             ids=paste0("Date-", 1:nrow(MSB2K)))
 
-age.samples <- Bchron::SampleAges(cal.ages)
+SimplifyCalAge <- function(ages, densities){
+  
+  wts <- densities / sum(densities)
+  
+  M <- sum(wts > 0)
 
-MSB2K$age.cal <- apply(age.samples, 2, median)
-MSB2K$age.cal.sd <- apply(age.samples, 2, sd)
+  w.mean <- sum(ages * wts)
+  w.std <- sqrt(sum(wts * (ages-w.mean)^2) / ((M-1)/M * sum(wts)))
+  
+  return(c("mean" = w.mean, "std" = w.std))
+  
+}
+
+
+MSB2K$age.cal <- sapply(cal.ages, function(x) SimplifyCalAge(x$ageGrid, x$densities)["mean"])
+MSB2K$age.cal.sd <- sapply(cal.ages, function(x) SimplifyCalAge(x$ageGrid, x$densities)["std"])
 ```
 
 
