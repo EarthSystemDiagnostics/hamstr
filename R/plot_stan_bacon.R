@@ -13,7 +13,7 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom rstan extract
 #' @examples
-plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000) {
+plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
   
   fit_data <- stan_bacon_fit$data
   
@@ -47,6 +47,7 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000) {
       alpha = 0.5) +
     ggplot2::theme_bw()
   
+  if (plot_priors == FALSE) return(p.fit)
   
   ## Prior and posterior figures
   acc.rng <- qgamma(c(0.000001, 0.999), shape = stan_bacon_fit$data$acc_alpha,  rate = stan_bacon_fit$data$acc_beta)
@@ -68,8 +69,12 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000) {
   mem.prior <- tibble(mem = seq(0, 1, length.out = 1000)) %>% 
     mutate(mem.dens = dbeta(mem, shape1 = stan_bacon_fit$data$mem_alpha,  shape2 = stan_bacon_fit$data$mem_beta))
   
-  mem.post <- tibble(R = as.vector(rstan::extract(stan_bacon_fit$fit, "R")$R),
-                     w = as.vector(rstan::extract(stan_bacon_fit$fit, "w")$w))
+  w <- rstan::extract(stan_bacon_fit$fit, "w")$w
+  ifelse(is.matrix(w), w <- apply(w, 1, median),  w <- as.vector(w))
+  
+  mem.post <- tibble(w = w,
+                     R = as.vector(rstan::extract(stan_bacon_fit$fit, "R")$R))
+  
   
   p.mem <- mem.prior %>% 
     ggplot(aes(x = mem, y = mem.dens)) +
