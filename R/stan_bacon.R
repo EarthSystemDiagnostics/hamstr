@@ -41,16 +41,16 @@
 #' @examples
 #' K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 #' fit <- stan_bacon(
-#'   depth = MSB2K$depth,
-#'   obs_age = MSB2K$age.cal,
+#'   depth = MSB2K$depth, 
+#'   obs_age = MSB2K$age.cal, 
 #'   obs_err = MSB2K$age.cal.sd,
 #'   K = K_for_5cm, nu = 6,
 #'   acc_mean = 20, acc_alpha = 1.5,
 #'   mem_mean = 0.7, mem_strength = 4,
 #'   iter = 2000, chains = 3)
-#'
+#'   
 #'   print(fit$fit, par = c("R", "w", "c_ages"))
-#'
+#'   
 #'   plot_stan_bacon(fit, 1000)
 #'      
 stan_bacon <- function(depth, obs_age, obs_err,
