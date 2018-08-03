@@ -132,7 +132,7 @@ stan_dat
 #      , type = "l", col = "Green")
 # plot(x, exp(-priorwU(w = x, deltaC = 5, alpha = stan_dat$mem_alpha, beta = stan_dat$mem_beta))
 #      , type = "l", col = "Red")
-```
+``` 
 
 
 ### Fit the bacon model with `stan_bacon`
@@ -145,7 +145,7 @@ fit <- stan_bacon(
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.7, mem_strength = 4,
-  iter = 2000, chains = 4)
+  iter = 2000, chains = 3)
 ```
 
 
@@ -174,7 +174,7 @@ fit2 <- stan_bacon(
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 25,
   mem_mean = 0.7, mem_strength = 4,
-  iter = 2000, chains = 4)
+  iter = 2000, chains = 3)
 ```
 
 
@@ -194,7 +194,7 @@ fit3 <- stan_bacon(
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.1, mem_strength = 4,
-  iter = 2000, chains = 4)
+  iter = 2000, chains = 3)
 ```
 
 
@@ -206,30 +206,54 @@ plot_stan_bacon(fit3, 1000)
 ### Add tephras at 25 and 90 cm
 
 
-
 ```{r, results='hide'}
 teph <- data.frame(depth = c(25, 87.5), age.cal = c(5000, 6500), age.cal.sd = c(3, 5))
 MSB2K.2 <- bind_rows(MSB2K, teph) %>% 
   arrange(age.cal)
   
 
-fit3 <- stan_bacon(
+fit4 <- stan_bacon(
   depth = MSB2K.2$depth, 
   obs_age = MSB2K.2$age.cal, 
   obs_err = MSB2K.2$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.7, mem_strength = 4,
-  iter = 2000, chains = 4)
+  iter = 2000, chains = 3)
 ```
 
 
 ```{r tephras}
-plot_stan_bacon(fit3, 1000) +
+plot_stan_bacon(fit4, 1000) +
   geom_pointrange(data = teph,
                   aes(x = depth, y = age.cal, ymax = age.cal + age.cal.sd, ymin = age.cal - age.cal.sd),
                   group = NA, colour = "Blue", alpha = 0.5) 
 ```
+
+
+### Add hiatus
+
+```{r fit_hiatus, results="hide"}
+# Add 1000 years to all depths below 40 cm
+hi_ages <- MSB2K$age
+hi_ages[MSB2K$depth > 40] <- hi_ages[MSB2K$depth > 40] + 1000
+
+fit_hi <- stan_bacon(
+  depth = MSB2K$depth, 
+  obs_age = hi_ages, 
+  obs_err = MSB2K$age.cal.sd,
+  hiatus_depth = c(40),
+  hiatus_length = c(1000),
+  K = 20, nu = 6,
+  acc_mean = 20, acc_alpha = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  iter = 2000, chains = 3)
+```
+
+```{r hiatus}
+plot_stan_bacon(fit_hi)
+```
+
 
 
 ### Distribution of sediment accumulation rates
@@ -238,7 +262,7 @@ plot_stan_bacon(fit3, 1000) +
 age.fit <- fit
 age.mod <- rstan::extract(age.fit$fit)
 
-bp.dat <- age.mod$x[1:4000,] %>% 
+bp.dat <- age.mod$x[1:3000,] %>% 
   as_tibble() %>% 
   tibble::rownames_to_column("Rep") %>% 
   gather(Depth, value, -Rep) %>% 

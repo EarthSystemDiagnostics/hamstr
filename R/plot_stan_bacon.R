@@ -12,6 +12,7 @@
 #' @export
 #' @importFrom ggpubr ggarrange
 #' @importFrom rstan extract
+#' @importFrom magrittr %>%
 #' @examples
 plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
   
@@ -23,12 +24,14 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
   obs_ages <- dplyr::tibble(
     Depth = fit_data$depth,
     Age = fit_data$obs_age,
-    Err = fit_data$obs_err
-  ) %>%
-    dplyr::mutate(Age_upr = Age + 2*Err,
-           Age_lwr = Age - 2*Err)
+    Err = fit_data$obs_err) 
+  
+  obs_ages <- dplyr::mutate(obs_ages, 
+                            Age_upr = Age + 2*Err,
+                            Age_lwr = Age - 2*Err)
   
   posterior <- rstan::extract(stan_bacon_fit$fit)
+  
   post_depth_age <- posterior$c_ages %>%
     dplyr::tbl_df() %>%
     dplyr::mutate(Iter = 1:nrow(posterior$c_ages)) %>%
@@ -78,15 +81,22 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
   
   p.mem <- mem.prior %>% 
     ggplot(aes(x = mem, y = mem.dens)) +
-    geom_density(data = mem.post, aes(x = R), fill = "Blue", inherit.aes = FALSE) +
-    geom_density(data = mem.post, aes(x = w), fill = "Grey", inherit.aes = FALSE) +
+    geom_density(data = mem.post, aes(x = R, fill = "at 1 cm 'R'"), inherit.aes = FALSE,
+                 show.legend = TRUE) +
+    geom_density(data = mem.post, aes(x = w, fill = "between\nsections 'w'"), inherit.aes = FALSE,
+                 show.legend = TRUE) +
     geom_line(colour = "Red") + 
-    scale_x_continuous("Memory [correlation at 1 cm]", limits = c(0, 1)) + 
+    scale_x_continuous("Memory [correlation]", limits = c(0, 1)) + 
     scale_y_continuous("") +
-    theme_bw()
+    scale_fill_discrete("") +
+    theme_bw() +
+    theme(legend.position = "top")
+  
+  t.lp <- rstan::traceplot(stan_bacon_fit$fit, pars = c("lp__"), include = TRUE) +
+    theme(legend.position = "top")
   
   ggpubr::ggarrange(
-    ggpubr::ggarrange(p.acc, p.mem, ncol = 2),
+    ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,2,3)),
     p.fit,
     nrow = 2, heights = c(1, 2)) 
 }

@@ -4,8 +4,10 @@
 \alias{make_stan_dat}
 \title{make_stan_dat}
 \usage{
-make_stan_dat(depth, obs_age, obs_err, K = 10, nu = 6, acc_mean,
-  acc_alpha = 1.5, mem_mean = 0.7, mem_strength = 4, ...)
+make_stan_dat(depth, obs_age, obs_err, hiatus_depth = NULL,
+  hiatus_length = NULL, hiatus_shape = 1, hiatus_interval = 0.1, K = 10,
+  nu = 6, acc_mean, acc_alpha = 1.5, mem_mean = 0.7, mem_strength = 4,
+  ...)
 }
 \arguments{
 \item{depth}{Vector of depths from an observed age-depth profile}
@@ -14,6 +16,18 @@ make_stan_dat(depth, obs_age, obs_err, K = 10, nu = 6, acc_mean,
 
 \item{obs_err}{Error associated with each observed age (1 standard error)}
 
+\item{hiatus_depth}{Depths of suspected hiatuses, as vector}
+
+\item{hiatus_length}{Priors for lengths of suspected hiatuses (in time units)}
+
+\item{hiatus_shape}{Shape parameter for the gamma prior on hiatus length,
+defaults to 1 which results in a gamma distribution with 1 degree of
+freedom, i.e. an exponential distribution with mean and sd equal to
+hiatus_length}
+
+\item{hiatus_interval}{Depth interval over which hiatus occurs. Should be
+small but cannot be zero}
+
 \item{K}{Number of sections into which the profile will be divided}
 
 \item{nu}{Degrees of freedom for the Student-t distributed error model.
@@ -21,13 +35,13 @@ Defaults to 6, which is equivalent to the default parameterisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
 
-\item{acc_mean}{the mean sediment accumulation rate for the
-Gamma prior on sedimentation rate innovations}
+\item{acc_mean}{The mean sediment accumulation rate for the Gamma prior on
+sedimentation rate innovations}
 
-\item{acc_alpha}{sets the alpha (shape) parameter for the Gamma prior on
-sedimentation rate innovations. The variance of the innovations
-acc_var = acc_mean^2^ / acc_alpha. The default is acc_alpha = 1.5
-which is equivalent to the default shape = 1.5 parameter in Bacon 2.2}
+\item{acc_alpha}{Sets the alpha (shape) parameter for the Gamma prior on
+sedimentation rate innovations. The variance of the innovations acc_var =
+acc_mean^2^ / acc_alpha. The default is acc_alpha = 1.5 which is equivalent
+to the default shape = 1.5 parameter in Bacon 2.2}
 
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
 on "memory", i.e. the autocorrelation parameter in the underlying AR1
