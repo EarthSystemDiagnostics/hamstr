@@ -31,19 +31,31 @@
 #' @export
 #' 
 #' @examples
-stan_bacon <- function(depth, obs_age, obs_err, K = 10, nu = 6,
-                  acc_mean, acc_alpha = 1.5,
-                  mem_mean = 0.7, mem_strength = 4,
-                  iter = 2000, chains = 4){
+stan_bacon <- function(depth, obs_age, obs_err,
+                       hiatus_depth = NULL, hiatus_length = NULL,
+                       hiatus_shape = 1, hiatus_interval = 0.1,
+                       K = 10, nu = 6,
+                       acc_mean, acc_alpha = 1.5,
+                       mem_mean = 0.7, mem_strength = 4,
+                       iter = 2000, chains = 4){
   
-  stan_dat <- make_stan_dat(depth, obs_age, obs_err, K, nu,
-                         acc_mean, acc_alpha,
-                         mem_mean, mem_strength)
+  stan_dat <- make_stan_dat(depth, obs_age, obs_err,
+                            hiatus_depth, hiatus_length,
+                            hiatus_shape, hiatus_interval,
+                            K, nu,
+                            acc_mean, acc_alpha,
+                            mem_mean, mem_strength)
   
-  fit <- rstan::sampling(stanmodels$bacon, 
-              data = stan_dat, iter = iter, chains = chains,
-              verbose = FALSE)
-  
-  return(list(fit=fit, data=stan_dat))
-
+  if (is.null(hiatus_depth)){
+    fit <- rstan::sampling(stanmodels$bacon, 
+                           data = stan_dat, iter = iter, chains = chains,
+                           verbose = FALSE)  
+  }else if(is.null(hiatus_depth) == FALSE){
+    fit <- rstan::sampling(stanmodels$bacon_hiatuses, 
+                           data = stan_dat, iter = iter, chains = chains,
+                           verbose = FALSE) 
   }
+
+  return(list(fit=fit, data=stan_dat))
+  
+}
