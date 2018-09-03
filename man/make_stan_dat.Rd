@@ -5,9 +5,9 @@
 \title{make_stan_dat}
 \usage{
 make_stan_dat(depth, obs_age, obs_err, hiatus_depth = NULL,
-  hiatus_length = NULL, hiatus_shape = 1, hiatus_interval = 0.1, K = 10,
-  nu = 6, acc_mean, acc_alpha = 1.5, mem_mean = 0.7, mem_strength = 4,
-  ...)
+  hiatus_length = NULL, hiatus_shape = 1, hiatus_interval = 0.1,
+  K = 10, nu = 6, acc_mean, acc_alpha = 1.5, mem_mean = 0.7,
+  mem_strength = 4, ...)
 }
 \arguments{
 \item{depth}{Vector of depths from an observed age-depth profile}

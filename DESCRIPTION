@@ -14,4 +14,6 @@ Depends: R (>= 3.0.2), Rcpp (>= 0.12.9), methods
 Imports: rstan (>= 2.14.2), rstantools (>= 1.2.0), ggplot2, tidyr, dplyr, ggpubr, Bchron
 LinkingTo: StanHeaders (>= 2.14.0.1), rstan (>= 2.14.2), BH (>= 1.62.0.1), Rcpp (>= 0.12.9), RcppEigen (>= 0.3.2.9.0)
 LazyData: TRUE
+SystemRequirements: GNU make
+NeedsCompilation: yes
 RoxygenNote: 6.1.0
