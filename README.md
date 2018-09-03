@@ -217,8 +217,8 @@ fit <- stan_bacon(
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 1).
 ## 
-## Gradient evaluation took 0 seconds
-## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Gradient evaluation took 5.1e-05 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0.51 seconds.
 ## Adjust your expectations accordingly!
 ## 
 ## 
@@ -235,15 +235,15 @@ fit <- stan_bacon(
 ## Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Iteration: 2000 / 2000 [100%]  (Sampling)
 ## 
-##  Elapsed Time: 2.045 seconds (Warm-up)
-##                1.357 seconds (Sampling)
-##                3.402 seconds (Total)
+##  Elapsed Time: 2.18345 seconds (Warm-up)
+##                1.53961 seconds (Sampling)
+##                3.72306 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 2).
 ## 
-## Gradient evaluation took 0 seconds
-## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Gradient evaluation took 1.8e-05 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0.18 seconds.
 ## Adjust your expectations accordingly!
 ## 
 ## 
@@ -260,15 +260,15 @@ fit <- stan_bacon(
 ## Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Iteration: 2000 / 2000 [100%]  (Sampling)
 ## 
-##  Elapsed Time: 1.937 seconds (Warm-up)
-##                1.355 seconds (Sampling)
-##                3.292 seconds (Total)
+##  Elapsed Time: 2.05763 seconds (Warm-up)
+##                1.5288 seconds (Sampling)
+##                3.58643 seconds (Total)
 ## 
 ## 
 ## SAMPLING FOR MODEL 'bacon' NOW (CHAIN 3).
 ## 
-## Gradient evaluation took 0 seconds
-## 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.
+## Gradient evaluation took 1.7e-05 seconds
+## 1000 transitions using 10 leapfrog steps per transition would take 0.17 seconds.
 ## Adjust your expectations accordingly!
 ## 
 ## 
@@ -285,9 +285,9 @@ fit <- stan_bacon(
 ## Iteration: 1800 / 2000 [ 90%]  (Sampling)
 ## Iteration: 2000 / 2000 [100%]  (Sampling)
 ## 
-##  Elapsed Time: 1.943 seconds (Warm-up)
-##                1.334 seconds (Sampling)
-##                3.277 seconds (Total)
+##  Elapsed Time: 2.22362 seconds (Warm-up)
+##                1.48273 seconds (Sampling)
+##                3.70634 seconds (Total)
 ```
 
 
@@ -303,31 +303,31 @@ print(fit$fit, par = c("R", "w", "c_ages"))
 ## post-warmup draws per chain=1000, total post-warmup draws=3000.
 ## 
 ##               mean se_mean    sd    2.5%     25%     50%     75%   97.5% n_eff Rhat
-## R             0.73    0.00  0.18    0.29    0.63    0.78    0.86    0.94  2070    1
-## w             0.29    0.01  0.22    0.00    0.09    0.27    0.47    0.71  1839    1
-## c_ages[1]  4573.50    0.88 48.00 4473.82 4543.32 4575.54 4607.04 4659.60  3000    1
-## c_ages[2]  4612.87    0.77 41.99 4528.62 4584.65 4614.57 4641.71 4689.95  3000    1
-## c_ages[3]  4656.90    0.72 39.34 4577.84 4630.75 4657.62 4684.27 4730.64  3000    1
-## c_ages[4]  4717.58    0.76 41.53 4637.12 4690.90 4716.21 4744.41 4800.38  3000    1
-## c_ages[5]  4862.61    1.00 54.75 4760.58 4824.77 4862.12 4899.54 4971.74  3000    1
-## c_ages[6]  5096.96    1.71 84.40 4924.89 5040.93 5100.29 5151.61 5262.94  2435    1
-## c_ages[7]  5319.55    0.95 52.22 5216.42 5285.60 5319.26 5354.62 5422.30  3000    1
-## c_ages[8]  5470.25    0.76 41.72 5386.68 5444.00 5470.40 5496.72 5550.31  3000    1
-## c_ages[9]  5589.82    0.69 38.00 5510.56 5565.14 5591.18 5615.51 5661.10  3000    1
-## c_ages[10] 5712.59    0.66 36.32 5639.86 5688.01 5714.03 5737.88 5779.46  3000    1
-## c_ages[11] 5848.11    0.69 37.93 5771.57 5823.01 5849.39 5873.08 5921.27  3000    1
-## c_ages[12] 5981.24    0.72 39.42 5903.19 5954.51 5982.41 6006.95 6059.26  3000    1
-## c_ages[13] 6087.21    0.80 43.74 6002.39 6058.34 6087.48 6116.77 6173.36  3000    1
-## c_ages[14] 6185.54    0.87 47.85 6084.94 6155.00 6189.17 6218.59 6271.70  3000    1
-## c_ages[15] 6297.44    0.58 31.81 6230.28 6276.77 6298.33 6319.18 6358.12  3000    1
-## c_ages[16] 6375.13    0.58 31.94 6313.38 6353.34 6374.42 6396.71 6440.18  3000    1
-## c_ages[17] 6459.12    0.91 49.94 6367.28 6425.51 6456.82 6490.32 6562.01  3000    1
-## c_ages[18] 6540.40    1.08 59.24 6421.17 6501.19 6541.78 6577.11 6662.44  3000    1
-## c_ages[19] 6621.52    1.09 59.52 6499.68 6583.91 6622.73 6659.22 6736.90  3000    1
-## c_ages[20] 6707.87    0.98 53.87 6605.34 6673.48 6706.02 6740.03 6819.63  3000    1
-## c_ages[21] 6805.96    1.50 82.06 6666.92 6748.84 6798.72 6854.39 6986.32  3000    1
+## R             0.73    0.00  0.18    0.29    0.63    0.78    0.87    0.94  1799    1
+## w             0.30    0.01  0.22    0.00    0.09    0.28    0.47    0.72  1725    1
+## c_ages[1]  4571.78    0.93 50.73 4463.70 4540.89 4575.39 4605.93 4662.86  3000    1
+## c_ages[2]  4611.96    0.80 43.61 4519.83 4585.77 4613.60 4641.45 4691.18  3000    1
+## c_ages[3]  4657.49    0.72 39.53 4577.14 4631.48 4657.85 4683.84 4733.11  3000    1
+## c_ages[4]  4718.55    0.75 40.88 4640.47 4691.31 4718.34 4744.71 4801.53  3000    1
+## c_ages[5]  4864.85    1.02 55.71 4755.74 4826.32 4863.32 4902.85 4970.28  3000    1
+## c_ages[6]  5094.61    1.74 85.60 4920.92 5041.33 5096.38 5150.37 5261.55  2430    1
+## c_ages[7]  5317.74    0.96 52.69 5212.87 5283.63 5317.63 5353.55 5418.70  3000    1
+## c_ages[8]  5468.79    0.78 42.79 5387.30 5440.42 5468.53 5496.87 5551.85  3000    1
+## c_ages[9]  5588.78    0.73 39.84 5505.82 5563.06 5590.21 5615.51 5666.17  3000    1
+## c_ages[10] 5711.90    0.67 36.89 5635.88 5688.33 5712.99 5736.86 5781.00  3000    1
+## c_ages[11] 5848.83    0.71 39.01 5769.01 5823.03 5850.31 5874.09 5924.35  3000    1
+## c_ages[12] 5980.77    0.73 39.73 5900.93 5955.43 5980.16 6006.59 6059.57  3000    1
+## c_ages[13] 6085.76    0.82 44.96 5999.67 6055.20 6087.12 6115.30 6173.87  3000    1
+## c_ages[14] 6184.12    0.86 46.95 6082.58 6156.28 6186.72 6216.31 6269.04  3000    1
+## c_ages[15] 6296.79    0.57 31.34 6234.16 6276.20 6297.75 6317.95 6355.54  3000    1
+## c_ages[16] 6376.09    0.58 31.81 6315.44 6354.82 6375.18 6396.30 6442.39  3000    1
+## c_ages[17] 6460.69    0.91 50.00 6367.76 6426.74 6457.64 6490.57 6568.26  3000    1
+## c_ages[18] 6542.83    1.07 58.57 6427.63 6503.54 6543.48 6581.17 6659.80  3000    1
+## c_ages[19] 6624.42    1.06 58.29 6505.01 6587.96 6626.66 6662.92 6738.17  3000    1
+## c_ages[20] 6709.57    0.96 52.80 6608.30 6677.26 6707.02 6739.43 6822.53  3000    1
+## c_ages[21] 6809.23    1.51 82.70 6667.54 6754.56 6800.79 6853.60 7000.61  3000    1
 ## 
-## Samples were drawn using NUTS(diag_e) at Fri Aug 03 15:27:28 2018.
+## Samples were drawn using NUTS(diag_e) at Mon Sep  3 16:46:25 2018.
 ## For each parameter, n_eff is a crude measure of effective sample size,
 ## and Rhat is the potential scale reduction factor on split chains (at 
 ## convergence, Rhat=1).
