@@ -19,6 +19,8 @@ Read-and-delete-me
 *.so
 *.hpp
 
+src-i386
+src-x64
 
 !src/Makevars
 !src/Makevars.win
