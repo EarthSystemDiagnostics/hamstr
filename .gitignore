@@ -16,9 +16,9 @@ Read-and-delete-me
 # Cpp build objects
 *.dll
 *.o
+*.so
+*.hpp
 
-# build on installation
-src*
 
 !src/Makevars
 !src/Makevars.win
