@@ -77,7 +77,7 @@ cal.ages <- Bchron::BchronCalibrate(ages=MSB2K$age,
 
 SimplifyCalAge <- function(ages, densities){
   
-  wts <- densities / sum(densities)
+  wts <- densities #/ sum(densities)
   
   M <- sum(wts > 0)
 
