@@ -17,7 +17,7 @@ Read-and-delete-me
 *.dll
 *.o
 *.so
-*.hpp
+
 
 src-i386
 src-x64
