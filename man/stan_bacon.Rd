@@ -4,10 +4,23 @@
 \alias{stan_bacon}
 \title{stan_bacon}
 \usage{
-stan_bacon(depth, obs_age, obs_err, hiatus_depth = NULL,
-  hiatus_length = NULL, hiatus_shape = 1, hiatus_interval = 0.1,
-  K = 10, nu = 6, acc_mean, acc_alpha = 1.5, mem_mean = 0.7,
-  mem_strength = 4, iter = 2000, chains = 3)
+stan_bacon(
+  depth,
+  obs_age,
+  obs_err,
+  hiatus_depth = NULL,
+  hiatus_length = NULL,
+  hiatus_shape = 1,
+  hiatus_interval = 0.1,
+  K = 10,
+  nu = 6,
+  acc_mean,
+  acc_alpha = 1.5,
+  mem_mean = 0.7,
+  mem_strength = 4,
+  iter = 2000,
+  chains = 3
+)
 }
 \arguments{
 \item{depth}{Vector of depths from an observed age-depth profile}
@@ -46,9 +59,9 @@ to the default shape = 1.5 parameter in Bacon 2.2}
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
 on "memory", i.e. the autocorrelation parameter in the underlying AR1
 model. The prior on the correlation between layers is scaled according to
-the thickness of the layers \emph{delta_c}, which is determined by the total
-length of the profile and the parameter \emph{K}. mem_mean sets the mean value
-for \emph{R} (defaults to 0.7), while \emph{w} = R^(delta_c)}
+the thickness of the layers *delta_c*, which is determined by the total
+length of the profile and the parameter *K*. mem_mean sets the mean value
+for *R* (defaults to 0.7), while *w* = R^(delta_c)}
 
 \item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
@@ -61,7 +74,7 @@ defaults to 4 as in Bacon 2.2}
 }
 \value{
 Returns a list composed of the output from the Stan sampler .$fit,
-and the list of data passed to the sampler
+  and the list of data passed to the sampler
 }
 \description{
 stan_bacon
@@ -69,16 +82,16 @@ stan_bacon
 \examples{
 K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 fit <- stan_bacon(
-  depth = MSB2K$depth, 
-  obs_age = MSB2K$age.cal, 
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age.cal,
   obs_err = MSB2K$age.cal.sd,
   K = K_for_5cm, nu = 6,
   acc_mean = 20, acc_alpha = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   iter = 2000, chains = 3)
-  
+
   print(fit$fit, par = c("R", "w", "c_ages"))
-  
+
   plot_stan_bacon(fit, 1000)
-     
+
 }

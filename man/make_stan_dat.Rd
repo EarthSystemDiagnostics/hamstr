@@ -4,10 +4,22 @@
 \alias{make_stan_dat}
 \title{make_stan_dat}
 \usage{
-make_stan_dat(depth, obs_age, obs_err, hiatus_depth = NULL,
-  hiatus_length = NULL, hiatus_shape = 1, hiatus_interval = 0.1,
-  K = 10, nu = 6, acc_mean, acc_alpha = 1.5, mem_mean = 0.7,
-  mem_strength = 4, ...)
+make_stan_dat(
+  depth,
+  obs_age,
+  obs_err,
+  hiatus_depth = NULL,
+  hiatus_length = NULL,
+  hiatus_shape = 1,
+  hiatus_interval = 0.1,
+  K = 10,
+  nu = 6,
+  acc_mean,
+  acc_alpha = 1.5,
+  mem_mean = 0.7,
+  mem_strength = 4,
+  ...
+)
 }
 \arguments{
 \item{depth}{Vector of depths from an observed age-depth profile}
@@ -46,9 +58,9 @@ to the default shape = 1.5 parameter in Bacon 2.2}
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
 on "memory", i.e. the autocorrelation parameter in the underlying AR1
 model. The prior on the correlation between layers is scaled according to
-the thickness of the layers \emph{delta_c}, which is determined by the total
-length of the profile and the parameter \emph{K}. mem_mean sets the mean value
-for \emph{R} (defaults to 0.7), while \emph{w} = R^(delta_c)}
+the thickness of the layers *delta_c*, which is determined by the total
+length of the profile and the parameter *K*. mem_mean sets the mean value
+for *R* (defaults to 0.7), while *w* = R^(delta_c)}
 
 \item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}

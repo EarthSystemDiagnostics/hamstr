@@ -4,10 +4,10 @@
 \name{baconr-package}
 \alias{baconr-package}
 \alias{baconr}
-\title{baconr}
+\title{The 'baconr' package.}
 \description{
-baconr
+A DESCRIPTION OF THE PACKAGE
 }
 \references{
-Stan Development Team (2018). RStan: the R interface to Stan. R package version 2.17.3. http://mc-stan.org
+Stan Development Team (2019). RStan: the R interface to Stan. R package version 2.19.2. https://mc-stan.org
 }

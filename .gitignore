@@ -22,5 +22,9 @@ Read-and-delete-me
 src-i386
 src-x64
 
-!src/Makevars
-!src/Makevars.win
+.Rd2pdf*
+
+*.cc
+*.h
+*.cpp
+

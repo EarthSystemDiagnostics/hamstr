@@ -15,8 +15,6 @@
 #'               K = K_for_5cm, nu = 6,
 #'               acc_mean = 20, acc_var = "default",
 #'               mem_mean = 0.7, mem_strength = 4)
-
-
 make_stan_dat <- function(depth, obs_age, obs_err,
                           hiatus_depth = NULL, hiatus_length = NULL,
                           hiatus_shape = 1, hiatus_interval = 0.1,

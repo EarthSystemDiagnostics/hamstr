@@ -4,16 +4,19 @@
 \alias{stan_bacon_dev}
 \title{stan_bacon_dev}
 \usage{
-stan_bacon_dev(depth, obs_age, obs_err, K = 10, nu = 6, acc_mean,
-  acc_alpha = 1.5, mem_mean = 0.7, mem_strength = 4, iter = 2000,
-  chains = 4)
-}
-\arguments{
-\item{iter}{A positive integer specifying the number of iterations for each 
-    chain (including warmup). The default is 2000.}
-
-\item{chains}{A positive integer specifying the number of Markov chains. 
-    The default is 4.}
+stan_bacon_dev(
+  depth,
+  obs_age,
+  obs_err,
+  K = 10,
+  nu = 6,
+  acc_mean,
+  acc_alpha = 1.5,
+  mem_mean = 0.7,
+  mem_strength = 4,
+  iter = 2000,
+  chains = 4
+)
 }
 \value{
 Returns a list composed of the output from the Stan sampler .$fit,

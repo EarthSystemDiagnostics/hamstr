@@ -1,7 +1,4 @@
 #' stan_bacon
-#' @md
-#' @useDynLib baconr, .registration = TRUE
-#' @exportPattern("^[[:alpha:]]+")
 #' @param depth Vector of depths from an observed age-depth profile
 #' @param obs_age Observed age at each depth
 #' @param obs_err Error associated with each observed age (1 standard error)
@@ -41,18 +38,18 @@
 #' @examples
 #' K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 #' fit <- stan_bacon(
-#'   depth = MSB2K$depth, 
-#'   obs_age = MSB2K$age.cal, 
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age.cal,
 #'   obs_err = MSB2K$age.cal.sd,
 #'   K = K_for_5cm, nu = 6,
 #'   acc_mean = 20, acc_alpha = 1.5,
 #'   mem_mean = 0.7, mem_strength = 4,
 #'   iter = 2000, chains = 3)
-#'   
+#'
 #'   print(fit$fit, par = c("R", "w", "c_ages"))
-#'   
+#'
 #'   plot_stan_bacon(fit, 1000)
-#'      
+#'
 stan_bacon <- function(depth, obs_age, obs_err,
                        hiatus_depth = NULL, hiatus_length = NULL,
                        hiatus_shape = 1, hiatus_interval = 0.1,
@@ -60,24 +57,24 @@ stan_bacon <- function(depth, obs_age, obs_err,
                        acc_mean, acc_alpha = 1.5,
                        mem_mean = 0.7, mem_strength = 4,
                        iter = 2000, chains = 3){
-  
+
   stan_dat <- make_stan_dat(depth=depth, obs_age=obs_age, obs_err=obs_err,
                             hiatus_depth=hiatus_depth, hiatus_length=hiatus_length,
                             hiatus_shape=hiatus_shape, hiatus_interval=hiatus_interval,
                             K=K, nu=nu,
                             acc_mean=acc_mean, acc_alpha=acc_alpha,
                             mem_mean=mem_mean, mem_strength=mem_strength)
-  
+
   if (is.null(hiatus_depth)){
-    fit <- rstan::sampling(stanmodels$bacon, 
+    fit <- rstan::sampling(stanmodels$bacon,
                            data = stan_dat, iter = iter, chains = chains,
-                           verbose = FALSE)  
+                           verbose = FALSE)
   }else if(is.null(hiatus_depth) == FALSE){
-    fit <- rstan::sampling(stanmodels$bacon_hiatuses, 
+    fit <- rstan::sampling(stanmodels$bacon_hiatuses,
                            data = stan_dat, iter = iter, chains = chains,
-                           verbose = FALSE) 
+                           verbose = FALSE)
   }
 
   return(list(fit=fit, data=stan_dat))
-  
+
 }

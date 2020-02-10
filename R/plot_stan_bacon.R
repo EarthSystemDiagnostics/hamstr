@@ -2,7 +2,7 @@
 #'
 #' @param stan_bacon_fit The object returned from \code{stan_bacon}.
 #' @param n.iter The number of iterations of the model to plot, defaults to 1000.
-#' 
+#'
 #' @description Plots the Bacon modelled Age~Depth relationship together with
 #'   the depths, ages, and age uncertainties in the observed data. A sample of
 #'   size \code{n.iter} of the interactions of the posterior distribution are
@@ -15,29 +15,29 @@
 #' @importFrom magrittr %>%
 #' @examples
 plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
-  
+
   fit_data <- stan_bacon_fit$data
-  
+
   c_depths <- c(fit_data$c_depth_top[1], fit_data$c_depth_bottom) %>%
     dplyr::tibble(Depth = ., Section = paste0("V", 1:length(.)))
-  
+
   obs_ages <- dplyr::tibble(
     Depth = fit_data$depth,
     Age = fit_data$obs_age,
-    Err = fit_data$obs_err) 
-  
-  obs_ages <- dplyr::mutate(obs_ages, 
+    Err = fit_data$obs_err)
+
+  obs_ages <- dplyr::mutate(obs_ages,
                             Age_upr = Age + 2*Err,
                             Age_lwr = Age - 2*Err)
-  
+
   posterior <- rstan::extract(stan_bacon_fit$fit)
-  
+
   post_depth_age <- posterior$c_ages %>%
-    dplyr::tbl_df() %>%
+    dplyr::as_tibble(.) %>%
     dplyr::mutate(Iter = 1:nrow(posterior$c_ages)) %>%
     tidyr::gather(Section, Age,-Iter) %>%
     dplyr::left_join(., c_depths, by = "Section")
-  
+
   p.fit <- post_depth_age %>%
     dplyr::filter(Iter %in% sample(unique(.$Iter), n.iter, replace = FALSE)) %>%
     ggplot2::ggplot(aes(x = Depth, y = Age, group = Iter)) +
@@ -49,55 +49,55 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
       colour = "Red",
       alpha = 0.5) +
     ggplot2::theme_bw()
-  
+
   if (plot_priors == FALSE) return(p.fit)
-  
+
   ## Prior and posterior figures
   acc.rng <- qgamma(c(0.000001, 0.999), shape = stan_bacon_fit$data$acc_alpha,  rate = stan_bacon_fit$data$acc_beta)
-  
-  acc.prior <- tibble(acc.rate = seq(acc.rng[1], acc.rng[2], length.out = 1000)) %>% 
+
+  acc.prior <- tibble(acc.rate = seq(acc.rng[1], acc.rng[2], length.out = 1000)) %>%
     mutate(acc.dens = dgamma(acc.rate, shape = stan_bacon_fit$data$acc_alpha,  rate = stan_bacon_fit$data$acc_beta))
-  
+
   acc.post <- tibble(alpha = as.vector(rstan::extract(stan_bacon_fit$fit, "alpha")$alpha))
-  
-  p.acc <- acc.prior %>% 
+
+  p.acc <- acc.prior %>%
     ggplot(aes(x = acc.rate, y = acc.dens)) +
     geom_density(data = acc.post, aes(x = alpha), fill = "Grey", inherit.aes = FALSE) +
-    geom_line(colour = "Red") + 
+    geom_line(colour = "Red") +
     scale_x_continuous("Acc. rate [yr/cm]", limits = acc.rng) +
     scale_y_continuous("Density") +
     theme_bw()
-  
+
   # memory prior
-  mem.prior <- tibble(mem = seq(0, 1, length.out = 1000)) %>% 
+  mem.prior <- tibble(mem = seq(0, 1, length.out = 1000)) %>%
     mutate(mem.dens = dbeta(mem, shape1 = stan_bacon_fit$data$mem_alpha,  shape2 = stan_bacon_fit$data$mem_beta))
-  
+
   w <- rstan::extract(stan_bacon_fit$fit, "w")$w
   ifelse(is.matrix(w), w <- apply(w, 1, median),  w <- as.vector(w))
-  
+
   mem.post <- tibble(w = w,
                      R = as.vector(rstan::extract(stan_bacon_fit$fit, "R")$R))
-  
-  
-  p.mem <- mem.prior %>% 
+
+
+  p.mem <- mem.prior %>%
     ggplot(aes(x = mem, y = mem.dens)) +
     geom_density(data = mem.post, aes(x = R, fill = "at 1 cm 'R'"), inherit.aes = FALSE,
                  show.legend = TRUE) +
     geom_density(data = mem.post, aes(x = w, fill = "between\nsections 'w'"), inherit.aes = FALSE,
                  show.legend = TRUE) +
-    geom_line(colour = "Red") + 
-    scale_x_continuous("Memory [correlation]", limits = c(0, 1)) + 
+    geom_line(colour = "Red") +
+    scale_x_continuous("Memory [correlation]", limits = c(0, 1)) +
     scale_y_continuous("") +
     scale_fill_discrete("") +
     theme_bw() +
     theme(legend.position = "top")
-  
+
   t.lp <- rstan::traceplot(stan_bacon_fit$fit, pars = c("lp__"), include = TRUE) +
     theme(legend.position = "top")
-  
+
   ggpubr::ggarrange(
     ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,2,3)),
     p.fit,
-    nrow = 2, heights = c(1, 2)) 
+    nrow = 2, heights = c(1, 2))
 }
 
