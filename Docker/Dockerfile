@@ -1,0 +1,3 @@
+FROM mattocci/rstan
+
+RUN Rscript -e 'remotes::install_github(c("earthsystemdiagnostics/baconr"), dependencies=NA, build_vignettes=FALSE)'
