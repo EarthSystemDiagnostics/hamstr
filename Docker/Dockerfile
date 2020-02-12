@@ -1,3 +1,5 @@
 FROM mattocci/rstan
 
-RUN Rscript -e 'remotes::install_github(c("earthsystemdiagnostics/baconr"), dependencies=NA, build_vignettes=FALSE)'
+## Do not upgrade dependencies to avoid reinstalling rstan and rstanheaders
+## Should be quite new based on base image
+RUN Rscript -e 'remotes::install_github(c("earthsystemdiagnostics/baconr"), dependencies=NA, upgrade = "never", build_vignettes=FALSE)'
