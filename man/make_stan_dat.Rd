@@ -14,7 +14,7 @@ make_stan_dat(
   hiatus_interval = 0.1,
   K = 10,
   nu = 6,
-  acc_mean,
+  acc_mean = 20,
   acc_alpha = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,

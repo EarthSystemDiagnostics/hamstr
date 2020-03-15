@@ -19,7 +19,7 @@ make_stan_dat <- function(depth, obs_age, obs_err,
                           hiatus_depth = NULL, hiatus_length = NULL,
                           hiatus_shape = 1, hiatus_interval = 0.1,
                           K = 10, nu = 6,
-                          acc_mean, acc_alpha = 1.5,
+                          acc_mean = 20, acc_alpha = 1.5,
                           mem_mean = 0.7, mem_strength = 4, ...) {
   
   # Pretty sure nu = 6 is equivalent to the default parameterisation of t.a = 3, t.b = 4 in Bacon
