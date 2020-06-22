@@ -28,3 +28,5 @@ src-x64
 *.h
 *.cpp
 
+doc/*.png
+doc/*.pdf
