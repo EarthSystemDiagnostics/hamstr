@@ -64,6 +64,9 @@ parameters {
   real<lower = 0> record_acc_mean;
   real<lower = 0> record_acc_shape;
   vector<lower=0>[K1] section_acc_mean;
+  
+  // measurement error inflation factor
+  real<lower = 1> infl;
 }
 transformed parameters{
   
@@ -103,6 +106,7 @@ transformed parameters{
   Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
 }
 model {
+  infl ~ normal(1, 2);
   record_acc_mean ~ gamma(record_prior_acc_mean_alpha, record_prior_acc_mean_beta);
   record_acc_shape ~ gamma(record_prior_acc_shape_alpha, record_prior_acc_shape_beta);
   section_acc_mean ~ gamma(record_prior_acc_mean_alpha, record_acc_mean_beta);
@@ -111,5 +115,5 @@ model {
   R ~ beta(mem_alpha, mem_beta);
   alpha ~ gamma(record_prior_acc_mean_alpha, section_acc_mean_beta[whichK1]);
   //obs_age ~ normal(Mod_age, obs_err);
-  obs_age ~ student_t(nu, Mod_age, obs_err);
+  obs_age ~ student_t(nu, Mod_age, infl*obs_err);
 }
