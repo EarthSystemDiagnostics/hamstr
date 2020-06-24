@@ -2,6 +2,7 @@
 // 20.06.2020 Andrew Dolman
 // Add addtional layer to alphas.
 data {
+  int<lower=0, upper=1> inflate_error;
   int<lower=0> N;
   int<lower=0> K;  // no of fine sections
   int<lower=0> K1; // no of coarse sections
@@ -25,6 +26,7 @@ data {
 
   real<lower = 0> mem_mean;
   real<lower = 0> mem_strength;
+  
 }
 transformed data{
   // transformed hyperparameters
@@ -60,10 +62,14 @@ parameters {
   vector<lower=0>[K1] section_acc_mean;
 
   // measurement error inflation factor
-  real<lower = 0> infl_mean;
-  real<lower = 0> infl_shape;
-  vector<lower = 0>[N] infl;
-
+  real<lower = 0> infl_mean[inflate_error];
+  real<lower = 0> infl_shape[inflate_error];
+  //real<lower = 0> infl[inflate_error ? N : 0];
+  
+  //vector<lower = 0>[inflate_error ? 1 : 0] infl_mean;
+  //vector<lower = 0>[inflate_error ? 1 : 0] infl_shape;
+  vector<lower = 0>[inflate_error ? N : 0] infl;
+ 
 }
 transformed parameters{
 
@@ -76,13 +82,19 @@ transformed parameters{
   vector[N] Mod_age;
   vector[K1] section_acc_mean_beta;
 
-   real infl_beta;
-
+  
   // the inflated observation errors
-  vector[N] obs_err_1 = obs_err + infl .* obs_err;
-
-  infl_beta = infl_shape / infl_mean;
-
+  vector[N] obs_err_1;
+  
+ 
+  if (inflate_error == 1){
+    obs_err_1 = obs_err + infl .* obs_err;
+    //infl_beta = infl_shape / infl_mean;
+    } else {
+    obs_err_1 = obs_err;
+  }
+  
+  
   record_acc_mean_beta = record_acc_shape / record_acc_mean;
 
   //record_acc_shape_beta = record_prior_acc_shape_shape / record_prior_acc_shape_mean;
@@ -106,8 +118,10 @@ transformed parameters{
   c_ages[2:(K+1)] = age0 + cumulative_sum(x * delta_c);
   Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
 }
-model {
 
+model {
+  
+if (inflate_error == 1){
   // parameters for the hierarchical prior on the section means
   record_acc_mean ~ gamma(record_prior_acc_mean_shape, record_prior_acc_mean_beta);
   record_acc_shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
@@ -125,9 +139,31 @@ model {
   R ~ beta(mem_alpha, mem_beta);
 
   // the observation model
-  infl_mean ~ gamma(1.5, 1);
-  infl_shape ~ gamma(1.5, 1);
-  infl ~ gamma(infl_shape, infl_beta);
+  
+    infl_mean ~ gamma(1.5, 1);
+    infl_shape ~ gamma(1.5, 1);
+    infl ~ gamma(infl_shape[1], infl_shape[1] / infl_mean[1]);
+  
+  obs_age ~ student_t(nu, Mod_age, obs_err_1);
+  
+  } else {
+    // parameters for the hierarchical prior on the section means
+  record_acc_mean ~ gamma(record_prior_acc_mean_shape, record_prior_acc_mean_beta);
+  record_acc_shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
+
+  // the K1 section means, parametrised by the record mean and a user specified shape (alpha)
+  section_acc_mean ~ gamma(record_prior_acc_mean_shape, record_acc_mean_beta);
+
+  // the Gamma distributed innovations
+  // parametrised from the section mean acc rates and a user supplied shape (alpha)
+  alpha ~ gamma(record_prior_acc_mean_shape, section_acc_mean_beta[whichK1]);
+
+  // loosely model the first age as being anywhere between 0 and the youngest data point
+  age0 ~ uniform(0, obs_age[1]);
+
+  R ~ beta(mem_alpha, mem_beta);
 
   obs_age ~ student_t(nu, Mod_age, obs_err_1);
+  
+  }
 }

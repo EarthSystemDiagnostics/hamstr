@@ -117,10 +117,37 @@ make_stan_dat_2 <- function(depth, obs_age, obs_err,
   return(l)
 }
 
+GetInits <- function(dat){
+  l <- list(
+    R = runif(1, 0.1, 0.9),
+    alpha = abs(rnorm(dat$K, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3)),
+    record_acc_mean = abs(rnorm(1, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3)),
+    section_acc_mean = abs(rnorm(dat$K1, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3)),
+    
+    record_acc_shape = rnorm(1, 1.5, 1.5/3),
+    
+    age0 = runif(1, 0, dat$obs_age)
+  )
+  
+  # need to make this conditional and make sure initial values are arrays! 
+  if (dat$inflate_error == 1){
+    l$infl_mean = as.array(abs(rnorm(1, 0, 0.1)))
+    l$infl_sd = as.array(abs(rnorm(1, 0, 0.1)))
+    l$infl = abs(rnorm(dat$N, 0, 0.1))   
+  } else {
+    l$infl_mean = numeric(0)
+    l$infl_sd = numeric(0)
+    l$infl = numeric(0)   
+  }
+  
+  return(l)
+  
+}
 
-name <- "BEBR5"
-dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv")) %>%
-#dat <- read.csv(paste0("../envi-age-modelling/working-data/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv")) %>%
+
+name <- "BAMBILI2"
+#dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv")) %>%
+dat <- read.csv(paste0("../envi-age-modelling/working-data/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv")) %>%
   filter(depth > 0)
 
 dat <- ecustools::CalibrateAge(dat, age.14C = "age", age.14C.se = "error") %>%
@@ -141,7 +168,6 @@ options(mc.cores = parallel::detectCores())
 #options(mc.cores = 1)
 
 dat.fit.2l <- make_stan_dat_2(
-  inflate_errors = 0,
   depth = dat$depth,
   obs_age = dat$age.14C.cal,
   obs_err = dat$age.14C.cal.se,
@@ -153,25 +179,10 @@ dat.fit.2l <- make_stan_dat_2(
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
-  iter = 1000, chains = 3)
+  iter = 1000, chains = 3, 
+  inflate_error = 1)
 
 
-GetInits <- function(dat){
-  list(
-    R = runif(1, 0.1, 0.9),
-    alpha = abs(rnorm(dat$K, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3)),
-    record_acc_mean = abs(rnorm(1, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3)),
-    section_acc_mean = abs(rnorm(dat$K1, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3)),
-
-    record_acc_shape = rnorm(1, 1.5, 1.5/3),
-
-    age0 = runif(1, 0, dat$obs_age),
-
-    infl_mean = abs(rnorm(1, 0, 0.1)),
-    infl_sd = abs(rnorm(1, 0, 0.1)),
-    infl = abs(rnorm(dat$N, 0, 0.1))
-  )
-}
 
 inits <- list(GetInits(dat.fit.2l), GetInits(dat.fit.2l), GetInits(dat.fit.2l))
 
@@ -196,7 +207,7 @@ print(twoFit$fit, par = c("record_acc_mean"))
 
 print(twoFit$fit, par = c("section_acc_mean"))
 
-print(twoFit$fit, par = c("infl_shape", "infl_beta", "infl_mean"))
+print(twoFit$fit, par = c("infl_shape", "infl_mean"))
 print(twoFit$fit, par = c("infl"))
 
 print(twoFit$fit, par = c("w", "R"))
