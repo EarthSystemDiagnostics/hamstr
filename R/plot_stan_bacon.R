@@ -69,13 +69,6 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
     nrow = 2, heights = c(1, 2))
 }
 
-
-plot_stan_bacon(sarn.fit3, n.iter = 100, plot_priors = F)
-plot_stan_bacon(bacon.fit1, n.iter = 100, plot_priors = T)
-
-plot_age_models(bacon.fit1)
-plot_age_models(sarn.fit1)
-
 plot_age_models <- function(stan_fit, n.iter = 100){
   
   fit_data <- stan_fit$data
