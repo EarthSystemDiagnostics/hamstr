@@ -16,39 +16,7 @@
 #' @examples
 plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
 
-  fit_data <- stan_bacon_fit$data
-
-  c_depths <- c(fit_data$c_depth_top[1], fit_data$c_depth_bottom) %>%
-    dplyr::tibble(Depth = ., Section = paste0("V", 1:length(.)))
-
-  obs_ages <- dplyr::tibble(
-    Depth = fit_data$depth,
-    Age = fit_data$obs_age,
-    Err = fit_data$obs_err)
-
-  obs_ages <- dplyr::mutate(obs_ages,
-                            Age_upr = Age + 2*Err,
-                            Age_lwr = Age - 2*Err)
-
-  posterior <- rstan::extract(stan_bacon_fit$fit)
-
-  post_depth_age <- posterior$c_ages %>%
-    dplyr::as_tibble(.) %>%
-    dplyr::mutate(Iter = 1:nrow(posterior$c_ages)) %>%
-    tidyr::gather(Section, Age,-Iter) %>%
-    dplyr::left_join(., c_depths, by = "Section")
-
-  p.fit <- post_depth_age %>%
-    dplyr::filter(Iter %in% sample(unique(.$Iter), n.iter, replace = FALSE)) %>%
-    ggplot2::ggplot(aes(x = Depth, y = Age, group = Iter)) +
-    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter))  +
-    ggplot2::geom_pointrange(
-      data = obs_ages,
-      aes(y = Age, ymax = Age_upr, ymin = Age_lwr),
-      group = NA,
-      colour = "Red",
-      alpha = 0.5) +
-    ggplot2::theme_bw()
+  p.fit <- plot_age_models(stan_bacon_fit, n.iter = n.iter)
 
   if (plot_priors == FALSE) return(p.fit)
 
@@ -100,4 +68,90 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
     p.fit,
     nrow = 2, heights = c(1, 2))
 }
+
+
+plot_stan_bacon(sarn.fit3, n.iter = 100, plot_priors = F)
+plot_stan_bacon(bacon.fit1, n.iter = 100, plot_priors = T)
+
+plot_age_models(bacon.fit1)
+plot_age_models(sarn.fit1)
+
+plot_age_models <- function(stan_fit, n.iter = 100){
+  
+  fit_data <- stan_fit$data
+  
+  c_depths <- c(fit_data$c_depth_top[1], fit_data$c_depth_bottom) %>%
+    dplyr::tibble(Depth = ., Section = paste0("V", 1:length(.)))
+  
+  obs_ages <- dplyr::tibble(
+    Depth = fit_data$depth,
+    Age = fit_data$obs_age,
+    Err = fit_data$obs_err)
+  
+  obs_ages <- dplyr::mutate(obs_ages,
+                            Age_upr = Age + 2*Err,
+                            Age_lwr = Age - 2*Err)
+  
+  posterior <- rstan::extract(stan_fit$fit)
+  
+ 
+  s1 <- summary(stan_fit$fit)
+  s1 <- as_tibble(s1$summary, rownames = "par")
+  
+  infl <- s1 %>% 
+    filter(grepl("infl[", par, fixed = T),
+           grepl("err_infl", par, fixed = T) == FALSE)
+  
+  if (nrow(infl) > 0){
+    obs_ages <- obs_ages %>% 
+    mutate(infl_fac = infl$mean,
+           infl_err = Err + Err * infl_fac,
+           age_lwr_infl = Age + 2*infl_err,
+           age_upr_infl = Age - 2*infl_err)
+  }
+  
+  post_depth_age <- posterior$c_ages %>%
+    dplyr::as_tibble(.) %>%
+    dplyr::mutate(Iter = 1:nrow(posterior$c_ages)) %>%
+    tidyr::gather(Section, Age,-Iter) %>%
+    dplyr::left_join(., c_depths, by = "Section")
+  
+  p.fit <- post_depth_age %>%
+    dplyr::filter(Iter %in% sample(unique(.$Iter), n.iter, replace = FALSE)) %>%
+    ggplot2::ggplot(aes(x = Depth, y = Age, group = Iter)) +
+    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter)) 
+  
+  if (nrow(infl) > 0){
+    p.fit <- p.fit +
+    ggplot2::geom_linerange(
+      data = obs_ages,
+      aes(ymax = age_upr_infl, ymin = age_lwr_infl),
+      group = NA,
+      colour = "Blue",
+      alpha = 0.5)
+  }
+  p.fit <- p.fit +
+    ggplot2::geom_linerange(
+      data = obs_ages,
+      aes(y = Age, ymax = Age_upr, ymin = Age_lwr),
+      group = NA,
+      colour = "Red",
+      size = 1.2,
+      alpha = 1) +
+    ggplot2::geom_point(
+      data = obs_ages,
+      aes(y = Age),
+      group = NA,
+      colour = "Red",
+      #size = 1.01,
+      alpha = 1) +
+    ggplot2::theme_bw()
+  
+  return(p.fit)
+  
+}
+
+
+
+
 
