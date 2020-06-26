@@ -23,8 +23,14 @@ make_stan_dat_sarnie <- function(depth, obs_age, obs_err,
   
   l <- c(as.list(environment()))
   
+  # make sure in depth order
+  ord <- order(l$depth)
+  l$depth <- l$depth[ord]
+  l$obs_age <- l$obs_age[ord]
+  l$obs_err <- l$obs_err[ord]
+  
   # Transformed arguments
-  l$N <- length(depth)
+  l$N <- length(l$depth)
   
   stopifnot(K%%K1 == 0)
   l$whichK1 = rep(1:K1, each = K / K1)
@@ -36,11 +42,11 @@ make_stan_dat_sarnie <- function(depth, obs_age, obs_err,
   l$mem_strength = mem_strength
   
   # Set start depth to 5% less than first depth observation, and DO allow negative depths
-  depth_range <- diff(range(depth))
+  depth_range <- diff(range(l$depth))
   buff_5 <- 0.05 * depth_range
-  strt_dpth <- depth[1] - buff_5
+  strt_dpth <- l$depth[1] - buff_5
   #strt_dpth[strt_dpth < 0] <- 0
-  end_dpth <- tail(depth, 1) + buff_5
+  end_dpth <- tail(l$depth, 1) + buff_5
   depth_range = end_dpth - strt_dpth
   
   
