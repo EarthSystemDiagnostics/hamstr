@@ -35,11 +35,11 @@ make_stan_dat_sarnie <- function(depth, obs_age, obs_err,
   l$mem_mean = mem_mean
   l$mem_strength = mem_strength
   
-  # Set start depth to 5% less than first depth observation, but do not allow negative depths
+  # Set start depth to 5% less than first depth observation, and DO allow negative depths
   depth_range <- diff(range(depth))
   buff_5 <- 0.05 * depth_range
   strt_dpth <- depth[1] - buff_5
-  strt_dpth[strt_dpth < 0] <- 0
+  #strt_dpth[strt_dpth < 0] <- 0
   end_dpth <- tail(depth, 1) + buff_5
   depth_range = end_dpth - strt_dpth
   
@@ -65,7 +65,7 @@ get_inits_sarnie <- function(dat){
     
     record_acc_shape = rnorm(1, 1.5, 1.5/3),
     
-    age0 = runif(1, 0, dat$obs_age)
+    age0 = rnorm(1, min(dat$obs_age), 2)
   )
   
   # need to make this conditional and make sure initial values are arrays! 

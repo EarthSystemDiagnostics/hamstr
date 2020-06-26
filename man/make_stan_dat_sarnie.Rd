@@ -27,12 +27,26 @@ make_stan_dat_sarnie(
 
 \item{obs_err}{Error associated with each observed age (1 standard error)}
 
-\item{K}{Number of sections into which the profile will be divided}
+\item{K1}{Number of coarse level sections}
+
+\item{K}{Number of sections into which the profile will be divided, must be a multiple of K1}
 
 \item{nu}{Degrees of freedom for the Student-t distributed error model.
 Defaults to 6, which is equivalent to the default parameterisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
+
+\item{record_prior_acc_mean_mean}{hyperprior parameter for the prior on the overall mean acc.rate for 
+the record, set to the mean acc.rate for the record from a linear model or similar}
+
+\item{record_prior_acc_mean_shape}{shape for the prior on the overall mean, leave at 1.5 for now 
+acc.rate for the record}
+
+\item{record_prior_acc_shape_mean}{hyperprior parameters for the prior on 
+the shape of the innovations distribution, leave at 1.5 for now}
+
+\item{record_prior_acc_shape_shape}{hyperprior parameters for the prior on 
+the shape of the innovations distribution, leave at 1.5 for now}
 
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
 on "memory", i.e. the autocorrelation parameter in the underlying AR1
@@ -43,6 +57,9 @@ for *R* (defaults to 0.7), while *w* = R^(delta_c)}
 
 \item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
+
+\item{inflate_errors}{logical, 1 or 0. If set to 1, observation errors are 
+inflated so that data are consistent with a Bacon type monotonic age-depth model}
 }
 \value{
 a list of data, and parameters to be passed as data to the Stan sampler

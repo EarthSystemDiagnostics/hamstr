@@ -14,7 +14,7 @@ data {
   vector[K] c_depth_top;
   int whichK1[K]; // index fine sections to their parent coarse sections
   int which_c[N]; // index observations to their fine section
-  real<lower = 0> delta_c;
+  real<lower = 0> delta_c; // width of each fine section
   
   // hyperparameters
   
@@ -46,7 +46,7 @@ transformed data{
 parameters {
   real<lower = 0, upper = 1> R;
   vector<lower = 0>[K] alpha;
-  real<lower = 0> age0;
+  real age0;
   real<lower = 0> record_acc_mean;
   real<lower = 0> record_acc_shape;
   vector<lower=0>[K1] section_acc_mean;
@@ -117,7 +117,7 @@ model {
   alpha ~ gamma(record_prior_acc_mean_shape, section_acc_mean_beta[whichK1]);
   
   // loosely model the first age as being anywhere between 0 and the youngest data point
-  age0 ~ uniform(0, min(obs_age));
+  //age0 ~ normal(min(obs_age), 100);
   
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);
