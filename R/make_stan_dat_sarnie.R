@@ -1,4 +1,4 @@
-#' make_stan_dat
+#' make_stan_dat_sarnie
 #'
 #' @inheritParams sarnie
 #'

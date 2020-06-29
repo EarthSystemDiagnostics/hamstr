@@ -93,16 +93,16 @@ sarnie
 
 fit <- sarnie(
   depth = MSB2K$depth,
-  obs_age = MSB2K$age.cal,
-  obs_err = MSB2K$age.cal.sd,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
   K = 100, K1 = 10, nu = 6,
-  acc_mean = 20, acc_alpha = 1.5,
+  record_prior_acc_mean_mean = 20,
   mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0,
   iter = 2000, chains = 3)
 
-  print(fit$fit, par = c("R", "w", "c_ages"))
+print(fit$fit, par = c("record_acc_mean"))
 
-  plot_stan_bacon(fit, 1000)
+plot_stan_bacon(fit, 100, plot_priors = FALSE)
 
-sarnie(depth = 20:25, obs_age = 1:5, obs_err = 1:5)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_stan_dat_sarnie.R
 \name{make_stan_dat_sarnie}
 \alias{make_stan_dat_sarnie}
-\title{make_stan_dat}
+\title{make_stan_dat_sarnie}
 \usage{
 make_stan_dat_sarnie(
   depth,
@@ -65,7 +65,7 @@ inflated so that data are consistent with a Bacon type monotonic age-depth model
 a list of data, and parameters to be passed as data to the Stan sampler
 }
 \description{
-make_stan_dat
+make_stan_dat_sarnie
 }
 \examples{
 make_stan_dat_sarnie(depth = MSB2K$depth,

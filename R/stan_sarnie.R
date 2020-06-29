@@ -54,8 +54,6 @@
 #'
 #' plot_stan_bacon(fit, 100, plot_priors = FALSE)
 #'
-
-#' sarnie(depth = 20:25, obs_age = 1:5, obs_err = 1:5)
 sarnie <- function(depth, obs_age, obs_err,
                        K1 = 10, K = 100, nu = 6,
                        record_prior_acc_mean_mean = 20,
