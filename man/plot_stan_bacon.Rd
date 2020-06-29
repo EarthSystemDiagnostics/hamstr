@@ -4,10 +4,10 @@
 \alias{plot_stan_bacon}
 \title{Title}
 \usage{
-plot_stan_bacon(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE)
+plot_stan_bacon(stan_fit, n.iter = 1000, plot_priors = TRUE)
 }
 \arguments{
-\item{stan_bacon_fit}{The object returned from \code{stan_bacon}.}
+\item{stan_fit}{The object returned from \code{stan_bacon}.}
 
 \item{n.iter}{The number of iterations of the model to plot, defaults to 1000.}
 }

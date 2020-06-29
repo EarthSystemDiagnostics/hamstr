@@ -11,29 +11,64 @@
 #'               obs_err = MSB2K$error,
 #'               K1 = 10, K = 100,
 #'               nu = 6)
+#'               
+# acc_mean_hyp = record_prior_acc_mean_mean 
+# acc_shape_hyp = record_prior_acc_mean_shape
+# record_acc_mean_shape_mean 
+# record_prior_acc_shape_shape
+
 make_stan_dat_sarnie <- function(depth, obs_age, obs_err,
-                             K1 = 10, K = 100, nu = 6,
-                             record_prior_acc_mean_mean = 20,
-                             record_prior_acc_mean_shape = 1.5,
-                             record_prior_acc_shape_mean = 1.5,
-                             record_prior_acc_shape_shape = 1.5,
-                             mem_mean = 0.7, mem_strength = 4,
-                             inflate_errors = 0) {
-  
+                                 top_depth = NULL, bottom_depth = NULL,
+                                 pad_top_bottom = FALSE,
+                                 K1 = 10, K = 100, nu = 6,
+                                 record_prior_acc_mean_mean = 20,
+                                 record_prior_acc_mean_shape = 1.5,
+                                 record_prior_acc_shape_mean = 1.5,
+                                 record_prior_acc_shape_shape = 1.5,
+                                 section_acc_shape = 1.5,
+                                 mem_mean = 0.7, mem_strength = 4,
+                                 inflate_errors = 0) {
   
   l <- c(as.list(environment()))
   
-  # make sure in depth order
-  ord <- order(l$depth)
-  l$depth <- l$depth[ord]
-  l$obs_age <- l$obs_age[ord]
-  l$obs_err <- l$obs_err[ord]
+  ord <- order(depth)
+  
+  l$depth <- depth[ord]
+  l$obs_age <- obs_age[ord]
+  l$obs_err <- obs_err[ord]
+  
+  if (pad_top_bottom == TRUE){
+     # Set start depth to 5% less than first depth observation, and DO allow negative depths
+    depth_range <- diff(range(l$depth))
+    buff <- 0.05 * depth_range
+  } else {
+    buff <- 0
+  }
+ 
+  if (is.null(top_depth)) l$top_depth <- l$depth[1] - buff
+  
+  if (is.null(bottom_depth)) l$bottom_depth <- tail(l$depth, 1) + buff
+  
+  depth_range <- l$bottom_depth - l$top_depth
+  
+  if(l$top_depth > min(l$depth)) stop("top_depth must be above or equal to the shallowest data point")
+  if(l$bottom_depth < max(l$depth)) stop("bottom_depth must be deeper or equal to the deepest data point")
+  
   
   # Transformed arguments
   l$N <- length(l$depth)
   
-  stopifnot(K%%K1 == 0)
-  l$whichK1 = rep(1:K1, each = K / K1)
+  stopifnot(l$N == length(obs_err), l$N == length(obs_age))
+  
+  l$K <- K
+  l$c <- 1:l$K
+  
+  l$K1 <- K1
+  
+  if (K1 == 1){
+    l$whichK1 <- rep(1, K)} else {
+      l$whichK1 = cut(seq_along(1:K), K1, labels = FALSE)
+      }
   
   l$mem_alpha = mem_strength * mem_mean
   l$mem_beta = mem_strength * (1-mem_mean)
@@ -41,19 +76,11 @@ make_stan_dat_sarnie <- function(depth, obs_age, obs_err,
   l$mem_mean = mem_mean
   l$mem_strength = mem_strength
   
-  # Set start depth to 5% less than first depth observation, and DO allow negative depths
-  depth_range <- diff(range(l$depth))
-  buff_5 <- 0.05 * depth_range
-  strt_dpth <- l$depth[1] - buff_5
-  #strt_dpth[strt_dpth < 0] <- 0
-  end_dpth <- tail(l$depth, 1) + buff_5
-  depth_range = end_dpth - strt_dpth
+  l$delta_c = depth_range / l$K
+  l$c_depth_bottom = l$delta_c * l$c + l$top_depth
+  l$c_depth_top = c(l$top_depth, l$c_depth_bottom[1:(l$K-1)])
   
-  
-  l$c = 1:K
-  l$delta_c = depth_range / K
-  l$c_depth_bottom = l$delta_c * l$c + strt_dpth
-  l$c_depth_top = c(strt_dpth, l$c_depth_bottom[1:(K-1)])
+  l$modelled_depths <- c(l$c_depth_top[1], l$c_depth_bottom)
   
   # Index for which sections the target depth is in
   l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))

@@ -26,6 +26,8 @@ data {
   real<lower = 0> record_prior_acc_shape_mean;
   real<lower = 0> record_prior_acc_shape_shape;
   
+  real<lower = 0> section_acc_shape; // shape of the within section innovations
+  
   real<lower = 0> mem_mean;
   real<lower = 0> mem_strength;
   
@@ -83,7 +85,7 @@ transformed parameters{
   
   record_acc_mean_beta = record_acc_shape / record_acc_mean;
   
-  section_acc_mean_beta = record_prior_acc_mean_shape ./ section_acc_mean;
+  section_acc_mean_beta = section_acc_shape ./ section_acc_mean;
   
   w = R^(delta_c);
   
@@ -114,7 +116,7 @@ model {
   
   // the Gamma distributed innovations
   // parametrised from the section mean acc rates and a user supplied shape (alpha)
-  alpha ~ gamma(record_prior_acc_mean_shape, section_acc_mean_beta[whichK1]);
+  alpha ~ gamma(section_acc_shape, section_acc_mean_beta[whichK1]);
   
   // loosely model the first age as being anywhere between 0 and the youngest data point
   //age0 ~ normal(min(obs_age), 100);

@@ -32,23 +32,24 @@ sarnie(
 
 \item{K1}{Number of coarse level sections}
 
-\item{K}{Number of sections into which the profile will be divided, must be a multiple of K1}
+\item{K}{Number of fine level sections into which the profile will be divided}
 
 \item{nu}{Degrees of freedom for the Student-t distributed error model.
 Defaults to 6, which is equivalent to the default parameterisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
 
-\item{record_prior_acc_mean_mean}{hyperprior parameter for the prior on the overall mean acc.rate for 
-the record, set to the mean acc.rate for the record from a linear model or similar}
+\item{record_prior_acc_mean_mean}{hyperprior parameter for the prior on the
+overall mean acc.rate for the record, set to the mean acc.rate for the
+record from a linear model or similar}
 
-\item{record_prior_acc_mean_shape}{shape for the prior on the overall mean, leave at 1.5 for now 
-acc.rate for the record}
+\item{record_prior_acc_mean_shape}{shape for the prior on the overall mean,
+leave at 1.5 for now acc.rate for the record}
 
-\item{record_prior_acc_shape_mean}{hyperprior parameters for the prior on 
-the shape of the innovations distribution, leave at 1.5 for now}
+\item{record_prior_acc_shape_mean}{hyperprior parameters for the prior on the
+shape of the innovations distribution, leave at 1.5 for now}
 
-\item{record_prior_acc_shape_shape}{hyperprior parameters for the prior on 
+\item{record_prior_acc_shape_shape}{hyperprior parameters for the prior on
 the shape of the innovations distribution, leave at 1.5 for now}
 
 \item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
@@ -61,8 +62,9 @@ for *R* (defaults to 0.7), while *w* = R^(delta_c)}
 \item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 
-\item{inflate_errors}{logical, 1 or 0. If set to 1, observation errors are 
-inflated so that data are consistent with a Bacon type monotonic age-depth model}
+\item{inflate_errors}{logical. If set to TRUE, observation errors are
+inflated so that data are consistent with a Bacon type monotonic age-depth
+model}
 
 \item{iter}{A positive integer specifying the number of iterations for each 
     chain (including warmup). The default is 2000.}
@@ -73,6 +75,13 @@ inflated so that data are consistent with a Bacon type monotonic age-depth model
 \item{...}{Additional arguments can be \code{chain_id}, \code{init_r}, 
     \code{test_grad}, \code{append_samples}, \code{refresh},
     \code{enable_random_init}. See the documentation in \code{\link[rstan]{stan}}.}
+
+\item{top_depth, bottom_depth}{the top and bottom depths of the age-depth
+model. Must encompass the range of the data. Default to the shallowest and
+deepest data points unless \code{pad_top_bottom = TRUE}}
+
+\item{pad_top_bottom}{logical, pad the length of the age-depth model by 5% on
+each end}
 
 \item{acc_mean}{The mean sediment accumulation rate for the Gamma prior on
 sedimentation rate innovations}
@@ -103,6 +112,6 @@ fit <- sarnie(
 
 print(fit$fit, par = c("record_acc_mean"))
 
-plot_stan_bacon(fit, 100, plot_priors = FALSE)
+plot_stan_bacon(fit, 100, plot_priors = TRUE)
 
 }

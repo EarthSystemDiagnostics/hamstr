@@ -1,6 +1,6 @@
 #' Title
 #'
-#' @param stan_bacon_fit The object returned from \code{stan_bacon}.
+#' @param stan_fit The object returned from \code{stan_bacon}.
 #' @param n.iter The number of iterations of the model to plot, defaults to 1000.
 #'
 #' @description Plots the Bacon modelled Age~Depth relationship together with
@@ -14,53 +14,18 @@
 #' @importFrom rstan extract
 #' @importFrom magrittr %>%
 #' @examples
-plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
+plot_stan_bacon <- function(stan_fit, n.iter = 1000, plot_priors = TRUE) {
 
-  p.fit <- plot_age_models(stan_bacon_fit, n.iter = n.iter)
+  p.fit <- plot_age_models(stan_fit, n.iter = n.iter)
 
   if (plot_priors == FALSE) return(p.fit)
-
-  ## Prior and posterior figures
-  acc.rng <- qgamma(c(0.000001, 0.999), shape = stan_bacon_fit$data$acc_alpha,  rate = stan_bacon_fit$data$acc_beta)
-
-  acc.prior <- tibble(acc.rate = seq(acc.rng[1], acc.rng[2], length.out = 1000)) %>%
-    mutate(acc.dens = dgamma(acc.rate, shape = stan_bacon_fit$data$acc_alpha,  rate = stan_bacon_fit$data$acc_beta))
-
-  acc.post <- tibble(alpha = as.vector(rstan::extract(stan_bacon_fit$fit, "alpha")$alpha))
-
-  p.acc <- acc.prior %>%
-    ggplot(aes(x = acc.rate, y = acc.dens)) +
-    geom_density(data = acc.post, aes(x = alpha), fill = "Grey", inherit.aes = FALSE) +
-    geom_line(colour = "Red") +
-    scale_x_continuous("Acc. rate [yr/cm]", limits = acc.rng) +
-    scale_y_continuous("Density") +
-    theme_bw()
-
-  # memory prior
-  mem.prior <- tibble(mem = seq(0, 1, length.out = 1000)) %>%
-    mutate(mem.dens = dbeta(mem, shape1 = stan_bacon_fit$data$mem_alpha,  shape2 = stan_bacon_fit$data$mem_beta))
-
-  w <- rstan::extract(stan_bacon_fit$fit, "w")$w
-  ifelse(is.matrix(w), w <- apply(w, 1, median),  w <- as.vector(w))
-
-  mem.post <- tibble(w = w,
-                     R = as.vector(rstan::extract(stan_bacon_fit$fit, "R")$R))
-
-
-  p.mem <- mem.prior %>%
-    ggplot(aes(x = mem, y = mem.dens)) +
-    geom_density(data = mem.post, aes(x = R, fill = "at 1 cm 'R'"), inherit.aes = FALSE,
-                 show.legend = TRUE) +
-    geom_density(data = mem.post, aes(x = w, fill = "between\nsections 'w'"), inherit.aes = FALSE,
-                 show.legend = TRUE) +
-    geom_line(colour = "Red") +
-    scale_x_continuous("Memory [correlation]", limits = c(0, 1)) +
-    scale_y_continuous("") +
-    scale_fill_discrete("") +
-    theme_bw() +
-    theme(legend.position = "top")
-
-  t.lp <- rstan::traceplot(stan_bacon_fit$fit, pars = c("lp__"), include = TRUE) +
+  
+  if (plot_priors){
+    p.mem <- plot_memory_prior_posterior(stan_fit)
+    p.acc <- plot_acc_rate_prior_posterior(stan_fit)
+    }    
+  
+  t.lp <- rstan::traceplot(stan_fit$fit, pars = c("lp__"), include = TRUE) +
     theme(legend.position = "top")
 
   ggpubr::ggarrange(
@@ -68,6 +33,74 @@ plot_stan_bacon <- function(stan_bacon_fit, n.iter = 1000, plot_priors = TRUE) {
     p.fit,
     nrow = 2, heights = c(1, 2))
 }
+
+
+plot_acc_rate_prior_posterior <- function(stan_fit){
+  
+  if (exists("K1", where = stan_fit$data)){
+    p.acc <- ggplot() + theme_void()
+  } else {
+    acc.rng <- qgamma(c(0.000001, 0.9999), shape = stan_fit$data$acc_alpha,
+                      rate = stan_fit$data$acc_beta)
+    
+    acc.prior <- tibble(acc.rate = seq(acc.rng[1], acc.rng[2], length.out = 1000)) %>%
+      mutate(acc.dens = dgamma(acc.rate, shape = stan_fit$data$acc_alpha,
+                               rate = stan_fit$data$acc_beta))
+    
+    acc.post <- tibble(alpha = as.vector(rstan::extract(stan_fit$fit, "alpha")$alpha))
+    
+    if (any(acc.post$alpha > acc.rng[2])){
+      acc.outside <- sum(acc.post$alpha > acc.rng[2])
+      p.acc.o <- round(100 * acc.outside / length(acc.post$alpha), 2)
+      warning(p.acc.o, paste0("% of accumulation rate samples were outside plotted region of the acc.rate prior"))
+    }
+    
+    acc.post <- acc.post[acc.post$alpha <= acc.rng[2], ]
+    
+    p.acc <- acc.prior %>%
+      ggplot(aes(x = acc.rate, y = acc.dens)) +
+      geom_density(data = acc.post, aes(x = alpha), fill = "Grey", inherit.aes = FALSE) +
+      geom_line(colour = "Red") +
+      scale_x_continuous("Acc. rate [yr/cm]", limits = acc.rng) +
+      scale_y_continuous("Density") +
+      theme_bw()
+  }
+
+return(p.acc)
+  
+}
+
+
+
+plot_memory_prior_posterior <- function(stan_fit){
+  # memory prior
+  mem.prior <- tibble(mem = seq(0, 1, length.out = 1000)) %>%
+    mutate(mem.dens = dbeta(mem, shape1 = stan_fit$data$mem_alpha,
+                            shape2 = stan_fit$data$mem_beta))
+  
+  w <- rstan::extract(stan_fit$fit, "w")$w
+  ifelse(is.matrix(w), w <- apply(w, 1, median),  w <- as.vector(w))
+  
+  mem.post <- tibble(w = w,
+                     R = as.vector(rstan::extract(stan_fit$fit, "R")$R))
+  
+  
+  p.mem <- mem.prior %>%
+    ggplot(aes(x = mem, y = mem.dens)) +
+    geom_density(data = mem.post, aes(x = R, fill = "at 1 cm 'R'"),
+                 inherit.aes = FALSE, show.legend = TRUE) +
+    geom_density(data = mem.post, aes(x = w, fill = "between\nsections 'w'"),
+                 inherit.aes = FALSE, show.legend = TRUE) +
+    geom_line(colour = "Red") +
+    scale_x_continuous("Memory [correlation]", limits = c(0, 1)) +
+    scale_y_continuous("") +
+    scale_fill_discrete("") +
+    theme_bw() +
+    theme(legend.position = "top")
+  
+  return(p.mem)
+}
+
 
 
 
@@ -113,7 +146,17 @@ plot_age_models <- function(stan_fit, n.iter = 1000){
   
   p.fit <- post_depth_age %>%
     dplyr::filter(Iter %in% sample(unique(.$Iter), n.iter, replace = FALSE)) %>%
-    ggplot2::ggplot(aes(x = Depth, y = Age, group = Iter)) +
+    ggplot2::ggplot(aes(x = Depth, y = Age, group = Iter))
+  
+  if (exists("K1", where = fit_data)){
+    
+    bnds <- tapply(fit_data$c_depth_top, fit_data$whichK1, min)
+    
+    p.fit <- p.fit + 
+      ggplot2::geom_vline(xintercept = bnds[-1], colour = "grey", linetype = 2) 
+  }
+  
+  p.fit <- p.fit +
     ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter)) 
   
   if (nrow(infl) > 0){
@@ -128,7 +171,7 @@ plot_age_models <- function(stan_fit, n.iter = 1000){
   p.fit <- p.fit +
     ggplot2::geom_linerange(
       data = obs_ages,
-      aes(y = Age, ymax = Age_upr, ymin = Age_lwr),
+      aes(ymax = Age_upr, ymin = Age_lwr),
       group = NA,
       colour = "Red",
       size = 1.2,
@@ -140,7 +183,8 @@ plot_age_models <- function(stan_fit, n.iter = 1000){
       colour = "Red",
       #size = 1.01,
       alpha = 1) +
-    ggplot2::theme_bw()
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank())
   
   return(p.fit)
   
