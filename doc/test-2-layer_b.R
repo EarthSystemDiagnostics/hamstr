@@ -92,7 +92,7 @@ sarn.fit1 <- sarnie(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  bottom_depth = 800,
+  #bottom_depth = 800,
   K = 100,
   K1 = 1,
   nu = 6,
@@ -122,27 +122,14 @@ sarn.fit2 <- sarnie(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
-p2 <- plot_stan_bacon(sarn.fit1, n.iter = 100, plot_priors = F)
+p2 <- plot_stan_bacon(sarn.fit2, n.iter = 100, plot_priors = F)
 p2
 
-bnds <- tibble(K1 = sarn.fit2$data$whichK1,
-               depth1 = sarn.fit2$data$c_depth_top) %>% 
-  group_by(K1) %>% 
-  summarise(depth1 = min(depth1)) %>% 
-  slice(-1)
-
-
-bnds <- tapply(sarn.fit2$data$c_depth_top, sarn.fit2$data$whichK1, min)
-
-
-p2 + #geom_vline(data = bnds, aes(xintercept = depth1), inherit.aes  = F, colour = "grey", linetype = 2) +
-  geom_vline(xintercept = bnds[-1], inherit.aes  = F, colour = "grey", linetype = 2) +
-  theme(panel.grid = element_blank())
 
 summary(sarn.fit2$fit, par = c("record_acc_mean", "record_acc_shape"))$summary
 traceplot(sarn.fit2$fit, par = c("record_acc_mean", "record_acc_shape"))
 
-shinystan::launch_shinystan(sarn.fit3$fit)
+#shinystan::launch_shinystan(sarn.fit3$fit)
 
 
 sarn.fit3 <- sarnie(
@@ -160,14 +147,11 @@ sarn.fit3 <- sarnie(
   inflate_errors = 1, chains = 3)
 
 
-p.single.level <- plot_stan_bacon(sarn.fit1, 1000, plot_priors = F)
-p.multi.level <- plot_stan_bacon(sarn.fit2, 1000, plot_priors = F)
-p.multi.level.infl <- plot_stan_bacon(sarn.fit3, 1000, plot_priors = F)
+p.single.level <- plot_stan_bacon(sarn.fit1, 1000, plot_priors = T)
+p.multi.level <- plot_stan_bacon(sarn.fit2, 1000, plot_priors = T)
+p.multi.level.infl <- plot_stan_bacon(sarn.fit3, 1000, plot_priors = T)
 
 
-plot_stan_bacon(sarn.fit1, 100)
-
-sarn.fit2$data
 
 
 

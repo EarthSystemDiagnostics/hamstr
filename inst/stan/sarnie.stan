@@ -1,6 +1,27 @@
 // Bacon as a Stan model
 // 20.06.2020 Andrew Dolman
 // Add addtional layer to alphas.
+
+// ideas for parameter renaming
+// acc_mean_record = record_acc_mean
+// acc_mean_sections = section_acc_mean
+
+// hyper-hyper-parameters
+// acc_mean_hhp = record_prior_acc_mean_mean (mean of the prior on acc_mean)
+// acc_mean_shape_hhp = record_prior_acc_mean_shape (shape of the prior on acc_mean)
+
+// acc_shape_mean_hhp = record_prior_acc_shape_mean (mean of the prior on acc_mean)
+// acc_shape_shape_hhp = record_prior_acc_shape_shape (shape of the prior on acc_mean)
+
+// hyper-parameters
+// acc_shape_sections_hp
+
+// mem_mean_hp
+// mem_strength_hp
+
+
+
+
 data {
   int<lower=0, upper=1> inflate_errors;
   int<lower=0> N;
