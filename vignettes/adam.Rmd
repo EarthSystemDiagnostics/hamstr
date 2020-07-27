@@ -1,0 +1,63 @@
+---
+title: "adam"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{adam}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(baconr)
+library(tidyverse)
+```
+
+
+Hyperprior on the mean accumulation rate.
+
+```{r}
+mu <- 50
+sigma <- 1
+  
+  
+lnorm.examples <- crossing(
+  mu = c(mu),
+  x = seq(0, 1000, length.out = 1000)
+) %>% 
+  mutate(d = dlnorm(x, meanlog = log(mu), sdlog = sigma))
+
+lnorm.examples %>% 
+  ggplot(aes(x = x, y = d, colour = factor(mu))) +
+  geom_line() +
+  geom_vline(aes(xintercept = mu, colour = as.factor(mu))) +
+ # geom_vline(xintercept = qlnorm(c(0.025, 0.5, 0.975), log(mu), sigma), colour = "green")+
+  geom_vline(xintercept = mu, colour = "red", linetype = 2) +
+  geom_vline(xintercept = exp(log(mu) - sigma^2), colour = "blue")
+
+mu <- 1000
+sigma <- 0.4
+s <- rlnorm(1e05, meanlog = log(mu), sdlog = sigma)
+qlnorm(c(0.025, 0.5, 0.975), log(mu), sigma)
+hist(s, 100)
+abline(v = qlnorm(c(0.025, 0.5, 0.975), log(mu), sigma))
+
+
+mu <- 1000
+sh <- 5
+g <- rgamma(1e05, sh, sh/mu)
+hist(g, 100)
+abline(v = mu)
+mean(g)
+qgamma(c(0.025, 0.5, 0.975), sh, sh/mu)
+
+```
+

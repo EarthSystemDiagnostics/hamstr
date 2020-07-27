@@ -30,3 +30,4 @@ src-x64
 
 doc/*.png
 doc/*.pdf
+inst/doc
