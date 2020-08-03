@@ -11,10 +11,14 @@ sarnie(
   K1 = 10,
   K = 100,
   nu = 6,
+  top_depth = NULL,
+  bottom_depth = NULL,
+  pad_top_bottom = FALSE,
   record_prior_acc_mean_mean = 20,
   record_prior_acc_mean_shape = 1.5,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
+  section_acc_shape = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,
   inflate_errors = 0,
@@ -39,27 +43,33 @@ Defaults to 6, which is equivalent to the default parameterisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
 
-\item{record_prior_acc_mean_mean}{hyperprior parameter for the prior on the
-overall mean acc.rate for the record, set to the mean acc.rate for the
-record from a linear model or similar}
+\item{top_depth, bottom_depth}{the top and bottom depths of the age-depth
+model. Must encompass the range of the data. Default to the shallowest and
+deepest data points unless \code{pad_top_bottom = TRUE}}
 
-\item{record_prior_acc_mean_shape}{shape for the prior on the overall mean,
-leave at 1.5 for now acc.rate for the record}
+\item{pad_top_bottom}{logical, pad the length of the age-depth model by 5% on
+each end}
 
-\item{record_prior_acc_shape_mean}{hyperprior parameters for the prior on the
-shape of the innovations distribution, leave at 1.5 for now}
+\item{record_prior_acc_mean_mean, record_prior_acc_mean_shape}{hyperparameters
+for the hyperprior on the overall mean accumulation rate for the record.
+Units are depth / obs_age. E.g. if depth is in cm and age in kyr then the
+accumulation rate is in cm/kyr. ...mean_shape sets the shape of the
+hyperprior for the mean. Defaults to 1.5.}
 
-\item{record_prior_acc_shape_shape}{hyperprior parameters for the prior on
-the shape of the innovations distribution, leave at 1.5 for now}
+\item{record_prior_acc_shape_mean, record_prior_acc_shape_shape}{hyperparameters for the hyperprior on the shape of the distribution of K1
+coarse level accumulation rates. Defaults to 1.5, 1.5.}
 
-\item{mem_mean}{Hyper-parameter: a parameter of the Beta prior distribution
-on "memory", i.e. the autocorrelation parameter in the underlying AR1
-model. The prior on the correlation between layers is scaled according to
-the thickness of the layers *delta_c*, which is determined by the total
-length of the profile and the parameter *K*. mem_mean sets the mean value
-for *R* (defaults to 0.7), while *w* = R^(delta_c)}
+\item{section_acc_shape}{hyperparameter for the prior on the shape of the K
+fine level accumulation rates. Defaults to 1.5 - as for Bacon 2.2.}
 
-\item{mem_strength}{Hyper-parameter: sets the strength of the memory prior,
+\item{mem_mean}{Hyperparameter: a parameter of the Beta prior distribution on
+"memory", i.e. the autocorrelation parameter in the underlying AR1 model.
+The prior on the correlation between layers is scaled according to the
+thickness of the layers *delta_c*, which is determined by the total length
+of the profile and the parameter *K*. mem_mean sets the mean value for *R*
+(defaults to 0.7), while *w* = R^(delta_c)}
+
+\item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 
 \item{inflate_errors}{logical. If set to TRUE, observation errors are
@@ -75,21 +85,6 @@ model}
 \item{...}{Additional arguments can be \code{chain_id}, \code{init_r}, 
     \code{test_grad}, \code{append_samples}, \code{refresh},
     \code{enable_random_init}. See the documentation in \code{\link[rstan]{stan}}.}
-
-\item{top_depth, bottom_depth}{the top and bottom depths of the age-depth
-model. Must encompass the range of the data. Default to the shallowest and
-deepest data points unless \code{pad_top_bottom = TRUE}}
-
-\item{pad_top_bottom}{logical, pad the length of the age-depth model by 5% on
-each end}
-
-\item{acc_mean}{The mean sediment accumulation rate for the Gamma prior on
-sedimentation rate innovations}
-
-\item{acc_alpha}{Sets the alpha (shape) parameter for the Gamma prior on
-sedimentation rate innovations. The variance of the innovations acc_var =
-acc_mean^2^ / acc_alpha. The default is acc_alpha = 1.5 which is equivalent
-to the default shape = 1.5 parameter in Bacon 2.2}
 }
 \value{
 Returns a list composed of the output from the Stan sampler .$fit,
@@ -99,6 +94,8 @@ Returns a list composed of the output from the Stan sampler .$fit,
 sarnie
 }
 \examples{
+
+dontrun{
 
 fit <- sarnie(
   depth = MSB2K$depth,
@@ -114,4 +111,5 @@ print(fit$fit, par = c("record_acc_mean"))
 
 plot_stan_bacon(fit, 100, plot_priors = TRUE)
 
+}
 }

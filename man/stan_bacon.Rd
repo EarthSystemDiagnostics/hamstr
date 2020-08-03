@@ -80,6 +80,8 @@ Returns a list composed of the output from the Stan sampler .$fit,
 stan_bacon
 }
 \examples{
+
+dontrun{
 K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 fit <- stan_bacon(
   depth = MSB2K$depth,
@@ -93,5 +95,5 @@ fit <- stan_bacon(
   print(fit$fit, par = c("R", "w", "c_ages"))
 
   plot_stan_bacon(fit, 1000)
-
+}
 }

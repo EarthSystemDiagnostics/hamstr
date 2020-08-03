@@ -1,4 +1,4 @@
-#' sarnie
+#' adam
 #' @param depth Vector of depths from an observed age-depth profile
 #' @param obs_age Observed age at each depth
 #' @param obs_err Error associated with each observed age (1 standard error)
@@ -7,8 +7,7 @@
 #'   deepest data points unless \code{pad_top_bottom = TRUE}
 #' @param pad_top_bottom logical, pad the length of the age-depth model by 5% on
 #'   each end
-#' @param K Number of fine level sections into which the profile will be divided
-#' @param K1 Number of coarse level sections
+#' @param K Number of sub-sections at each level
 #' @param nu Degrees of freedom for the Student-t distributed error model.
 #'   Defaults to 6, which is equivalent to the default parameterisation of
 #'   t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
@@ -41,14 +40,13 @@
 #' @export
 #'
 #' @examples
-#'
 #' dontrun{
 #' 
-#' fit <- sarnie(
+#' fit <- adam(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
 #'   obs_err = MSB2K$error,
-#'   K = 100, K1 = 10, nu = 6,
+#'   K = c(10, 10), nu = 6,
 #'   record_prior_acc_mean_mean = 20,
 #'   mem_mean = 0.7, mem_strength = 4,
 #'   inflate_errors = 0,
@@ -59,21 +57,21 @@
 #' plot_stan_bacon(fit, 100, plot_priors = TRUE)
 #' 
 #' }
-sarnie <- function(depth, obs_age, obs_err,
-                       K1 = 10, K = 100, nu = 6,
+adam <- function(depth, obs_age, obs_err,
+                   K = c(10, 10), nu = 6,
                    top_depth = NULL, bottom_depth = NULL,
                    pad_top_bottom = FALSE,
-                       record_prior_acc_mean_mean = 20,
-                       record_prior_acc_mean_shape = 1.5,
-                       record_prior_acc_shape_mean = 1.5,
-                       record_prior_acc_shape_shape = 1.5,
+                   record_prior_acc_mean_mean = 20,
+                   record_prior_acc_mean_shape = 1.5,
+                   record_prior_acc_shape_mean = 1.5,
+                   record_prior_acc_shape_shape = 1.5,
                    section_acc_shape = 1.5,
-                       mem_mean = 0.7, mem_strength = 4,
-                       inflate_errors = 0,
-                       iter = 2000, chains = 3, ...){
+                   mem_mean = 0.7, mem_strength = 4,
+                   inflate_errors = 0,
+                   iter = 2000, chains = 3, ...){
   
-  stan_dat <- make_stan_dat_sarnie(depth = depth, obs_age = obs_age, obs_err = obs_err,
-                                   K1 = K1, K=K, nu=nu,
+  stan_dat <- make_stan_dat_adam(depth = depth, obs_age = obs_age, obs_err = obs_err,
+                                   K=K, nu=nu,
                                    top_depth = top_depth, bottom_depth = bottom_depth,
                                    pad_top_bottom = pad_top_bottom,
                                    record_prior_acc_mean_mean = record_prior_acc_mean_mean,
@@ -84,14 +82,18 @@ sarnie <- function(depth, obs_age, obs_err,
                                    mem_mean=mem_mean, mem_strength=mem_strength,
                                    inflate_errors = inflate_errors)
   
-  inits <- get_inits_sarnie(stan_dat)
+  inits <- get_inits_adam(stan_dat)
   
   inits <- rep(list(inits), chains)
   
-  fit <- rstan::sampling(stanmodels$sarnie,
+  fit <- rstan::sampling(stanmodels$adam,
                          data = stan_dat, init = inits, iter = iter, chains = chains,
                          verbose = FALSE, ...)
-
-  return(list(fit=fit, data=stan_dat))
+  
+  out <- list(fit=fit, data=stan_dat)
+  
+  class(out) <- c("list", "adam")
+  
+  return(out)
   
 }

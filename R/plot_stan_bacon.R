@@ -29,16 +29,54 @@ plot_stan_bacon <- function(stan_fit, n.iter = 1000, plot_priors = TRUE) {
     theme(legend.position = "top")
 
   ggpubr::ggarrange(
-    ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,2,3)),
+    ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,2)),
     p.fit,
     nrow = 2, heights = c(1, 2))
 }
 
 
+plot_acc_rate_pars <- function(stan_fit){
+  
+  
+  K1.df <- rstan::summary(stan_fit$fit, par = "section_acc_mean") 
+  K1.df <- as_tibble(K1.df$summary, rownames = "par") %>% 
+    separate(par, into = c("par", "K1"), sep = "\\[") %>% 
+    separate(K1, into = c("K1", "h"), sep = "\\]") %>% 
+    mutate(K1 = factor(as.numeric(K1), ordered = T))
+  
+  
+  K.df <- rstan::summary(stan_fit$fit, par = "alpha") 
+  K.df <- as_tibble(K.df$summary, rownames = "par")%>% 
+    separate(par, into = c("par", "K"), sep = "\\[") %>% 
+    separate(K, into = c("K", "h"), sep = "\\]") 
+  
+  ind <- tibble(K1 = factor(stan_fit$data$whichK1, ordered = T),
+                K = factor(stan_fit$data$c, ordered = T))
+  
+  K.df <- left_join(ind, K.df) %>% 
+    mutate(K1 = factor(K1, ordered = T, levels = 1:20))
+  
+  K.df %>% 
+    ggplot(aes(x = mean)) +
+    #geom_histogram(position = "identity", alpha = 0.5)+
+    geom_histogram(aes(fill = K1, colour = K1), # position = "identity",
+                   alpha = 1) +
+    geom_vline(data = K1.df, aes(xintercept = mean, colour = K1)) +
+    # scale_fill_brewer(type = "qual", palette = "Set3",
+    #                   guide = guide_legend(ncol = 2)) + 
+    # scale_color_brewer(type = "qual", palette = "Set3",
+    #                    guide = guide_legend(ncol = 2)) +
+    labs(x = "Acc. rate") +
+    theme_bw()
+  
+}
+
+#plot_acc_rate_pars(sarn.fit3)
+
 plot_acc_rate_prior_posterior <- function(stan_fit){
   
   if (exists("K1", where = stan_fit$data)){
-    p.acc <- ggplot() + theme_void()
+    p.acc <- plot_acc_rate_pars(stan_fit)
   } else {
     acc.rng <- qgamma(c(0.000001, 0.9999), shape = stan_fit$data$acc_alpha,
                       rate = stan_fit$data$acc_beta)

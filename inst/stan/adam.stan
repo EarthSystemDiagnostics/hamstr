@@ -1,36 +1,19 @@
 // Bacon as a Stan model
-// 20.06.2020 Andrew Dolman
-// Add addtional layer to alphas.
-
-// ideas for parameter renaming
-// acc_mean_record = record_acc_mean
-// acc_mean_sections = section_acc_mean
-
-// hyper-hyper-parameters
-// acc_mean_hhp = record_prior_acc_mean_mean (mean of the prior on acc_mean)
-// acc_mean_shape_hhp = record_prior_acc_mean_shape (shape of the prior on acc_mean)
-
-// acc_shape_mean_hhp = record_prior_acc_shape_mean (mean of the prior on acc_mean)
-// acc_shape_shape_hhp = record_prior_acc_shape_shape (shape of the prior on acc_mean)
-
-// hyper-parameters
-// acc_shape_sections_hp
-
-// mem_mean_hp
-// mem_strength_hp
+// 03.08.2020 Andrew Dolman
+// Add flexible addtional layer to alphas.
 
 data {
   int<lower=0, upper=1> inflate_errors;
   int<lower=0> N;
-  int<lower=0> K;  // no of fine sections
-  int<lower=0> K1; // no of coarse sections
+  int<lower=0> K_fine;  // no of fine sections
+  int<lower=0> K_tot;  // total no of gamma parameters
   int<lower=0> nu; // degrees of freedom of t error distribution
   vector[N] depth;
   vector[N] obs_age;
   vector[N] obs_err;
-  vector[K] c_depth_bottom;
-  vector[K] c_depth_top;
-  int whichK1[K]; // index fine sections to their parent coarse sections
+  vector[K_fine] c_depth_bottom;
+  vector[K_fine] c_depth_top;
+  int parent[K_tot]; // index fine sections to their parent coarse sections
   int which_c[N]; // index observations to their fine section
   real<lower = 0> delta_c; // width of each fine section
   
@@ -61,15 +44,17 @@ transformed data{
   real<lower=0> mem_alpha = mem_strength * mem_mean;
   real<lower=0> mem_beta = mem_strength * (1-mem_mean);
   
+  int<lower = 1> first_K_fine = K_tot - K_fine+1;
   
 }
 parameters {
   real<lower = 0, upper = 1> R;
-  vector<lower = 0>[K] alpha;
+  vector<lower = 0>[K_tot] alpha;
   real age0;
-  real<lower = 0> record_acc_mean;
-  real<lower = 0> record_acc_shape;
-  vector<lower=0>[K1] section_acc_mean;
+  //real<lower = 0> record_acc_mean;
+  real<lower = 0> shape;
+  //vector<lower = 0>[K_tot] shape;
+  //vector<lower=0>[K1] section_acc_mean;
   
   // measurement error inflation factor
   // these have length 0 if inflate_errors == 0
@@ -81,14 +66,14 @@ parameters {
 }
 transformed parameters{
   
-  real<lower = 0> record_acc_mean_beta;
+  //real<lower = 0> record_acc_mean_beta;
   
   real<lower = 0, upper = 1> w;
   
-  vector[K] x;
-  vector[K+1] c_ages;
+  vector[K_fine] x;
+  vector[K_fine+1] c_ages;
   vector[N] Mod_age;
-  vector[K1] section_acc_mean_beta;
+  vector[K_tot] beta;
   
   
   // the inflated observation errors
@@ -100,45 +85,44 @@ transformed parameters{
     obs_err_infl = obs_err;
   }
   
-  
-  record_acc_mean_beta = record_acc_shape / record_acc_mean;
-  
-  section_acc_mean_beta = section_acc_shape ./ section_acc_mean;
+  beta[1] = shape / alpha[1];
+  beta[2:K_tot] = section_acc_shape ./ alpha[parent[2:K_tot]];
+ 
+  //section_acc_mean_beta = section_acc_shape ./ section_acc_mean;
   
   w = R^(delta_c);
   
-  x[1] = alpha[1];
+  // only the "fine" alphas
+  
+  x[1] = alpha[first_K_fine];
   
   // call to sampling function is already vectorised below so there is no
   // advantage to vectorising here
-  // x[2:K] = w * x[1:(K-1)] + (1-w) * alpha[2:K];
+  // x[2:K_fine] = w * x[1:(K_fine-1)] + (1-w) * alpha[2:K_fine];
   
-  for(i in 2:K){
-    x[i] = w*x[i-1] + (1-w)*alpha[i];
+  for(i in 2:K_fine){
+    x[i] = w*x[i-1] + (1-w)*alpha[i + first_K_fine -1];
   }
   
   // Get the Mod_ages
   c_ages[1] = age0;
-  c_ages[2:(K+1)] = age0 + cumulative_sum(x * delta_c);
+  c_ages[2:(K_fine+1)] = age0 + cumulative_sum(x * delta_c);
   Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
 }
 
 model {
   
   // parameters for the hierarchical prior on the section means
-  record_acc_mean ~ gamma(record_prior_acc_mean_shape, record_prior_acc_mean_beta);
-  record_acc_shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
+  alpha[1] ~ gamma(record_prior_acc_mean_shape, record_prior_acc_mean_beta);
+  shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
   
-  // the K1 section means, parametrised by the record mean and a modelled shape
-  section_acc_mean ~ gamma(record_acc_shape, record_acc_mean_beta);
   
-  // the Gamma distributed innovations
-  // parametrised from the section mean acc rates and a user supplied shape (alpha)
-  alpha ~ gamma(section_acc_shape, section_acc_mean_beta[whichK1]);
-  
-  // loosely model the first age as being anywhere between 0 and the youngest data point
-  //age0 ~ normal(min(obs_age), 100);
-  
+  // the Gamma distributed innovations 
+  alpha[2:K_tot] ~ gamma(section_acc_shape, beta[parent[2:K_tot]]);
+
+  // maybe need to model the shapes also - at the moment only the first shape is modelled
+  // the rest are fixed
+ 
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);
   
@@ -150,6 +134,5 @@ model {
   } 
   
   obs_age ~ student_t(nu, Mod_age, obs_err_infl);
-  
   
 }

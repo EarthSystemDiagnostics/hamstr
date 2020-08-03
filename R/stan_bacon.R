@@ -36,6 +36,8 @@
 #' @export
 #'
 #' @examples
+#' 
+#' dontrun{
 #' K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 #' fit <- stan_bacon(
 #'   depth = MSB2K$depth,
@@ -49,7 +51,7 @@
 #'   print(fit$fit, par = c("R", "w", "c_ages"))
 #'
 #'   plot_stan_bacon(fit, 1000)
-#'
+#' }
 stan_bacon <- function(depth, obs_age, obs_err,
                        hiatus_depth = NULL, hiatus_length = NULL,
                        hiatus_shape = 1, hiatus_interval = 0.1,
