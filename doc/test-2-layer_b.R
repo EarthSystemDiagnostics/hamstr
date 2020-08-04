@@ -94,7 +94,7 @@ sarn.fit1 <- sarnie(
   obs_err = dat1$age.14C.cal.se,
   #bottom_depth = 800,
   K = 100,
-  K1 = 1,
+  K1 = 10,
   nu = 6,
   record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
@@ -104,6 +104,10 @@ sarn.fit1 <- sarnie(
   inflate_errors = 0, chains = 3)
 
 plot_stan_bacon(sarn.fit1, n.iter = 100, plot_priors = T)
+
+s1 <- rstan::summary(sarn.fit1$fit)
+s1 <- as_tibble(s1$summary, rownames = "par")
+
 
 
 sarn.fit2 <- sarnie(
