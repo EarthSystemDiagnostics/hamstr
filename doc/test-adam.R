@@ -29,7 +29,7 @@ library(rstan)
 
 ##########
 
-name <- "AREO"
+name <- "ALUT"
 dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv"))
 
 
@@ -149,7 +149,7 @@ adam.fit3 <- adam(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 1, chains = 3)
 
-plot_stan_bacon(adam.fit3, n.iter = 100, plot_priors = F)
+plot_stan_bacon(adam.fit3, n.iter = 1000, plot_priors = F)
 
 a3 <- rstan::summary(adam.fit3$fit)
 a3 <- as_tibble(a3$summary, rownames = "par")
@@ -162,13 +162,12 @@ traceplot(adam.fit3$fit, par = c("alpha[1]", "shape"))
 baconr:::plot_memory_prior_posterior(adam.fit3)
 
 
-stan_dat <- make_stan_dat_adam(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se)
 
 idx <- as_tibble(alpha_indices(c(9,9,9))[1:3]) %>%
   mutate(alpha_idx = as.character(alpha_idx))
 
 
-alph <- a2b %>%
+alph <- a3 %>%
   filter(grepl("alpha", par, fixed = TRUE)) %>%
   separate(par, into = c("par", "alpha_idx")) %>%
   left_join(idx, .) %>%
@@ -177,8 +176,15 @@ alph <- a2b %>%
 
 alph %>%
   ggplot(aes(x = mean)) +
-  geom_histogram(aes(fill = lvl)) +
-  facet_wrap(~lvl)
+  geom_histogram(aes()) +
+  facet_wrap(~lvl, scales = "free_y")
+
+alph %>%
+  filter(lvl == 4) %>%
+  ggplot(aes(x = mean)) +
+  geom_histogram(aes(fill = as.factor(parent))) +
+  facet_wrap(~lvl, scales = "free_y")
+
 
 alph %>%
   ggplot(aes(x = Rhat)) +
