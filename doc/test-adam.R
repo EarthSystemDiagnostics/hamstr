@@ -29,7 +29,7 @@ library(rstan)
 
 ##########
 
-name <- "ALUT"
+name <- "ASHIK"
 dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv"))
 
 
@@ -84,7 +84,7 @@ adam.fit1 <- adam(
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
   #bottom_depth = 800,
-  K = c(10, 10),
+  K = c(10, 100),
   nu = 6,
   record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
@@ -100,12 +100,12 @@ a1 <- as_tibble(a1$summary, rownames = "par")
 
 
 
-adam.fit2b <- adam(
+adam.fit2 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
  # K = c(3,3,3,3,3,3),
-  K = c(9, 9, 9),
+  K = c(10, 10, 10),
   nu = 6,
   record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
@@ -114,24 +114,14 @@ adam.fit2b <- adam(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
-plot_stan_bacon(adam.fit2b, n.iter = 1000, plot_priors = F)
+plot_stan_bacon(adam.fit2, n.iter = 1000, plot_priors = F)
 
 a2 <- rstan::summary(adam.fit2$fit)
 a2 <- as_tibble(a2$summary, rownames = "par")
 
-plot_stan_bacon(adam.fit2, n.iter = 1000, plot_priors = F)
-plot_stan_bacon(adam.fit2b, n.iter = 1000, plot_priors = F)
-
-a2b <- rstan::summary(adam.fit2b$fit)
-a2b <- as_tibble(a2b$summary, rownames = "par")
-
-
 
 summary(adam.fit2$fit, par = c("alpha[1]", "shape"))$summary
 
-traceplot(adam.fit2b$fit, par = c("alpha[1]", "shape"))
-
-traceplot(adam.fit2b$fit, par = c("alpha[700]"))
 
 #shinystan::launch_shinystan(adam.fit3$fit)
 
