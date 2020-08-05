@@ -61,7 +61,7 @@ adam <- function(depth, obs_age, obs_err,
                    K = c(10, 10), nu = 6,
                    top_depth = NULL, bottom_depth = NULL,
                    pad_top_bottom = FALSE,
-                   record_prior_acc_mean_mean = 20,
+                   record_prior_acc_mean_mean = NULL,
                    record_prior_acc_mean_shape = 1.5,
                    record_prior_acc_shape_mean = 1.5,
                    record_prior_acc_shape_shape = 1.5,
@@ -69,6 +69,7 @@ adam <- function(depth, obs_age, obs_err,
                    mem_mean = 0.7, mem_strength = 4,
                    inflate_errors = 0,
                    iter = 2000, chains = 3, ...){
+  
   
   stan_dat <- make_stan_dat_adam(depth = depth, obs_age = obs_age, obs_err = obs_err,
                                    K=K, nu=nu,

@@ -46,7 +46,7 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
                                top_depth = NULL, bottom_depth = NULL,
                                  pad_top_bottom = FALSE,
                                  K = c(10, 10), nu = 6,
-                                 record_prior_acc_mean_mean = 20,
+                                 record_prior_acc_mean_mean = NULL,
                                  record_prior_acc_mean_shape = 1.5,
                                  record_prior_acc_shape_mean = 1.5,
                                  record_prior_acc_shape_shape = 1.5,
@@ -55,6 +55,11 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
                                  inflate_errors = 0) {
 
   l <- c(as.list(environment()))
+  
+  if (is.null(record_prior_acc_mean_mean)){
+    d <- data.frame(depth = depth, obs_age = obs_age)
+    l$record_prior_acc_mean_mean <- coef(MASS::rlm(obs_age~depth, data = d))[2]
+  }
 
   ord <- order(depth)
 
