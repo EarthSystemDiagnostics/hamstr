@@ -57,8 +57,17 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
   l <- c(as.list(environment()))
   
   if (is.null(record_prior_acc_mean_mean)){
+    
     d <- data.frame(depth = depth, obs_age = obs_age)
-    l$record_prior_acc_mean_mean <- coef(MASS::rlm(obs_age~depth, data = d))[2]
+    acc_mean <- coef(MASS::rlm(obs_age~depth, data = d))[2]
+    
+    # if negative replace with 20
+    if (acc_mean <= 0) {
+      warning("Estimated mean accumulation rate is negative - using value = 20")
+      acc_mean <- 20
+      }
+    l$record_prior_acc_mean_mean <- acc_mean
+    
   }
 
   ord <- order(depth)
