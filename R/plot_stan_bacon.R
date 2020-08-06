@@ -140,8 +140,6 @@ plot_memory_prior_posterior <- function(stan_fit){
 }
 
 
-
-
 plot_age_models <- function(stan_fit, n.iter = 1000){
   
   fit_data <- stan_fit$data

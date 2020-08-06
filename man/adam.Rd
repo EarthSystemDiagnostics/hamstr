@@ -13,7 +13,7 @@ adam(
   top_depth = NULL,
   bottom_depth = NULL,
   pad_top_bottom = FALSE,
-  record_prior_acc_mean_mean = 20,
+  record_prior_acc_mean_mean = NULL,
   record_prior_acc_mean_shape = 1.5,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,

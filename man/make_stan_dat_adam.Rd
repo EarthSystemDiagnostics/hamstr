@@ -13,7 +13,7 @@ make_stan_dat_adam(
   pad_top_bottom = FALSE,
   K = c(10, 10),
   nu = 6,
-  record_prior_acc_mean_mean = 20,
+  record_prior_acc_mean_mean = NULL,
   record_prior_acc_mean_shape = 1.5,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,

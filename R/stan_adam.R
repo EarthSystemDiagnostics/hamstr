@@ -93,7 +93,8 @@ adam <- function(depth, obs_age, obs_err,
   
   out <- list(fit=fit, data=stan_dat)
   
-  class(out) <- c("list", "adam")
+  class(out) <- append(class(out), "adam_fit")
+  
   
   return(out)
   

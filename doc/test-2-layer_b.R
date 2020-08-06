@@ -6,7 +6,8 @@ library(rstan)
 library(baconr)
 library(tidyverse)
 
-# pkgbuild::compile_dll()
+# devtools::document()
+# pkgbuild::compile_dll(force = TRUE)
 # devtools::load_all()
 # devtools::install(quick=FALSE)
 

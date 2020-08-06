@@ -29,12 +29,12 @@ library(rstan)
 
 ##########
 
-name <- "ASHIK"
-dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv"))
+name <- "BLACKMA"
+#dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv"))
 
 
-#dat <- read.csv(paste0("../envi-age-modelling/working-data/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv")) %>%
-#  filter(depth > 0)
+dat <- read.csv(paste0("../envi-age-modelling/working-data/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv")) %>%
+  filter(depth > 0)
 
 dat <- ecustools::CalibrateAge(dat, age.14C = "age", age.14C.se = "error") %>%
   filter(complete.cases(age.14C.cal))
@@ -66,34 +66,37 @@ acc.mean
 
 options(mc.cores = parallel::detectCores())
 
-bacon.fit1 <- stan_bacon(
-  depth = dat1$depth,
-  obs_age = dat1$age.14C.cal,
-  obs_err = dat1$age.14C.cal.se,
-  K = 100,
-  nu = 6,
-  acc_mean = acc.mean,
-  mem_mean = 0.7, mem_strength = 4,
-  chains = 3)
-
-plot_stan_bacon(bacon.fit1, n.iter = 100, plot_priors = F)
+# bacon.fit1 <- stan_bacon(
+#   depth = dat1$depth,
+#   obs_age = dat1$age.14C.cal,
+#   obs_err = dat1$age.14C.cal.se,
+#   K = 100,
+#   nu = 6,
+#   acc_mean = acc.mean,
+#   mem_mean = 0.7, mem_strength = 4,
+#   chains = 3)
+# 
+# plot_stan_bacon(bacon.fit1, n.iter = 100, plot_priors = F)
 
 
 adam.fit1 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  #bottom_depth = 800,
-  K = c(10, 100),
+  
+  top_depth = 1, bottom_depth = NULL,
+  
+  K = c(10, 10),
   nu = 6,
   record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
+  section_acc_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
-plot_stan_bacon(adam.fit1, n.iter = 1000, plot_priors = F)
+plot_stan_bacon(adam.fit1, n.iter = 100, plot_priors = F)
 
 a1 <- rstan::summary(adam.fit1$fit)
 a1 <- as_tibble(a1$summary, rownames = "par")
@@ -130,7 +133,8 @@ adam.fit3 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = c(9,9,9),
+  #top_depth = 1,
+  K = c(10, 10, 10),
   nu = 6,
   record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
@@ -148,6 +152,12 @@ summary(adam.fit3$fit, par = c("alpha[1]", "shape"))$summary
 summary(adam.fit3$fit, par = c("w"))$summary
 
 traceplot(adam.fit3$fit, par = c("alpha[1]", "shape"))
+
+traceplot(adam.fit3$fit, par = c("infl_mean", "infl_shape"))
+traceplot(adam.fit3$fit, par = c("infl"))
+
+summary(adam.fit3$fit, par = c("infl_mean", "infl_shape"))$summary
+
 
 baconr:::plot_memory_prior_posterior(adam.fit3)
 
