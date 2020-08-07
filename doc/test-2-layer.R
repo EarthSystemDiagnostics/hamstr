@@ -175,7 +175,7 @@ print(twoFit$fit, par = c("infl"))
 print(twoFit$fit, par = c("w", "R"))
 
 set.seed(20170406)
-p.multilevel <- plot_stan_bacon(twoFit, 1000, plot_priors = F)
+p.multilevel <- plot_stan_bacon(twoFit, 1000, plot_diagnostics = F)
 #p.multilevel
 
 # infl errors

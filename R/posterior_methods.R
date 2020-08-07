@@ -58,11 +58,10 @@ interpolate_age_models <- function(adam_fit, new_depth){
       )
     })
   
-  class(new_age) <- append(class(new_age), "adam_new_ages")
+  class(new_age) <- append(class(new_age), "adam_interpolated_ages")
   
   return(new_age)
 }
-
 
 
 #' Summarise Interpolated Posterior Age Models
@@ -70,9 +69,7 @@ interpolate_age_models <- function(adam_fit, new_depth){
 #' @param new_ages 
 #'
 #' @return
-#' @export
-#'
-#' @examples
+#' @keywords internal
 summarise_new_ages <- function(new_ages){
   
   new_ages_sum <- new_ages %>% 
@@ -91,26 +88,29 @@ summarise_new_ages <- function(new_ages){
 }
 
 
-
 #' Summarise Posterior Age Models
 #'
-#' @param adam_fit 
-#' @description Extracts the summary statistics of posterior age modells and attached the depths 
+#' @param adam_fit an adam_fit object or adam_interpolated_ages object
+#' @description Extracts the summary statistics of posterior age models and attached the depths 
 #' @return
 #' @export
 #'
 #' @examples
 summarise_age_models <- function(adam_fit){
   
-  age_summary <- summary(adam_fit$fit, par = "c_ages")$summary %>% 
-    as_tibble(., rownames = "par")
-  
-  depths <- tibble(depth = adam_fit$data$modelled_depths,
-                   idx = 1:length(adam_fit$data$modelled_depths))
-  age_summary <- age_summary %>% 
-    mutate(idx = readr::parse_number(par)) %>% 
-    left_join(depths, .)
-  
+  if (is_adam_interpolated_ages(adam_fit)){
+    age_summary <-summarise_new_ages(adam_fit)
+  } else {
+    age_summary <- rstan::summary(adam_fit$fit, par = "c_ages")[["summary"]] %>% 
+      as_tibble(., rownames = "par")
+    
+    depths <- tibble(depth = adam_fit$data$modelled_depths,
+                     idx = 1:length(adam_fit$data$modelled_depths))
+    age_summary <- age_summary %>% 
+      mutate(idx = readr::parse_number(par)) %>% 
+      left_join(depths, .)
+    
+  }
   return(age_summary)
 }
 
@@ -138,7 +138,7 @@ plot_summary_age_models <- function(adam_fit){
                             age_lwr = age - 2*err)
   
   
-  infl_errs <- summary(adam_fit$fit, par = "obs_err_infl")$summary %>% 
+  infl_errs <- rstan::summary(adam_fit$fit, par = "obs_err_infl")$summary %>% 
     as_tibble(., rownames = "par") %>% 
     mutate(dat_idx = readr::parse_number(par))
   
@@ -149,7 +149,8 @@ plot_summary_age_models <- function(adam_fit){
     geom_line() +
     geom_line(aes(y = `50%`), colour = "Green") +
     labs(x = "Depth", y = "Age") +
-    theme_bw() 
+    theme_bw() +
+    theme(panel.grid = element_blank())
    
    
   if (adam_fit$data$inflate_errors == 1){
@@ -169,10 +170,14 @@ plot_summary_age_models <- function(adam_fit){
   
   p.age.sum <- p.age.sum +
     geom_linerange(data = obs_ages,
-                   aes(y = age, ymax = age_upr, ymin = age_lwr),
+                   aes(x = depth, 
+                       ymax = age_upr, ymin = age_lwr), inherit.aes = FALSE,
                     colour = "Blue", size = 1.5) +
     geom_point(data = obs_ages, aes(y = age),
                colour = "Yellow")
+  
+  
+  p.age.sum <- add_subdivisions(p.age.sum, adam_fit)
   
   p.age.sum
 }

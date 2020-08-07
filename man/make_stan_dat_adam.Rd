@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_stan_dat_adam.R
 \name{make_stan_dat_adam}
 \alias{make_stan_dat_adam}
-\title{Title}
+\title{Make the data object required by the Stan program}
 \usage{
 make_stan_dat_adam(
   depth,
@@ -41,7 +41,9 @@ deepest data points unless \code{pad_top_bottom = TRUE}}
 \item{pad_top_bottom}{logical, pad the length of the age-depth model by 5% on
 each end}
 
-\item{K}{Number of sub-sections at each level}
+\item{K}{a vector with the number of new sub-divisions at each level,
+defaults to c(10, 10), resulting in two levels with 10 and 100 sections
+respectively.}
 
 \item{nu}{Degrees of freedom for the Student-t distributed error model.
 Defaults to 6, which is equivalent to the default parameterisation of
@@ -84,17 +86,14 @@ inflated so that data are consistent with a Bacon type monotonic age-depth
 model}
 }
 \value{
-a list of data, and parameters to be passed as data to the Stan sampler
-
-
+a list of data and parameters to be passed as data to the Stan sampler
 }
 \description{
-Title
+Make the data object required by the Stan program
 }
 \examples{
 make_stan_dat_adam(depth = MSB2K$depth,
               obs_age = MSB2K$age,
               obs_err = MSB2K$error,
-              #K1 = 10, K = 100,
               nu = 6)
 }

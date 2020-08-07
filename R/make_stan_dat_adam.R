@@ -1,10 +1,37 @@
+
+#' Estimate Optimal Hierarchical Structure
+#'
+#' @param K_tot 
+#'
+#' @return
+#' @keywords internal
+optimal_K <- function(K_tot, target_K_per_lvl = 10){
+ 
+   n_lvls <- ceiling(log(K_tot, base = target_K_per_lvl))
+   K_per_lvl <- round(K_tot^(1/n_lvls))
+   
+   K <- rep(K_per_lvl, n_lvls)
+  
+   return(K)
+}
+
+
 # Make index creating functions for K levels
+#' Create alpha level indices
+#'
+#' @inheritParams adam
+#'
+#' @return a list
+#' @keywords internal
 alpha_indices <- function(K){
 
+  # prepend 1 for the single overall mean alpha 
   K <- c(1, K)
 
+  # number of sections at each level
   nK <- cumprod(K)
 
+  
   K <- c(0, K)
   nK <- c(0, nK)
 
@@ -12,35 +39,27 @@ alpha_indices <- function(K){
 
   nLevels <- length(K)-1
 
+  # which level is each parameter
   lvl <- unlist(lapply(seq_along(nK[-1]), function(i) rep(i, times = nK[i+1])))
 
+  # index the parent of each parameter
   parent <- c(rep(0, K[2]), unlist(lapply(alpha_idx[1:sum(nK[1:nLevels])], function(i) rep(i, K[lvl[i]+2]))))
 
   list(alpha_idx=alpha_idx, lvl=lvl, parent=parent, nK = nK[-1])
-
 }
 
-#level_indices(nLevels = 3, K_per_level = 3)
 
-#alpha_indices(K = c(3, 3, 3, 3, 3, 3))
-
-
-#' Title
+#' Make the data object required by the Stan program
 #'
 #' @inheritParams adam
 #'
-#' @return a list of data, and parameters to be passed as data to the Stan sampler
-#' @export
-#'
-#' @examples
-#' @return
+#' @return a list of data and parameters to be passed as data to the Stan sampler
 #' @export
 #'
 #' @examples
 #' make_stan_dat_adam(depth = MSB2K$depth,
 #'               obs_age = MSB2K$age,
 #'               obs_err = MSB2K$error,
-#'               #K1 = 10, K = 100,
 #'               nu = 6)
 make_stan_dat_adam <- function(depth, obs_age, obs_err,
                                top_depth = NULL, bottom_depth = NULL,
@@ -125,22 +144,52 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
   return(l)
 }
 
-get_inits_adam <- function(dat){
+
+#' Calculated depth of section boundary at all hierarchical levels
+#'
+#' @param stan_dat 
+#'
+#' @return
+#' @keywords internal
+hierarchical_depths <- function(stan_dat){
+  d_range <- diff(range(stan_dat$modelled_depths))
+  min_d <- min(stan_dat$modelled_depths)
+  
+  delta_d <- d_range / stan_dat$nK
+  
+  lapply(stan_dat$nK[-1], function(x) {
+    delta_d <- d_range / x
+    c(min_d, delta_d * 1:x + min_d)
+  })
+}
+
+
+
+#' Create Random Initial Values for the adam Stan Model
+#'
+#' @param stan_dat stan data for the adam model
+#'
+#' @return a list of lists
+#' @keywords internal
+get_inits_adam <- function(stan_dat){
+  
   l <- list(
     R = runif(1, 0.1, 0.9),
-    alpha = (abs(rnorm(dat$K_tot, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3))),
-    record_acc_mean = (abs(rnorm(1, dat$record_prior_acc_mean_mean, dat$record_prior_acc_mean_mean/3))),
+    
+    # create starting alpha values +- 3 SD from the overal prior mean (but always +ve)
+    alpha = with(stan_dat, abs(rnorm(K_tot, record_prior_acc_mean_mean, record_prior_acc_mean_mean/3))),
+    #record_acc_mean = (abs(rnorm(1, stan_dat$record_prior_acc_mean_mean, stan_dat$record_prior_acc_mean_mean/3))),
 
-    record_acc_shape = rnorm(1, 1.5, 1.5/3),
+    shape = abs(rnorm(1, 1.5, 1.5/3)),
 
-    age0 = rnorm(1, min(dat$obs_age), 2)
+    age0 = rnorm(1, min(stan_dat$obs_age), 2)
   )
 
   # need to make this conditional and make sure initial values are arrays!
-  if (dat$inflate_errors == 1){
+  if (stan_dat$inflate_errors == 1){
     l$infl_mean = as.array(abs(rnorm(1, 0, 0.1)))
     l$infl_sd = as.array(abs(rnorm(1, 0, 0.1)))
-    l$infl = abs(rnorm(dat$N, 0, 0.1))
+    l$infl = abs(rnorm(stan_dat$N, 0, 0.1))
   } else {
     l$infl_mean = numeric(0)
     l$infl_sd = numeric(0)
@@ -148,6 +197,5 @@ get_inits_adam <- function(dat){
   }
 
   return(l)
-
 }
 

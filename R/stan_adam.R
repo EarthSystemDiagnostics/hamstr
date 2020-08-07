@@ -7,7 +7,9 @@
 #'   deepest data points unless \code{pad_top_bottom = TRUE}
 #' @param pad_top_bottom logical, pad the length of the age-depth model by 5% on
 #'   each end
-#' @param K Number of sub-sections at each level
+#' @param K a vector with the number of new sub-divisions at each level,
+#'   defaults to c(10, 10), resulting in two levels with 10 and 100 sections
+#'   respectively.
 #' @param nu Degrees of freedom for the Student-t distributed error model.
 #'   Defaults to 6, which is equivalent to the default parameterisation of
 #'   t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
@@ -54,7 +56,7 @@
 #'
 #' print(fit$fit, par = c("record_acc_mean"))
 #'
-#' plot_stan_bacon(fit, 100, plot_priors = TRUE)
+#' plot_adam(fit, 100, plot_diagnostics = TRUE)
 #' 
 #' }
 adam <- function(depth, obs_age, obs_err,
@@ -95,7 +97,16 @@ adam <- function(depth, obs_age, obs_err,
   
   class(out) <- append(class(out), "adam_fit")
   
-  
+   
   return(out)
   
 }
+
+
+# Methods and classes -------
+
+is_adam_fit <- function(x) inherits(x, "adam_fit")
+is_adam_interpolated_ages <- function(x) inherits(x, "adam_interpolated_ages")
+
+
+

@@ -15,3 +15,4 @@ summarise_new_ages(new_ages)
 \description{
 Summarise Interpolated Posterior Age Models
 }
+\keyword{internal}

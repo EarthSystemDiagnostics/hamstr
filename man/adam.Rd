@@ -33,7 +33,9 @@ adam(
 
 \item{obs_err}{Error associated with each observed age (1 standard error)}
 
-\item{K}{Number of sub-sections at each level}
+\item{K}{a vector with the number of new sub-divisions at each level,
+defaults to c(10, 10), resulting in two levels with 10 and 100 sections
+respectively.}
 
 \item{nu}{Degrees of freedom for the Student-t distributed error model.
 Defaults to 6, which is equivalent to the default parameterisation of
@@ -105,7 +107,7 @@ fit <- adam(
 
 print(fit$fit, par = c("record_acc_mean"))
 
-plot_stan_bacon(fit, 100, plot_priors = TRUE)
+plot_adam(fit, 100, plot_priors = TRUE)
 
 }
 }

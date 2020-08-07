@@ -3,31 +3,11 @@ library(tidyverse)
 library(baconr)
 library(rstan)
 
-#adam_mod <- stan_model(file = "inst/stan/adam.stan")
+# devtools::document()
+# pkgbuild::compile_dll(force = TRUE)
+# devtools::load_all()
+# devtools::install(quick=FALSE)
 
-# stan_dat <- make_stan_dat_adam(depth = MSB2K$depth,
-#                                obs_age = MSB2K$age,
-#                                obs_err = MSB2K$error,
-#                                #K1 = 10, K = 100,
-#                                nu = 6)
-#
-# inits <- get_inits_adam(stan_dat)
-#
-# n.chains = 3
-#
-# inits <- rep(list(inits), n.chains)
-#
-#
-# fit <- sampling(adam_mod,
-#                 data = stan_dat, init = inits, chains = n.chains,
-#                        verbose = FALSE)
-#
-#
-# fit
-#
-# traceplot(fit, par = "alpha[1]")
-
-##########
 
 name <- "BLACKMA"
 #dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv"))
@@ -57,7 +37,7 @@ dat1 %>%
 dat1 <- dat1 %>%
   arrange(age.14C.cal.se)
 
-make_stan_dat_adam(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se)
+stan_dat <- make_stan_dat_adam(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se)
 
 
 acc.mean <- coef(MASS::rlm(age.14C.cal~depth, data = dat1))[2]
@@ -76,54 +56,40 @@ options(mc.cores = parallel::detectCores())
 #   mem_mean = 0.7, mem_strength = 4,
 #   chains = 3)
 # 
-# plot_stan_bacon(bacon.fit1, n.iter = 100, plot_priors = F)
-
-
-adam.fit1 <- adam(
-  depth = dat1$depth,
-  obs_age = dat1$age.14C.cal,
-  obs_err = dat1$age.14C.cal.se,
-  
-  top_depth = 1, bottom_depth = NULL,
-  
-  K = c(10, 10),
-  nu = 6,
-  record_prior_acc_mean_mean = acc.mean,
-  record_prior_acc_mean_shape = 1.5,
-  record_prior_acc_shape_mean = 1.5,
-  record_prior_acc_shape_shape = 1.5,
-  section_acc_shape = 1.5,
-  mem_mean = 0.7, mem_strength = 4,
-  inflate_errors = 0, chains = 3)
-
-plot_stan_bacon(adam.fit1, n.iter = 100, plot_priors = F)
-
-a1 <- rstan::summary(adam.fit1$fit)
-a1 <- as_tibble(a1$summary, rownames = "par")
-
+# plot_adam(bacon.fit1, n.iter = 100, plot_diagnostics = F)
 
 
 adam.fit2 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
- # K = c(3,3,3,3,3,3),
-  K = c(10, 10, 10),
+  #K = c(5,5,5,5),
+  K = optimal_K(700, 10),
   nu = 6,
-  record_prior_acc_mean_mean = acc.mean,
+  #record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
-plot_stan_bacon(adam.fit2, n.iter = 1000, plot_priors = F)
+
+
+plot_adam(adam.fit2, plot_diagnostics = T)
+plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+
+
+
 
 a2 <- rstan::summary(adam.fit2$fit)
 a2 <- as_tibble(a2$summary, rownames = "par")
 
 
 summary(adam.fit2$fit, par = c("alpha[1]", "shape"))$summary
+
+traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
+
+traceplot(adam.fit2$fit, pars = paste0("alpha[", 91:111, "]"), inc_warmup = T)
 
 
 #shinystan::launch_shinystan(adam.fit3$fit)
@@ -136,14 +102,16 @@ adam.fit3 <- adam(
   #top_depth = 1,
   K = c(10, 10, 10),
   nu = 6,
-  record_prior_acc_mean_mean = acc.mean,
+  #record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 1, chains = 3)
 
-plot_stan_bacon(adam.fit3, n.iter = 1000, plot_priors = F)
+plot_adam(adam.fit3, type = "ribbon", plot_diagnostics = TRUE)
+plot_adam(adam.fit3, type = "spaghetti", n.iter = 100, plot_diagnostics = TRUE)
+
 
 a3 <- rstan::summary(adam.fit3$fit)
 a3 <- as_tibble(a3$summary, rownames = "par")
@@ -163,7 +131,7 @@ baconr:::plot_memory_prior_posterior(adam.fit3)
 
 
 
-idx <- as_tibble(alpha_indices(c(9,9,9))[1:3]) %>%
+idx <- as_tibble(alpha_indices(c(10,10,10))[1:3]) %>%
   mutate(alpha_idx = as.character(alpha_idx))
 
 
@@ -192,10 +160,13 @@ alph %>%
   expand_limits(x = c(0.95, 1.1)) +
   facet_wrap(~lvl, scales = "free_y")
 
-alph %>%
-  mutate(alpha_idx = as.numeric(alpha_idx)) %>%
-  ggplot(aes(x = alpha_idx, y = mean, colour = lvl)) +
-  geom_point()
+
+
+
+plot_hierarchical_acc_rate(adam.fit2)
+
+
+
 
 
 

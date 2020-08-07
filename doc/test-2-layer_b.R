@@ -86,7 +86,7 @@ bacon.fit1 <- stan_bacon(
   mem_mean = 0.7, mem_strength = 4,
   chains = 3)
 
-plot_stan_bacon(bacon.fit1, n.iter = 100, plot_priors = F)
+plot_stan_bacon(bacon.fit1, n.iter = 100, plot_diagnostics = F)
 
 
 sarn.fit1 <- sarnie(
@@ -104,7 +104,7 @@ sarn.fit1 <- sarnie(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
-plot_stan_bacon(sarn.fit1, n.iter = 100, plot_priors = T)
+plot_stan_bacon(sarn.fit1, n.iter = 100, plot_diagnostics = T)
 
 s1 <- rstan::summary(sarn.fit1$fit)
 s1 <- as_tibble(s1$summary, rownames = "par")
@@ -127,7 +127,7 @@ sarn.fit2 <- sarnie(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
-plot_stan_bacon(sarn.fit2, n.iter = 100, plot_priors = T)
+plot_stan_bacon(sarn.fit2, n.iter = 100, plot_diagnostics = T)
 
 
 
@@ -158,7 +158,7 @@ sarn.fit3 <- sarnie(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 1, chains = 3)
 
-plot_stan_bacon(sarn.fit3, n.iter = 100, plot_priors = T)
+plot_stan_bacon(sarn.fit3, n.iter = 100, plot_diagnostics = T)
 
 summary(sarn.fit3$fit, par = c("record_acc_mean", "record_acc_shape"))$summary
 
@@ -166,9 +166,9 @@ traceplot(sarn.fit3$fit, par = c("record_acc_mean", "record_acc_shape"))
 
 
 
-p.single.level <- plot_stan_bacon(sarn.fit1, 100, plot_priors = T)
-p.multi.level <- plot_stan_bacon(sarn.fit2, 100, plot_priors = T)
-p.multi.level.infl <- plot_stan_bacon(sarn.fit3, 100, plot_priors = T)
+p.single.level <- plot_stan_bacon(sarn.fit1, 100, plot_diagnostics = T)
+p.multi.level <- plot_stan_bacon(sarn.fit2, 100, plot_diagnostics = T)
+p.multi.level.infl <- plot_stan_bacon(sarn.fit3, 100, plot_diagnostics = T)
 
 
 

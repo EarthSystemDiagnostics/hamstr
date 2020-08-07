@@ -7,11 +7,11 @@
 summarise_age_models(adam_fit)
 }
 \arguments{
-\item{adam_fit}{}
+\item{adam_fit}{an adam_fit object or adam_interpolated_ages object}
 }
 \value{
 
 }
 \description{
-Extracts the summary statistics of posterior age modells and attached the depths
+Extracts the summary statistics of posterior age models and attached the depths
 }
