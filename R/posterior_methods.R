@@ -172,9 +172,9 @@ plot_summary_age_models <- function(adam_fit){
     geom_linerange(data = obs_ages,
                    aes(x = depth, 
                        ymax = age_upr, ymin = age_lwr), inherit.aes = FALSE,
-                    colour = "Blue", size = 1.5) +
+                    colour = "Blue", size = 1.25) +
     geom_point(data = obs_ages, aes(y = age),
-               colour = "Yellow")
+               colour = "Blue")
   
   
   p.age.sum <- add_subdivisions(p.age.sum, adam_fit)

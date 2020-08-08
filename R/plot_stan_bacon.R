@@ -32,7 +32,8 @@ plot_adam <- function(adam_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, 
     }    
   
   t.lp <- rstan::traceplot(adam_fit$fit, pars = c("lp__"), include = TRUE) +
-    theme(legend.position = "top")
+    theme(legend.position = "top") +
+    labs(x = "Iteration")
 
   ggpubr::ggarrange(
     ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,2)),
@@ -277,11 +278,14 @@ plot_hierarchical_acc_rate <- function(adam_fit){
                  aes(y = mean, yend = mean,
                      x = min(alph$depth), xend = max(alph$depth))) +
     geom_line() +
-    theme_bw() +
+    
     expand_limits(y = 0) +
     labs(y = "Accummulation rate [age/depth]", x = "Depth",
          colour = "Hierarchical\nlevel") +
-    theme(panel.grid = element_blank())
+    #scale_colour_brewer(palette = "YlOrRd") +
+    #scale_colour_viridis_d() +
+    #theme_bw() +
+    theme(panel.grid = element_blank(), legend.position = "top")
   
   return(gg)
 }

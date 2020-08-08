@@ -46,17 +46,61 @@ acc.mean
 
 options(mc.cores = parallel::detectCores())
 
-# bacon.fit1 <- stan_bacon(
-#   depth = dat1$depth,
-#   obs_age = dat1$age.14C.cal,
-#   obs_err = dat1$age.14C.cal.se,
-#   K = 100,
-#   nu = 6,
-#   acc_mean = acc.mean,
-#   mem_mean = 0.7, mem_strength = 4,
-#   chains = 3)
-# 
-# plot_adam(bacon.fit1, n.iter = 100, plot_diagnostics = F)
+
+adam.fit1 <- adam(
+  depth = dat1$depth,
+  obs_age = dat1$age.14C.cal,
+  obs_err = dat1$age.14C.cal.se,
+  K = 729,
+  nu = 6,
+  #record_prior_acc_mean_mean = acc.mean,
+  record_prior_acc_mean_shape = 1.5,
+  record_prior_acc_shape_mean = 1.5,
+  record_prior_acc_shape_shape = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0, chains = 3)
+
+
+plot_adam(adam.fit1, plot_diagnostics = T)
+plot_adam(adam.fit1, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+
+
+adam.fit1b <- adam(
+  depth = dat1$depth,
+  obs_age = dat1$age.14C.cal,
+  obs_err = dat1$age.14C.cal.se,
+  K = 100,
+  nu = 6,
+  #record_prior_acc_mean_mean = acc.mean,
+  record_prior_acc_mean_shape = 1.5,
+  record_prior_acc_shape_mean = 1.5,
+  record_prior_acc_shape_shape = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0, chains = 3)
+
+
+plot_adam(adam.fit1b, plot_diagnostics = T)
+plot_adam(adam.fit1b, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+
+
+adam.fit1c <- adam(
+  depth = dat1$depth,
+  obs_age = dat1$age.14C.cal,
+  obs_err = dat1$age.14C.cal.se,
+  K = 20,
+  nu = 6,
+  #record_prior_acc_mean_mean = acc.mean,
+  record_prior_acc_mean_shape = 1.5,
+  record_prior_acc_shape_mean = 1.5,
+  record_prior_acc_shape_shape = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0, chains = 3)
+
+
+plot_adam(adam.fit1c, plot_diagnostics = T)
+plot_adam(adam.fit1c, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+
+
 
 
 adam.fit2 <- adam(
@@ -100,7 +144,7 @@ adam.fit3 <- adam(
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
   #top_depth = 1,
-  K = c(10, 10, 10),
+  K = c(9, 9, 9),
   nu = 6,
   #record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
