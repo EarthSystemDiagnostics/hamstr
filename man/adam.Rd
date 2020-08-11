@@ -107,7 +107,7 @@ fit <- adam(
 
 print(fit$fit, par = c("record_acc_mean"))
 
-plot_adam(fit, 100, plot_priors = TRUE)
+plot_adam(fit, 100, plot_diagnostics = TRUE)
 
 }
 }

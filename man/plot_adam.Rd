@@ -2,12 +2,17 @@
 % Please edit documentation in R/plot_stan_bacon.R
 \name{plot_adam}
 \alias{plot_adam}
-\title{Title}
+\title{Plot an adam_fit object}
 \usage{
-plot_adam(stan_fit, n.iter = 1000, plot_priors = TRUE)
+plot_adam(
+  adam_fit,
+  type = c("ribbon", "spaghetti"),
+  n.iter = 1000,
+  plot_diagnostics = FALSE
+)
 }
 \arguments{
-\item{stan_fit}{The object returned from \code{stan_bacon}.}
+\item{adam_fit}{The object returned from \code{stan_bacon}.}
 
 \item{n.iter}{The number of iterations of the model to plot, defaults to 1000.}
 }
