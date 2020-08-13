@@ -45,6 +45,8 @@ transformed data{
   real<lower=0> mem_beta = mem_strength * (1-mem_mean);
 
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
+  
+  real<lower=0> mean_obs_err = mean(obs_err);
 
 }
 parameters {
@@ -62,6 +64,9 @@ parameters {
   real<lower = 0> infl_mean[inflate_errors];
   real<lower = 0> infl_shape[inflate_errors];
   vector<lower = 0>[inflate_errors ? N : 0] infl;
+  //vector<lower = 0>[inflate_errors ? 1 : 0] infl_sigma;
+  real<lower = 0> infl_sigma[inflate_errors];
+ 
 
 }
 transformed parameters{
@@ -78,9 +83,14 @@ transformed parameters{
 
   // the inflated observation errors
   vector[N] obs_err_infl;
-
+ 
   if (inflate_errors == 1){
-    obs_err_infl = obs_err + infl .* obs_err;
+    
+   for (n in 1:N)
+   
+   obs_err_infl[n] = obs_err[n] + infl_sigma[1] * infl[n];
+   //obs_err_infl[n] = obs_err[n] + obs_err[n] * infl[n];
+   
   } else {
     obs_err_infl = obs_err;
   }
@@ -129,9 +139,11 @@ model {
 
   // the observation error inflation model
   if (inflate_errors == 1){
-    infl_mean ~ gamma(1.5, 1);
-    infl_shape ~ gamma(1.5, 1);
+    infl_mean ~ gamma(1, 1);
+    infl_shape ~ gamma(1, 1);
     infl ~ gamma(infl_shape[1], infl_shape[1] / infl_mean[1]);
+    
+    infl_sigma ~ normal(0, mean_obs_err);
   }
 
   obs_age ~ student_t(nu, Mod_age, obs_err_infl);

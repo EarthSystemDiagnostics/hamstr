@@ -179,22 +179,27 @@ plot_age_models <- function(adam_fit, n.iter = 1000){
   obs_ages <- dplyr::mutate(obs_ages,
                             age_upr = age + 2*err,
                             age_lwr = age - 2*err)
+  
+  infl_errs <- rstan::summary(adam_fit$fit, par = "obs_err_infl")$summary %>% 
+    as_tibble(., rownames = "par") %>% 
+    mutate(dat_idx = readr::parse_number(par))
+  
 
 
-  s1 <- rstan::summary(adam_fit$fit)
-  s1 <- as_tibble(s1$summary, rownames = "par")
+  # s1 <- rstan::summary(adam_fit$fit)
+  # s1 <- as_tibble(s1$summary, rownames = "par")
+  # 
+  # infl <- s1 %>%
+  #   filter(grepl("infl[", par, fixed = T),
+  #          grepl("err_infl", par, fixed = T) == FALSE)
 
-  infl <- s1 %>%
-    filter(grepl("infl[", par, fixed = T),
-           grepl("err_infl", par, fixed = T) == FALSE)
-
-  if (nrow(infl) > 0){
-    obs_ages <- obs_ages %>%
-    mutate(infl_fac = infl$mean,
-           infl_err = err + err * infl_fac,
-           age_lwr_infl = age + 2*infl_err,
-           age_upr_infl = age - 2*infl_err)
-  }
+  # if (nrow(infl) > 0){
+  #   obs_ages <- obs_ages %>%
+  #   mutate(infl_fac = infl$mean,
+  #          infl_err = err + err * infl_fac,
+  #          age_lwr_infl = age + 2*infl_err,
+  #          age_upr_infl = age - 2*infl_err)
+  # }
 
 
   p.fit <- posterior_ages %>%
@@ -205,28 +210,43 @@ plot_age_models <- function(adam_fit, n.iter = 1000){
   p.fit <- p.fit +
     ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter))
 
-  if (nrow(infl) > 0){
+  if (adam_fit$data$inflate_errors == 1){
+    obs_ages <- obs_ages %>% 
+      mutate(infl_err = infl_errs$mean,
+             age_lwr_infl = age + 2*infl_err,
+             age_upr_infl = age - 2*infl_err)
+    
     p.fit <- p.fit +
-    ggplot2::geom_linerange(
-      data = obs_ages,
-      aes(ymax = age_upr_infl, ymin = age_lwr_infl),
-      group = NA,
-      colour = "Blue",
-      alpha = 0.5)
+      ggplot2::geom_linerange(
+        data = obs_ages,
+        aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
+        group = NA,
+        colour = "Red",
+        alpha = 0.5, inherit.aes = F)
   }
+  
+  # if (nrow(infl) > 0){
+  #   p.fit <- p.fit +
+  #   ggplot2::geom_linerange(
+  #     data = obs_ages,
+  #     aes(ymax = age_upr_infl, ymin = age_lwr_infl),
+  #     group = NA,
+  #     colour = "Blue",
+  #     alpha = 0.5)
+  # }
   p.fit <- p.fit +
     ggplot2::geom_linerange(
       data = obs_ages,
       aes(ymax = age_upr, ymin = age_lwr),
       group = NA,
-      colour = "Red",
+      colour = "Blue",
       size = 1.2,
       alpha = 1) +
     ggplot2::geom_point(
       data = obs_ages,
       aes(y = age),
       group = NA,
-      colour = "Red",
+      colour = "Blue",
       #size = 1.01,
       alpha = 1) +
     ggplot2::theme_bw() +

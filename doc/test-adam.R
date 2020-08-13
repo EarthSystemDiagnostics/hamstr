@@ -6,8 +6,7 @@ library(rstan)
 # devtools::document()
 # pkgbuild::compile_dll(force = TRUE)
 # devtools::load_all()
-# devtools::install(quick=FALSE)
-
+# devtools::install(quick = FALSE)
 
 #name <- "BLOODMA"
 #dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv"))
@@ -27,8 +26,9 @@ all.terr.14C.dat <- all.terr.dat %>%
   mutate(n.dates = n()) %>%
   ungroup()
 
-name <- "BUROVER"
-#name <- "BLACKMA"
+#name <- "BUROVER"
+name <- "HANGING"
+
 dat2 <- all.terr.14C.dat %>%
   filter(DataName == name)
 
@@ -44,13 +44,15 @@ dat1 %>%
   geom_line()
 
 
-options(mc.cores = parallel::detectCores())
+#options(mc.cores = parallel::detectCores())
+
+options(mc.cores = 3)
 
 adam.fit1 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = c(3,3,3, 3, 3),
+  K = c(100),
   nu = 6,
   #record_prior_acc_mean_mean = acc.mean,
   record_prior_acc_mean_shape = 1.5,
@@ -60,16 +62,17 @@ adam.fit1 <- adam(
   inflate_errors = 0, chains = 3)
 
 
-plot_adam(adam.fit1, plot_diagnostics = T)
-plot_adam(adam.fit1, type = "spaghetti", n.iter = 1000, plot_diagnostics = T)
+ad_K100_rib <- plot_adam(adam.fit1, plot_diagnostics = T)
+ad_K100_spag <- plot_adam(adam.fit1, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
 
+ggsave("doc/ad_K100_rib.png", ad_K100_rib, width = 8, height = 6)
+ggsave("doc/ad_K100_spag.png", ad_K100_spag, width = 8, height = 6)
 
 
 adam.fit2 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  #K = c(5,5,5,5),
   K = baconr:::optimal_K(100, 10),
   nu = 6,
   #record_prior_acc_mean_mean = acc.mean,
@@ -81,8 +84,18 @@ adam.fit2 <- adam(
 
 
 
-plot_adam(adam.fit2, plot_diagnostics = T)
-plot_adam(adam.fit2, type = "spaghetti", n.iter = 1000, plot_diagnostics = T)
+ad_K10_100_rib <- plot_adam(adam.fit2, plot_diagnostics = T)
+ad_K10_100_spag <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+
+ad_K10_100_spag_nod <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
+
+plot_hierarchical_acc_rate(adam.fit2)
+
+
+ggsave("doc/ad_K10_100_rib.png", ad_K10_100_rib, width = 8, height = 6)
+ggsave("doc/ad_K10_100_spag.png", ad_K10_100_spag, width = 8, height = 8)
+
+ggsave("doc/ad_K10_100_spag_nod.png", ad_K10_100_spag_nod, width = 8, height = 6)
 
 
 a2 <- rstan::summary(adam.fit2$fit)
@@ -94,6 +107,45 @@ summary(adam.fit2$fit, par = c("alpha[1]", "shape"))$summary
 traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
 
 traceplot(adam.fit2$fit, pars = paste0("alpha[", 91:111, "]"), inc_warmup = T)
+
+
+
+## with 3 layers
+
+adam.fit2b <- adam(
+  depth = dat1$depth,
+  obs_age = dat1$age.14C.cal,
+  obs_err = dat1$age.14C.cal.se,
+  K = baconr:::optimal_K(1000, 10),
+  nu = 6,
+  #record_prior_acc_mean_mean = acc.mean,
+  record_prior_acc_mean_shape = 1.5,
+  record_prior_acc_shape_mean = 1.5,
+  record_prior_acc_shape_shape = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0, chains = 3)
+
+
+
+ad_K10_100_1000_rib <- plot_adam(adam.fit2b, plot_diagnostics = T)
+ad_K10_100_1000_spag <- plot_adam(adam.fit2b, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+
+ad_K10_100_1000_spag_nod <- plot_adam(adam.fit2b, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
+
+ad_K10_100_1000_HA <- plot_hierarchical_acc_rate(adam.fit2b)
+
+
+ggsave("doc/ad_K10_100_1000_rib.png", ad_K10_100_1000_rib, width = 8, height = 6)
+ggsave("doc/ad_K10_100_1000_spag.png", ad_K10_100_1000_spag, width = 8, height = 6)
+
+ggsave("doc/ad_K10_100_1000_spag_nod.png", ad_K10_100_1000_spag_nod, width = 8, height = 6)
+
+
+ggsave("doc/ad_K10_100_1000_HA.png", ad_K10_100_1000_HA, width = 6, height = 4)
+
+
+
+
 
 
 #shinystan::launch_shinystan(adam.fit3$fit)
@@ -116,6 +168,9 @@ adam.fit3 <- adam(
 plot_adam(adam.fit3, type = "ribbon", plot_diagnostics = TRUE)
 plot_adam(adam.fit3, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
 
+print(adam.fit3$fit, pars = c("infl_mean", "infl_shape", "infl_sigma", "infl"))
+traceplot(adam.fit3$fit, pars = c("infl_mean", "infl_shape", "infl_sigma"), inc_warmup = T)
+
 
 a3 <- rstan::summary(adam.fit3$fit)
 a3 <- as_tibble(a3$summary, rownames = "par")
@@ -132,6 +187,109 @@ summary(adam.fit3$fit, par = c("infl_mean", "infl_shape"))$summary
 
 
 baconr:::plot_memory_prior_posterior(adam.fit3)
+
+
+
+###
+
+name <- "BIBER"
+
+dat3 <- all.terr.14C.dat %>%
+  filter(DataName == name)
+
+dat3 <- ecustools::CalibrateAge(dat3, age.14C = "age", age.14C.se = "sigma.age") %>%
+  filter(complete.cases(age.14C.cal)) %>%
+  select(depth, age.14C.cal, age.14C.cal.se, age, sigma.age) %>%
+  mutate(age.14C.cal = round(age.14C.cal),
+         age.14C.cal.se = round(age.14C.cal.se))
+
+dat3 %>%
+  ggplot(aes(x = depth, y = age.14C.cal)) +
+  geom_point() +
+  geom_line()
+
+
+adam.fit4 <- adam(
+  depth = dat3$depth,
+  obs_age = dat3$age.14C.cal,
+  obs_err = dat3$age.14C.cal.se,
+  #top_depth = 1,
+  K = 100,
+  nu = 6,
+  #record_prior_acc_mean_mean = acc.mean,
+  record_prior_acc_mean_shape = 1.5,
+  record_prior_acc_shape_mean = 1.5,
+  record_prior_acc_shape_shape = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0, chains = 3)
+
+plot_adam(adam.fit4, type = "ribbon", plot_diagnostics = TRUE)
+plot_adam(adam.fit4, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
+
+
+
+adam.fit4a <- adam(
+  depth = dat3$depth,
+  obs_age = dat3$age.14C.cal,
+  obs_err = dat3$age.14C.cal.se,
+  #top_depth = 1,
+  K = 100,
+  nu = 6,
+  #record_prior_acc_mean_mean = acc.mean,
+  record_prior_acc_mean_shape = 1.5,
+  record_prior_acc_shape_mean = 1.5,
+  record_prior_acc_shape_shape = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 1, chains = 3)
+
+plot_adam(adam.fit4a, type = "ribbon", plot_diagnostics = TRUE)
+plot_adam(adam.fit4a, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
+
+
+
+adam.fit4b <- adam(
+  depth = dat3$depth,
+  obs_age = dat3$age.14C.cal,
+  obs_err = dat3$age.14C.cal.se,
+  #top_depth = 1,
+  K = baconr:::optimal_K(100, 10),
+  nu = 6,
+  #record_prior_acc_mean_mean = acc.mean,
+  record_prior_acc_mean_shape = 1.5,
+  record_prior_acc_shape_mean = 1.5,
+  record_prior_acc_shape_shape = 1.5,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 1, chains = 3)
+
+plot_adam(adam.fit4b, type = "ribbon", plot_diagnostics = TRUE)
+plot_adam(adam.fit4b, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
+
+##
+
+
+#
+
+gamma_ex <- crossing(x = seq(-0.1, 4, length.out = 1000), shape = c(0.75, 1.5, 15), mu = 1) %>%
+  mutate(scale = mu / shape) %>% 
+  group_by(shape) %>% 
+  do({
+    tibble(
+      x = .$x,
+      d = dgamma(x, shape = .$shape[1], scale = .$scale[1])
+    )
+  })
+
+fig_gamma_infl <- gamma_ex %>% 
+  ggplot(aes(x = x, y = d, colour = factor(shape), group = shape)) +
+  geom_line() +
+  theme_bw() +
+  labs(colour = "shape", x = "Error inflation")
+
+ggsave("doc/fig_gamma_infl.png", fig_gamma_infl, width = 6, height = 4)
+
+
+#
+
 
 
 
@@ -226,7 +384,12 @@ CompareAgePDF <- function(age.14C, age.14C.se, curve, t.df = 6, return.type = c(
 
 }
 
-p <- CompareAgePDF(dat1$age.14C.cal[1:6], dat1$sigma.age[1:6], curve = "intcal13", t.df = 6)
-p + facet_wrap(~.id, scales = "free")
+wa <- c(1:length(dat1$age.14C.cal))
+wa <- c(1, 2, 5, 11)
+p_age_pdf <- CompareAgePDF(dat1$age.14C.cal[wa], dat1$sigma.age[wa], curve = "intcal13", t.df = 6) + 
+  facet_wrap(~.id, scales = "free") + theme_bw() + theme(panel.grid.minor = element_blank())
+
+ggsave("doc/age_pdf.png", p_age_pdf, width = 6, height = 4, dpi = 300)
+
 
 
