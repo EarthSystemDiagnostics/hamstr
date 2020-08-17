@@ -7,13 +7,7 @@ library(rstan)
 # pkgbuild::compile_dll(force = TRUE)
 # devtools::load_all()
 # devtools::install(quick = FALSE)
-
-#name <- "BLOODMA"
-#dat <- read.csv(paste0("/Users/andrewdolman/Dropbox/Work/AWI/Data/terrestrial-age-models/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv"))
-
-
-#dat <- read.csv(paste0("../envi-age-modelling/working-data/terr_14C_min10_dates-2020.03.04_15-19-42/", name, "/", name,".csv")) %>%
-#  filter(depth > 0)
+ 
 
 #Load and filter data
 all.terr.dat <- readr::read_csv2("doc/Dating_Data.csv") %>%
@@ -26,8 +20,8 @@ all.terr.14C.dat <- all.terr.dat %>%
   mutate(n.dates = n()) %>%
   ungroup()
 
-#name <- "BUROVER"
-name <- "HANGING"
+name <- "MOKHOVOE"
+#name <- "HANGING"
 
 dat2 <- all.terr.14C.dat %>%
   filter(DataName == name)
@@ -68,6 +62,9 @@ ad_K100_spag <- plot_adam(adam.fit1, type = "spaghetti", n.iter = 100, plot_diag
 ggsave("doc/ad_K100_rib.png", ad_K100_rib, width = 8, height = 6)
 ggsave("doc/ad_K100_spag.png", ad_K100_spag, width = 8, height = 6)
 
+traceplot(adam.fit1$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
+
+
 
 adam.fit2 <- adam(
   depth = dat1$depth,
@@ -75,7 +72,7 @@ adam.fit2 <- adam(
   obs_err = dat1$age.14C.cal.se,
   K = baconr:::optimal_K(100, 10),
   nu = 6,
-  #record_prior_acc_mean_mean = acc.mean,
+  #record_prior_acc_mean_mean = 20,
   record_prior_acc_mean_shape = 1.5,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
@@ -85,7 +82,7 @@ adam.fit2 <- adam(
 
 
 ad_K10_100_rib <- plot_adam(adam.fit2, plot_diagnostics = T)
-ad_K10_100_spag <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+ad_K10_100_spag <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 1000, plot_diagnostics = T)
 
 ad_K10_100_spag_nod <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
 
@@ -108,6 +105,9 @@ traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
 
 traceplot(adam.fit2$fit, pars = paste0("alpha[", 91:111, "]"), inc_warmup = T)
 
+traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
+
+traceplot(adam.fit2$fit, pars = c("w", "R"), inc_warmup = T)
 
 
 ## with 3 layers

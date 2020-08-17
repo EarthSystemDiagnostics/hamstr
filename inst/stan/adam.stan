@@ -123,7 +123,10 @@ transformed parameters{
 model {
 
   // parameters for the hierarchical prior on the section means
-  alpha[1] ~ gamma(record_prior_acc_mean_shape, record_prior_acc_mean_beta);
+  //alpha[1] ~ gamma(record_prior_acc_mean_shape, record_prior_acc_mean_beta);
+  
+  alpha[1] ~ normal(0, 10*record_prior_acc_mean_mean);
+  
   shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
 
 
