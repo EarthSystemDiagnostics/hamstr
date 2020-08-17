@@ -42,6 +42,63 @@ plot_adam <- function(adam_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, 
 }
 
 
+#' Plot Mean Accumulation Rate Prior and Posterior Distributions
+#'
+#' @param adam_fit 
+#'
+#' @return
+#' @export
+plot_acc_mean_prior_posterior <- function(adam_fit) {
+  clrs <- c("Posterior" = "Blue", "Prior" = "Red")
+  
+  adam_dat <- adam_fit$data
+  
+  prior_mean <- adam_dat$record_prior_acc_mean_mean
+  
+  acc_prior_rng <- qnorm(c(0.99), mean = 0, sd = 10 * prior_mean)
+  
+  acc_prior <-
+    tibble(acc_rate = seq(0, acc_prior_rng[1], length.out = 1000)) %>%
+    mutate(
+      density = 2 * dnorm(acc_rate, 0, 10 * prior_mean),
+      density = ifelse(acc_rate <= 0, 0, density)
+    )
+  
+  acc_post <-
+    tibble(alpha = as.vector(rstan::extract(adam_fit$fit, "alpha[1]")[[1]]))
+  
+  p <- acc_prior %>%
+    ggplot(aes(x = acc_rate, y = density)) +
+    # plot the posterior first
+    geom_histogram(
+      data = acc_post,
+      aes(x = alpha, after_stat(density), fill = "Posterior"),
+      inherit.aes = FALSE,
+      alpha = 0.5,
+      # set the colour for the outline of the bins but don't include in colour 
+      # legend
+      colour = clrs["Posterior"],
+      bins = 100
+    ) +
+    geom_line(aes(colour = "Prior")) +
+    labs(
+      x = "Mean accumulation rate",
+      y = "Density",
+      colour = "",
+      fill = ""
+    ) +
+    scale_fill_manual(values = clrs) +
+    scale_colour_manual(values = clrs) +
+    guides(fill = guide_legend(override.aes = list(alpha = c(0.5)))) +
+    
+    theme_bw()
+  
+  return(p)
+  
+}
+
+
+
 plot_acc_rate_pars <- function(adam_fit){
 
 
@@ -276,6 +333,7 @@ plot_hierarchical_acc_rate <- function(adam_fit){
     mutate(alpha_idx = (alpha_idx))
 
   a3 <- rstan::summary(adam_fit$fit, pars = "alpha")$summary
+  
   alph <- as_tibble(a3, rownames = "par") %>%
     mutate(alpha_idx = readr::parse_number(par)) %>%
     left_join(idx, .) %>%
