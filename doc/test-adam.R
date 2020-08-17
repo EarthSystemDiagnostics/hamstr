@@ -6,7 +6,7 @@ library(rstan)
 # devtools::document()
 # pkgbuild::compile_dll(force = TRUE)
 # devtools::load_all()
-# devtools::install(quick = FALSE)
+# devtools::install(quick = FALSE, dependencies = FALSE)
  
 
 #Load and filter data
@@ -20,8 +20,8 @@ all.terr.14C.dat <- all.terr.dat %>%
   mutate(n.dates = n()) %>%
   ungroup()
 
-name <- "MOKHOVOE"
-#name <- "HANGING"
+#name <- "MOKHOVOE"
+name <- "HANGING"
 
 dat2 <- all.terr.14C.dat %>%
   filter(DataName == name)
@@ -48,8 +48,8 @@ adam.fit1 <- adam(
   obs_err = dat1$age.14C.cal.se,
   K = c(100),
   nu = 6,
-  #record_prior_acc_mean_mean = acc.mean,
-  record_prior_acc_mean_shape = 1.5,
+  #acc_mean_prior = acc.mean,
+  
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -72,13 +72,11 @@ adam.fit2 <- adam(
   obs_err = dat1$age.14C.cal.se,
   K = baconr:::optimal_K(100, 10),
   nu = 6,
-  #record_prior_acc_mean_mean = 20,
-  record_prior_acc_mean_shape = 1.5,
+  #acc_mean_prior = 20,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
-
 
 
 ad_K10_100_rib <- plot_adam(adam.fit2, plot_diagnostics = T)
@@ -88,6 +86,10 @@ ad_K10_100_spag_nod <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, pl
 
 plot_hierarchical_acc_rate(adam.fit2)
 
+plot_hierarchical_acc_rate(adam.fit2) +
+  facet_grid(lvl~.)
+
+plot_acc_mean_prior_posterior(adam.fit2)
 
 ggsave("doc/ad_K10_100_rib.png", ad_K10_100_rib, width = 8, height = 6)
 ggsave("doc/ad_K10_100_spag.png", ad_K10_100_spag, width = 8, height = 8)
@@ -107,6 +109,8 @@ traceplot(adam.fit2$fit, pars = paste0("alpha[", 91:111, "]"), inc_warmup = T)
 
 traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
 
+traceplot(adam.fit2$fit, pars = c("shape"), inc_warmup = T)
+
 traceplot(adam.fit2$fit, pars = c("w", "R"), inc_warmup = T)
 
 
@@ -118,8 +122,8 @@ adam.fit2b <- adam(
   obs_err = dat1$age.14C.cal.se,
   K = baconr:::optimal_K(1000, 10),
   nu = 6,
-  #record_prior_acc_mean_mean = acc.mean,
-  record_prior_acc_mean_shape = 1.5,
+  #acc_mean_prior = acc.mean,
+  
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -158,8 +162,8 @@ adam.fit3 <- adam(
   #top_depth = 1,
   K = baconr:::optimal_K(100, 10),
   nu = 6,
-  #record_prior_acc_mean_mean = acc.mean,
-  record_prior_acc_mean_shape = 1.5,
+  #acc_mean_prior = acc.mean,
+  
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -216,8 +220,8 @@ adam.fit4 <- adam(
   #top_depth = 1,
   K = 100,
   nu = 6,
-  #record_prior_acc_mean_mean = acc.mean,
-  record_prior_acc_mean_shape = 1.5,
+  #acc_mean_prior = acc.mean,
+  
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -235,8 +239,8 @@ adam.fit4a <- adam(
   #top_depth = 1,
   K = 100,
   nu = 6,
-  #record_prior_acc_mean_mean = acc.mean,
-  record_prior_acc_mean_shape = 1.5,
+  #acc_mean_prior = acc.mean,
+  
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -254,8 +258,7 @@ adam.fit4b <- adam(
   #top_depth = 1,
   K = baconr:::optimal_K(100, 10),
   nu = 6,
-  #record_prior_acc_mean_mean = acc.mean,
-  record_prior_acc_mean_shape = 1.5,
+  #acc_mean_prior = acc.mean,
   record_prior_acc_shape_mean = 1.5,
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
@@ -293,11 +296,12 @@ ggsave("doc/fig_gamma_infl.png", fig_gamma_infl, width = 6, height = 4)
 
 
 
-idx <- as_tibble(alpha_indices(c(10,10,10))[1:3]) %>%
+idx <- as_tibble(baconr:::alpha_indices(c(3,3,3,3,3))[1:3]) %>%
   mutate(alpha_idx = as.character(alpha_idx))
 
 
-alph <- a3 %>%
+alph <- a2 %>%
+  #as_tibble(., rownames = "par") %>% 
   filter(grepl("alpha", par, fixed = TRUE)) %>%
   separate(par, into = c("par", "alpha_idx")) %>%
   left_join(idx, .) %>%
@@ -307,12 +311,26 @@ alph <- a3 %>%
 alph %>%
   ggplot(aes(x = mean)) +
   geom_histogram(aes()) +
-  facet_wrap(~lvl, scales = "free_y")
+  facet_wrap(~lvl, scales = "free_y", labeller = label_both)
 
 alph %>%
-  filter(lvl == 4) %>%
-  ggplot(aes(x = mean)) +
-  geom_histogram(aes(fill = as.factor(parent))) +
+  filter(lvl == 5) %>%
+  ggplot() +
+  geom_histogram(aes(x = mean, after_stat(density), fill = as.factor(parent))) +
+  facet_wrap(~parent) +
+  theme(legend.position = "none")
+
+
+dat <- tibble(
+  x = seq(0, 600, length.out = 1000),
+  d = dgamma(x, shape = 1.5, rate = 1.5 / adam.fit2$data$acc_mean_prior)
+)
+
+alph %>%
+  filter(lvl == tail(alph$lvl, 1)) %>%
+  ggplot() +
+  geom_histogram(aes(x = mean, after_stat(density))) +
+  geom_line(data = dat, aes(x = x, y = d, colour = "Prior")) +
   facet_wrap(~lvl, scales = "free_y")
 
 
@@ -322,74 +340,6 @@ alph %>%
   expand_limits(x = c(0.95, 1.1)) +
   facet_wrap(~lvl, scales = "free_y")
 
-
-
-
-plot_hierarchical_acc_rate(adam.fit2)
-
-
-
-
-
-
-
-CompareAgePDF <- function(age.14C, age.14C.se, curve, t.df = 6, return.type = c("plot", "data")){
-
-  dt_ls <- function(x, df=1, mu=0, sigma=1) 1/sigma * dt((x - mu)/sigma, df)
-
-  cal.dat <- data.frame(age.14C = age.14C, age.14C.se = age.14C.se)
-
-  calib <- ecustools::CalibrateAge(cal.dat,
-                                   return.type = "lst",
-                                   offset = 0, curve = curve)
-
-  # The summarised calendar ages are appended to the input data
-  C14 <- calib$df
-  C14$.id <- 1:nrow(cal.dat)
-
-  # These are the full PDFs
-  cal.ages <- calib$cal.ages
-
-  cali.pdf.df <- plyr::ldply(1:length(cal.ages), function(i){
-    x <- cal.ages[[i]]
-    if (is.na(x)==FALSE){data.frame(age = x[[1]]$ageGrid, d = x[[1]]$densities, .id = i)}else{
-      data.frame(age = 0, d = 0, .id = i)
-    }
-  })
-
-  t.dat <- C14 %>%
-    group_by(.id) %>%
-    do({
-      rng <- .$age.14C.cal.se * 5
-      age = seq(.$age.14C.cal - rng, .$age.14C.cal + rng, length.out = 100)
-      data.frame(
-        age = age,
-        d = dt_ls(age, df = t.df, mu = .$age.14C.cal, sigma = .$age.14C.cal.se)
-      )
-    })
-
-  gg <- cali.pdf.df %>%
-    ggplot(aes(x = age/1000, y = d, group = .id)) +
-    geom_line(aes(colour = "Empirical")) +
-    geom_line(data = t.dat, aes(y = d, colour = "t-dist")) +
-    labs(colour = "")
-
-  if (return.type == "data"){
-    return(list(cal.age.pdf = cali.pdf.df, t.dist.age = t.dat))
-  } else if (return.type == "plot") {
-    return(gg)
-  }
-
-
-
-}
-
-wa <- c(1:length(dat1$age.14C.cal))
-wa <- c(1, 2, 5, 11)
-p_age_pdf <- CompareAgePDF(dat1$age.14C.cal[wa], dat1$sigma.age[wa], curve = "intcal13", t.df = 6) + 
-  facet_wrap(~.id, scales = "free") + theme_bw() + theme(panel.grid.minor = element_blank())
-
-ggsave("doc/age_pdf.png", p_age_pdf, width = 6, height = 4, dpi = 300)
 
 
 

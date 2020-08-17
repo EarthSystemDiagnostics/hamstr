@@ -53,7 +53,7 @@ plot_acc_mean_prior_posterior <- function(adam_fit) {
   
   adam_dat <- adam_fit$data
   
-  prior_mean <- adam_dat$record_prior_acc_mean_mean
+  prior_mean <- adam_dat$acc_mean_prior
   
   acc_prior_rng <- qnorm(c(0.99), mean = 0, sd = 10 * prior_mean)
   
@@ -96,82 +96,6 @@ plot_acc_mean_prior_posterior <- function(adam_fit) {
   return(p)
   
 }
-
-
-
-plot_acc_rate_pars <- function(adam_fit){
-
-
-  K1.df <- rstan::summary(adam_fit$fit, par = "section_acc_mean")
-  K1.df <- as_tibble(K1.df$summary, rownames = "par") %>%
-    separate(par, into = c("par", "K1"), sep = "\\[") %>%
-    separate(K1, into = c("K1", "h"), sep = "\\]") %>%
-    mutate(K1 = factor(as.numeric(K1), ordered = T))
-
-
-  K.df <- rstan::summary(adam_fit$fit, par = "alpha")
-  K.df <- as_tibble(K.df$summary, rownames = "par")%>%
-    separate(par, into = c("par", "K"), sep = "\\[") %>%
-    separate(K, into = c("K", "h"), sep = "\\]")
-
-  ind <- tibble(K1 = factor(adam_fit$data$whichK1, ordered = T),
-                K = factor(adam_fit$data$c, ordered = T))
-
-  K.df <- left_join(ind, K.df) %>%
-    mutate(K1 = factor(K1, ordered = T, levels = 1:20))
-
-  K.df %>%
-    ggplot(aes(x = mean)) +
-    #geom_histogram(position = "identity", alpha = 0.5)+
-    geom_histogram(aes(fill = K1, colour = K1), # position = "identity",
-                   alpha = 1) +
-    geom_vline(data = K1.df, aes(xintercept = mean, colour = K1)) +
-    # scale_fill_brewer(type = "qual", palette = "Set3",
-    #                   guide = guide_legend(ncol = 2)) +
-    # scale_color_brewer(type = "qual", palette = "Set3",
-    #                    guide = guide_legend(ncol = 2)) +
-    labs(x = "Acc. rate") +
-    theme_bw()
-
-}
-
-#plot_acc_rate_pars(sarn.fit3)
-
-plot_acc_rate_prior_posterior <- function(adam_fit){
-
-  if (exists("K1", where = adam_fit$data)){
-    p.acc <- plot_acc_rate_pars(adam_fit)
-  } else {
-    acc.rng <- qgamma(c(0.000001, 0.9999), shape = adam_fit$data$acc_alpha,
-                      rate = adam_fit$data$acc_beta)
-
-    acc.prior <- tibble(acc.rate = seq(acc.rng[1], acc.rng[2], length.out = 1000)) %>%
-      mutate(acc.dens = dgamma(acc.rate, shape = adam_fit$data$acc_alpha,
-                               rate = adam_fit$data$acc_beta))
-
-    acc.post <- tibble(alpha = as.vector(rstan::extract(adam_fit$fit, "alpha")$alpha))
-
-    if (any(acc.post$alpha > acc.rng[2])){
-      acc.outside <- sum(acc.post$alpha > acc.rng[2])
-      p.acc.o <- round(100 * acc.outside / length(acc.post$alpha), 2)
-      warning(p.acc.o, paste0("% of accumulation rate samples were outside plotted region of the acc.rate prior"))
-    }
-
-    acc.post <- acc.post[acc.post$alpha <= acc.rng[2], ]
-
-    p.acc <- acc.prior %>%
-      ggplot(aes(x = acc.rate, y = acc.dens)) +
-      geom_density(data = acc.post, aes(x = alpha), fill = "Grey", inherit.aes = FALSE) +
-      geom_line(colour = "Red") +
-      scale_x_continuous("Acc. rate [yr/cm]", limits = acc.rng) +
-      scale_y_continuous("Density") +
-      theme_bw()
-  }
-
-return(p.acc)
-
-}
-
 
 
 plot_memory_prior_posterior <- function(adam_fit){
@@ -241,24 +165,6 @@ plot_age_models <- function(adam_fit, n.iter = 1000){
     as_tibble(., rownames = "par") %>% 
     mutate(dat_idx = readr::parse_number(par))
   
-
-
-  # s1 <- rstan::summary(adam_fit$fit)
-  # s1 <- as_tibble(s1$summary, rownames = "par")
-  # 
-  # infl <- s1 %>%
-  #   filter(grepl("infl[", par, fixed = T),
-  #          grepl("err_infl", par, fixed = T) == FALSE)
-
-  # if (nrow(infl) > 0){
-  #   obs_ages <- obs_ages %>%
-  #   mutate(infl_fac = infl$mean,
-  #          infl_err = err + err * infl_fac,
-  #          age_lwr_infl = age + 2*infl_err,
-  #          age_upr_infl = age - 2*infl_err)
-  # }
-
-
   p.fit <- posterior_ages %>%
     dplyr::filter(iter %in% sample(unique(.$iter), n.iter, replace = FALSE)) %>%
     ggplot2::ggplot(aes(x = depth, y = age, group = iter))
@@ -282,15 +188,6 @@ plot_age_models <- function(adam_fit, n.iter = 1000){
         alpha = 0.5, inherit.aes = F)
   }
   
-  # if (nrow(infl) > 0){
-  #   p.fit <- p.fit +
-  #   ggplot2::geom_linerange(
-  #     data = obs_ages,
-  #     aes(ymax = age_upr_infl, ymin = age_lwr_infl),
-  #     group = NA,
-  #     colour = "Blue",
-  #     alpha = 0.5)
-  # }
   p.fit <- p.fit +
     ggplot2::geom_linerange(
       data = obs_ages,
@@ -339,33 +236,39 @@ plot_hierarchical_acc_rate <- function(adam_fit){
     left_join(idx, .) %>%
     mutate(lvl = factor(lvl))
 
-  alph$depth <- c(mean(adam_fit$data$modelled_depths),
-                  unlist(sapply((
-                    hierarchical_depths(adam_fit$data)
-                  ),
-                  function(x) {
-                    y <- stats::filter(x, rep(1 / 2, 2))
-                    y[is.na(y) == FALSE]
-                  })))
+  # for each unit at each level in hierarchy get max and min depth 
+  alph$depth1 <- c(min(adam_fit$data$modelled_depths),
+                   unlist(sapply((
+                     hierarchical_depths(adam_fit$data)
+                   ),
+                   function(x) {
+                    head(x, -1)
+                   })))
+  
+  alph$depth2 <- c(max(adam_fit$data$modelled_depths),
+                   unlist(sapply((
+                     hierarchical_depths(adam_fit$data)
+                   ),
+                   function(x) {
+                     tail(x, -1)
+                   })))
+  
+  alph2 <- alph %>% 
+    select(lvl, alpha_idx, depth1, depth2, mean) %>% 
+    group_by(lvl) %>% 
+    gather(type, depth, -mean, -lvl, -alpha_idx) %>% 
+    select(lvl, alpha_idx, depth, mean) %>% 
+    arrange(lvl, alpha_idx, depth, mean)
+  
 
-  gg <- alph %>%
-    mutate(alpha_idx = as.numeric(alpha_idx)) %>%
+  gg <- alph2 %>%
     ggplot(aes(x = depth, y = mean, colour = lvl)) +
-    #geom_point() +
-    geom_segment(data = filter(alph, lvl == 1),
-                 aes(y = mean, yend = mean,
-                     x = min(alph$depth), xend = max(alph$depth))) +
-    geom_line() +
-
+    geom_path() +
     expand_limits(y = 0) +
     labs(y = "Accummulation rate [age/depth]", x = "Depth",
          colour = "Hierarchical\nlevel") +
-    #scale_colour_brewer(palette = "YlOrRd") +
-    #scale_colour_viridis_d() +
-    #theme_bw() +
+    theme_bw() +
     theme(panel.grid = element_blank(), legend.position = "top")
 
   return(gg)
 }
-
-
