@@ -27,7 +27,7 @@ all.terr.14C.dat <- all.terr.dat %>%
   ungroup()
 
 #name <- "BUROVER"
-name <- "HANGING"
+name <- "WESTHAWK"
 
 dat2 <- all.terr.14C.dat %>%
   filter(DataName == name)
@@ -124,7 +124,6 @@ adam.fit2b <- adam(
   record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
-
 
 
 ad_K10_100_1000_rib <- plot_adam(adam.fit2b, plot_diagnostics = T)
@@ -270,8 +269,8 @@ plot_adam(adam.fit4b, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE
 #
 
 gamma_ex <- crossing(x = seq(-0.1, 4, length.out = 1000), shape = c(0.75, 1.5, 15), mu = 1) %>%
-  mutate(scale = mu / shape) %>% 
-  group_by(shape) %>% 
+  mutate(scale = mu / shape) %>%
+  group_by(shape) %>%
   do({
     tibble(
       x = .$x,
@@ -279,7 +278,7 @@ gamma_ex <- crossing(x = seq(-0.1, 4, length.out = 1000), shape = c(0.75, 1.5, 1
     )
   })
 
-fig_gamma_infl <- gamma_ex %>% 
+fig_gamma_infl <- gamma_ex %>%
   ggplot(aes(x = x, y = d, colour = factor(shape), group = shape)) +
   geom_line() +
   theme_bw() +
@@ -386,7 +385,7 @@ CompareAgePDF <- function(age.14C, age.14C.se, curve, t.df = 6, return.type = c(
 
 wa <- c(1:length(dat1$age.14C.cal))
 wa <- c(1, 2, 5, 11)
-p_age_pdf <- CompareAgePDF(dat1$age.14C.cal[wa], dat1$sigma.age[wa], curve = "intcal13", t.df = 6) + 
+p_age_pdf <- CompareAgePDF(dat1$age.14C.cal[wa], dat1$sigma.age[wa], curve = "intcal13", t.df = 6) +
   facet_wrap(~.id, scales = "free") + theme_bw() + theme(panel.grid.minor = element_blank())
 
 ggsave("doc/age_pdf.png", p_age_pdf, width = 6, height = 4, dpi = 300)
