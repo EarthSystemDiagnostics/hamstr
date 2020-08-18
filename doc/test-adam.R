@@ -71,15 +71,23 @@ adam.fit2 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = baconr:::optimal_K(100, 3),
+  K = baconr:::optimal_K(100, 10),
   nu = 6,
-  shape = 1,
-  #acc_mean_prior = 20,
-  #record_prior_acc_shape_mean = 1.5,
-  #record_prior_acc_shape_shape = 1.5,
+  shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
+# warmup sample
+# chain:1 53.281 82.095
+# chain:2 53.627 73.500
+# chain:3 55.919 73.026
+
+# warmup sample
+# chain:1 37.423 40.540
+# chain:2 34.730 37.017
+# chain:3 38.712 29.908
+
+get_elapsed_time(adam.fit2$fit)
 
 ad_K10_100_rib <- plot_adam(adam.fit2, plot_diagnostics = T)
 ad_K10_100_spag <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 1000, plot_diagnostics = T)

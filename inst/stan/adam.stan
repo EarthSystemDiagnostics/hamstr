@@ -7,147 +7,112 @@ data {
   int<lower=0> N;
   int<lower=0> K_fine;  // no of fine sections
   int<lower=0> K_tot;  // total no of gamma parameters
-  //int<lower=0> K_lvls;  // no of levels in hierarchy 
   int<lower=0> nu; // degrees of freedom of t error distribution
   vector[N] depth;
   vector[N] obs_age;
   vector[N] obs_err;
   vector[K_fine] c_depth_bottom;
   vector[K_fine] c_depth_top;
-  int parent[K_tot]; // index fine sections to their parent coarse sections
-  //vector[K_tot] lvl; // index fine sections to their parent coarse sections
-  //int K_idx[K_tot]; // 
+  int parent[K_tot]; // index sections to their parent sections
   
-  int which_c[N]; // index observations to their fine section
+  int which_c[N]; // index observations to their fine sections
   real<lower = 0> delta_c; // width of each fine section
-
+  
   // hyperparameters
-
+  
   // parameters for the prior distribution of the overall mean acc rate
   real<lower = 0> acc_mean_prior;
- 
-  // parameters for the prior distribution of the shape of the distribution of section means
-  //real<lower = 0> record_prior_acc_shape_mean;
-  //real<lower = 0> record_prior_acc_shape_shape;
-
-  real<lower = 0> shape; // shape of the within section innovations
-
+  
+  // shape of the gamma distributions
+  real<lower = 0> shape; 
+  
   real<lower = 0> mem_mean;
   real<lower = 0> mem_strength;
-
+  
 }
 transformed data{
-
-  // transform shape and mean to shape and beta (rate) of gamma dist
-  //real<lower=0> record_prior_acc_shape_beta  = record_prior_acc_shape_shape / record_prior_acc_shape_mean;
-
-
+  
   // transform mean and strength of memory beta distribution to alpha and beta
   real<lower=0> mem_alpha = mem_strength * mem_mean;
   real<lower=0> mem_beta = mem_strength * (1-mem_mean);
-
+  
+  // position of the first highest resolution innovation (alpha)
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
   
   real<lower=0> mean_obs_err = mean(obs_err);
-
+  
 }
 parameters {
+  // AR1 coeffiecient at 1 depth unit
   real<lower = 0, upper = 1> R;
+  
+  // the hierarchical gamma innovations in one long vector that will be indexed
   vector<lower = 0>[K_tot] alpha;
+  
+  // the age at the first modelled depth
   real age0;
-  //real<lower = 0> record_acc_mean;
-  //real<lower = 0> shape;
-  //vector<lower = 0>[K_lvls] shape;
-  //vector<lower=0>[K1] section_acc_mean;
-
-  // measurement error inflation factor
-  // these have length 0 if inflate_errors == 0
-  // parameters are in scope so model runs, but zero length so nothing sampled
+  
+  // the measurement error inflation factors
+  // these have length 0 if inflate_errors == 0 meaning that the parameters are 
+  // in scope, so the model runs, but are zero length so nothing is sampled
   real<lower = 0> infl_mean[inflate_errors];
   real<lower = 0> infl_shape[inflate_errors];
   vector<lower = 0>[inflate_errors ? N : 0] infl;
-  //vector<lower = 0>[inflate_errors ? 1 : 0] infl_sigma;
   real<lower = 0> infl_sigma[inflate_errors];
- 
-
 }
 transformed parameters{
-
-  //real<lower = 0> record_acc_mean_beta;
-
-  real<lower = 0, upper = 1> w;
-
-  vector[K_fine] x;
-  vector[K_fine+1] c_ages;
-  vector[N] Mod_age;
-  vector[K_tot] beta;
-
-  //vector[K_tot-1] shape_vec = shape[K_idx[2:K_tot]];
   
-  //shape_vec = shape[K_idx[2:K_tot]];
-
+  // the AR1 coefficient scaled for the thickness of the modelled sediment sections
+  real<lower = 0, upper = 1> w = R^(delta_c);
+  
+  // the highest resolution AR1 correlated innovations
+  vector[K_fine] x;
+  
+  // the modelled ages
+  vector[K_fine+1] c_ages;
+  
+  // the modelled ages interpolated to the positions of the data
+  vector[N] Mod_age;
+  
   // the inflated observation errors
   vector[N] obs_err_infl;
- 
+  
   if (inflate_errors == 1){
-    
-   for (n in 1:N)
-   
-   obs_err_infl[n] = obs_err[n] + infl_sigma[1] * infl[n];
-   //obs_err_infl[n] = obs_err[n] + obs_err[n] * infl[n];
-   
+    for (n in 1:N)
+    obs_err_infl[n] = obs_err[n] + infl_sigma[1] * infl[n];
   } else {
     obs_err_infl = obs_err;
   }
-
-  //beta[1] = shape[1] / alpha[1];
-  //for (i in 2:K_tot){
-  //  beta[i] = shape[K_idx[i]] / alpha[parent[i]];
-  //}
   
-  beta[1] = 0;
-  beta[2:K_tot] = shape ./ alpha[parent[2:K_tot]];
-
-  //section_acc_mean_beta = section_acc_shape ./ section_acc_mean;
-
-  w = R^(delta_c);
-
+ 
   // only the "fine" alphas
-
+  // the first innovation
   x[1] = alpha[first_K_fine];
-
-  // call to sampling function is already vectorised below so there is no
-  // advantage to vectorising here
-  // x[2:K_fine] = w * x[1:(K_fine-1)] + (1-w) * alpha[2:K_fine];
-
+  
+  // the remaining innovations with the AR1 parameter applied
   for(i in 2:K_fine){
     x[i] = w*x[i-1] + (1-w)*alpha[i + first_K_fine -1];
   }
-
-  // Get the Mod_ages
+  
+  
+  // Get the cumulative sum of the highest resolution innovations
   c_ages[1] = age0;
   c_ages[2:(K_fine+1)] = age0 + cumulative_sum(x * delta_c);
+  
+  // Interpolate to the positions of the observations
   Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
 }
 
 model {
-
-  // parameters for the hierarchical prior on the section means
-  
+  // the overall mean accumulation rate
   alpha[1] ~ normal(0, 10*acc_mean_prior);
   
-  //shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
-
-
-  // the Gamma distributed innovations
-  // betas have already been indexed to correct parent
-  //alpha[2:K_tot] ~ gamma(shape[K_idx[2:K_tot]], beta[2:K_tot]);
-  
-  alpha[2:K_tot] ~ gamma(shape, beta[2:K_tot]);
+  // the gamma distributed innovations
+  alpha[2:K_tot] ~ gamma(shape, shape ./ alpha[parent[2:K_tot]]);
   
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);
-
+  
   // the observation error inflation model
   if (inflate_errors == 1){
     infl_mean ~ gamma(1, 1);
@@ -156,7 +121,7 @@ model {
     
     infl_sigma ~ normal(0, mean_obs_err);
   }
-
+  
+  // the Likelihood of the data given the model
   obs_age ~ student_t(nu, Mod_age, obs_err_infl);
-
 }
