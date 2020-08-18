@@ -65,17 +65,17 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
                                top_depth = NULL, bottom_depth = NULL,
                                  pad_top_bottom = FALSE,
                                  K = c(10, 10), nu = 6,
-                                 record_prior_acc_mean_mean = NULL,
-                                 record_prior_acc_mean_shape = 1.5,
-                                 record_prior_acc_shape_mean = 1.5,
-                                 record_prior_acc_shape_shape = 1.5,
-                                 section_acc_shape = 1.5,
+                                 acc_mean_prior = NULL,
+                               shape = 1.5,
+                                 #record_prior_acc_shape_mean = 1.5,
+                                 #record_prior_acc_shape_shape = 1.5,
+                                 # section_acc_shape = 1.5,
                                  mem_mean = 0.7, mem_strength = 4,
                                  inflate_errors = 0) {
 
   l <- c(as.list(environment()))
   
-  if (is.null(record_prior_acc_mean_mean)){
+  if (is.null(acc_mean_prior)){
     
     d <- data.frame(depth = depth, obs_age = obs_age)
     acc_mean <- coef(MASS::rlm(obs_age~depth, data = d))[2]
@@ -85,7 +85,7 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
       warning("Estimated mean accumulation rate is negative - using value = 20")
       acc_mean <- 20
       }
-    l$record_prior_acc_mean_mean <- acc_mean
+    l$acc_mean_prior <- acc_mean
     
   }
 
@@ -140,6 +140,9 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
   l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))
 
   l <- append(l, alpha_idx)
+  
+  #l$K_lvls <- length(l$K)
+  #l$K_idx <- l$lvl - 1
 
   return(l)
 }
@@ -177,10 +180,10 @@ get_inits_adam <- function(stan_dat){
     R = runif(1, 0.1, 0.9),
     
     # create starting alpha values +- 3 SD from the overal prior mean (but always +ve)
-    alpha = with(stan_dat, abs(rnorm(K_tot, record_prior_acc_mean_mean, record_prior_acc_mean_mean/3))),
-    #record_acc_mean = (abs(rnorm(1, stan_dat$record_prior_acc_mean_mean, stan_dat$record_prior_acc_mean_mean/3))),
+    alpha = with(stan_dat, abs(rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
+    #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
 
-    shape = abs(rnorm(1, 1.5, 1.5/3)),
+    #shape = abs(rnorm(1, 1.5, 1.5/3)),
 
     age0 = rnorm(1, min(stan_dat$obs_age), 2)
   )

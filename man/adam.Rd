@@ -13,10 +13,8 @@ adam(
   top_depth = NULL,
   bottom_depth = NULL,
   pad_top_bottom = FALSE,
-  record_prior_acc_mean_mean = NULL,
-  record_prior_acc_mean_shape = 1.5,
-  record_prior_acc_shape_mean = 1.5,
-  record_prior_acc_shape_shape = 1.5,
+  acc_mean_prior = NULL,
+  shape = 1.5,
   section_acc_shape = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,
@@ -49,14 +47,9 @@ deepest data points unless \code{pad_top_bottom = TRUE}}
 \item{pad_top_bottom}{logical, pad the length of the age-depth model by 5% on
 each end}
 
-\item{record_prior_acc_mean_mean, record_prior_acc_mean_shape}{hyperparameters
-for the hyperprior on the overall mean accumulation rate for the record.
+\item{acc_mean_prior, }{parameter for the hyperprior on the overall mean accumulation rate for the record.
 Units are depth / obs_age. E.g. if depth is in cm and age in kyr then the
-accumulation rate is in cm/kyr. ...mean_shape sets the shape of the
-hyperprior for the mean. Defaults to 1.5.}
-
-\item{record_prior_acc_shape_mean, record_prior_acc_shape_shape}{hyperparameters for the hyperprior on the shape of the distribution of K1
-coarse level accumulation rates. Defaults to 1.5, 1.5.}
+accumulation rate is in cm/kyr.}
 
 \item{section_acc_shape}{hyperparameter for the prior on the shape of the K
 fine level accumulation rates. Defaults to 1.5 - as for Bacon 2.2.}
@@ -84,6 +77,9 @@ model}
 \item{...}{Additional arguments can be \code{chain_id}, \code{init_r}, 
     \code{test_grad}, \code{append_samples}, \code{refresh},
     \code{enable_random_init}. See the documentation in \code{\link[rstan]{stan}}.}
+
+\item{record_prior_acc_shape_mean, record_prior_acc_shape_shape}{hyperparameters for the hyperprior on the shape of the distribution of K1
+coarse level accumulation rates. Defaults to 1.5, 1.5.}
 }
 \value{
 Returns a list composed of the output from the Stan sampler .$fit,
@@ -100,7 +96,7 @@ fit <- adam(
   obs_age = MSB2K$age,
   obs_err = MSB2K$error,
   K = c(10, 10), nu = 6,
-  record_prior_acc_mean_mean = 20,
+  acc_mean_prior = 20,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0,
   iter = 2000, chains = 3)
