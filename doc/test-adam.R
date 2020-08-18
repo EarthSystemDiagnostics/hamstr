@@ -113,6 +113,35 @@ traceplot(adam.fit2$fit, pars = c("shape"), inc_warmup = T)
 
 traceplot(adam.fit2$fit, pars = c("w", "R"), inc_warmup = T)
 
+stan_dat <- make_stan_dat_adam(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se,
+                               K=c(10, 10), 
+                               inflate_errors = 1)
+
+
+p_idx <- stan_dat$parent
+p_idx[p_idx == 0] <- NA
+
+alph <- a2 %>% 
+  filter(grepl("alpha", par)) %>% 
+  rename(alpha = mean) %>% 
+  select(alpha) %>% 
+  mutate(parent_alpha = alpha[p_idx])
+
+bet <- a2 %>% 
+  filter(grepl("beta", par))%>% 
+  rename(beta = mean) %>% 
+  select(beta)
+
+shp <- a2 %>% 
+  filter(grepl("shape_vec", par))%>% 
+  rename(shape = mean) %>% 
+  select(shape)
+
+prs <- bind_cols(alph, bet) %>% 
+  mutate(shape = c(NA, shp$shape)) %>% 
+  mutate(beta_calc = shape / parent_alpha)
+
+
 
 ## with 3 layers
 

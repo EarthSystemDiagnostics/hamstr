@@ -82,6 +82,9 @@ transformed parameters{
   vector[N] Mod_age;
   vector[K_tot] beta;
 
+  vector[K_tot-1] shape_vec = shape[K_idx[2:K_tot]];
+  
+  //shape_vec = shape[K_idx[2:K_tot]];
 
   // the inflated observation errors
   vector[N] obs_err_infl;
@@ -98,7 +101,11 @@ transformed parameters{
   }
 
   //beta[1] = shape[1] / alpha[1];
-  beta[2:K_tot] = shape[K_idx[2:K_tot]] ./ alpha[parent[2:K_tot]];
+  //for (i in 2:K_tot){
+  //  beta[i] = shape[K_idx[i]] / alpha[parent[i]];
+  //}
+  
+  beta[2:K_tot] = shape_vec ./ alpha[parent[2:K_tot]];
 
   //section_acc_mean_beta = section_acc_shape ./ section_acc_mean;
 
@@ -133,8 +140,10 @@ model {
 
   // the Gamma distributed innovations
   // betas have already been indexed to correct parent
-  alpha[2:K_tot] ~ gamma(shape[K_idx[2:K_tot]], beta[2:K_tot]);
-
+  //alpha[2:K_tot] ~ gamma(shape[K_idx[2:K_tot]], beta[2:K_tot]);
+  
+  alpha[2:K_tot] ~ gamma(shape_vec, beta[2:K_tot]);
+  
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);
 
