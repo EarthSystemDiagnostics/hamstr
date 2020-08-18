@@ -7,7 +7,7 @@ data {
   int<lower=0> N;
   int<lower=0> K_fine;  // no of fine sections
   int<lower=0> K_tot;  // total no of gamma parameters
-  int<lower=0> K_lvls;  // no of levels in hierarchy 
+  //int<lower=0> K_lvls;  // no of levels in hierarchy 
   int<lower=0> nu; // degrees of freedom of t error distribution
   vector[N] depth;
   vector[N] obs_age;
@@ -16,7 +16,7 @@ data {
   vector[K_fine] c_depth_top;
   int parent[K_tot]; // index fine sections to their parent coarse sections
   //vector[K_tot] lvl; // index fine sections to their parent coarse sections
-  int K_idx[K_tot]; // 
+  //int K_idx[K_tot]; // 
   
   int which_c[N]; // index observations to their fine section
   real<lower = 0> delta_c; // width of each fine section
@@ -27,10 +27,10 @@ data {
   real<lower = 0> acc_mean_prior;
  
   // parameters for the prior distribution of the shape of the distribution of section means
-  real<lower = 0> record_prior_acc_shape_mean;
-  real<lower = 0> record_prior_acc_shape_shape;
+  //real<lower = 0> record_prior_acc_shape_mean;
+  //real<lower = 0> record_prior_acc_shape_shape;
 
-  //real<lower = 0> section_acc_shape; // shape of the within section innovations
+  real<lower = 0> shape; // shape of the within section innovations
 
   real<lower = 0> mem_mean;
   real<lower = 0> mem_strength;
@@ -39,7 +39,7 @@ data {
 transformed data{
 
   // transform shape and mean to shape and beta (rate) of gamma dist
-  real<lower=0> record_prior_acc_shape_beta  = record_prior_acc_shape_shape / record_prior_acc_shape_mean;
+  //real<lower=0> record_prior_acc_shape_beta  = record_prior_acc_shape_shape / record_prior_acc_shape_mean;
 
 
   // transform mean and strength of memory beta distribution to alpha and beta
@@ -57,7 +57,7 @@ parameters {
   real age0;
   //real<lower = 0> record_acc_mean;
   //real<lower = 0> shape;
-  vector<lower = 0>[K_lvls] shape;
+  //vector<lower = 0>[K_lvls] shape;
   //vector<lower=0>[K1] section_acc_mean;
 
   // measurement error inflation factor
@@ -82,7 +82,7 @@ transformed parameters{
   vector[N] Mod_age;
   vector[K_tot] beta;
 
-  vector[K_tot-1] shape_vec = shape[K_idx[2:K_tot]];
+  //vector[K_tot-1] shape_vec = shape[K_idx[2:K_tot]];
   
   //shape_vec = shape[K_idx[2:K_tot]];
 
@@ -105,7 +105,8 @@ transformed parameters{
   //  beta[i] = shape[K_idx[i]] / alpha[parent[i]];
   //}
   
-  beta[2:K_tot] = shape_vec ./ alpha[parent[2:K_tot]];
+  beta[1] = 0;
+  beta[2:K_tot] = shape ./ alpha[parent[2:K_tot]];
 
   //section_acc_mean_beta = section_acc_shape ./ section_acc_mean;
 
@@ -135,14 +136,14 @@ model {
   
   alpha[1] ~ normal(0, 10*acc_mean_prior);
   
-  shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
+  //shape ~ gamma(record_prior_acc_shape_shape, record_prior_acc_shape_beta);
 
 
   // the Gamma distributed innovations
   // betas have already been indexed to correct parent
   //alpha[2:K_tot] ~ gamma(shape[K_idx[2:K_tot]], beta[2:K_tot]);
   
-  alpha[2:K_tot] ~ gamma(shape_vec, beta[2:K_tot]);
+  alpha[2:K_tot] ~ gamma(shape, beta[2:K_tot]);
   
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);

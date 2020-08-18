@@ -66,9 +66,10 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
                                  pad_top_bottom = FALSE,
                                  K = c(10, 10), nu = 6,
                                  acc_mean_prior = NULL,
-                                 record_prior_acc_shape_mean = 1.5,
-                                 record_prior_acc_shape_shape = 1.5,
-                                 section_acc_shape = 1.5,
+                               shape = 1.5,
+                                 #record_prior_acc_shape_mean = 1.5,
+                                 #record_prior_acc_shape_shape = 1.5,
+                                 # section_acc_shape = 1.5,
                                  mem_mean = 0.7, mem_strength = 4,
                                  inflate_errors = 0) {
 
@@ -140,8 +141,8 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
 
   l <- append(l, alpha_idx)
   
-  l$K_lvls <- length(l$K)
-  l$K_idx <- l$lvl - 1
+  #l$K_lvls <- length(l$K)
+  #l$K_idx <- l$lvl - 1
 
   return(l)
 }
@@ -182,7 +183,7 @@ get_inits_adam <- function(stan_dat){
     alpha = with(stan_dat, abs(rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
     #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
 
-    shape = abs(rnorm(stan_dat$K_lvls, 1.5, 1.5/3)),
+    #shape = abs(rnorm(1, 1.5, 1.5/3)),
 
     age0 = rnorm(1, min(stan_dat$obs_age), 2)
   )

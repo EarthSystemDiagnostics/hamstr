@@ -14,8 +14,7 @@ adam(
   bottom_depth = NULL,
   pad_top_bottom = FALSE,
   acc_mean_prior = NULL,
-  record_prior_acc_shape_mean = 1.5,
-  record_prior_acc_shape_shape = 1.5,
+  shape = 1.5,
   section_acc_shape = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,
@@ -52,9 +51,6 @@ each end}
 Units are depth / obs_age. E.g. if depth is in cm and age in kyr then the
 accumulation rate is in cm/kyr.}
 
-\item{record_prior_acc_shape_mean, record_prior_acc_shape_shape}{hyperparameters for the hyperprior on the shape of the distribution of K1
-coarse level accumulation rates. Defaults to 1.5, 1.5.}
-
 \item{section_acc_shape}{hyperparameter for the prior on the shape of the K
 fine level accumulation rates. Defaults to 1.5 - as for Bacon 2.2.}
 
@@ -81,6 +77,9 @@ model}
 \item{...}{Additional arguments can be \code{chain_id}, \code{init_r}, 
     \code{test_grad}, \code{append_samples}, \code{refresh},
     \code{enable_random_init}. See the documentation in \code{\link[rstan]{stan}}.}
+
+\item{record_prior_acc_shape_mean, record_prior_acc_shape_shape}{hyperparameters for the hyperprior on the shape of the distribution of K1
+coarse level accumulation rates. Defaults to 1.5, 1.5.}
 }
 \value{
 Returns a list composed of the output from the Stan sampler .$fit,

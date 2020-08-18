@@ -70,11 +70,12 @@ adam.fit2 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = baconr:::optimal_K(100, 10),
+  K = baconr:::optimal_K(100, 3),
   nu = 6,
+  shape = 1,
   #acc_mean_prior = 20,
-  record_prior_acc_shape_mean = 1.5,
-  record_prior_acc_shape_shape = 1.5,
+  #record_prior_acc_shape_mean = 1.5,
+  #record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
@@ -101,7 +102,7 @@ a2 <- rstan::summary(adam.fit2$fit)
 a2 <- as_tibble(a2$summary, rownames = "par")
 
 
-summary(adam.fit2$fit, par = c("alpha[1]", "shape"))$summary
+summary(adam.fit2$fit, par = c("alpha[1]", "beta"))$summary
 
 traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
 
@@ -142,6 +143,22 @@ prs <- bind_cols(alph, bet) %>%
   mutate(beta_calc = shape / parent_alpha)
 
 
+# extract a few iterations
+
+as_tibble(as.data.frame(adam.fit2$fit, pars = c("alpha")))
+
+
+prs <- tibble(
+shape = c(NA, rstan::extract(adam.fit2$fit, "shape_vec")[[1]][1,]),
+alpha = rstan::extract(adam.fit2$fit, "alpha")[[1]][1,],
+beta = rstan::extract(adam.fit2$fit, "beta")[[1]][1,]
+) %>% 
+  mutate(parent_alpha = alpha[p_idx])%>% 
+  mutate(beta_calc = shape / parent_alpha)
+
+
+
+
 
 ## with 3 layers
 
@@ -152,9 +169,8 @@ adam.fit2b <- adam(
   K = baconr:::optimal_K(1000, 10),
   nu = 6,
   #acc_mean_prior = acc.mean,
-  
-  record_prior_acc_shape_mean = 1.5,
-  record_prior_acc_shape_shape = 1.5,
+  #record_prior_acc_shape_mean = 1.5,
+  #record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
