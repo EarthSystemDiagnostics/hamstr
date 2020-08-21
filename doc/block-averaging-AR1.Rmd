@@ -1,0 +1,142 @@
+---
+title: "Affect of block-averaging on AR[1] coefficient"
+author: "Andrew M. Dolman"
+date: "19/08/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE, dpi = 300, cache = TRUE, autodep = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+BlockAverage <- function(ts1, scale){
+
+  ts2 <- stats::filter(ts1, rep(1/scale, scale))
+  ts2 <- ts(ts2[seq(ceiling(scale/2), length(ts2), by = scale)])
+  return(ts2)
+}
+
+GetARCoef <- function(ts1){
+  
+  ts1 <- ts1[is.na(ts1) == FALSE]
+  
+  f1 <- arima0(ts1, order = c(1,0,0))
+  return(f1$coef[1])
+}
+
+```
+
+```{r example_ts}
+
+set.seed(20200818)
+n <- 30
+dat <- tibble(
+  x = 1:n,
+  y = as.numeric(arima.sim(list(ar = 0.9), n)),
+  p = ifelse(x %in% seq(2, length(x), by = 3), TRUE, FALSE)
+)
+
+dat2 <- dat %>%
+  do({
+    tibble(
+      x = seq(2, length(.$y), 3),
+      y = BlockAverage(.$y, 3)
+    )
+  })
+
+
+rect_left <- seq(0.5, n, by = 3)
+rectangles <- data.frame(
+  xmin = rect_left,
+  xmax = rect_left + 3,
+  ymin = -Inf,
+  ymax = Inf,
+  fill = rep(c("a", "b"), times = length(rect_left)/2)
+)
+
+p.all <- dat %>%
+  ggplot(aes(x=x, y=y)) +
+  scale_colour_manual("", values = c("All points" = "#1b9e77", "Block Averaged" = "#d95f02", "Lag 3" = "#7570b3")) +
+  scale_fill_grey() +
+  theme_bw() +
+  theme(panel.grid = element_blank()) +
+  geom_rect(data=rectangles, aes(xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax, 
+                                 fill=fill), alpha=0.1, inherit.aes = F, show.legend = F)+
+  geom_point(aes(colour = "All points")) +
+  geom_line(aes(colour = "All points")) 
+
+p.sub <- p.all + 
+  geom_point(data = filter(dat, p == TRUE), aes(colour = "Lag 3")) +
+  geom_line(data = filter(dat, p == TRUE), aes(colour = "Lag 3")) 
+
+p.BA <- p.all  +
+  geom_point(data = dat2, aes(colour = "Block Averaged"))+
+  geom_line(data = dat2, aes(colour = "Block Averaged"))
+
+p.Both <- p.sub +
+  geom_point(data = dat2, aes(colour = "Block Averaged"))+
+  geom_line(data = dat2, aes(colour = "Block Averaged")) 
+
+```
+
+```{r fig_all}
+p.all
+```
+
+```{r fig_sub}
+p.sub
+```
+
+```{r fig_BA}
+p.BA
+```
+
+
+```{r fig_both}
+p.Both
+```
+
+
+```{r}
+BA.AR1 <- crossing(rep = 1:10, AR1 = c(0.7),
+                scl = 1:20) %>%
+  group_by(rep, AR1, scl) %>%
+  do({
+    ts1 <- arima.sim(list(ar = .$AR1), 1e04)
+    tibble(
+      AR1.Lag = .$AR1^.$scl,
+      AR1.BlockAverage = GetARCoef(BlockAverage(ts1, scale = .$scl[1]))
+    )
+  })
+
+BA.AR1 <- BA.AR1 %>%
+  ungroup() %>%
+  gather(type, AR1.coef, -scl, -AR1, -rep) %>%
+  group_by(type, AR1, scl) %>%
+  summarise_if(is.numeric, mean)
+
+fig.BA.AR1 <- BA.AR1 %>%
+  ggplot(aes(x = scl, y = AR1.coef, colour = type, group = paste(type, rep))) +
+  scale_colour_manual("", values = c("AR1.BlockAverage" = "#d95f02", "AR1.Lag" = "#7570b3")) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~AR1, ncol = 1, labeller = label_both) +
+  labs(x = "Lag / Block width") +
+  expand_limits(x  = 0)
+
+
+```
+
+```{r fig_lag_BA}
+fig.BA.AR1
+```
+

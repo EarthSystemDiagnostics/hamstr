@@ -9,6 +9,8 @@
 
 # knitr artefacts
 *_cache
+*files
+doc/*html
 
 # rstan::rstan.package.skeleton() instruction files
 Read-and-delete-me
@@ -31,3 +33,5 @@ src-x64
 doc/*.png
 doc/*.pdf
 inst/doc
+
+
