@@ -7,9 +7,9 @@
 alpha_indices(K)
 }
 \arguments{
-\item{K}{a vector with the number of new sub-divisions at each level,
-defaults to c(10, 10), resulting in two levels with 10 and 100 sections
-respectively.}
+\item{K}{A vector with the number of new sub-divisions at each hierarchical
+level, defaults to c(10, 10), resulting in two levels with 10 and 100
+sections respectively.}
 }
 \value{
 a list

@@ -15,52 +15,56 @@ make_stan_dat_adam(
   nu = 6,
   acc_mean_prior = NULL,
   shape = 1.5,
-  section_acc_shape = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,
   inflate_errors = 0
 )
 }
 \arguments{
-\item{depth}{Vector of depths from an observed age-depth profile}
+\item{depth}{Depths of observed ages (age control points)}
 
-\item{obs_age}{Observed age at each depth}
+\item{obs_age}{Observed age at each depth (age control points)}
 
 \item{obs_err}{Error associated with each observed age (1 standard error)}
 
-\item{top_depth}{the top and bottom depths of the age-depth
-model. Must encompass the range of the data. Default to the shallowest and
-deepest data points unless \code{pad_top_bottom = TRUE}}
+\item{top_depth}{The top and bottom depths of the desired
+age-depth model. Must encompass the range of the data. Defaults to the
+shallowest and deepest data points unless \code{pad_top_bottom = TRUE}}
 
-\item{bottom_depth}{the top and bottom depths of the age-depth
-model. Must encompass the range of the data. Default to the shallowest and
-deepest data points unless \code{pad_top_bottom = TRUE}}
+\item{bottom_depth}{The top and bottom depths of the desired
+age-depth model. Must encompass the range of the data. Defaults to the
+shallowest and deepest data points unless \code{pad_top_bottom = TRUE}}
 
 \item{pad_top_bottom}{logical, pad the length of the age-depth model by 5% on
 each end}
 
-\item{K}{a vector with the number of new sub-divisions at each level,
-defaults to c(10, 10), resulting in two levels with 10 and 100 sections
-respectively.}
+\item{K}{A vector with the number of new sub-divisions at each hierarchical
+level, defaults to c(10, 10), resulting in two levels with 10 and 100
+sections respectively.}
 
 \item{nu}{Degrees of freedom for the Student-t distributed error model.
 Defaults to 6, which is equivalent to the default parameterisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
 
-\item{acc_mean_prior}{parameter for the hyperprior on the overall mean accumulation rate for the record.
-Units are depth / obs_age. E.g. if depth is in cm and age in kyr then the
-accumulation rate is in cm/kyr.}
+\item{acc_mean_prior}{Hyperparameter for the prior on the overall mean
+accumulation rate for the record. Units are depth / obs_age. E.g. if depth
+is in cm and age in kyr then the accumulation rate is in cm/kyr. The
+overall mean accumulation rate is given a weak half-normal prior with mean
+= 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
+mean accumulation rate estimated by fitting a robust linear model using
+\code{\link{MASS::rlm}}.}
 
-\item{section_acc_shape}{hyperparameter for the prior on the shape of the K
-fine level accumulation rates. Defaults to 1.5 - as for Bacon 2.2.}
+\item{shape}{Hyperparameter for the shape of the priors on accumulation rates.
+Defaults to 1.5 - as for Bacon 2.2.}
 
 \item{mem_mean}{Hyperparameter: a parameter of the Beta prior distribution on
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 The prior on the correlation between layers is scaled according to the
-thickness of the layers *delta_c*, which is determined by the total length
-of the profile and the parameter *K*. mem_mean sets the mean value for *R*
-(defaults to 0.7), while *w* = R^(delta_c)}
+thickness of the sediment sections in the highest resolution hierarchical
+layer, *delta_c*, which is determined by the total length age-models and
+the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
+0.7), while *w* = R^(delta_c)}
 
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}

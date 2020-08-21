@@ -3,42 +3,56 @@
 // Add flexible addtional layer to alphas.
 
 data {
-  int<lower=0, upper=1> inflate_errors;
-  int<lower=0> N;
-  int<lower=0> K_fine;  // no of fine sections
-  int<lower=0> K_tot;  // total no of gamma parameters
-  int<lower=0> nu; // degrees of freedom of t error distribution
+  // age control points
+  int<lower=0> N; 
   vector[N] depth;
   vector[N] obs_age;
   vector[N] obs_err;
-  vector[K_fine] c_depth_bottom;
-  vector[K_fine] c_depth_top;
+
+  // resolution of age-depth model
+  int<lower=0> K_fine;  // number of highest resolution sections
+  int<lower=0> K_tot;  // total no of gamma parameters
+  
   int parent[K_tot]; // index sections to their parent sections
   
-  int which_c[N]; // index observations to their fine sections
-  real<lower = 0> delta_c; // width of each fine section
+  // modelled depths 
+  vector[K_fine] c_depth_bottom;
+  vector[K_fine] c_depth_top;
+  real<lower = 0> delta_c; // width of each highest resolution section
   
-  // hyperparameters
+ 
+  // hyperparameters for the gamma innovations
   
-  // parameters for the prior distribution of the overall mean acc rate
+  // prior for the oversall mean accumulation rate
   real<lower = 0> acc_mean_prior;
   
   // shape of the gamma distributions
   real<lower = 0> shape; 
   
+  
+  // hyperparameters for prior distribution on memory strength (the AR1 coefficient)
   real<lower = 0> mem_mean;
   real<lower = 0> mem_strength;
+
+  // observation error model parameters 
   
+  int<lower=0> nu; // degrees of freedom of t error distribution
+  int which_c[N]; // index observations to their fine sections
+ 
+  int<lower=0, upper=1> inflate_errors; // use error inflation model or not
+
 }
 transformed data{
   
   // transform mean and strength of memory beta distribution to alpha and beta
+  // as used to parameterise beta dist in stan function
   real<lower=0> mem_alpha = mem_strength * mem_mean;
   real<lower=0> mem_beta = mem_strength * (1-mem_mean);
   
   // position of the first highest resolution innovation (alpha)
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
   
+  // mean observation error, used to scale prior on additional error in error inflation model
   real<lower=0> mean_obs_err = mean(obs_err);
   
 }
@@ -95,19 +109,21 @@ transformed parameters{
   }
   
   
-  // Get the cumulative sum of the highest resolution innovations
+  // the cumulative sum of the highest resolution innovations
   c_ages[1] = age0;
   c_ages[2:(K_fine+1)] = age0 + cumulative_sum(x * delta_c);
   
-  // Interpolate to the positions of the observations
+  // age model interpolated to the positions of the observations
   Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
 }
 
 model {
   // the overall mean accumulation rate
+  // weak half normal prior
   alpha[1] ~ normal(0, 10*acc_mean_prior);
   
   // the gamma distributed innovations
+  // prior parameterised by use set shape and the value of it's parent section
   alpha[2:K_tot] ~ gamma(shape, shape ./ alpha[parent[2:K_tot]]);
   
   // the memory parameters
