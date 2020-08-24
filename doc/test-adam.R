@@ -8,6 +8,8 @@ library(rstan)
 # devtools::load_all()
 # devtools::install(quick = FALSE, dependencies = FALSE)
 
+#sm <- stan_model("inst/stan/adam.stan")
+
 
 #Load and filter data
 all.terr.dat <- readr::read_csv2("doc/Dating_Data.csv") %>%
@@ -21,8 +23,8 @@ all.terr.14C.dat <- all.terr.dat %>%
   ungroup()
 
 
-#name <- "MOKHOVOE"
-name <- "HANGING"
+name <- "BEEFPAST"
+#name <- "HANGING"
 
 dat2 <- all.terr.14C.dat %>%
   filter(DataName == name)
@@ -49,10 +51,6 @@ adam.fit1 <- adam(
   obs_err = dat1$age.14C.cal.se,
   K = c(100),
   nu = 6,
-  #acc_mean_prior = acc.mean,
-
-  record_prior_acc_shape_mean = 1.5,
-  record_prior_acc_shape_shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
@@ -71,10 +69,10 @@ adam.fit2 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = baconr:::optimal_K(100, 10),
+  K = baconr:::optimal_K(500, 3),
   nu = 6,
   shape = 1.5,
-  mem_mean = 0.7, mem_strength = 4,
+  mem_mean = 0.5, mem_strength = 2,
   inflate_errors = 0, chains = 3)
 
 # warmup sample
@@ -89,7 +87,9 @@ adam.fit2 <- adam(
 
 get_elapsed_time(adam.fit2$fit)
 
-ad_K10_100_rib <- plot_adam(adam.fit2, plot_diagnostics = T)
+ad_K10_100_rib <- plot_adam(adam.fit2, plot_diagnostics = F) +
+  labs(subtitle = name)
+
 ad_K10_100_spag <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 1000, plot_diagnostics = T)
 
 ad_K10_100_spag_nod <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
