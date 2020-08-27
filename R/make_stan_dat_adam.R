@@ -90,10 +90,8 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
                                  K = c(10, 10), nu = 6,
                                  acc_mean_prior = NULL,
                                shape = 1.5,
-                                 #record_prior_acc_shape_mean = 1.5,
-                                 #record_prior_acc_shape_shape = 1.5,
-                                 # section_acc_shape = 1.5,
                                  mem_mean = 0.7, mem_strength = 4,
+                               scale_R = 1,
                                  inflate_errors = 0) {
 
   l <- c(as.list(environment()))

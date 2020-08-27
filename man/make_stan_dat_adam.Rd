@@ -69,7 +69,7 @@ the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 
-\item{inflate_errors}{logical. If set to TRUE, observation errors are
+\item{inflate_errors}{logical: If set to TRUE, observation errors are
 inflated so that data are consistent with a Bacon type monotonic age-depth
 model}
 }

@@ -73,8 +73,8 @@ adam.fit2 <- adam(
   nu = 6,
   shape = 1.5,
   mem_mean = 0.5, mem_strength = 2,
-  scale_R = 0,
-  inflate_errors = 0,
+  scale_R = FALSE,
+  inflate_errors = FALSE,
   chains = 3)
 
 # warmup sample

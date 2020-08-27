@@ -8,6 +8,8 @@ optimal_K(K_tot, target_K_per_lvl = 10)
 }
 \arguments{
 \item{K_tot}{}
+
+\item{target_K_per_lvl}{}
 }
 \value{
 

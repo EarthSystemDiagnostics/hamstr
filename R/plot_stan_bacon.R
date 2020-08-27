@@ -14,7 +14,7 @@
 #' @importFrom rstan extract
 #' @importFrom magrittr %>%
 #' @examples
-plot_adam <- function(adam_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, plot_diagnostics = FALSE) {
+plot_adam <- function(adam_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, plot_diagnostics = TRUE) {
 
   type <- match.arg(type)
 

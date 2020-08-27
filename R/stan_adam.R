@@ -69,10 +69,9 @@ adam <- function(depth, obs_age, obs_err,
                  pad_top_bottom = FALSE,
                  acc_mean_prior = NULL,
                  shape = 1.5,
-                 section_acc_shape = 1.5,
                  mem_mean = 0.7, mem_strength = 4,
-                 scale_R = 1,
-                 inflate_errors = 0,
+                 scale_R = TRUE,
+                 inflate_errors = FALSE,
                  iter = 2000, chains = 3, ...){
   
   
@@ -83,7 +82,8 @@ adam <- function(depth, obs_age, obs_err,
                                  acc_mean_prior = acc_mean_prior,
                                  shape = shape,
                                  mem_mean=mem_mean, mem_strength=mem_strength,
-                                 inflate_errors = inflate_errors)
+                                 scale_R = as.numeric(scale_R),
+                                 inflate_errors = as.numeric(inflate_errors))
   
   inits <- get_inits_adam(stan_dat)
   

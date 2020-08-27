@@ -1,5 +1,5 @@
 ---
-title: "baconr: An rstan implementation of the Bayesian Age-Depth model *Bacon* (Blaauw and Christen, 2011)."
+title: "hamstr: Hierarchical Accumulation Modelling (with Stan in R)."
 output: 
   html_document: 
     keep_md: yes
@@ -9,7 +9,7 @@ editor_options:
 
 -------------------------------
 
-**baconr** implements the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). Functions from the R package **Bchron** (Parnell 2016) can be used to calibrate ^14^C ages to calendar ages.
+**hamstr** implements a the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). Functions from the R package **Bchron** (Parnell 2016) can be used to calibrate ^14^C ages to calendar ages.
 
 
 There are currently just three exported functions: 

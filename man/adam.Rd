@@ -15,9 +15,9 @@ adam(
   pad_top_bottom = FALSE,
   acc_mean_prior = NULL,
   shape = 1.5,
-  section_acc_shape = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,
+  scale_R = 1,
   inflate_errors = 0,
   iter = 2000,
   chains = 3,
@@ -69,7 +69,9 @@ the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 
-\item{inflate_errors}{logical. If set to TRUE, observation errors are
+\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or not}
+
+\item{inflate_errors}{logical: If set to TRUE, observation errors are
 inflated so that data are consistent with a Bacon type monotonic age-depth
 model}
 

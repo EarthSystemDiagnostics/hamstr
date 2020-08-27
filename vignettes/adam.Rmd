@@ -19,49 +19,139 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(baconr)
 library(tidyverse)
+
+set.seed(20200827)
 ```
 
 
-Hyperprior on the mean accumulation rate.
+A quick example using the example data from the rbacon package.
+
+
+## Calibrate the radiocarbon ages to calendar ages.
 
 ```{r}
-mu <- 50
-sigma <- 1
-  
-  
-lnorm.examples <- crossing(
-  mu = c(mu),
-  x = seq(0, 1000, length.out = 1000)
-) %>% 
-  mutate(d = dlnorm(x, meanlog = log(mu), sdlog = sigma))
+# function calibrate_14C_age will append columns to a data.frame with the 
+# calendar ages and 1 sigma uncertainties
+MSB2K_cal <- calibrate_14C_age(MSB2K, age.14C = "age", age.14C.se = "error")
+```
 
-lnorm.examples %>% 
-  ggplot(aes(x = x, y = d, colour = factor(mu))) +
-  geom_line() +
-  geom_vline(aes(xintercept = mu, colour = as.factor(mu))) +
- # geom_vline(xintercept = qlnorm(c(0.025, 0.5, 0.975), log(mu), sigma), colour = "green")+
-  geom_vline(xintercept = mu, colour = "red", linetype = 2) +
-  geom_vline(xintercept = exp(log(mu) - sigma^2), colour = "blue")
+#### Assign to 3 cores, one per chain, as long as the machine has at least 3
 
-mu <- 1000
-sigma <- 0.4
-s <- rlnorm(1e05, meanlog = log(mu), sdlog = sigma)
-qlnorm(c(0.025, 0.5, 0.975), log(mu), sigma)
-hist(s, 100)
-abline(v = qlnorm(c(0.025, 0.5, 0.975), log(mu), sigma))
-
-
-mu <- 1000
-sh <- 5
-g <- rgamma(1e05, sh, sh/mu)
-hist(g, 100)
-abline(v = mu)
-mean(g)
-qgamma(c(0.025, 0.5, 0.975), sh, sh/mu)
-
+```{r}
+if (parallel::detectCores() >= 3) options(mc.cores = 3)
 ```
 
 ```{r}
+adam_fit_1 <- adam(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(10, 10))
+```
+
+
+### Default plot
+
+```{r}
+plot_adam(adam_fit_1)
+```
+
+### Plot "spaghetti" instead of shaded regions
+
+```{r}
+plot_adam(adam_fit_1, type = "spag")
+```
+
+### Prior and posterior of overall mean accumulation rate
+
+```{r}
+plot_acc_mean_prior_posterior(adam_fit_1)
+```
+
+### Plot modelled accumulation rates at each hierarchical level
+
+```{r}
+plot_hierarchical_acc_rate(adam_fit_1)
+```
+
+
+### Plot memory prior and posterior
+
+As for this example the highest resolution sections are approximately 1 cm thick, there is not much difference between R and w. 
+
+```{r}
+plot_memory_prior_posterior(adam_fit_1)
+```
+
+
+### Examine calendar age PDFs
+
+Unlike Bacon, HAMStR approximates the complicated empirical calendar age PDFs with t-distributions. These can be examined with the function `compare_14C_PDF`
+
+The six dates are plotted here.
+
+```{r}
+i <- seq(1, 40, by = floor(40/6))[1:6]
+compare_14C_PDF(MSB2K$age[i], MSB2K$error[i])
+```
+
+
+## Refit with fewer sections at the highest resolution
+
+
+```{r}
+adam_fit_2 <- adam(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(4, 5))
+```
+
+```{r}
+plot_adam(adam_fit_2)
+```
+
+```{r}
 
 ```
+
+
+## Refit with 21 non-hierarchical sections
+
+```{r}
+adam_fit_3 <- adam(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(21))
+```
+
+```{r}
+plot_adam(adam_fit_3)
+```
+
+```{r}
+plot_adam(adam_fit_3, type = "spag")
+```
+
+
+
+## Refit with maximum hierarchical structure
+
+```{r}
+adam_fit_4 <- adam(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(10, 10),
+                   mem_mean = 0.5, mem_strength = 2,
+                   scale_R = FALSE)
+```
+
+```{r}
+plot_adam(adam_fit_4)
+
+plot_acc_mean_prior_posterior(adam_fit_4)
+```
+
+```{r}
+plot_adam(adam_fit_4, type = "spag")
+```
+
 
