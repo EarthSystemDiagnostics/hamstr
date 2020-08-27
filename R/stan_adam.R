@@ -35,7 +35,8 @@
 #'   0.7), while *w* = R^(delta_c)
 #' @param mem_strength Hyperparameter: sets the strength of the memory prior,
 #'   defaults to 4 as in Bacon 2.2 
-#' @param inflate_errors logical. If set to TRUE, observation errors are
+#' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or not
+#' @param inflate_errors logical: If set to TRUE, observation errors are
 #'   inflated so that data are consistent with a Bacon type monotonic age-depth
 #'   model
 #' @inheritParams rstan::sampling
@@ -70,6 +71,7 @@ adam <- function(depth, obs_age, obs_err,
                  shape = 1.5,
                  section_acc_shape = 1.5,
                  mem_mean = 0.7, mem_strength = 4,
+                 scale_R = 1,
                  inflate_errors = 0,
                  iter = 2000, chains = 3, ...){
   

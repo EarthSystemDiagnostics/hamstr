@@ -39,6 +39,7 @@ data {
   int<lower=0> nu; // degrees of freedom of t error distribution
   int which_c[N]; // index observations to their fine sections
  
+  int<lower=0, upper=1> scale_R; // scale the AR1 coefficient or not
   int<lower=0, upper=1> inflate_errors; // use error inflation model or not
 
 }
@@ -77,7 +78,7 @@ parameters {
 transformed parameters{
   
   // the AR1 coefficient scaled for the thickness of the modelled sediment sections
-  real<lower = 0, upper = 1> w = R^(delta_c);
+  real<lower = 0, upper = 1> w;
   
   // the highest resolution AR1 correlated innovations
   vector[K_fine] x;
@@ -90,6 +91,12 @@ transformed parameters{
   
   // the inflated observation errors
   vector[N] obs_err_infl;
+  
+  if (scale_R == 1){
+    w = R^(delta_c);
+  } else {
+    w = R;
+  }
   
   if (inflate_errors == 1){
     for (n in 1:N)
