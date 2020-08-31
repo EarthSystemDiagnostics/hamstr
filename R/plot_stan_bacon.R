@@ -42,6 +42,133 @@ plot_adam <- function(adam_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, 
 }
 
 
+#' Title
+#'
+#' @param prior 
+#' @param posterior 
+#'
+#' @return
+#' @keywords internal
+#'
+#' @examples
+plot_prior_posterior_hist <- function(prior, posterior){
+  clrs <- c("Posterior" = "Blue", "Prior" = "Red")
+  ggplot() +
+    geom_histogram(data = posterior,
+                   aes(x = x, after_stat(density),
+                       fill = "Posterior"),
+                   alpha = 0.5, bins = 100) +
+    geom_line(data = prior, aes(x = x, y = d, colour = "Prior")) +
+    facet_wrap(~par, scales = "free") +
+    scale_fill_manual(values = clrs) +
+    scale_colour_manual(values = clrs) +
+    guides(fill = guide_legend(override.aes = list(alpha = c(0.5))))+
+    labs(
+      x = "Value",
+      y = "Density",
+      colour = "",
+      fill = ""
+    ) +
+    theme_bw() 
+}
+
+
+#' Title
+#'
+#' @param adam_fit 
+#'
+#' @return
+#' @export
+#' @import rstan 
+#'
+#' @examples
+plot_infl_prior_posterior <- function(adam_fit){
+  
+  clrs <- c("Posterior" = "Blue", "Prior" = "Red")
+  
+  adam_dat <- adam_fit$data
+  
+  infl_mean_shape_post <-
+    tibble(infl_mean = as.vector(rstan::extract(adam_fit$fit, "infl_mean")[[1]]),
+           infl_shape = as.vector(rstan::extract(adam_fit$fit, "infl_shape")[[1]])) %>% 
+    mutate(iter = 1:n())
+  
+  
+  max_x_shape <- with(adam_dat, {
+    infl_shape_prior_upr <- qgamma(c(0.99), shape = infl_shape_shape, rate =  infl_shape_shape / infl_shape_mean)
+  
+     max(c(infl_shape_prior_upr, infl_mean_shape_post$infl_shape))
+  }) 
+  
+  max_x_mean <- with(adam_dat, {
+    infl_mean_prior_upr <- qnorm(c(0.99), 0, infl_sigma_sd)
+    max(c(infl_mean_prior_upr, infl_mean_shape_post$infl_mean))
+  })
+  
+  
+  infl_fac <- rstan::extract(adam_fit$fit, "infl")[[1]] %>% 
+    as_tibble() %>% 
+    gather() %>% 
+    mutate(key = readr::parse_number(key))
+  
+ 
+  p.infl.fac <- rstan::stan_plot(adam_fit$fit, pars = "infl")
+  
+ 
+  
+  infl_prior_shape <-
+    tibble(x = seq(0, max_x_shape, length.out = 1000)) %>%
+    mutate(
+      #infl_mean = 2*dnorm(x, 0,  sd = adam_dat$infl_sigma_sd),
+      d = dgamma(x-1, adam_dat$infl_shape_shape,  rate = adam_dat$infl_shape_shape / adam_dat$infl_shape_mean),
+      par = "infl_shape")
+  
+  infl_prior_mean <-
+    tibble(x = seq(0, max_x_mean, length.out = 1000)) %>%
+    mutate(
+      d = 2*dnorm(x, 0,  sd = adam_dat$infl_sigma_sd),
+      par = "infl_mean")
+  
+  infl_priors <- bind_rows(infl_prior_mean, infl_prior_shape)
+  
+  infl_mean_shape_post_long <- infl_mean_shape_post %>% 
+    gather(par, x, -iter)
+ 
+  p.pars <- plot_prior_posterior_hist(infl_priors, infl_mean_shape_post_long)
+  
+  
+  infl_mean_shape_post <- infl_mean_shape_post %>% 
+    mutate(q99 = qgamma(0.75, infl_shape, rate = infl_shape/infl_mean))
+  
+  
+  infl_pars_prior_dist <- infl_mean_shape_post %>% 
+    filter(iter %in% sample.int(n(), 10)) %>% 
+    crossing(., tibble(x = exp(seq(log(0.01), log(quantile(infl_mean_shape_post$q99, prob = 0.95)), length.out = 100)))) %>% 
+    mutate(d = dgamma(x, shape = infl_shape, rate = infl_shape / infl_mean),
+           #d = dgamma(x, shape = infl_shape, rate = infl_shape / 1),
+           par = "Modelled prior for infl_fac")
+  
+  
+  p.priors <- infl_pars_prior_dist  %>% 
+    ggplot(aes(x = x, y = d, group = iter)) +
+    geom_line(alpha = 1,#/sqrt(100),
+              colour = "Red") +
+    theme_bw() +
+    #facet_wrap(~par+iter, scales = "free") +
+    labs(y = "Density", x = "Value") 
+  
+  p <- egg::ggarrange(plots = list(p.pars, p.priors,
+                                   #p.sigma, 
+                                   p.infl.fac), ncol = 2)
+  
+  return(p)
+  
+}
+
+
+
+
+
 #' Plot Mean Accumulation Rate Prior and Posterior Distributions
 #'
 #' @param adam_fit 

@@ -3,6 +3,8 @@ library(tidyverse)
 library(baconr)
 library(rstan)
 
+# build -----
+
 # devtools::document()
 # pkgbuild::compile_dll(force = TRUE)
 # devtools::load_all()
@@ -23,8 +25,8 @@ all.terr.14C.dat <- all.terr.dat %>%
   ungroup()
 
 
-name <- "BEEFPAST"
-#name <- "HANGING"
+#name <- "BEEFPAST"
+name <- "BRUCHBG1"
 
 dat2 <- all.terr.14C.dat %>%
   filter(DataName == name)
@@ -207,28 +209,33 @@ ggsave("doc/ad_K10_100_1000_HA.png", ad_K10_100_1000_HA, width = 6, height = 4)
 
 
 #shinystan::launch_shinystan(adam.fit3$fit)
-
+## adam.fit3 -----
 
 adam.fit3 <- adam(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  #top_depth = 1,
   K = baconr:::optimal_K(100, 10),
-  nu = 6,
-  #acc_mean_prior = acc.mean,
-
-  record_prior_acc_shape_mean = 1.5,
-  record_prior_acc_shape_shape = 1.5,
+  shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
-  inflate_errors = 1, chains = 3)
+  infl_shape_shape = 1,
+  infl_shape_mean = 1,
+  #infl_mean_shape = 1,
+  #infl_mean_mean = 3,
+  inflate_errors = TRUE, chains = 3)
 
 plot_adam(adam.fit3, type = "ribbon", plot_diagnostics = TRUE)
 plot_adam(adam.fit3, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
 
-print(adam.fit3$fit, pars = c("infl_mean", "infl_shape", "infl_sigma", "infl"))
-traceplot(adam.fit3$fit, pars = c("infl_mean", "infl_shape", "infl_sigma"), inc_warmup = T)
+print(adam.fit3$fit, pars = c("infl", "infl_mean",  "infl_shape"#, "infl_sigma"
+                              ))
+traceplot(adam.fit3$fit, pars = c("infl_mean", "infl_shape"#, "infl_sigma"
+                                  ), inc_warmup = T)
 
+
+plot_infl_prior_posterior(adam.fit3)
+
+pairs(adam.fit3$fit, pars = c("infl_mean", "infl_shape"))
 
 a3 <- rstan::summary(adam.fit3$fit)
 a3 <- as_tibble(a3$summary, rownames = "par")
@@ -244,7 +251,12 @@ traceplot(adam.fit3$fit, par = c("infl"))
 summary(adam.fit3$fit, par = c("infl_mean", "infl_shape"))$summary
 
 
-baconr:::plot_memory_prior_posterior(adam.fit3)
+as.data.frame(adam.fit3$fit, pars = c("infl[1]", "obs_err_infl[1]")) %>% 
+  as_tibble() %>% 
+  mutate(obs_err = dat1$age.14C.cal.se[1],
+         tst = obs_err + `infl[1]`) %>% 
+  ggplot(aes(x = `obs_err_infl[1]`, y = `infl[1]`)) +
+  geom_point()
 
 
 

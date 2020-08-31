@@ -42,6 +42,16 @@ data {
   int<lower=0, upper=1> scale_R; // scale the AR1 coefficient or not
   int<lower=0, upper=1> inflate_errors; // use error inflation model or not
 
+
+ // hyperparameters for the error inflation model
+  real<lower = 0> infl_shape_shape;  
+  real<lower = 0> infl_shape_mean;  
+ 
+  real<lower = 0> infl_sigma_sd;  
+  
+ // real<lower = 0> infl_mean_shape;  
+ // real<lower = 0> infl_mean_mean;  
+ 
 }
 transformed data{
   
@@ -53,9 +63,7 @@ transformed data{
   // position of the first highest resolution innovation (alpha)
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
   
-  // mean observation error, used to scale prior on additional error in error inflation model
-  real<lower=0> mean_obs_err = mean(obs_err);
-  
+ 
 }
 parameters {
   // AR1 coeffiecient at 1 depth unit
@@ -71,9 +79,9 @@ parameters {
   // these have length 0 if inflate_errors == 0 meaning that the parameters are 
   // in scope, so the model runs, but are zero length so nothing is sampled
   real<lower = 0> infl_mean[inflate_errors];
-  real<lower = 0> infl_shape[inflate_errors];
+  real<lower = 0> infl_shape_1[inflate_errors];
   vector<lower = 0>[inflate_errors ? N : 0] infl;
-  real<lower = 0> infl_sigma[inflate_errors];
+  //real<lower = 0> infl_sigma[inflate_errors];
 }
 transformed parameters{
   
@@ -90,6 +98,7 @@ transformed parameters{
   vector[N] Mod_age;
   
   // the inflated observation errors
+  real<lower = 0> infl_shape[inflate_errors];
   vector[N] obs_err_infl;
   
   if (scale_R == 1){
@@ -100,7 +109,9 @@ transformed parameters{
   
   if (inflate_errors == 1){
     for (n in 1:N)
-    obs_err_infl[n] = obs_err[n] + infl_sigma[1] * infl[n];
+    //obs_err_infl[n] = obs_err[n] + infl_sigma[1] * infl[n];
+    obs_err_infl[n] = obs_err[n] + infl[n];
+    infl_shape[1] = infl_shape_1[1] + 1;
   } else {
     obs_err_infl = obs_err;
   }
@@ -138,11 +149,13 @@ model {
   
   // the observation error inflation model
   if (inflate_errors == 1){
-    infl_mean ~ gamma(1, 1);
-    infl_shape ~ gamma(1, 1);
-    infl ~ gamma(infl_shape[1], infl_shape[1] / infl_mean[1]);
+    //infl_mean ~ gamma(infl_mean_shape, infl_mean_shape / infl_mean_mean);
+    infl_shape ~ gamma(infl_shape_shape, infl_shape_shape / infl_shape_mean);
     
-    infl_sigma ~ normal(0, mean_obs_err);
+    infl ~ gamma(infl_shape[1], infl_shape[1] / infl_mean[1]);
+    //infl ~ gamma(infl_shape[1], infl_shape[1] / 1);
+    
+    infl_mean ~ normal(0, infl_sigma_sd);
   }
   
   // the Likelihood of the data given the model

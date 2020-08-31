@@ -17,8 +17,11 @@ adam(
   shape = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,
-  scale_R = 1,
-  inflate_errors = 0,
+  scale_R = TRUE,
+  inflate_errors = FALSE,
+  infl_sigma_sd = NULL,
+  infl_shape_shape = 1,
+  infl_shape_mean = 1,
   iter = 2000,
   chains = 3,
   ...

@@ -8,7 +8,7 @@ plot_adam(
   adam_fit,
   type = c("ribbon", "spaghetti"),
   n.iter = 1000,
-  plot_diagnostics = FALSE
+  plot_diagnostics = TRUE
 )
 }
 \arguments{

@@ -17,7 +17,11 @@ make_stan_dat_adam(
   shape = 1.5,
   mem_mean = 0.7,
   mem_strength = 4,
-  inflate_errors = 0
+  scale_R = 1,
+  inflate_errors = 0,
+  infl_sigma_sd = NULL,
+  infl_shape_shape = 1,
+  infl_shape_mean = 1
 )
 }
 \arguments{
@@ -68,6 +72,8 @@ the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
 
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
+
+\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or not}
 
 \item{inflate_errors}{logical: If set to TRUE, observation errors are
 inflated so that data are consistent with a Bacon type monotonic age-depth

@@ -92,7 +92,9 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
                                shape = 1.5,
                                  mem_mean = 0.7, mem_strength = 4,
                                scale_R = 1,
-                                 inflate_errors = 0) {
+                                 inflate_errors = 0,
+                               infl_sigma_sd = NULL, 
+                               infl_shape_shape = 1, infl_shape_mean = 1) {
 
   l <- c(as.list(environment()))
   
@@ -115,6 +117,12 @@ make_stan_dat_adam <- function(depth, obs_age, obs_err,
   l$depth <- depth[ord]
   l$obs_age <- obs_age[ord]
   l$obs_err <- obs_err[ord]
+  
+  
+  if (is.null(infl_sigma_sd)){
+    l$infl_sigma_sd <- 10 * mean(obs_err) 
+  }
+  
 
   if (pad_top_bottom == TRUE){
     # Set start depth to 5% less than first depth observation, and DO allow negative depths
@@ -212,7 +220,7 @@ get_inits_adam <- function(stan_dat){
   # need to make this conditional and make sure initial values are arrays!
   if (stan_dat$inflate_errors == 1){
     l$infl_mean = as.array(abs(rnorm(1, 0, 0.1)))
-    l$infl_sd = as.array(abs(rnorm(1, 0, 0.1)))
+    l$infl_shape = as.array(1+abs(rnorm(1, 0, 0.1)))
     l$infl = abs(rnorm(stan_dat$N, 0, 0.1))
   } else {
     l$infl_mean = numeric(0)

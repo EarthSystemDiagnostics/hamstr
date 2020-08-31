@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 library(baconr)
 library(tidyverse)
 
+
 set.seed(20200827)
 ```
 
@@ -154,4 +155,29 @@ plot_acc_mean_prior_posterior(adam_fit_4)
 plot_adam(adam_fit_4, type = "spag")
 ```
 
+
+```{r}
+adam_fit_5 <- adam(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(10, 10),
+                   mem_mean = 0.5, mem_strength = 2,
+                   scale_R = FALSE,
+                   inflate_errors = TRUE,
+                   infl_shape_shape = 3, infl_shape_mean = 5)
+
+plot_adam(adam_fit_5)
+
+print(adam_fit_5$fit, pars = c("infl", "infl_mean", "infl_shape", "infl_shape_1"))
+
+traceplot(adam_fit_5$fit, pars = c("infl_mean", "infl_shape"), inc_warmup = T)
+
+library(rstan)
+plot_infl_prior_posterior(adam_fit_5)
+```
+
+
+```{r}
+
+```
 
