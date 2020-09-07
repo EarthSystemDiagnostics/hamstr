@@ -8,9 +8,14 @@ library(rstan)
 # devtools::document()
 # pkgbuild::compile_dll(force = TRUE)
 # devtools::load_all()
+
+# devtools::install(quick = FALSE)
 # devtools::install(quick = FALSE, dependencies = FALSE)
 
 #sm <- stan_model("inst/stan/adam.stan")
+#stan_data <- baconr::make_stan_dat_adam(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se)
+
+#rstan::sampling(sm, data = stan_data, iter = 10)
 
 
 #Load and filter data
@@ -31,7 +36,7 @@ name <- "BRUCHBG1"
 dat2 <- all.terr.14C.dat %>%
   filter(DataName == name)
 
-dat1 <- ecustools::CalibrateAge(dat2, age.14C = "age", age.14C.se = "sigma.age") %>%
+dat1 <- calibrate_14C_age(dat2, age.14C = "age", age.14C.se = "sigma.age") %>%
   filter(complete.cases(age.14C.cal)) %>%
   select(depth, age.14C.cal, age.14C.cal.se, age, sigma.age) %>%
   mutate(age.14C.cal = round(age.14C.cal),
@@ -45,7 +50,7 @@ dat1 %>%
 
 #options(mc.cores = parallel::detectCores())
 
-options(mc.cores = 3)
+options(mc.cores = 4)
 
 adam.fit1 <- adam(
   depth = dat1$depth,
