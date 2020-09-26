@@ -49,7 +49,7 @@ plot_hamstr <- function(hamstr_fit, type = c("ribbon", "spaghetti"), n.iter = 10
 #'
 #' @return
 #' @keywords internal
-#'
+#' @import ggplot2
 #' @examples
 plot_prior_posterior_hist <- function(prior, posterior){
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
@@ -80,7 +80,8 @@ plot_prior_posterior_hist <- function(prior, posterior){
 #' @return
 #' @export
 #' @import rstan 
-#'
+#' @import ggplot2
+#' 
 #' @examples
 plot_infl_prior_posterior <- function(hamstr_fit){
   
@@ -171,8 +172,9 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 
 #' Plot Mean Accumulation Rate Prior and Posterior Distributions
 #'
-#' @param hamstr_fit 
-#'
+#' @param hamstr_fit
+#'  
+#' @import ggplot2
 #' @return
 #' @export
 plot_acc_mean_prior_posterior <- function(hamstr_fit) {
@@ -231,7 +233,8 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #'
 #' @return
 #' @export
-#'
+#' @import ggplot2
+#' 
 #' @examples
 plot_memory_prior_posterior <- function(hamstr_fit){
   # memory prior
@@ -262,6 +265,16 @@ plot_memory_prior_posterior <- function(hamstr_fit){
   return(p.mem)
 }
 
+#' Title
+#'
+#' @param gg 
+#' @param hamstr_fit 
+#'
+#' @return
+#' 
+#' @import ggplot2
+#'
+#' @keywords internal
 add_subdivisions <- function(gg, hamstr_fit){
 
   tick_dat <- hierarchical_depths(hamstr_fit$data)
@@ -289,7 +302,8 @@ add_subdivisions <- function(gg, hamstr_fit){
 #'
 #' @return
 #' @export
-#'
+#' @import ggplot2
+#' 
 #' @examples
 plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
@@ -367,6 +381,8 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 #' @return
 #' @export
 #'
+#' @import ggplot2
+#' 
 #' @examples
 plot_hierarchical_acc_rate <- function(hamstr_fit){
 
