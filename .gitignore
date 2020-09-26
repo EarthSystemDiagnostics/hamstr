@@ -34,4 +34,4 @@ doc/*.png
 doc/*.pdf
 inst/doc
 
-
+!readme_files/
