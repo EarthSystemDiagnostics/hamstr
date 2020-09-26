@@ -14,9 +14,9 @@ editor_options:
 
 There are currently just three exported functions: 
 
-* `make_stan_dat` prepares data and parameter values into the correct format to be passed to the Stan model 
-* `stan_bacon` calls a pre-compiled Stan implementation of Bacon and estimates the age model
-* `plot_stan_bacon` plots a sample from the posterior distribution of the estimated age model
+* `make_stan_dat_hamstr` prepares data and parameter values into the correct format to be passed to the Stan model 
+* `stan_hamstr` calls a pre-compiled Stan implementation of Bacon and estimates the age model
+* `plot_stan_hamstr` plots a sample from the posterior distribution of the estimated age model
 
 **hamstr** also includes the example data, core MSB2K, included in the existing C++ implementation of [Bacon v2.2](http://www.chrono.qub.ac.uk/blaauw/bacon.html)
 
@@ -96,13 +96,13 @@ MSB2K$age.cal.sd <- sapply(cal.ages, function(x) SimplifyCalAge(x$ageGrid, x$den
 ```
 
 
-the output from `make_stan_dat` is shown here to illustrate the required data and parameter format, but a separate call to `make_stan_dat` is not normally necessary as it is used internally by `stan_bacon`
+the output from `make_stan_dat_hamstr` is shown here to illustrate the required data and parameter format, but a separate call to `make_stan_dat_hamstr` is not normally necessary as it is used internally by `stan_hamstr`
 
 ```{r}
 # Get number of sections K, so that they will be ~ 5cm
 K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
 
-stan_dat <- make_stan_dat(depth = MSB2K$depth, 
+stan_dat <- make_stan_dat_hamstr(depth = MSB2K$depth, 
   obs_age = MSB2K$age.cal, 
   obs_err = MSB2K$age.cal.sd,
   K = K_for_5cm, nu = 6,
@@ -137,10 +137,10 @@ stan_dat
 ``` 
 
 
-### Fit the bacon model with `stan_bacon`
+### Fit the bacon model with `stan_hamstr`
 
 ```{r}
-fit <- stan_bacon(
+fit <- stan_hamstr(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age.cal, 
   obs_err = MSB2K$age.cal.sd,
@@ -161,7 +161,7 @@ print(fit$fit, par = c("R", "w", "c_ages"))
 
 ```{r bacon_defaults}
 set.seed(20170406)
-plot_stan_bacon(fit, 1000)
+plot_stan_hamstr(fit, 1000)
 ```
 
 
@@ -169,7 +169,7 @@ plot_stan_bacon(fit, 1000)
 
 
 ```{r, results='hide'}
-fit2 <- stan_bacon(
+fit2 <- stan_hamstr(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age.cal, 
   obs_err = MSB2K$age.cal.sd,
@@ -181,7 +181,7 @@ fit2 <- stan_bacon(
 
 
 ```{r stronger_prior}
-plot_stan_bacon(fit2, 1000)
+plot_stan_hamstr(fit2, 1000)
 ```
 
 
@@ -189,7 +189,7 @@ plot_stan_bacon(fit2, 1000)
 
 
 ```{r, results='hide'}
-fit3 <- stan_bacon(
+fit3 <- stan_hamstr(
   depth = MSB2K$depth, 
   obs_age = MSB2K$age.cal, 
   obs_err = MSB2K$age.cal.sd,
@@ -201,7 +201,7 @@ fit3 <- stan_bacon(
 
 
 ```{r weaker_prior}
-plot_stan_bacon(fit3, 1000)
+plot_stan_hamstr(fit3, 1000)
 ```
 
 
@@ -214,7 +214,7 @@ MSB2K.2 <- bind_rows(MSB2K, teph) %>%
   arrange(age.cal)
   
 
-fit4 <- stan_bacon(
+fit4 <- stan_hamstr(
   depth = MSB2K.2$depth, 
   obs_age = MSB2K.2$age.cal, 
   obs_err = MSB2K.2$age.cal.sd,
@@ -226,7 +226,7 @@ fit4 <- stan_bacon(
 
 
 ```{r tephras}
-plot_stan_bacon(fit4, 1000) +
+plot_stan_hamstr(fit4, 1000) +
   geom_pointrange(data = teph,
                   aes(x = depth, y = age.cal, ymax = age.cal + age.cal.sd, ymin = age.cal - age.cal.sd),
                   group = NA, colour = "Blue", alpha = 0.5) 
@@ -240,7 +240,7 @@ plot_stan_bacon(fit4, 1000) +
 hi_ages <- MSB2K$age
 hi_ages[MSB2K$depth > 40] <- hi_ages[MSB2K$depth > 40] + 1000
 
-fit_hi <- stan_bacon(
+fit_hi <- stan_hamstr(
   depth = MSB2K$depth, 
   obs_age = hi_ages, 
   obs_err = MSB2K$age.cal.sd,
@@ -253,7 +253,7 @@ fit_hi <- stan_bacon(
 ```
 
 ```{r hiatus}
-plot_stan_bacon(fit_hi)
+plot_stan_hamstr(fit_hi)
 ```
 
 

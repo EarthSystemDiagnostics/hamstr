@@ -1,6 +1,6 @@
 #' Plot an hamstr_fit object
 #'
-#' @param hamstr_fit The object returned from \code{stan_bacon}.
+#' @param hamstr_fit The object returned from \code{stan_hamstr}.
 #' @param n.iter The number of iterations of the model to plot, defaults to 1000.
 #'
 #' @description Plots the Bacon modelled Age~Depth relationship together with
