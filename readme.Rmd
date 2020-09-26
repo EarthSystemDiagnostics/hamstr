@@ -9,19 +9,13 @@ editor_options:
 
 -------------------------------
 
-**hamstr** implements a the Bayesian Age~Depth model, **Bacon**, in the **Stan** probabilistic programming language. It is at a very early stage of development and at the moment implements only the core non-Gaussian AR1 model described in Blaauw and Christen (2011). Functions from the R package **Bchron** (Parnell 2016) can be used to calibrate ^14^C ages to calendar ages.
+**hamstr** implements a *Bacon-like* sediment accumulation or age-depth model with hierarchically structured multi-resolution sediment sections. The Bayesian model is implemented in the Stan probabilistic  programming language (https://mc-stan.org/). 
 
-
-There are currently just three exported functions: 
-
-* `make_stan_dat_hamstr` prepares data and parameter values into the correct format to be passed to the Stan model 
-* `stan_hamstr` calls a pre-compiled Stan implementation of Bacon and estimates the age model
-* `plot_stan_hamstr` plots a sample from the posterior distribution of the estimated age model
 
 **hamstr** also includes the example data, core MSB2K, included in the existing C++ implementation of [Bacon v2.2](http://www.chrono.qub.ac.uk/blaauw/bacon.html)
 
-The motivation for creating this package is to make use of the Bacon age modelling routine more flexible, and to make further development 
-of the age model itself easier, by coding it in a widely used higher-level probabilistic programming language.
+
+The motivation for creating this package is to make use of the Bacon age modelling routine more flexible, and to make further development of the age model itself easier, by coding it in a widely used higher-level probabilistic programming language.
 
 
 *  Parnell, Andrew. 2016. Bchron: Radiocarbon Dating, Age-Depth Modelling, Relative Sea Level Rate Estimation, and Non-Parametric Phase Modelling. R package version 4.2.6. https://CRAN.R-project.org/package=Bchron
@@ -30,6 +24,10 @@ of the age model itself easier, by coding it in a widely used higher-level proba
 
 *  Stan Development Team. 2016. Stan Modeling Language Users Guide and Reference Manual, Version 2.14.0.   http://mc-stan.org
 
+
+## Development
+
+We aim to develop this package following the [Guidelines for R packages providing interfaces to Stan](https://cran.r-project.org/web/packages/rstantools/vignettes/developer-guidelines.html)
 
 
 
@@ -42,290 +40,138 @@ if (!require("devtools")) {
   install.packages("devtools")
 }
 
-devtools::install_github("andrewdolman/hamstr", args = "--preclean", build_vignettes = FALSE)
+devtools::install_github("earthsystemdiagnostics/hamstr", args = "--preclean", build_vignettes = FALSE)
 ```
 
 
-## Development
 
-We aim to develop this package following the [Guidelines for R packages providing interfaces to Stan](https://cran.r-project.org/web/packages/rstantools/vignettes/developer-guidelines.html)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  cache = TRUE, autodep = TRUE
+)
+```
 
-
-## Example
-
-
-```{r, message = FALSE, warning=FALSE}
+```{r setup}
 library(hamstr)
-library(knitr)
-library(ggplot2)
-library(tidyr)
-library(dplyr)
-library(Bchron)
+library(rstan)
+library(tidyverse)
 
-opts_chunk$set(echo=TRUE, message = FALSE, warning = FALSE, cache = TRUE,
-               fig.width = 6, fig.pos = "H", dpi = 300, autodep = TRUE)
-
+set.seed(20200827)
 ```
 
-### Data and parameters
 
-First convert 14^C ages to calendar ages. Functions from the R package **Bchron** can be used for this.
+A quick example using the example core "MSB2K" from the [rbacon](https://cran.r-project.org/web/packages/rbacon/index.html) package.
+
+
+## Calibrate the radiocarbon ages to calendar ages.
+
+```{r, warning=FALSE}
+# function calibrate_14C_age will append columns to a data.frame with the 
+# calendar ages and 1 sigma uncertainties
+MSB2K_cal <- calibrate_14C_age(MSB2K, age.14C = "age", age.14C.se = "error")
+```
+
+#### Assign to 3 cores, one per chain, as long as the machine has at least 3
 
 ```{r}
-cal.ages <- Bchron::BchronCalibrate(ages=MSB2K$age,
-                            ageSds=MSB2K$error,
-                            calCurves=rep("intcal13", nrow(MSB2K)),
-                            ids=paste0("Date-", 1:nrow(MSB2K)))
-
-SimplifyCalAge <- function(ages, densities){
-  
-  wts <- densities / sum(densities)
-  
-  M <- sum(wts > 0)
-
-  w.mean <- sum(ages * wts)
-  w.std <- sqrt(sum(wts * (ages-w.mean)^2) / ((M-1)/M * sum(wts)))
-  
-  return(c("mean" = w.mean, "std" = w.std))
-  
-}
-
-
-MSB2K$age.cal <- sapply(cal.ages, function(x) SimplifyCalAge(x$ageGrid, x$densities)["mean"])
-MSB2K$age.cal.sd <- sapply(cal.ages, function(x) SimplifyCalAge(x$ageGrid, x$densities)["std"])
+if (parallel::detectCores() >= 3) options(mc.cores = 3)
 ```
-
-
-the output from `make_stan_dat_hamstr` is shown here to illustrate the required data and parameter format, but a separate call to `make_stan_dat_hamstr` is not normally necessary as it is used internally by `stan_hamstr`
 
 ```{r}
-# Get number of sections K, so that they will be ~ 5cm
-K_for_5cm <- round(diff(range(MSB2K$depth)) / 5)
+hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   shape = 1,
+                   K = c(10, 10))
 
-stan_dat <- make_stan_dat_hamstr(depth = MSB2K$depth, 
-  obs_age = MSB2K$age.cal, 
-  obs_err = MSB2K$age.cal.sd,
-  K = K_for_5cm, nu = 6,
-  acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.7, mem_strength = 4)
-
-stan_dat
+hamstr_fit_1b <- hamstr(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   shape = 1,
+                   K = c(100))
 ```
 
-```{r, echo=FALSE}
-# Examine scaling behaviour of memory prior
-# Behaves very strangely when deltaC is small and mem.mean is small
 
-# hamstr does not match output of Bacon2.2 when mem_mean = 0.1, mem_strength = 4
-# in hamstr the prior is strong and dominates, in Bacon2.2 the data dominate the prior
-
-#(0.1^0.1)^10
-
-# priorwU <- function(w, deltaC, alpha, beta) {
-# 			    ds=1.0
-# 			    logw=log(w)
-# 			    tmp <- (ds/deltaC)*(1.0-alpha)*logw + (1.0-beta)*log(1.0-exp((ds/deltaC)*logw))
-# 			    tmp #/ sum(tmp, na.rm = T)
-# 			}
-# x <- seq(0, 1, length.out = 1000)
-# 
-# plot(x, dbeta(x, stan_dat$mem_alpha, stan_dat$mem_beta), type = "l")
-# plot(x, exp(-priorwU(w = x, deltaC = 1, alpha = stan_dat$mem_alpha, beta = stan_dat$mem_beta))
-#      , type = "l", col = "Green")
-# plot(x, exp(-priorwU(w = x, deltaC = 5, alpha = stan_dat$mem_alpha, beta = stan_dat$mem_beta))
-#      , type = "l", col = "Red")
-``` 
-
-
-### Fit the bacon model with `stan_hamstr`
+### Default plot
 
 ```{r}
-fit <- stan_hamstr(
-  depth = MSB2K$depth, 
-  obs_age = MSB2K$age.cal, 
-  obs_err = MSB2K$age.cal.sd,
-  K = K_for_5cm, nu = 6,
-  acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.7, mem_strength = 4,
-  iter = 2000, chains = 3)
+plot_hamstr(hamstr_fit_1)
 ```
+
+### Plot "spaghetti" instead of shaded regions
+
+```{r}
+plot_hamstr(hamstr_fit_1, type = "spag")
+```
+
+### Prior and posterior of overall mean accumulation rate
+
+```{r}
+plot_acc_mean_prior_posterior(hamstr_fit_1)
+```
+
+### Plot modelled accumulation rates at each hierarchical level
+
+```{r}
+plot_hierarchical_acc_rate(hamstr_fit_1)
+```
+
+
+### Plot memory prior and posterior
+
+As for this example the highest resolution sections are approximately 1 cm thick, there is not much difference between R and w. 
+
+```{r}
+plot_memory_prior_posterior(hamstr_fit_1)
+```
+
+
+### Examine calendar age PDFs
+
+Unlike Bacon, HAMStR approximates the complicated empirical calendar age PDFs with t-distributions. These can be examined with the function `compare_14C_PDF`
+
+The six dates are plotted here.
+
+```{r}
+i <- seq(1, 40, by = floor(40/6))[1:6]
+compare_14C_PDF(MSB2K$age[i], MSB2K$error[i])
+```
+
+
+## Refit with fewer sections at the highest resolution
 
 
 ```{r}
-options(width = 85)
-print(fit$fit, par = c("R", "w", "c_ages"))
+hamstr_fit_2 <- hamstr(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(4, 5))
 ```
-
-
-### Plot the estimated age model
-
-```{r bacon_defaults}
-set.seed(20170406)
-plot_stan_hamstr(fit, 1000)
-```
-
-
-### Fit again with stronger prior on accumulation rates
-
-
-```{r, results='hide'}
-fit2 <- stan_hamstr(
-  depth = MSB2K$depth, 
-  obs_age = MSB2K$age.cal, 
-  obs_err = MSB2K$age.cal.sd,
-  K = K_for_5cm, nu = 6,
-  acc_mean = 20, acc_alpha = 25,
-  mem_mean = 0.7, mem_strength = 4,
-  iter = 2000, chains = 3)
-```
-
-
-```{r stronger_prior}
-plot_stan_hamstr(fit2, 1000)
-```
-
-
-### Fit again with strong prior for lower memory
-
-
-```{r, results='hide'}
-fit3 <- stan_hamstr(
-  depth = MSB2K$depth, 
-  obs_age = MSB2K$age.cal, 
-  obs_err = MSB2K$age.cal.sd,
-  K = K_for_5cm, nu = 6,
-  acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.1, mem_strength = 4,
-  iter = 2000, chains = 3)
-```
-
-
-```{r weaker_prior}
-plot_stan_hamstr(fit3, 1000)
-```
-
-
-### Add tephras at 25 and 90 cm
-
-
-```{r, results='hide'}
-teph <- data.frame(depth = c(25, 87.5), age.cal = c(5000, 6500), age.cal.sd = c(3, 5))
-MSB2K.2 <- bind_rows(MSB2K, teph) %>% 
-  arrange(age.cal)
-  
-
-fit4 <- stan_hamstr(
-  depth = MSB2K.2$depth, 
-  obs_age = MSB2K.2$age.cal, 
-  obs_err = MSB2K.2$age.cal.sd,
-  K = K_for_5cm, nu = 6,
-  acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.7, mem_strength = 4,
-  iter = 2000, chains = 3)
-```
-
-
-```{r tephras}
-plot_stan_hamstr(fit4, 1000) +
-  geom_pointrange(data = teph,
-                  aes(x = depth, y = age.cal, ymax = age.cal + age.cal.sd, ymin = age.cal - age.cal.sd),
-                  group = NA, colour = "Blue", alpha = 0.5) 
-```
-
-
-### Add hiatus
-
-```{r fit_hiatus, results="hide"}
-# Add 1000 years to all depths below 40 cm
-hi_ages <- MSB2K$age
-hi_ages[MSB2K$depth > 40] <- hi_ages[MSB2K$depth > 40] + 1000
-
-fit_hi <- stan_hamstr(
-  depth = MSB2K$depth, 
-  obs_age = hi_ages, 
-  obs_err = MSB2K$age.cal.sd,
-  hiatus_depth = c(40),
-  hiatus_length = c(1000),
-  K = 20, nu = 6,
-  acc_mean = 20, acc_alpha = 1.5,
-  mem_mean = 0.7, mem_strength = 4,
-  iter = 2000, chains = 3)
-```
-
-```{r hiatus}
-plot_stan_hamstr(fit_hi)
-```
-
-
-
-### Distribution of sediment accumulation rates
 
 ```{r}
-age.fit <- fit
-age.mod <- rstan::extract(age.fit$fit)
-
-bp.dat <- age.mod$x[1:3000,] %>% 
-  as_tibble() %>% 
-  tibble::rownames_to_column("Rep") %>% 
-  gather(Depth, value, -Rep) %>% 
-  mutate(Depth = as.numeric(gsub("V", "", Depth)),
-         Depth = Depth * age.fit$data$delta_c,
-         Rep = as.numeric(Rep))
-
-# bp.dat.bw <- bp.dat %>% 
-#   group_by(Depth) %>% 
-#   summarise(mean.val = mean(value),
-#             upr = quantile(value, 0.9),
-#             lwr = quantile(value, 0.1))
-# 
-# bp.dat.bw %>% 
-#   ggplot(aes(x = Depth)) + 
-#   geom_pointrange(aes(y = mean.val, ymax = upr, ymin = lwr))
+plot_hamstr(hamstr_fit_2)
 ```
 
-```{r acc_rates}
-bp.dat %>% 
-  ggplot(aes(x = Depth, y = 1/value, group = Depth)) + 
-  geom_violin() +
-  #geom_boxplot() +
-  #geom_point(alpha = 0.15)
-  scale_x_continuous("Depth [cm]")+
-  scale_y_continuous("Sediment accumulation rate [cm/yr]",
-                     trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
-  annotation_logticks(sides = "l") +
-  expand_limits(y = 0.01) + 
-  theme_bw()
-```
+```{r}
 
-```{r acc_intervals}
-bp.dat %>% 
-  ggplot(aes(x = Depth, y = value, group = Depth)) + 
-  geom_violin() +
-  #geom_boxplot() +
-  #geom_point(alpha = 0.15)
-  scale_x_continuous("Depth [cm]")+
-  scale_y_continuous("Sedimentation interval [yr/cm]",
-                     trans = "log10", breaks = c(1, 5, 10, 20, 50)) +
-  annotation_logticks(sides = "l") +
-#  expand_limits(y = 0.01) + 
-  theme_bw()
 ```
 
 
+## Refit with 21 non-hierarchical sections
 
-```{r, echo=FALSE}
-# bp.dat %>% 
-#   filter(Rep %in% sample(Rep, 110)) %>%  
-#   ggplot(aes(x = Depth, y = 1/value, group = Rep, colour = as.factor(Rep))) + 
-#   geom_line(alpha = 0.51) +
-#   scale_y_continuous(trans = "log10", breaks = c(0.01, 0.05, 0.1, 0.5)) +
-#   expand_limits(y = 0.01)
-
-# plot(density(age.mod$alpha[,]), xlim = c(0, 50))
-# lines(seq(0.1, 50, length.out = 100), dgamma(seq(0.1, 50, length.out = 100),
-#                     shape = age.fit$data$acc_mean^2 / age.fit$data$acc_var,
-#                     rate = age.fit$data$acc_mean/age.fit$data$acc_var),
-#       col = "Red")
+```{r}
+hamstr_fit_3 <- hamstr(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(21))
 ```
 
+```{r}
+plot_hamstr(hamstr_fit_3)
+```
 
+```{r}
+plot_hamstr(hamstr_fit_3, type = "spag")
+```

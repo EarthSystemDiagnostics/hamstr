@@ -225,6 +225,14 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 }
 
 
+#' Title
+#'
+#' @param hamstr_fit 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plot_memory_prior_posterior <- function(hamstr_fit){
   # memory prior
   mem.prior <- tibble(mem = seq(0, 1, length.out = 1000)) %>%
@@ -274,6 +282,15 @@ add_subdivisions <- function(gg, hamstr_fit){
 }
 
 
+#' Title
+#'
+#' @param hamstr_fit 
+#' @param n.iter 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 

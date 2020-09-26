@@ -12,7 +12,7 @@ plot_hamstr(
 )
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_bacon}.}
+\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 
 \item{n.iter}{The number of iterations of the model to plot, defaults to 1000.}
 }
