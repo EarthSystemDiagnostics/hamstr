@@ -4,10 +4,10 @@
 \alias{get_posterior_ages}
 \title{Get Posterior Age Models}
 \usage{
-get_posterior_ages(adam_fit)
+get_posterior_ages(hamstr_fit)
 }
 \arguments{
-\item{adam_fit}{fitted adam model, output from adam()}
+\item{hamstr_fit}{fitted hamstr model, output from hamstr()}
 }
 \value{
 a dataframe/tibble with posterior ages for all iterations after warmup
@@ -17,6 +17,6 @@ Get Posterior Age Models
 }
 \examples{
 \dontrun{
-get_posterior_ages(fitted.adam.object)
+get_posterior_ages(fitted.hamstr.object)
 }
 }

@@ -4,10 +4,10 @@
 \alias{interpolate_age_models}
 \title{Interpolate Posterior Age Model At New Depths}
 \usage{
-interpolate_age_models(adam_fit, new_depth)
+interpolate_age_models(hamstr_fit, new_depth)
 }
 \arguments{
-\item{adam_fit}{fitted adam model, output from adam()}
+\item{hamstr_fit}{fitted hamstr model, output from hamstr()}
 
 \item{new_depth}{a vector of depths at which to interpolate the age models}
 }
@@ -19,7 +19,7 @@ Interpolate Posterior Age Model At New Depths
 }
 \examples{
 \dontrun{
-interpolate.age.models(fitted.adam.object, new_depth = seq(1000, 15000, by = 1000))
+interpolate.age.models(fitted.hamstr.object, new_depth = seq(1000, 15000, by = 1000))
 }
 
 }

@@ -42,7 +42,7 @@ optimal_K <- function(K_tot, target_K_per_lvl = 10){
 # Make index creating functions for K levels
 #' Create alpha level indices
 #'
-#' @inheritParams adam
+#' @inheritParams hamstr
 #'
 #' @return a list
 #' @keywords internal
@@ -74,17 +74,17 @@ alpha_indices <- function(K){
 
 #' Make the data object required by the Stan program
 #'
-#' @inheritParams adam
+#' @inheritParams hamstr
 #'
 #' @return a list of data and parameters to be passed as data to the Stan sampler
 #' @export
 #'
 #' @examples
-#' make_stan_dat_adam(depth = MSB2K$depth,
+#' make_stan_dat_hamstr(depth = MSB2K$depth,
 #'               obs_age = MSB2K$age,
 #'               obs_err = MSB2K$error,
 #'               nu = 6)
-make_stan_dat_adam <- function(depth, obs_age, obs_err,
+make_stan_dat_hamstr <- function(depth, obs_age, obs_err,
                                top_depth = NULL, bottom_depth = NULL,
                                  pad_top_bottom = FALSE,
                                  K = c(10, 10), nu = 6,
@@ -197,13 +197,13 @@ hierarchical_depths <- function(stan_dat){
 
 
 
-#' Create Random Initial Values for the adam Stan Model
+#' Create Random Initial Values for the hamstr Stan Model
 #'
-#' @param stan_dat stan data for the adam model
+#' @param stan_dat stan data for the hamstr model
 #'
 #' @return a list of lists
 #' @keywords internal
-get_inits_adam <- function(stan_dat){
+get_inits_hamstr <- function(stan_dat){
   
   l <- list(
     R = runif(1, 0.1, 0.9),

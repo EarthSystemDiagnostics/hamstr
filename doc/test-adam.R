@@ -1,6 +1,6 @@
-# test adam
+# test hamstr
 library(tidyverse)
-library(baconr)
+library(hamstr)
 library(rstan)
 
 # build -----
@@ -12,8 +12,8 @@ library(rstan)
 # devtools::install(quick = FALSE)
 # devtools::install(quick = FALSE, dependencies = FALSE)
 
-#sm <- stan_model("inst/stan/adam.stan")
-#stan_data <- baconr::make_stan_dat_adam(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se)
+#sm <- stan_model("inst/stan/hamstr.stan")
+#stan_data <- hamstr::make_stan_dat_hamstr(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se)
 
 #rstan::sampling(sm, data = stan_data, iter = 10)
 
@@ -52,7 +52,7 @@ dat1 %>%
 
 options(mc.cores = 4)
 
-adam.fit1 <- adam(
+hamstr.fit1 <- hamstr(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
@@ -62,21 +62,19 @@ adam.fit1 <- adam(
   inflate_errors = 0, chains = 3)
 
 
-ad_K100_rib <- plot_adam(adam.fit1, plot_diagnostics = T)
-ad_K100_spag <- plot_adam(adam.fit1, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+ad_K100_rib <- plot_hamstr(hamstr.fit1, plot_diagnostics = T)
+ad_K100_spag <- plot_hamstr(hamstr.fit1, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
 
 ggsave("doc/ad_K100_rib.png", ad_K100_rib, width = 8, height = 6)
 ggsave("doc/ad_K100_spag.png", ad_K100_spag, width = 8, height = 6)
 
-traceplot(adam.fit1$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
+traceplot(hamstr.fit1$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
 
-
-
-adam.fit2 <- adam(
+hamstr.fit2 <- hamstr(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = baconr:::optimal_K(100, 10),
+  K = hamstr:::optimal_K(100, 10),
   nu = 6,
   shape = 1.5,
   mem_mean = 0.5, mem_strength = 2,
@@ -94,20 +92,20 @@ adam.fit2 <- adam(
 # chain:2 34.730 37.017
 # chain:3 38.712 29.908
 
-get_elapsed_time(adam.fit2$fit)
+get_elapsed_time(hamstr.fit2$fit)
 
-ad_K10_100_rib <- plot_adam(adam.fit2, plot_diagnostics = T) 
+ad_K10_100_rib <- plot_hamstr(hamstr.fit2, plot_diagnostics = T) 
 
-ad_K10_100_spag <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 1000, plot_diagnostics = T)
+ad_K10_100_spag <- plot_hamstr(hamstr.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
 
-ad_K10_100_spag_nod <- plot_adam(adam.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
+ad_K10_100_spag_nod <- plot_hamstr(hamstr.fit2, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
 
-plot_hierarchical_acc_rate(adam.fit2)
+plot_hierarchical_acc_rate(hamstr.fit2)
 
-plot_hierarchical_acc_rate(adam.fit2) +
+plot_hierarchical_acc_rate(hamstr.fit2) +
   facet_grid(lvl~.)
 
-plot_acc_mean_prior_posterior(adam.fit2)
+plot_acc_mean_prior_posterior(hamstr.fit2)
 
 ggsave("doc/ad_K10_100_rib.png", ad_K10_100_rib, width = 8, height = 6)
 ggsave("doc/ad_K10_100_spag.png", ad_K10_100_spag, width = 8, height = 8)
@@ -115,23 +113,23 @@ ggsave("doc/ad_K10_100_spag.png", ad_K10_100_spag, width = 8, height = 8)
 ggsave("doc/ad_K10_100_spag_nod.png", ad_K10_100_spag_nod, width = 8, height = 6)
 
 
-a2 <- rstan::summary(adam.fit2$fit)
+a2 <- rstan::summary(hamstr.fit2$fit)
 a2 <- as_tibble(a2$summary, rownames = "par")
 
 
-summary(adam.fit2$fit, par = c("alpha[1]", "beta"))$summary
+summary(hamstr.fit2$fit, par = c("alpha[1]", "beta"))$summary
 
-traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
+traceplot(hamstr.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
 
-traceplot(adam.fit2$fit, pars = paste0("alpha[", 91:111, "]"), inc_warmup = T)
+traceplot(hamstr.fit2$fit, pars = paste0("alpha[", 91:111, "]"), inc_warmup = T)
 
-traceplot(adam.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
+traceplot(hamstr.fit2$fit, pars = c("shape", "alpha[1]"), inc_warmup = T)
 
-traceplot(adam.fit2$fit, pars = c("shape"), inc_warmup = T)
+traceplot(hamstr.fit2$fit, pars = c("shape"), inc_warmup = T)
 
-traceplot(adam.fit2$fit, pars = c("w", "R"), inc_warmup = T)
+traceplot(hamstr.fit2$fit, pars = c("w", "R"), inc_warmup = T)
 
-stan_dat <- make_stan_dat_adam(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se,
+stan_dat <- make_stan_dat_hamstr(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se,
                                K=c(10, 10),
                                inflate_errors = 1)
 
@@ -162,13 +160,13 @@ prs <- bind_cols(alph, bet) %>%
 
 # extract a few iterations
 
-as_tibble(as.data.frame(adam.fit2$fit, pars = c("alpha")))
+as_tibble(as.data.frame(hamstr.fit2$fit, pars = c("alpha")))
 
 
 prs <- tibble(
-shape = c(NA, rstan::extract(adam.fit2$fit, "shape_vec")[[1]][1,]),
-alpha = rstan::extract(adam.fit2$fit, "alpha")[[1]][1,],
-beta = rstan::extract(adam.fit2$fit, "beta")[[1]][1,]
+shape = c(NA, rstan::extract(hamstr.fit2$fit, "shape_vec")[[1]][1,]),
+alpha = rstan::extract(hamstr.fit2$fit, "alpha")[[1]][1,],
+beta = rstan::extract(hamstr.fit2$fit, "beta")[[1]][1,]
 ) %>%
   mutate(parent_alpha = alpha[p_idx])%>%
   mutate(beta_calc = shape / parent_alpha)
@@ -179,11 +177,11 @@ beta = rstan::extract(adam.fit2$fit, "beta")[[1]][1,]
 
 ## with 3 layers
 
-adam.fit2b <- adam(
+hamstr.fit2b <- hamstr(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = baconr:::optimal_K(1000, 10),
+  K = hamstr:::optimal_K(1000, 10),
   nu = 6,
   #acc_mean_prior = acc.mean,
   #record_prior_acc_shape_mean = 1.5,
@@ -192,12 +190,12 @@ adam.fit2b <- adam(
   inflate_errors = 0, chains = 3)
 
 
-ad_K10_100_1000_rib <- plot_adam(adam.fit2b, plot_diagnostics = T)
-ad_K10_100_1000_spag <- plot_adam(adam.fit2b, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
+ad_K10_100_1000_rib <- plot_hamstr(hamstr.fit2b, plot_diagnostics = T)
+ad_K10_100_1000_spag <- plot_hamstr(hamstr.fit2b, type = "spaghetti", n.iter = 100, plot_diagnostics = T)
 
-ad_K10_100_1000_spag_nod <- plot_adam(adam.fit2b, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
+ad_K10_100_1000_spag_nod <- plot_hamstr(hamstr.fit2b, type = "spaghetti", n.iter = 100, plot_diagnostics = F)
 
-ad_K10_100_1000_HA <- plot_hierarchical_acc_rate(adam.fit2b)
+ad_K10_100_1000_HA <- plot_hierarchical_acc_rate(hamstr.fit2b)
 
 
 ggsave("doc/ad_K10_100_1000_rib.png", ad_K10_100_1000_rib, width = 8, height = 6)
@@ -209,18 +207,14 @@ ggsave("doc/ad_K10_100_1000_spag_nod.png", ad_K10_100_1000_spag_nod, width = 8, 
 ggsave("doc/ad_K10_100_1000_HA.png", ad_K10_100_1000_HA, width = 6, height = 4)
 
 
+#shinystan::launch_shinystan(hamstr.fit3$fit)
+## hamstr.fit3 -----
 
-
-
-
-#shinystan::launch_shinystan(adam.fit3$fit)
-## adam.fit3 -----
-
-adam.fit3 <- adam(
+hamstr.fit3 <- hamstr(
   depth = dat1$depth,
   obs_age = dat1$age.14C.cal,
   obs_err = dat1$age.14C.cal.se,
-  K = baconr:::optimal_K(100, 10),
+  K = hamstr:::optimal_K(100, 10),
   shape = 1.5,
   mem_mean = 0.7, mem_strength = 4,
   infl_shape_shape = 1,
@@ -229,34 +223,34 @@ adam.fit3 <- adam(
   #infl_mean_mean = 3,
   inflate_errors = TRUE, chains = 3)
 
-plot_adam(adam.fit3, type = "ribbon", plot_diagnostics = TRUE)
-plot_adam(adam.fit3, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit3, type = "ribbon", plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit3, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
 
-print(adam.fit3$fit, pars = c("infl", "infl_mean",  "infl_shape"#, "infl_sigma"
+print(hamstr.fit3$fit, pars = c("infl", "infl_mean",  "infl_shape"#, "infl_sigma"
                               ))
-traceplot(adam.fit3$fit, pars = c("infl_mean", "infl_shape"#, "infl_sigma"
+traceplot(hamstr.fit3$fit, pars = c("infl_mean", "infl_shape"#, "infl_sigma"
                                   ), inc_warmup = T)
 
 
-plot_infl_prior_posterior(adam.fit3)
+plot_infl_prior_posterior(hamstr.fit3)
 
-pairs(adam.fit3$fit, pars = c("infl_mean", "infl_shape"))
+pairs(hamstr.fit3$fit, pars = c("infl_mean", "infl_shape"))
 
-a3 <- rstan::summary(adam.fit3$fit)
+a3 <- rstan::summary(hamstr.fit3$fit)
 a3 <- as_tibble(a3$summary, rownames = "par")
 
-summary(adam.fit3$fit, par = c("alpha[1]", "shape"))$summary
-summary(adam.fit3$fit, par = c("w"))$summary
+summary(hamstr.fit3$fit, par = c("alpha[1]", "shape"))$summary
+summary(hamstr.fit3$fit, par = c("w"))$summary
 
-traceplot(adam.fit3$fit, par = c("alpha[1]", "shape"))
+traceplot(hamstr.fit3$fit, par = c("alpha[1]", "shape"))
 
-traceplot(adam.fit3$fit, par = c("infl_mean", "infl_shape"))
-traceplot(adam.fit3$fit, par = c("infl"))
+traceplot(hamstr.fit3$fit, par = c("infl_mean", "infl_shape"))
+traceplot(hamstr.fit3$fit, par = c("infl"))
 
-summary(adam.fit3$fit, par = c("infl_mean", "infl_shape"))$summary
+summary(hamstr.fit3$fit, par = c("infl_mean", "infl_shape"))$summary
 
 
-as.data.frame(adam.fit3$fit, pars = c("infl[1]", "obs_err_infl[1]")) %>% 
+as.data.frame(hamstr.fit3$fit, pars = c("infl[1]", "obs_err_infl[1]")) %>% 
   as_tibble() %>% 
   mutate(obs_err = dat1$age.14C.cal.se[1],
          tst = obs_err + `infl[1]`) %>% 
@@ -284,7 +278,7 @@ dat3 %>%
   geom_line()
 
 
-adam.fit4 <- adam(
+hamstr.fit4 <- hamstr(
   depth = dat3$depth,
   obs_age = dat3$age.14C.cal,
   obs_err = dat3$age.14C.cal.se,
@@ -298,12 +292,12 @@ adam.fit4 <- adam(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 0, chains = 3)
 
-plot_adam(adam.fit4, type = "ribbon", plot_diagnostics = TRUE)
-plot_adam(adam.fit4, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit4, type = "ribbon", plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit4, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
 
 
 
-adam.fit4a <- adam(
+hamstr.fit4a <- hamstr(
   depth = dat3$depth,
   obs_age = dat3$age.14C.cal,
   obs_err = dat3$age.14C.cal.se,
@@ -317,17 +311,17 @@ adam.fit4a <- adam(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 1, chains = 3)
 
-plot_adam(adam.fit4a, type = "ribbon", plot_diagnostics = TRUE)
-plot_adam(adam.fit4a, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit4a, type = "ribbon", plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit4a, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
 
 
 
-adam.fit4b <- adam(
+hamstr.fit4b <- hamstr(
   depth = dat3$depth,
   obs_age = dat3$age.14C.cal,
   obs_err = dat3$age.14C.cal.se,
   #top_depth = 1,
-  K = baconr:::optimal_K(100, 10),
+  K = hamstr:::optimal_K(100, 10),
   nu = 6,
   #acc_mean_prior = acc.mean,
   record_prior_acc_shape_mean = 1.5,
@@ -335,8 +329,8 @@ adam.fit4b <- adam(
   mem_mean = 0.7, mem_strength = 4,
   inflate_errors = 1, chains = 3)
 
-plot_adam(adam.fit4b, type = "ribbon", plot_diagnostics = TRUE)
-plot_adam(adam.fit4b, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit4b, type = "ribbon", plot_diagnostics = TRUE)
+plot_hamstr(hamstr.fit4b, type = "spaghetti", n.iter = 1000, plot_diagnostics = TRUE)
 
 ##
 
@@ -367,7 +361,7 @@ ggsave("doc/fig_gamma_infl.png", fig_gamma_infl, width = 6, height = 4)
 
 
 
-idx <- as_tibble(baconr:::alpha_indices(c(3,3,3,3,3))[1:3]) %>%
+idx <- as_tibble(hamstr:::alpha_indices(c(3,3,3,3,3))[1:3]) %>%
   mutate(alpha_idx = as.character(alpha_idx))
 
 
@@ -394,7 +388,7 @@ alph %>%
 
 dat <- tibble(
   x = seq(0, 600, length.out = 1000),
-  d = dgamma(x, shape = 1.5, rate = 1.5 / adam.fit2$data$acc_mean_prior)
+  d = dgamma(x, shape = 1.5, rate = 1.5 / hamstr.fit2$data$acc_mean_prior)
 )
 
 alph %>%

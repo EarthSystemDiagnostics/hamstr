@@ -4,10 +4,10 @@
 \alias{summarise_age_models}
 \title{Summarise Posterior Age Models}
 \usage{
-summarise_age_models(adam_fit)
+summarise_age_models(hamstr_fit)
 }
 \arguments{
-\item{adam_fit}{an adam_fit object or adam_interpolated_ages object}
+\item{hamstr_fit}{an hamstr_fit object or hamstr_interpolated_ages object}
 }
 \value{
 

@@ -1,11 +1,11 @@
-#' The 'baconr' package.
+#' The 'hamstr' package.
 #'
 #' @description A DESCRIPTION OF THE PACKAGE
 #'
 #' @docType package
-#' @name baconr-package
-#' @aliases baconr
-#' @useDynLib baconr, .registration = TRUE
+#' @name hamstr-package
+#' @aliases hamstr
+#' @useDynLib hamstr, .registration = TRUE
 #' @import methods
 #' @import Rcpp
 #' @importFrom rstan sampling

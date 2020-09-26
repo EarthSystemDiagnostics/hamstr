@@ -49,7 +49,7 @@
 #'     scale_y_continuous("") +
 #'     theme_bw()
 #'   
-#'   p.fit <- plot_adam(fit)
+#'   p.fit <- plot_hamstr(fit)
 #'   
 #'     ggpubr::ggarrange(
 #'     ggpubr::ggarrange(p.acc, p.mem, ncol = 2),

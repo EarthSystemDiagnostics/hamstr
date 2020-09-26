@@ -2,21 +2,21 @@
 
 #' Get Posterior Age Models
 #'
-#' @param adam_fit fitted adam model, output from adam()
+#' @param hamstr_fit fitted hamstr model, output from hamstr()
 #'
 #' @return a dataframe/tibble with posterior ages for all iterations after warmup
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' get_posterior_ages(fitted.adam.object)
+#' get_posterior_ages(fitted.hamstr.object)
 #' }
-get_posterior_ages <- function(adam_fit){
+get_posterior_ages <- function(hamstr_fit){
   
-  depths <- tibble(depth = adam_fit$data$modelled_depths,
-                   idx = 1:length(adam_fit$data$modelled_depths))
+  depths <- tibble(depth = hamstr_fit$data$modelled_depths,
+                   idx = 1:length(hamstr_fit$data$modelled_depths))
   
-  posterior_ages <- as.data.frame(adam_fit$fit, pars = "c_ages") %>% 
+  posterior_ages <- as.data.frame(hamstr_fit$fit, pars = "c_ages") %>% 
     as_tibble() %>% 
     mutate(iter = 1:nrow(.)) %>% 
     gather(par, age, -iter) %>% 
@@ -32,7 +32,7 @@ get_posterior_ages <- function(adam_fit){
 
 #' Interpolate Posterior Age Model At New Depths
 #'
-#' @param adam_fit fitted adam model, output from adam()
+#' @param hamstr_fit fitted hamstr model, output from hamstr()
 #' @param new_depth a vector of depths at which to interpolate the age models
 #'
 #' @return 
@@ -40,13 +40,13 @@ get_posterior_ages <- function(adam_fit){
 #'
 #' @examples
 #' \dontrun{
-#' interpolate.age.models(fitted.adam.object, new_depth = seq(1000, 15000, by = 1000))
+#' interpolate.age.models(fitted.hamstr.object, new_depth = seq(1000, 15000, by = 1000))
 #' }
 #' 
-interpolate_age_models <- function(adam_fit, new_depth){
+interpolate_age_models <- function(hamstr_fit, new_depth){
   
   # get posterior age models
-  pst_age <- get_posterior_ages(adam_fit)
+  pst_age <- get_posterior_ages(hamstr_fit)
   
   new_age <- pst_age %>% 
     group_by(iter) %>% 
@@ -58,7 +58,7 @@ interpolate_age_models <- function(adam_fit, new_depth){
       )
     })
   
-  class(new_age) <- append(class(new_age), "adam_interpolated_ages")
+  class(new_age) <- append(class(new_age), "hamstr_interpolated_ages")
   
   return(new_age)
 }
@@ -90,22 +90,22 @@ summarise_new_ages <- function(new_ages){
 
 #' Summarise Posterior Age Models
 #'
-#' @param adam_fit an adam_fit object or adam_interpolated_ages object
+#' @param hamstr_fit an hamstr_fit object or hamstr_interpolated_ages object
 #' @description Extracts the summary statistics of posterior age models and attached the depths 
 #' @return
 #' @export
 #'
 #' @examples
-summarise_age_models <- function(adam_fit){
+summarise_age_models <- function(hamstr_fit){
   
-  if (is_adam_interpolated_ages(adam_fit)){
-    age_summary <-summarise_new_ages(adam_fit)
+  if (is_hamstr_interpolated_ages(hamstr_fit)){
+    age_summary <-summarise_new_ages(hamstr_fit)
   } else {
-    age_summary <- rstan::summary(adam_fit$fit, par = "c_ages")[["summary"]] %>% 
+    age_summary <- rstan::summary(hamstr_fit$fit, par = "c_ages")[["summary"]] %>% 
       as_tibble(., rownames = "par")
     
-    depths <- tibble(depth = adam_fit$data$modelled_depths,
-                     idx = 1:length(adam_fit$data$modelled_depths))
+    depths <- tibble(depth = hamstr_fit$data$modelled_depths,
+                     idx = 1:length(hamstr_fit$data$modelled_depths))
     age_summary <- age_summary %>% 
       mutate(idx = readr::parse_number(par)) %>% 
       left_join(depths, .)
@@ -118,27 +118,27 @@ summarise_age_models <- function(adam_fit){
 
 #' Plot Summary of Posterior Age Models
 #'
-#' @param adam_fit 
+#' @param hamstr_fit 
 #'
 #' @return
 #' @export
 #'
 #' @examples
-plot_summary_age_models <- function(adam_fit){
+plot_summary_age_models <- function(hamstr_fit){
   
-  age_summary <- summarise_age_models(adam_fit)
+  age_summary <- summarise_age_models(hamstr_fit)
 
   obs_ages <- data.frame(
-    depth = adam_fit$data$depth,
-    age = adam_fit$data$obs_age,
-    err = adam_fit$data$obs_err)
+    depth = hamstr_fit$data$depth,
+    age = hamstr_fit$data$obs_age,
+    err = hamstr_fit$data$obs_err)
   
   obs_ages <- dplyr::mutate(obs_ages,
                             age_upr = age + 2*err,
                             age_lwr = age - 2*err)
   
   
-  infl_errs <- rstan::summary(adam_fit$fit, par = "obs_err_infl")$summary %>% 
+  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
     as_tibble(., rownames = "par") %>% 
     mutate(dat_idx = readr::parse_number(par))
   
@@ -153,7 +153,7 @@ plot_summary_age_models <- function(adam_fit){
     theme(panel.grid = element_blank())
    
    
-  if (adam_fit$data$inflate_errors == 1){
+  if (hamstr_fit$data$inflate_errors == 1){
     obs_ages <- obs_ages %>% 
       mutate(infl_err = infl_errs$mean,
              age_lwr_infl = age + 2*infl_err,
@@ -177,7 +177,7 @@ plot_summary_age_models <- function(adam_fit){
                colour = "Blue")
   
   
-  p.age.sum <- add_subdivisions(p.age.sum, adam_fit)
+  p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
   
   p.age.sum
 }

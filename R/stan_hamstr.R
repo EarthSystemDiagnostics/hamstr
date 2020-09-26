@@ -1,4 +1,4 @@
-#' adam
+#' hamstr
 #' @param depth Depths of observed ages (age control points)
 #' @param obs_age Observed age at each depth (age control points)
 #' @param obs_err Error associated with each observed age (1 standard error)
@@ -48,7 +48,7 @@
 #' @examples
 #' dontrun{
 #' 
-#' fit <- adam(
+#' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
 #'   obs_err = MSB2K$error,
@@ -60,10 +60,10 @@
 #'
 #' print(fit$fit, par = c("record_acc_mean"))
 #'
-#' plot_adam(fit, 100, plot_diagnostics = TRUE)
+#' plot_hamstr(fit, 100, plot_diagnostics = TRUE)
 #' 
 #' }
-adam <- function(depth, obs_age, obs_err,
+hamstr <- function(depth, obs_age, obs_err,
                  K = c(10, 10), nu = 6,
                  top_depth = NULL, bottom_depth = NULL,
                  pad_top_bottom = FALSE,
@@ -77,7 +77,7 @@ adam <- function(depth, obs_age, obs_err,
                  iter = 2000, chains = 3, ...){
   
   
-  stan_dat <- make_stan_dat_adam(depth = depth, obs_age = obs_age, obs_err = obs_err,
+  stan_dat <- make_stan_dat_hamstr(depth = depth, obs_age = obs_age, obs_err = obs_err,
                                  K=K, nu=nu,
                                  top_depth = top_depth, bottom_depth = bottom_depth,
                                  pad_top_bottom = pad_top_bottom,
@@ -89,17 +89,17 @@ adam <- function(depth, obs_age, obs_err,
                                  infl_sigma_sd = infl_sigma_sd,
                                  infl_shape_shape = infl_shape_shape, infl_shape_mean = infl_shape_mean)
   
-  inits <- get_inits_adam(stan_dat)
+  inits <- get_inits_hamstr(stan_dat)
   
   inits <- rep(list(inits), chains)
   
-  fit <- rstan::sampling(stanmodels$adam,
+  fit <- rstan::sampling(stanmodels$hamstr,
                          data = stan_dat, init = inits, iter = iter, chains = chains,
                          verbose = FALSE, ...)
   
   out <- list(fit=fit, data=stan_dat)
   
-  class(out) <- append(class(out), "adam_fit")
+  class(out) <- append(class(out), "hamstr_fit")
   
   
   return(out)
@@ -109,8 +109,8 @@ adam <- function(depth, obs_age, obs_err,
 
 # Methods and classes -------
 
-is_adam_fit <- function(x) inherits(x, "adam_fit")
-is_adam_interpolated_ages <- function(x) inherits(x, "adam_interpolated_ages")
+is_hamstr_fit <- function(x) inherits(x, "hamstr_fit")
+is_hamstr_interpolated_ages <- function(x) inherits(x, "hamstr_interpolated_ages")
 
 
 

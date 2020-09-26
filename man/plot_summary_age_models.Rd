@@ -4,10 +4,10 @@
 \alias{plot_summary_age_models}
 \title{Plot Summary of Posterior Age Models}
 \usage{
-plot_summary_age_models(adam_fit)
+plot_summary_age_models(hamstr_fit)
 }
 \arguments{
-\item{adam_fit}{}
+\item{hamstr_fit}{}
 }
 \value{
 

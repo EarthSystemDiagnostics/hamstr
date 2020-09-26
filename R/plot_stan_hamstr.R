@@ -1,6 +1,6 @@
-#' Plot an adam_fit object
+#' Plot an hamstr_fit object
 #'
-#' @param adam_fit The object returned from \code{stan_bacon}.
+#' @param hamstr_fit The object returned from \code{stan_bacon}.
 #' @param n.iter The number of iterations of the model to plot, defaults to 1000.
 #'
 #' @description Plots the Bacon modelled Age~Depth relationship together with
@@ -14,24 +14,24 @@
 #' @importFrom rstan extract
 #' @importFrom magrittr %>%
 #' @examples
-plot_adam <- function(adam_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, plot_diagnostics = TRUE) {
+plot_hamstr <- function(hamstr_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, plot_diagnostics = TRUE) {
 
   type <- match.arg(type)
 
   if (type == "ribbon"){
-    p.fit <- plot_summary_age_models(adam_fit)
+    p.fit <- plot_summary_age_models(hamstr_fit)
   } else if (type == "spaghetti"){
-    p.fit <- plot_age_models(adam_fit, n.iter = n.iter)
+    p.fit <- plot_age_models(hamstr_fit, n.iter = n.iter)
   }
 
   if (plot_diagnostics == FALSE) return(p.fit)
 
   if (plot_diagnostics){
-    p.mem <- plot_memory_prior_posterior(adam_fit)
-    p.acc <- plot_hierarchical_acc_rate(adam_fit)
+    p.mem <- plot_memory_prior_posterior(hamstr_fit)
+    p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
     }
 
-  t.lp <- rstan::traceplot(adam_fit$fit, pars = c("lp__"), include = TRUE) +
+  t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
     theme(legend.position = "top") +
     labs(x = "Iteration")
 
@@ -75,58 +75,58 @@ plot_prior_posterior_hist <- function(prior, posterior){
 
 #' Title
 #'
-#' @param adam_fit 
+#' @param hamstr_fit 
 #'
 #' @return
 #' @export
 #' @import rstan 
 #'
 #' @examples
-plot_infl_prior_posterior <- function(adam_fit){
+plot_infl_prior_posterior <- function(hamstr_fit){
   
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
   
-  adam_dat <- adam_fit$data
+  hamstr_dat <- hamstr_fit$data
   
   infl_mean_shape_post <-
-    tibble(infl_mean = as.vector(rstan::extract(adam_fit$fit, "infl_mean")[[1]]),
-           infl_shape = as.vector(rstan::extract(adam_fit$fit, "infl_shape")[[1]])) %>% 
+    tibble(infl_mean = as.vector(rstan::extract(hamstr_fit$fit, "infl_mean")[[1]]),
+           infl_shape = as.vector(rstan::extract(hamstr_fit$fit, "infl_shape")[[1]])) %>% 
     mutate(iter = 1:n())
   
   
-  max_x_shape <- with(adam_dat, {
+  max_x_shape <- with(hamstr_dat, {
     infl_shape_prior_upr <- qgamma(c(0.99), shape = infl_shape_shape, rate =  infl_shape_shape / infl_shape_mean)
   
      max(c(infl_shape_prior_upr, infl_mean_shape_post$infl_shape))
   }) 
   
-  max_x_mean <- with(adam_dat, {
+  max_x_mean <- with(hamstr_dat, {
     infl_mean_prior_upr <- qnorm(c(0.99), 0, infl_sigma_sd)
     max(c(infl_mean_prior_upr, infl_mean_shape_post$infl_mean))
   })
   
   
-  infl_fac <- rstan::extract(adam_fit$fit, "infl")[[1]] %>% 
+  infl_fac <- rstan::extract(hamstr_fit$fit, "infl")[[1]] %>% 
     as_tibble() %>% 
     gather() %>% 
     mutate(key = readr::parse_number(key))
   
  
-  p.infl.fac <- rstan::stan_plot(adam_fit$fit, pars = "infl")
+  p.infl.fac <- rstan::stan_plot(hamstr_fit$fit, pars = "infl")
   
  
   
   infl_prior_shape <-
     tibble(x = seq(0, max_x_shape, length.out = 1000)) %>%
     mutate(
-      #infl_mean = 2*dnorm(x, 0,  sd = adam_dat$infl_sigma_sd),
-      d = dgamma(x-1, adam_dat$infl_shape_shape,  rate = adam_dat$infl_shape_shape / adam_dat$infl_shape_mean),
+      #infl_mean = 2*dnorm(x, 0,  sd = hamstr_dat$infl_sigma_sd),
+      d = dgamma(x-1, hamstr_dat$infl_shape_shape,  rate = hamstr_dat$infl_shape_shape / hamstr_dat$infl_shape_mean),
       par = "infl_shape")
   
   infl_prior_mean <-
     tibble(x = seq(0, max_x_mean, length.out = 1000)) %>%
     mutate(
-      d = 2*dnorm(x, 0,  sd = adam_dat$infl_sigma_sd),
+      d = 2*dnorm(x, 0,  sd = hamstr_dat$infl_sigma_sd),
       par = "infl_mean")
   
   infl_priors <- bind_rows(infl_prior_mean, infl_prior_shape)
@@ -171,16 +171,16 @@ plot_infl_prior_posterior <- function(adam_fit){
 
 #' Plot Mean Accumulation Rate Prior and Posterior Distributions
 #'
-#' @param adam_fit 
+#' @param hamstr_fit 
 #'
 #' @return
 #' @export
-plot_acc_mean_prior_posterior <- function(adam_fit) {
+plot_acc_mean_prior_posterior <- function(hamstr_fit) {
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
   
-  adam_dat <- adam_fit$data
+  hamstr_dat <- hamstr_fit$data
   
-  prior_mean <- adam_dat$acc_mean_prior
+  prior_mean <- hamstr_dat$acc_mean_prior
   
   acc_prior_rng <- qnorm(c(0.99), mean = 0, sd = 10 * prior_mean)
   
@@ -192,7 +192,7 @@ plot_acc_mean_prior_posterior <- function(adam_fit) {
     )
   
   acc_post <-
-    tibble(alpha = as.vector(rstan::extract(adam_fit$fit, "alpha[1]")[[1]]))
+    tibble(alpha = as.vector(rstan::extract(hamstr_fit$fit, "alpha[1]")[[1]]))
   
   p <- acc_prior %>%
     ggplot(aes(x = acc_rate, y = density)) +
@@ -225,17 +225,17 @@ plot_acc_mean_prior_posterior <- function(adam_fit) {
 }
 
 
-plot_memory_prior_posterior <- function(adam_fit){
+plot_memory_prior_posterior <- function(hamstr_fit){
   # memory prior
   mem.prior <- tibble(mem = seq(0, 1, length.out = 1000)) %>%
-    mutate(mem.dens = dbeta(mem, shape1 = adam_fit$data$mem_alpha,
-                            shape2 = adam_fit$data$mem_beta))
+    mutate(mem.dens = dbeta(mem, shape1 = hamstr_fit$data$mem_alpha,
+                            shape2 = hamstr_fit$data$mem_beta))
 
-  w <- rstan::extract(adam_fit$fit, "w")$w
+  w <- rstan::extract(hamstr_fit$fit, "w")$w
   ifelse(is.matrix(w), w <- apply(w, 1, median),  w <- as.vector(w))
 
   mem.post <- tibble(w = w,
-                     R = as.vector(rstan::extract(adam_fit$fit, "R")$R))
+                     R = as.vector(rstan::extract(hamstr_fit$fit, "R")$R))
 
 
   p.mem <- mem.prior %>%
@@ -254,9 +254,9 @@ plot_memory_prior_posterior <- function(adam_fit){
   return(p.mem)
 }
 
-add_subdivisions <- function(gg, adam_fit){
+add_subdivisions <- function(gg, hamstr_fit){
 
-  tick_dat <- hierarchical_depths(adam_fit$data)
+  tick_dat <- hierarchical_depths(hamstr_fit$data)
 
   for (x in seq_along(tick_dat)){
 
@@ -274,21 +274,21 @@ add_subdivisions <- function(gg, adam_fit){
 }
 
 
-plot_age_models <- function(adam_fit, n.iter = 1000){
+plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 
-  posterior_ages <- get_posterior_ages(adam_fit)
+  posterior_ages <- get_posterior_ages(hamstr_fit)
 
   obs_ages <- dplyr::tibble(
-    depth = adam_fit$data$depth,
-    age = adam_fit$data$obs_age,
-    err = adam_fit$data$obs_err)
+    depth = hamstr_fit$data$depth,
+    age = hamstr_fit$data$obs_age,
+    err = hamstr_fit$data$obs_err)
 
   obs_ages <- dplyr::mutate(obs_ages,
                             age_upr = age + 2*err,
                             age_lwr = age - 2*err)
   
-  infl_errs <- rstan::summary(adam_fit$fit, par = "obs_err_infl")$summary %>% 
+  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
     as_tibble(., rownames = "par") %>% 
     mutate(dat_idx = readr::parse_number(par))
   
@@ -300,7 +300,7 @@ plot_age_models <- function(adam_fit, n.iter = 1000){
   p.fit <- p.fit +
     ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter))
 
-  if (adam_fit$data$inflate_errors == 1){
+  if (hamstr_fit$data$inflate_errors == 1){
     obs_ages <- obs_ages %>% 
       mutate(infl_err = infl_errs$mean,
              age_lwr_infl = age + 2*infl_err,
@@ -336,7 +336,7 @@ plot_age_models <- function(adam_fit, n.iter = 1000){
 
 
   # add subdivisions
-  p.fit <- add_subdivisions(p.fit, adam_fit)
+  p.fit <- add_subdivisions(p.fit, hamstr_fit)
 
   return(p.fit)
 
@@ -345,18 +345,18 @@ plot_age_models <- function(adam_fit, n.iter = 1000){
 
 #' Plot the hierarchical accumulation rate parameters
 #'
-#' @param adam_fit
+#' @param hamstr_fit
 #'
 #' @return
 #' @export
 #'
 #' @examples
-plot_hierarchical_acc_rate <- function(adam_fit){
+plot_hierarchical_acc_rate <- function(hamstr_fit){
 
-  idx <- as_tibble(alpha_indices(adam_fit$data$K)[1:3]) %>%
+  idx <- as_tibble(alpha_indices(hamstr_fit$data$K)[1:3]) %>%
     mutate(alpha_idx = (alpha_idx))
 
-  a3 <- rstan::summary(adam_fit$fit, pars = "alpha")$summary
+  a3 <- rstan::summary(hamstr_fit$fit, pars = "alpha")$summary
   
   alph <- as_tibble(a3, rownames = "par") %>%
     mutate(alpha_idx = readr::parse_number(par)) %>%
@@ -364,17 +364,17 @@ plot_hierarchical_acc_rate <- function(adam_fit){
     mutate(lvl = factor(lvl))
 
   # for each unit at each level in hierarchy get max and min depth 
-  alph$depth1 <- c(min(adam_fit$data$modelled_depths),
+  alph$depth1 <- c(min(hamstr_fit$data$modelled_depths),
                    unlist(sapply((
-                     hierarchical_depths(adam_fit$data)
+                     hierarchical_depths(hamstr_fit$data)
                    ),
                    function(x) {
                     head(x, -1)
                    })))
   
-  alph$depth2 <- c(max(adam_fit$data$modelled_depths),
+  alph$depth2 <- c(max(hamstr_fit$data$modelled_depths),
                    unlist(sapply((
-                     hierarchical_depths(adam_fit$data)
+                     hierarchical_depths(hamstr_fit$data)
                    ),
                    function(x) {
                      tail(x, -1)

@@ -1,5 +1,5 @@
 ---
-title: "hamstr: Hierarchical Accumulation Modelling (with Stan in R)."
+title: "hamstr: Hierarchical Accumulation Modelling with Stan and R."
 output: 
   html_document: 
     keep_md: yes
@@ -18,7 +18,7 @@ There are currently just three exported functions:
 * `stan_bacon` calls a pre-compiled Stan implementation of Bacon and estimates the age model
 * `plot_stan_bacon` plots a sample from the posterior distribution of the estimated age model
 
-**baconr** also includes the example data, core MSB2K, included in the existing C++ implementation of [Bacon v2.2](http://www.chrono.qub.ac.uk/blaauw/bacon.html)
+**hamstr** also includes the example data, core MSB2K, included in the existing C++ implementation of [Bacon v2.2](http://www.chrono.qub.ac.uk/blaauw/bacon.html)
 
 The motivation for creating this package is to make use of the Bacon age modelling routine more flexible, and to make further development 
 of the age model itself easier, by coding it in a widely used higher-level probabilistic programming language.
@@ -35,14 +35,14 @@ of the age model itself easier, by coding it in a widely used higher-level proba
 
 ## Installation
 
-**baconr** can be installed directly from Github
+**hamstr** can be installed directly from Github
 
 ```{r, eval=FALSE}
 if (!require("devtools")) {
   install.packages("devtools")
 }
 
-devtools::install_github("andrewdolman/baconr", args = "--preclean", build_vignettes = FALSE)
+devtools::install_github("andrewdolman/hamstr", args = "--preclean", build_vignettes = FALSE)
 ```
 
 
@@ -55,7 +55,7 @@ We aim to develop this package following the [Guidelines for R packages providin
 
 
 ```{r, message = FALSE, warning=FALSE}
-library(baconr)
+library(hamstr)
 library(knitr)
 library(ggplot2)
 library(tidyr)
@@ -116,8 +116,8 @@ stan_dat
 # Examine scaling behaviour of memory prior
 # Behaves very strangely when deltaC is small and mem.mean is small
 
-# baconr does not match output of Bacon2.2 when mem_mean = 0.1, mem_strength = 4
-# in baconr the prior is strong and dominates, in Bacon2.2 the data dominate the prior
+# hamstr does not match output of Bacon2.2 when mem_mean = 0.1, mem_strength = 4
+# in hamstr the prior is strong and dominates, in Bacon2.2 the data dominate the prior
 
 #(0.1^0.1)^10
 
