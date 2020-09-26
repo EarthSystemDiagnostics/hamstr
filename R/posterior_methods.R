@@ -13,17 +13,17 @@
 #' }
 get_posterior_ages <- function(hamstr_fit){
   
-  depths <- tibble(depth = hamstr_fit$data$modelled_depths,
+  depths <- tibble::tibble(depth = hamstr_fit$data$modelled_depths,
                    idx = 1:length(hamstr_fit$data$modelled_depths))
   
   posterior_ages <- as.data.frame(hamstr_fit$fit, pars = "c_ages") %>% 
-    as_tibble() %>% 
-    mutate(iter = 1:nrow(.)) %>% 
-    gather(par, age, -iter) %>% 
-    mutate(idx = readr::parse_number(par),
+    tibble::as_tibble() %>% 
+    dplyr::mutate(iter = 1:nrow(.)) %>% 
+    tidyr::gather(par, age, -iter) %>% 
+    dplyr::mutate(idx = readr::parse_number(par),
            par = "c_ages") %>% 
-    left_join(depths, .) %>% 
-    arrange(par, iter, idx, depth)
+    dplyr::left_join(depths, .) %>% 
+    dplyr::arrange(par, iter, idx, depth)
   
   return(posterior_ages)
   
@@ -49,12 +49,12 @@ interpolate_age_models <- function(hamstr_fit, new_depth){
   pst_age <- get_posterior_ages(hamstr_fit)
   
   new_age <- pst_age %>% 
-    group_by(iter) %>% 
-    do({
-      tibble(
+    dplyr::group_by(iter) %>% 
+    dplyr::do({
+      tibble::tibble(
         iter = .$iter[1],
         depth = new_depth,
-        age = approx(.$depth, .$age, new_depth)$y
+        age = stats::approx(.$depth, .$age, new_depth)$y
       )
     })
   
@@ -73,15 +73,15 @@ interpolate_age_models <- function(hamstr_fit, new_depth){
 summarise_new_ages <- function(new_ages){
   
   new_ages_sum <- new_ages %>% 
-    group_by(depth) %>% 
-    summarise(mean = mean(age),
+    dplyr::group_by(depth) %>% 
+    dplyr::summarise(mean = mean(age),
               #se_mean = NA,
-              sd = sd(age),
-              `2.5%` = quantile(age, probs = c(0.025), na.rm = T),
-              `25%` = quantile(age, probs = c(0.25), na.rm = T),
-              `50%` = quantile(age, probs = c(0.50), na.rm = T),
-              `75%` = quantile(age, probs = c(0.75), na.rm = T),
-              `97.5%` = quantile(age, probs = c(0.975), na.rm = T))
+              sd = stats::sd(age),
+              `2.5%` = stats::quantile(age, probs = c(0.025), na.rm = T),
+              `25%` = stats::quantile(age, probs = c(0.25), na.rm = T),
+              `50%` = stats::quantile(age, probs = c(0.50), na.rm = T),
+              `75%` = stats::quantile(age, probs = c(0.75), na.rm = T),
+              `97.5%` = stats::quantile(age, probs = c(0.975), na.rm = T))
   
   return(new_ages_sum)
   
@@ -102,13 +102,13 @@ summarise_age_models <- function(hamstr_fit){
     age_summary <-summarise_new_ages(hamstr_fit)
   } else {
     age_summary <- rstan::summary(hamstr_fit$fit, par = "c_ages")[["summary"]] %>% 
-      as_tibble(., rownames = "par")
+      tibble::as_tibble(., rownames = "par")
     
-    depths <- tibble(depth = hamstr_fit$data$modelled_depths,
+    depths <- tibble::tibble(depth = hamstr_fit$data$modelled_depths,
                      idx = 1:length(hamstr_fit$data$modelled_depths))
     age_summary <- age_summary %>% 
-      mutate(idx = readr::parse_number(par)) %>% 
-      left_join(depths, .)
+      dplyr::mutate(idx = readr::parse_number(par)) %>% 
+      dplyr::left_join(depths, .)
     
   }
   return(age_summary)
@@ -139,41 +139,41 @@ plot_summary_age_models <- function(hamstr_fit){
   
   
   infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
-    as_tibble(., rownames = "par") %>% 
-    mutate(dat_idx = readr::parse_number(par))
+    tibble::as_tibble(., rownames = "par") %>% 
+    dplyr::mutate(dat_idx = readr::parse_number(par))
   
   p.age.sum <- age_summary %>% 
-    ggplot(aes(x = depth, y = mean)) +
-    geom_ribbon(aes(ymax = `2.5%`, ymin = `97.5%`), fill = "Lightgrey") +
-    geom_ribbon(aes(ymax = `75%`, ymin = `25%`), fill = "Darkgrey") +
-    geom_line() +
-    geom_line(aes(y = `50%`), colour = "Green") +
-    labs(x = "Depth", y = "Age") +
-    theme_bw() +
-    theme(panel.grid = element_blank())
+    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`), fill = "Lightgrey") +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`), fill = "Darkgrey") +
+    ggplot2::geom_line() +
+    ggplot2::geom_line(ggplot2::aes(y = `50%`), colour = "Green") +
+    ggplot2::labs(x = "Depth", y = "Age") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank())
    
    
   if (hamstr_fit$data$inflate_errors == 1){
     obs_ages <- obs_ages %>% 
-      mutate(infl_err = infl_errs$mean,
+      dplyr::mutate(infl_err = infl_errs$mean,
              age_lwr_infl = age + 2*infl_err,
              age_upr_infl = age - 2*infl_err)
     
    p.age.sum <- p.age.sum +
     ggplot2::geom_linerange(
       data = obs_ages,
-      aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
+      ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
       group = NA,
       colour = "Red",
       alpha = 0.5, inherit.aes = F)
   }
   
   p.age.sum <- p.age.sum +
-    geom_linerange(data = obs_ages,
-                   aes(x = depth, 
+    ggplot2::geom_linerange(data = obs_ages,
+                   ggplot2::aes(x = depth, 
                        ymax = age_upr, ymin = age_lwr), inherit.aes = FALSE,
                     colour = "Blue", size = 1.25) +
-    geom_point(data = obs_ages, aes(y = age),
+    ggplot2::geom_point(data = obs_ages, ggplot2::aes(y = age),
                colour = "Blue")
   
   

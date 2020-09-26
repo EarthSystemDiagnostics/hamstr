@@ -17,7 +17,12 @@ Biarch: true
 Depends: 
     R (>= 3.4.0)
 Imports: 
+    stats,
+    MASS, 
+    utils,
     ggplot2,
+    tibble,
+    plyr,
     dplyr,
     tidyr,
     ggpubr,

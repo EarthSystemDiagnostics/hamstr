@@ -152,7 +152,7 @@ SummariseEmpiricalPDF <- function(x, p){
 compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 6,
                              return.type = c("plot", "list")){
   
-  dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * dt((x - mu)/sigma, dat)
+  dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * stats::dt((x - mu)/sigma, dat)
   
   stopifnot(length(age.14C) == length(age.14C.se))
   
@@ -185,8 +185,8 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
   })
   
   t_df <- C14 %>%
-    group_by(.id) %>%
-    do({
+    dplyr::group_by(.id) %>%
+    dplyr::do({
       rng <- .$age.14C.cal.se * 5
       age = seq(.$age.14C.cal - rng, .$age.14C.cal + rng, length.out = 100)
       data.frame(
@@ -198,12 +198,12 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
     })
   
   gg <- cali.pdf.dat %>%
-    ggplot(aes(x = age/1000, y = density, group = .id)) +
-    geom_line(aes(colour = "Empirical PDF")) +
-    geom_line(data = t_df, aes(y = density, colour = "t-distribution")) +
-    labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
-    facet_wrap(~.id, scales = "free") +
-    theme_bw()
+    ggplot2::ggplot(ggplot2::aes(x = age/1000, y = density, group = .id)) +
+    ggplot2::geom_line(ggplot2::aes(colour = "Empirical PDF")) +
+    ggplot2::geom_line(data = t_df, ggplot2::aes(y = density, colour = "t-distribution")) +
+    ggplot2::labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
+    ggplot2::facet_wrap(~.id, scales = "free") +
+    ggplot2::theme_bw()
   
   if (return.type == "list"){
     return(list(plot = gg, cal.age.pdf = cali.pdf.dat, t.dist.age = t_df))

@@ -101,7 +101,7 @@ make_stan_dat_hamstr <- function(depth, obs_age, obs_err,
   if (is.null(acc_mean_prior)){
     
     d <- data.frame(depth = depth, obs_age = obs_age)
-    acc_mean <- coef(MASS::rlm(obs_age~depth, data = d))[2]
+    acc_mean <- stats::coef(MASS::rlm(obs_age~depth, data = d))[2]
     
     # if negative replace with 20
     if (acc_mean <= 0) {
@@ -134,7 +134,7 @@ make_stan_dat_hamstr <- function(depth, obs_age, obs_err,
 
   if (is.null(top_depth)) l$top_depth <- l$depth[1] - buff
 
-  if (is.null(bottom_depth)) l$bottom_depth <- tail(l$depth, 1) + buff
+  if (is.null(bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) + buff
 
   depth_range <- l$bottom_depth - l$top_depth
 
@@ -150,7 +150,7 @@ make_stan_dat_hamstr <- function(depth, obs_age, obs_err,
   alpha_idx <- alpha_indices(K)
 
   l$K_tot <- sum(alpha_idx$nK)
-  l$K_fine <- tail(alpha_idx$nK, 1)
+  l$K_fine <- utils::tail(alpha_idx$nK, 1)
   l$c <- 1:l$K_fine
 
   l$mem_alpha = mem_strength * mem_mean
@@ -206,22 +206,22 @@ hierarchical_depths <- function(stan_dat){
 get_inits_hamstr <- function(stan_dat){
   
   l <- list(
-    R = runif(1, 0.1, 0.9),
+    R = stats::runif(1, 0.1, 0.9),
     
     # create starting alpha values +- 3 SD from the overal prior mean (but always +ve)
-    alpha = with(stan_dat, abs(rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
+    alpha = with(stan_dat, abs(stats::rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
     #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
 
     #shape = abs(rnorm(1, 1.5, 1.5/3)),
 
-    age0 = rnorm(1, min(stan_dat$obs_age), 2)
+    age0 = stats::rnorm(1, min(stan_dat$obs_age), 2)
   )
 
   # need to make this conditional and make sure initial values are arrays!
   if (stan_dat$inflate_errors == 1){
-    l$infl_mean = as.array(abs(rnorm(1, 0, 0.1)))
-    l$infl_shape = as.array(1+abs(rnorm(1, 0, 0.1)))
-    l$infl = abs(rnorm(stan_dat$N, 0, 0.1))
+    l$infl_mean = as.array(abs(stats::rnorm(1, 0, 0.1)))
+    l$infl_shape = as.array(1+abs(stats::rnorm(1, 0, 0.1)))
+    l$infl = abs(stats::rnorm(stan_dat$N, 0, 0.1))
   } else {
     l$infl_mean = numeric(0)
     l$infl_sd = numeric(0)
