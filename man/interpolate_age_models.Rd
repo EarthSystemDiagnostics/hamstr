@@ -7,19 +7,29 @@
 interpolate_age_models(hamstr_fit, new_depth)
 }
 \arguments{
-\item{hamstr_fit}{fitted hamstr model, output from hamstr()}
+\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 
 \item{new_depth}{a vector of depths at which to interpolate the age models}
 }
 \value{
-
+hamstr_interpolated_ages object
 }
 \description{
 Interpolate Posterior Age Model At New Depths
 }
 \examples{
 \dontrun{
-interpolate.age.models(fitted.hamstr.object, new_depth = seq(1000, 15000, by = 1000))
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
+  K = c(10, 10), nu = 6,
+  acc_mean_prior = 20,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0,
+  iter = 2000, chains = 3)
+  
+interpolate.age.models(fit, new_depth = seq(1000, 15000, by = 1000))
 }
 
 }

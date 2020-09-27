@@ -2,16 +2,31 @@
 % Please edit documentation in R/plot_stan_hamstr.R
 \name{plot_memory_prior_posterior}
 \alias{plot_memory_prior_posterior}
-\title{Title}
+\title{Plot Memory Prior and Posterior}
 \usage{
 plot_memory_prior_posterior(hamstr_fit)
 }
 \arguments{
-\item{hamstr_fit}{}
+\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 }
 \value{
-
+A ggplot2 object
 }
 \description{
-Title
+Plot Memory Prior and Posterior
+}
+\examples{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
+  K = c(10, 10), nu = 6,
+  acc_mean_prior = 20,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0,
+  iter = 2000, chains = 3)
+  
+plot_memory_prior_posterior(fit)
+}
 }

@@ -15,7 +15,7 @@ License: GPL-3
 LazyData: true
 Biarch: true
 Depends: 
-    R (>= 3.4.0)
+    R (>= 3.5.0)
 Imports: 
     stats,
     MASS, 
@@ -23,8 +23,10 @@ Imports:
     ggplot2,
     tibble,
     plyr,
+    rlang,
     dplyr,
     tidyr,
+    readr,
     ggpubr,
     magrittr,
     methods,

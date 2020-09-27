@@ -5,23 +5,24 @@
 \title{Make the data object required by the Stan program}
 \usage{
 make_stan_dat_hamstr(
-  depth,
-  obs_age,
-  obs_err,
+  depth = NULL,
+  obs_age = NULL,
+  obs_err = NULL,
   top_depth = NULL,
   bottom_depth = NULL,
-  pad_top_bottom = FALSE,
-  K = c(10, 10),
-  nu = 6,
+  pad_top_bottom = NULL,
+  K = NULL,
+  nu = NULL,
   acc_mean_prior = NULL,
-  shape = 1.5,
-  mem_mean = 0.7,
-  mem_strength = 4,
-  scale_R = 1,
-  inflate_errors = 0,
+  shape = NULL,
+  mem_mean = NULL,
+  mem_strength = NULL,
+  scale_R = NULL,
+  inflate_errors = NULL,
   infl_sigma_sd = NULL,
-  infl_shape_shape = 1,
-  infl_shape_mean = 1
+  infl_shape_shape = NULL,
+  infl_shape_mean = NULL,
+  ...
 )
 }
 \arguments{
@@ -57,7 +58,7 @@ is in cm and age in kyr then the accumulation rate is in cm/kyr. The
 overall mean accumulation rate is given a weak half-normal prior with mean
 = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 mean accumulation rate estimated by fitting a robust linear model using
-\code{\link{MASS::rlm}}.}
+\link[MASS]{rlm}.}
 
 \item{shape}{Hyperparameter for the shape of the priors on accumulation rates.
 Defaults to 1.5 - as for Bacon 2.2.}
@@ -73,11 +74,27 @@ the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 
-\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or not}
+\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or 
+not. Defaults to TRUE.}
 
 \item{inflate_errors}{logical: If set to TRUE, observation errors are
-inflated so that data are consistent with a Bacon type monotonic age-depth
-model}
+inflated so that data are consistent with a "Bacon-style" monotonic 
+age-depth model. This is an experimental feature under active development.
+Defaults to FALSE.}
+
+\item{infl_sigma_sd}{Hyperparameter: sets the standard deviation of the 
+half-normal prior on the mean of the additional error terms. Defaults to 10 
+times the mean observation error in obs_err.}
+
+\item{infl_shape_shape}{Hyperparameters: parametrises the 
+gamma prior on the shape of the distribution of the additional error terms.
+ Default to 1, 1.}
+
+\item{infl_shape_mean}{Hyperparameters: parametrises the 
+gamma prior on the shape of the distribution of the additional error terms.
+ Default to 1, 1.}
+
+\item{...}{additional arguments to \link[rstan]{sampling}}
 }
 \value{
 a list of data and parameters to be passed as data to the Stan sampler
@@ -88,6 +105,5 @@ Make the data object required by the Stan program
 \examples{
 make_stan_dat_hamstr(depth = MSB2K$depth,
               obs_age = MSB2K$age,
-              obs_err = MSB2K$error,
-              nu = 6)
+              obs_err = MSB2K$error)
 }

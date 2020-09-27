@@ -20,10 +20,7 @@
 #'   overall mean accumulation rate is given a weak half-normal prior with mean
 #'   = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 #'   mean accumulation rate estimated by fitting a robust linear model using
-#'   \code{\link{MASS::rlm}}.
-#' @param record_prior_acc_shape_mean,record_prior_acc_shape_shape
-#'   hyperparameters for the hyperprior on the shape of the distribution of K1
-#'   coarse level accumulation rates. Defaults to 1.5, 1.5.
+#'   \link[MASS]{rlm}.
 #' @param shape Hyperparameter for the shape of the priors on accumulation rates.
 #'  Defaults to 1.5 - as for Bacon 2.2.
 #' @param mem_mean Hyperparameter: a parameter of the Beta prior distribution on
@@ -35,18 +32,27 @@
 #'   0.7), while *w* = R^(delta_c)
 #' @param mem_strength Hyperparameter: sets the strength of the memory prior,
 #'   defaults to 4 as in Bacon 2.2 
-#' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or not
+#' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or 
+#' not. Defaults to TRUE.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
-#'   inflated so that data are consistent with a Bacon type monotonic age-depth
-#'   model
+#'   inflated so that data are consistent with a "Bacon-style" monotonic 
+#'   age-depth model. This is an experimental feature under active development.
+#'   Defaults to FALSE.
+#' @param infl_sigma_sd Hyperparameter: sets the standard deviation of the 
+#' half-normal prior on the mean of the additional error terms. Defaults to 10 
+#' times the mean observation error in obs_err.
+#' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the 
+#' gamma prior on the shape of the distribution of the additional error terms.
+#'  Default to 1, 1. 
+#' @param ... additional arguments to \link[rstan]{sampling}
 #' @inheritParams rstan::sampling
 #'
 #' @return Returns a list composed of the output from the Stan sampler .$fit,
-#'   and the list of data passed to the sampler
+#'   and the list of data passed to the sampler, .$data
 #' @export
 #'
 #' @examples
-#' dontrun{
+#' \dontrun{
 #' 
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -64,30 +70,35 @@
 #' 
 #' }
 hamstr <- function(depth, obs_age, obs_err,
-                 K = c(10, 10), nu = 6,
-                 top_depth = NULL, bottom_depth = NULL,
-                 pad_top_bottom = FALSE,
-                 acc_mean_prior = NULL,
-                 shape = 1.5,
-                 mem_mean = 0.7, mem_strength = 4,
-                 scale_R = TRUE,
-                 inflate_errors = FALSE,
-                 infl_sigma_sd = NULL,
-                 infl_shape_shape = 1, infl_shape_mean = 1, 
-                 iter = 2000, chains = 3, ...){
+                   K = c(10, 10),
+                   top_depth = NULL, bottom_depth = NULL,
+                   pad_top_bottom = FALSE,
+                   acc_mean_prior = NULL,
+                   shape = 1.5,
+                   mem_mean = 0.7, mem_strength = 4,
+                   scale_R = TRUE,
+                   nu = 6,
+                   inflate_errors = FALSE,
+                   infl_sigma_sd = NULL,
+                   infl_shape_shape = 1, infl_shape_mean = 1, 
+                   iter = 2000, chains = 3, ...){
   
   
-  stan_dat <- make_stan_dat_hamstr(depth = depth, obs_age = obs_age, obs_err = obs_err,
-                                 K=K, nu=nu,
-                                 top_depth = top_depth, bottom_depth = bottom_depth,
-                                 pad_top_bottom = pad_top_bottom,
-                                 acc_mean_prior = acc_mean_prior,
-                                 shape = shape,
-                                 mem_mean=mem_mean, mem_strength=mem_strength,
-                                 scale_R = as.numeric(scale_R),
-                                 inflate_errors = as.numeric(inflate_errors),
-                                 infl_sigma_sd = infl_sigma_sd,
-                                 infl_shape_shape = infl_shape_shape, infl_shape_mean = infl_shape_mean)
+  stan_dat <- make_stan_dat_hamstr(depth = depth, 
+                                   obs_age = obs_age, obs_err = obs_err,
+                                   K=K, 
+                                   top_depth = top_depth,
+                                   bottom_depth = bottom_depth,
+                                   pad_top_bottom = pad_top_bottom,
+                                   acc_mean_prior = acc_mean_prior,
+                                   shape = shape,
+                                   mem_mean=mem_mean, mem_strength=mem_strength,
+                                   scale_R = as.numeric(scale_R),
+                                   nu=nu,
+                                   inflate_errors = as.numeric(inflate_errors),
+                                   infl_sigma_sd = infl_sigma_sd,
+                                   infl_shape_shape = infl_shape_shape,
+                                   infl_shape_mean = infl_shape_mean)
   
   inits <- get_inits_hamstr(stan_dat)
   

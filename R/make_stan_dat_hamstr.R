@@ -25,8 +25,6 @@ optimal_K <- function(K_tot, target_K_per_lvl = 10){
   
   idx <- which.min(abs(df$K_fine - K_tot))
   
-  
-  
   n_lvls <- df[idx, "n_lvls"]
   K_per_lvl <- df[idx, "K_per_lvl"]
  
@@ -38,6 +36,28 @@ optimal_K <- function(K_tot, target_K_per_lvl = 10){
 }
 
 
+#' Calculate number of parameters being estimated for a given hierarchical structure
+#'
+#' @param base Number of new sections per per section
+#' @param n Number of hierarchical levels
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' hierarchy_efficiency(10, 3)
+hierarchy_efficiency <- function(base, n){
+  
+  nTot <- (base^1 - base^(n+1)) / (1-base)
+  
+  nFine <- base^n
+  
+  eff <- nTot / nFine
+  
+  return(c(nFine = nFine, nTot = nTot, eff = eff))
+  
+}
+
 
 # Make index creating functions for K levels
 #' Create alpha level indices
@@ -48,9 +68,11 @@ optimal_K <- function(K_tot, target_K_per_lvl = 10){
 #' @keywords internal
 alpha_indices <- function(K){
 
+  K <- eval(K)
+  
   # prepend 1 for the single overall mean alpha 
   K <- c(1, K)
-
+  
   # number of sections at each level
   nK <- cumprod(K)
 
@@ -82,49 +104,62 @@ alpha_indices <- function(K){
 #' @examples
 #' make_stan_dat_hamstr(depth = MSB2K$depth,
 #'               obs_age = MSB2K$age,
-#'               obs_err = MSB2K$error,
-#'               nu = 6)
-make_stan_dat_hamstr <- function(depth, obs_age, obs_err,
-                               top_depth = NULL, bottom_depth = NULL,
-                                 pad_top_bottom = FALSE,
-                                 K = c(10, 10), nu = 6,
-                                 acc_mean_prior = NULL,
-                               shape = 1.5,
-                                 mem_mean = 0.7, mem_strength = 4,
-                               scale_R = 1,
-                                 inflate_errors = 0,
-                               infl_sigma_sd = NULL, 
-                               infl_shape_shape = 1, infl_shape_mean = 1) {
+#'               obs_err = MSB2K$error)
+make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
+                                 top_depth=NULL, bottom_depth=NULL,
+                                 pad_top_bottom=NULL,
+                                 K=NULL, nu=NULL,
+                                 acc_mean_prior=NULL,
+                                 shape=NULL,
+                                 mem_mean=NULL, mem_strength=NULL,
+                                 scale_R=NULL,
+                                 inflate_errors=NULL,
+                                 infl_sigma_sd=NULL, 
+                                 infl_shape_shape=NULL, infl_shape_mean=NULL,
+                                 ...) {
 
   l <- c(as.list(environment()))
+ 
+  # get defaults
+  default.args <- formals(hamstr)
+  default.arg.nms <- names(default.args)
   
-  if (is.null(acc_mean_prior)){
-    
+  
+  # Overwrite the defaults with non-null passed arguments 
+ 
+  l <- l[lapply(l, is.null) == FALSE]
+  
+  default.args[names(l)] <- l
+  
+  l <- default.args
+  
+  if (is.null(l$acc_mean_prior)){
+
     d <- data.frame(depth = depth, obs_age = obs_age)
     acc_mean <- stats::coef(MASS::rlm(obs_age~depth, data = d))[2]
-    
+
     # if negative replace with 20
     if (acc_mean <= 0) {
       warning("Estimated mean accumulation rate is negative - using value = 20")
       acc_mean <- 20
       }
     l$acc_mean_prior <- acc_mean
-    
   }
 
+  
   ord <- order(depth)
 
   l$depth <- depth[ord]
   l$obs_age <- obs_age[ord]
   l$obs_err <- obs_err[ord]
-  
-  
-  if (is.null(infl_sigma_sd)){
-    l$infl_sigma_sd <- 10 * mean(obs_err) 
-  }
-  
 
-  if (pad_top_bottom == TRUE){
+
+  if (is.null(infl_sigma_sd)){
+    l$infl_sigma_sd <- 10 * mean(obs_err)
+  }
+
+
+  if (l$pad_top_bottom == TRUE){
     # Set start depth to 5% less than first depth observation, and DO allow negative depths
     depth_range <- diff(range(l$depth))
     buff <- 0.05 * depth_range
@@ -147,7 +182,7 @@ make_stan_dat_hamstr <- function(depth, obs_age, obs_err,
 
   stopifnot(l$N == length(obs_err), l$N == length(obs_age))
 
-  alpha_idx <- alpha_indices(K)
+  alpha_idx <- alpha_indices(l$K)
 
   l$K_tot <- sum(alpha_idx$nK)
   l$K_fine <- utils::tail(alpha_idx$nK, 1)
@@ -169,7 +204,7 @@ make_stan_dat_hamstr <- function(depth, obs_age, obs_err,
   l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))
 
   l <- append(l, alpha_idx)
-  
+
   #l$K_lvls <- length(l$K)
   #l$K_idx <- l$lvl - 1
 
@@ -194,7 +229,6 @@ hierarchical_depths <- function(stan_dat){
     c(min_d, delta_d * 1:x + min_d)
   })
 }
-
 
 
 #' Create Random Initial Values for the hamstr Stan Model

@@ -9,7 +9,6 @@ hamstr(
   obs_age,
   obs_err,
   K = c(10, 10),
-  nu = 6,
   top_depth = NULL,
   bottom_depth = NULL,
   pad_top_bottom = FALSE,
@@ -18,6 +17,7 @@ hamstr(
   mem_mean = 0.7,
   mem_strength = 4,
   scale_R = TRUE,
+  nu = 6,
   inflate_errors = FALSE,
   infl_sigma_sd = NULL,
   infl_shape_shape = 1,
@@ -38,11 +38,6 @@ hamstr(
 level, defaults to c(10, 10), resulting in two levels with 10 and 100
 sections respectively.}
 
-\item{nu}{Degrees of freedom for the Student-t distributed error model.
-Defaults to 6, which is equivalent to the default parameterisation of
-t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
-error model, (nu = 100 should do it).}
-
 \item{top_depth, bottom_depth}{The top and bottom depths of the desired
 age-depth model. Must encompass the range of the data. Defaults to the
 shallowest and deepest data points unless \code{pad_top_bottom = TRUE}}
@@ -56,7 +51,7 @@ is in cm and age in kyr then the accumulation rate is in cm/kyr. The
 overall mean accumulation rate is given a weak half-normal prior with mean
 = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 mean accumulation rate estimated by fitting a robust linear model using
-\code{\link{MASS::rlm}}.}
+\link[MASS]{rlm}.}
 
 \item{shape}{Hyperparameter for the shape of the priors on accumulation rates.
 Defaults to 1.5 - as for Bacon 2.2.}
@@ -72,11 +67,26 @@ the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 
-\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or not}
+\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or 
+not. Defaults to TRUE.}
+
+\item{nu}{Degrees of freedom for the Student-t distributed error model.
+Defaults to 6, which is equivalent to the default parameterisation of
+t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
+error model, (nu = 100 should do it).}
 
 \item{inflate_errors}{logical: If set to TRUE, observation errors are
-inflated so that data are consistent with a Bacon type monotonic age-depth
-model}
+inflated so that data are consistent with a "Bacon-style" monotonic 
+age-depth model. This is an experimental feature under active development.
+Defaults to FALSE.}
+
+\item{infl_sigma_sd}{Hyperparameter: sets the standard deviation of the 
+half-normal prior on the mean of the additional error terms. Defaults to 10 
+times the mean observation error in obs_err.}
+
+\item{infl_shape_shape, infl_shape_mean}{Hyperparameters: parametrises the 
+gamma prior on the shape of the distribution of the additional error terms.
+ Default to 1, 1.}
 
 \item{iter}{A positive integer specifying the number of iterations for each 
     chain (including warmup). The default is 2000.}
@@ -84,22 +94,17 @@ model}
 \item{chains}{A positive integer specifying the number of Markov chains. 
     The default is 4.}
 
-\item{...}{Additional arguments can be \code{chain_id}, \code{init_r}, 
-    \code{test_grad}, \code{append_samples}, \code{refresh},
-    \code{enable_random_init}. See the documentation in \code{\link[rstan]{stan}}.}
-
-\item{record_prior_acc_shape_mean, record_prior_acc_shape_shape}{hyperparameters for the hyperprior on the shape of the distribution of K1
-coarse level accumulation rates. Defaults to 1.5, 1.5.}
+\item{...}{additional arguments to \link[rstan]{sampling}}
 }
 \value{
 Returns a list composed of the output from the Stan sampler .$fit,
-  and the list of data passed to the sampler
+  and the list of data passed to the sampler, .$data
 }
 \description{
 hamstr
 }
 \examples{
-dontrun{
+\dontrun{
 
 fit <- hamstr(
   depth = MSB2K$depth,

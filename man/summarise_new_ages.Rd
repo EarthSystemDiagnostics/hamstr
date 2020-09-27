@@ -7,10 +7,10 @@
 summarise_new_ages(new_ages)
 }
 \arguments{
-\item{new_ages}{}
+\item{new_ages}{Object of class "hamstr_interpolated_ages"}
 }
 \value{
-
+data.frame / tibble
 }
 \description{
 Summarise Interpolated Posterior Age Models

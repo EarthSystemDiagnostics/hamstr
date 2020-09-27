@@ -7,13 +7,29 @@
 plot_age_models(hamstr_fit, n.iter = 1000)
 }
 \arguments{
-\item{hamstr_fit}{}
+\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 
-\item{n.iter}{}
+\item{n.iter}{The number of iterations of the model to plot, defaults to
+1000.}
 }
 \value{
-
+A ggplot2 object
 }
 \description{
 Title
+}
+\examples{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
+  K = c(10, 10), nu = 6,
+  acc_mean_prior = 20,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0,
+  iter = 2000, chains = 3)
+  
+plot_age_models(fit)
+}
 }

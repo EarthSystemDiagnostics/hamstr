@@ -1,19 +1,43 @@
 #' Plot an hamstr_fit object
 #'
 #' @param hamstr_fit The object returned from \code{stan_hamstr}.
-#' @param n.iter The number of iterations of the model to plot, defaults to 1000.
 #'
-#' @description Plots the Bacon modelled Age~Depth relationship together with
-#'   the depths, ages, and age uncertainties in the observed data. A sample of
-#'   size \code{n.iter} of the interactions of the posterior distribution are
-#'   plotted as grey lines. The observed data are plotted as points with +- 2*se error bars.
-#'
+#' @param n.iter The number of iterations of the model to plot, defaults to
+#'   1000.
+#' @param type Plot the realisations as a summarised "ribbon" (faster) or as a
+#'   spaghetti plot.
+#' @param plot_diagnostics logical, include diagnostic plots: traceplot of
+#'   log-posterior, hierarchical accumulations rates, memory parameter. Defaults
+#'   to TRUE.
+#' @description Plots the HAMStR modelled age ~ depth relationship together with
+#'   the depths, ages, and age uncertainties in the observed data. A random
+#'   sample of size \code{n.iter} of the iterations of the posterior
+#'   distribution are plotted as grey lines. The observed data are plotted as
+#'   points with +- 2*se error bars.
+#'   
 #' @return A ggplot2 object
 #' @export
 #' @importFrom ggpubr ggarrange
 #' @importFrom rstan extract
 #' @importFrom magrittr %>%
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' # With age models summarised as a ribbon. Faster than spaghetti plots.
+#' plot_hamstr(fit)
+#' 
+#' # With age models as spaghetti plots. Can see individual realisations, but slower to plot.
+#' plot_hamstr(fit, type = "spag")
+#' }
 plot_hamstr <- function(hamstr_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, plot_diagnostics = TRUE) {
 
   type <- match.arg(type)
@@ -47,10 +71,9 @@ plot_hamstr <- function(hamstr_fit, type = c("ribbon", "spaghetti"), n.iter = 10
 #' @param prior 
 #' @param posterior 
 #'
-#' @return
+#' @return A ggplot2 object
 #' @keywords internal
 #' @import ggplot2
-#' @examples
 plot_prior_posterior_hist <- function(prior, posterior){
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
   ggplot2::ggplot() +
@@ -75,14 +98,28 @@ plot_prior_posterior_hist <- function(prior, posterior){
 
 #' Title
 #'
-#' @param hamstr_fit 
-#'
-#' @return
+#' @return A ggplot2 object
 #' @export
 #' @import rstan 
 #' @import ggplot2
+#' @importFrom readr parse_number
+#' @importFrom rlang .data
+#' @inheritParams plot_hamstr
 #' 
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_infl_prior_posterior(fit)
+#' }
 plot_infl_prior_posterior <- function(hamstr_fit){
   
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
@@ -110,7 +147,7 @@ plot_infl_prior_posterior <- function(hamstr_fit){
   infl_fac <- rstan::extract(hamstr_fit$fit, "infl")[[1]] %>% 
     tibble::as_tibble() %>% 
     tidyr::gather() %>% 
-    dplyr::mutate(key = readr::parse_number(key))
+    dplyr::mutate(key = readr::parse_number(.data$key))
   
  
   p.infl.fac <- rstan::stan_plot(hamstr_fit$fit, pars = "infl")
@@ -127,25 +164,26 @@ plot_infl_prior_posterior <- function(hamstr_fit){
   infl_prior_mean <-
     tibble::tibble(x = seq(0, max_x_mean, length.out = 1000)) %>%
     dplyr::mutate(
-      d = 2*stats::dnorm(x, 0,  sd = hamstr_dat$infl_sigma_sd),
+      d = 2*stats::dnorm(.data$x, 0,  sd = hamstr_dat$infl_sigma_sd),
       par = "infl_mean")
   
   infl_priors <- dplyr::bind_rows(infl_prior_mean, infl_prior_shape)
   
   infl_mean_shape_post_long <- infl_mean_shape_post %>% 
-    tidyr::gather(par, x, -iter)
+    tidyr::gather(.data$par, .data$x, -.data$iter)
  
   p.pars <- plot_prior_posterior_hist(infl_priors, infl_mean_shape_post_long)
   
   
   infl_mean_shape_post <- infl_mean_shape_post %>% 
-    dplyr::mutate(q99 = stats::qgamma(0.75, infl_shape, rate = infl_shape/infl_mean))
+    dplyr::mutate(q99 = stats::qgamma(0.75, .data$infl_shape,
+                                      rate = .data$infl_shape/.data$infl_mean))
   
   
   infl_pars_prior_dist <- infl_mean_shape_post %>% 
     stats::filter(iter %in% sample.int(dplyr::n(), 10)) %>% 
     tidyr::crossing(., tibble::tibble(x = exp(seq(log(0.01), log(stats::quantile(infl_mean_shape_post$q99, prob = 0.95)), length.out = 100)))) %>% 
-    dplyr::mutate(d = stats::dgamma(x, shape = infl_shape, rate = infl_shape / infl_mean),
+    dplyr::mutate(d = stats::dgamma(x, shape = .data$infl_shape, rate = .data$infl_shape / .data$infl_mean),
            #d = dgamma(x, shape = infl_shape, rate = infl_shape / 1),
            par = "Modelled prior for infl_fac")
   
@@ -170,12 +208,26 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 
 
 #' Plot Mean Accumulation Rate Prior and Posterior Distributions
-#'
-#' @param hamstr_fit
-#'  
+#' @inheritParams plot_hamstr
+#' 
 #' @import ggplot2
-#' @return
+#' @importFrom rlang .data
+#' @return A ggplot2 object
 #' @export
+#' @examples 
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_acc_mean_prior_posterior(fit)
+#' }
 plot_acc_mean_prior_posterior <- function(hamstr_fit) {
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
   
@@ -188,8 +240,8 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
   acc_prior <-
     tibble::tibble(acc_rate = seq(0, acc_prior_rng[1], length.out = 1000)) %>%
     dplyr::mutate(
-      density = 2 * stats::dnorm(acc_rate, 0, 10 * prior_mean),
-      density = ifelse(acc_rate <= 0, 0, density)
+      density = 2 * stats::dnorm(.data$acc_rate, 0, 10 * prior_mean),
+      density = ifelse(.data$acc_rate <= 0, 0, .data$density)
     )
   
   acc_post <-
@@ -226,19 +278,33 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 }
 
 
-#' Title
+#' Plot Memory Prior and Posterior
 #'
-#' @param hamstr_fit 
+#' @inheritParams plot_hamstr
 #'
-#' @return
+#' @return A ggplot2 object
 #' @export
 #' @import ggplot2
+#' @importFrom rlang .data
 #' 
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_memory_prior_posterior(fit)
+#' }
 plot_memory_prior_posterior <- function(hamstr_fit){
   # memory prior
   mem.prior <- tibble::tibble(mem = seq(0, 1, length.out = 1000)) %>%
-    dplyr::mutate(mem.dens = stats::dbeta(mem, shape1 = hamstr_fit$data$mem_alpha,
+    dplyr::mutate(mem.dens = stats::dbeta(.data$mem, shape1 = hamstr_fit$data$mem_alpha,
                             shape2 = hamstr_fit$data$mem_beta))
 
   w <- rstan::extract(hamstr_fit$fit, "w")$w
@@ -264,12 +330,12 @@ plot_memory_prior_posterior <- function(hamstr_fit){
   return(p.mem)
 }
 
-#' Title
+#' Add subdivision tickmarks 
 #'
 #' @param gg 
-#' @param hamstr_fit 
+#' @inheritParams plot_hamstr
 #'
-#' @return
+#' @return A ggplot2 object
 #' 
 #' @import ggplot2
 #'
@@ -296,14 +362,27 @@ add_subdivisions <- function(gg, hamstr_fit){
 
 #' Title
 #'
-#' @param hamstr_fit 
-#' @param n.iter 
-#'
-#' @return
+#' @inheritParams plot_hamstr 
+#' 
+#' @return A ggplot2 object
 #' @export
 #' @import ggplot2
-#' 
+#' @importFrom rlang .data
+#' @importFrom readr parse_number
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_age_models(fit)
+#' }
 plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 
@@ -315,15 +394,15 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
     err = hamstr_fit$data$obs_err)
 
   obs_ages <- dplyr::mutate(obs_ages,
-                            age_upr = age + 2*err,
-                            age_lwr = age - 2*err)
+                            age_upr = .data$age + 2*.data$err,
+                            age_lwr = .data$age - 2*.data$err)
   
   infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
     tibble::as_tibble(., rownames = "par") %>% 
-    dplyr::mutate(dat_idx = readr::parse_number(par))
+    dplyr::mutate(dat_idx = readr::parse_number(.data$par))
   
   p.fit <- posterior_ages %>%
-    dplyr::filter(iter %in% sample(unique(.$iter), n.iter, replace = FALSE)) %>%
+    dplyr::filter(.data$iter %in% sample(unique(.data$iter), n.iter, replace = FALSE)) %>%
     ggplot2::ggplot(ggplot2::aes(x = depth, y = age, group = iter))
 
 
@@ -333,8 +412,8 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
   if (hamstr_fit$data$inflate_errors == 1){
     obs_ages <- obs_ages %>% 
       dplyr::mutate(infl_err = infl_errs$mean,
-             age_lwr_infl = age + 2*infl_err,
-             age_upr_infl = age - 2*infl_err)
+             age_lwr_infl = .data$age + 2*.data$infl_err,
+             age_upr_infl = .data$age - 2*.data$infl_err)
     
     p.fit <- p.fit +
       ggplot2::geom_linerange(
@@ -375,14 +454,28 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 #' Plot the hierarchical accumulation rate parameters
 #'
-#' @param hamstr_fit
+#' @inheritParams plot_hamstr
 #'
-#' @return
+#' @return ggplot2 object
 #' @export
 #'
 #' @import ggplot2
-#' 
+#' @importFrom readr parse_number
+#' @importFrom rlang .data
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_hierarchical_acc_rate(fit)
+#' }
 plot_hierarchical_acc_rate <- function(hamstr_fit){
 
   idx <- tibble::as_tibble(alpha_indices(hamstr_fit$data$K)[1:3]) %>%

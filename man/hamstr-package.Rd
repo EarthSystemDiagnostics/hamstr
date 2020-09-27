@@ -3,7 +3,6 @@
 \docType{package}
 \name{hamstr-package}
 \alias{hamstr-package}
-\alias{hamstr}
 \title{The 'hamstr' package.}
 \description{
 A DESCRIPTION OF THE PACKAGE

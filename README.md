@@ -53,24 +53,21 @@ devtools::install_github("earthsystemdiagnostics/hamstr", args = "--preclean", b
 library(hamstr)
 library(rstan)
 #> Loading required package: StanHeaders
+#> Loading required package: ggplot2
 #> rstan (Version 2.21.2, GitRev: 2e1f913d3ca3)
 #> For execution on a local, multicore CPU with excess RAM we recommend calling
 #> options(mc.cores = parallel::detectCores()).
 #> To avoid recompilation of unchanged Stan programs, we recommend calling
 #> rstan_options(auto_write = TRUE)
 #> Do not specify '-march=native' in 'LOCAL_CPPFLAGS' or a Makevars file
-#> 
-#> Attaching package: 'rstan'
-#> The following object is masked from 'package:tidyr':
-#> 
-#>     extract
 library(tidyverse)
-#> -- Attaching packages ------------------------------------------------------------ tidyverse 1.3.0 --
-#> v tibble  3.0.3     v stringr 1.4.0
+#> -- Attaching packages ---------------------------------------------------------- tidyverse 1.3.0 --
+#> v tibble  3.0.3     v dplyr   1.0.2
+#> v tidyr   1.1.2     v stringr 1.4.0
 #> v readr   1.3.1     v forcats 0.5.0
 #> v purrr   0.3.4
-#> -- Conflicts --------------------------------------------------------------- tidyverse_conflicts() --
-#> x rstan::extract() masks tidyr::extract()
+#> -- Conflicts ------------------------------------------------------------- tidyverse_conflicts() --
+#> x tidyr::extract() masks rstan::extract()
 #> x dplyr::filter()  masks stats::filter()
 #> x dplyr::lag()     masks stats::lag()
 

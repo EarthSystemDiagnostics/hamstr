@@ -26,7 +26,7 @@ compare_14C_PDF(
 object and two data frames with the empirical and t-distributions}
 }
 \value{
-
+A ggplot2 object or list with data and ggplot2 object
 }
 \description{
 Compare the full empirical calendar age PDF of a radiocarbon date with a

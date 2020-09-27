@@ -2,14 +2,24 @@
 
 #' Get Posterior Age Models
 #'
-#' @param hamstr_fit fitted hamstr model, output from hamstr()
+#' @inheritParams plot_hamstr
 #'
 #' @return a dataframe/tibble with posterior ages for all iterations after warmup
 #' @export
-#'
+#' @importFrom readr parse_number
 #' @examples
 #' \dontrun{
-#' get_posterior_ages(fitted.hamstr.object)
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' get_posterior_ages(fit)
 #' }
 get_posterior_ages <- function(hamstr_fit){
   
@@ -22,8 +32,8 @@ get_posterior_ages <- function(hamstr_fit){
     tidyr::gather(par, age, -iter) %>% 
     dplyr::mutate(idx = readr::parse_number(par),
            par = "c_ages") %>% 
-    dplyr::left_join(depths, .) %>% 
-    dplyr::arrange(par, iter, idx, depth)
+    dplyr::left_join(depths, .data$.) %>% 
+    dplyr::arrange(.data$par, .data$iter, .data$idx, .data$depth)
   
   return(posterior_ages)
   
@@ -32,15 +42,25 @@ get_posterior_ages <- function(hamstr_fit){
 
 #' Interpolate Posterior Age Model At New Depths
 #'
-#' @param hamstr_fit fitted hamstr model, output from hamstr()
+#' @inheritParams plot_hamstr
 #' @param new_depth a vector of depths at which to interpolate the age models
 #'
-#' @return 
+#' @return hamstr_interpolated_ages object
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' interpolate.age.models(fitted.hamstr.object, new_depth = seq(1000, 15000, by = 1000))
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' interpolate.age.models(fit, new_depth = seq(1000, 15000, by = 1000))
 #' }
 #' 
 interpolate_age_models <- function(hamstr_fit, new_depth){
@@ -66,9 +86,9 @@ interpolate_age_models <- function(hamstr_fit, new_depth){
 
 #' Summarise Interpolated Posterior Age Models
 #'
-#' @param new_ages 
+#' @param new_ages Object of class "hamstr_interpolated_ages"
 #'
-#' @return
+#' @return data.frame / tibble
 #' @keywords internal
 summarise_new_ages <- function(new_ages){
   
@@ -90,12 +110,26 @@ summarise_new_ages <- function(new_ages){
 
 #' Summarise Posterior Age Models
 #'
-#' @param hamstr_fit an hamstr_fit object or hamstr_interpolated_ages object
+#' @inheritParams plot_hamstr
 #' @description Extracts the summary statistics of posterior age models and attached the depths 
-#' @return
+#' @return data.frame / tibble
+#' @importFrom readr parse_number
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' summarise_age_models(fit)
+#' }
 summarise_age_models <- function(hamstr_fit){
   
   if (is_hamstr_interpolated_ages(hamstr_fit)){
@@ -118,12 +152,25 @@ summarise_age_models <- function(hamstr_fit){
 
 #' Plot Summary of Posterior Age Models
 #'
-#' @param hamstr_fit 
+#' @inheritParams plot_hamstr
 #'
-#' @return
+#' @return A ggplot2 object
 #' @export
-#'
+#' @importFrom readr parse_number
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_summary_age_models(fit)
+#' }
 plot_summary_age_models <- function(hamstr_fit){
   
   age_summary <- summarise_age_models(hamstr_fit)

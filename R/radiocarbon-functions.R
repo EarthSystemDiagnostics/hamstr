@@ -20,10 +20,10 @@
 #' calibrate_14C_age(dat)
 #'
 #' # Change the calibration
-#' calibrate_14C_age(dat, curve = "marine13")
+#' calibrate_14C_age(dat, cal_curve = "marine13")
 #'
 #' # Return the PDFs
-#' cal.lst <- calibrate_14C_age(dat, curve = "marine13", return = "lst")
+#' cal.lst <- calibrate_14C_age(dat, cal_curve = "marine13", return = "list")
 #' with(cal.lst[[2]][[1]][[1]], {plot(ageGrid, densities)})
 #'
 #' # Use different column names
@@ -97,9 +97,11 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
 #' deviation of the empirical PDF
 #' @keywords internal
 #' @examples
+#' \dontrun{#' 
 #' df <- data.frame(x = 1:10)
 #' df$p <- dnorm(df$x, 5, 2)
-#' SummariseEmpiricalPDF(df$x, df$p)
+#' hamstr:::SummariseEmpiricalPDF(df$x, df$p)
+#' }
 SummariseEmpiricalPDF <- function(x, p){
   
   # Ensure x and p are sorted
@@ -142,9 +144,9 @@ SummariseEmpiricalPDF <- function(x, p){
 #' @param t_df degrees of freedom of the t-distribution
 #' @param return.type return a ggplot object or a list containing the ggplot
 #'   object and two data frames with the empirical and t-distributions
-#' @return
+#' @return A ggplot2 object or list with data and ggplot2 object
 #' @export
-#'
+#' @importFrom rlang .data
 #' @examples
 #' compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),
 #'  cal_curve = "intcal13", return.type = "plot")
@@ -185,7 +187,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
   })
   
   t_df <- C14 %>%
-    dplyr::group_by(.id) %>%
+    dplyr::group_by(.data$.id) %>%
     dplyr::do({
       rng <- .$age.14C.cal.se * 5
       age = seq(.$age.14C.cal - rng, .$age.14C.cal + rng, length.out = 100)

@@ -47,10 +47,10 @@ dat <- data.frame(age.14C = c(2000, 20000),
 calibrate_14C_age(dat)
 
 # Change the calibration
-calibrate_14C_age(dat, curve = "marine13")
+calibrate_14C_age(dat, cal_curve = "marine13")
 
 # Return the PDFs
-cal.lst <- calibrate_14C_age(dat, curve = "marine13", return = "lst")
+cal.lst <- calibrate_14C_age(dat, cal_curve = "marine13", return = "list")
 with(cal.lst[[2]][[1]][[1]], {plot(ageGrid, densities)})
 
 # Use different column names

@@ -7,11 +7,26 @@
 summarise_age_models(hamstr_fit)
 }
 \arguments{
-\item{hamstr_fit}{an hamstr_fit object or hamstr_interpolated_ages object}
+\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 }
 \value{
-
+data.frame / tibble
 }
 \description{
 Extracts the summary statistics of posterior age models and attached the depths
+}
+\examples{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
+  K = c(10, 10), nu = 6,
+  acc_mean_prior = 20,
+  mem_mean = 0.7, mem_strength = 4,
+  inflate_errors = 0,
+  iter = 2000, chains = 3)
+  
+summarise_age_models(fit)
+}
 }

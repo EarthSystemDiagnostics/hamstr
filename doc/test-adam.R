@@ -11,7 +11,7 @@ library(rstan)
 
 # devtools::install(quick = FALSE)
 # devtools::install(quick = FALSE, dependencies = FALSE)
-# devtools::install(quick = TRUE, dependencies = FALSE)
+# devtools::install(quick = FALSE, build = FALSE, dependencies = FALSE)
 
 #sm <- stan_model("inst/stan/hamstr.stan")
 #stan_data <- hamstr::make_stan_dat_hamstr(depth = dat1$depth, obs_age = dat1$age.14C.cal, obs_err = dat1$age.14C.cal.se)

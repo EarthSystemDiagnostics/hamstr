@@ -12,7 +12,7 @@ plot_prior_posterior_hist(prior, posterior)
 \item{posterior}{}
 }
 \value{
-
+A ggplot2 object
 }
 \description{
 Title
