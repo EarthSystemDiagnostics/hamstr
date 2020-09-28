@@ -76,7 +76,8 @@ interpolate_age_models <- function(hamstr_fit, new_depth){
         depth = new_depth,
         age = stats::approx(.$depth, .$age, new_depth)$y
       )
-    })
+    }) %>% 
+    ungroup()
   
   class(new_age) <- append(class(new_age), "hamstr_interpolated_ages")
   
