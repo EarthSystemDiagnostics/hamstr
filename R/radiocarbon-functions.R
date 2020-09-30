@@ -47,7 +47,9 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
   cal_curve <- 
     match.arg(cal_curve,
-              choices = c("intcal13", "shcal13", "marine13", "normal"))
+              choices = c("intcal13", "shcal13", "marine13",
+                          "intcal20", "marine20", "shcal20",
+                          "normal"))
   
   cal.ages <- lapply(1:nrow(dat), function(x) {
     tryCatch(Bchron::BchronCalibrate(
@@ -164,7 +166,9 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
   
   cal_curve <-
     match.arg(cal_curve,
-              choices = c("intcal13", "shcal13", "marine13", "normal"))
+              choices = c("intcal13", "shcal13", "marine13",
+                          "intcal20", "marine20", "shcal20",
+                          "normal"))
   
   calib <- calibrate_14C_age(cal.dat,
                              return.type = "list",
