@@ -46,8 +46,8 @@ shallowest and deepest data points unless \code{pad_top_bottom = TRUE}}
 each end}
 
 \item{acc_mean_prior}{Hyperparameter for the prior on the overall mean
-accumulation rate for the record. Units are depth / obs_age. E.g. if depth
-is in cm and age in kyr then the accumulation rate is in cm/kyr. The
+accumulation rate for the record. Units are obs_age / depth. E.g. if depth
+is in cm and age in kyr then the accumulation rate is in kyr/cm. The
 overall mean accumulation rate is given a weak half-normal prior with mean
 = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 mean accumulation rate estimated by fitting a robust linear model using
@@ -67,7 +67,7 @@ the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 4 as in Bacon 2.2}
 
-\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or 
+\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 not. Defaults to TRUE.}
 
 \item{nu}{Degrees of freedom for the Student-t distributed error model.
@@ -76,15 +76,15 @@ t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
 
 \item{inflate_errors}{logical: If set to TRUE, observation errors are
-inflated so that data are consistent with a "Bacon-style" monotonic 
+inflated so that data are consistent with a "Bacon-style" monotonic
 age-depth model. This is an experimental feature under active development.
 Defaults to FALSE.}
 
-\item{infl_sigma_sd}{Hyperparameter: sets the standard deviation of the 
-half-normal prior on the mean of the additional error terms. Defaults to 10 
+\item{infl_sigma_sd}{Hyperparameter: sets the standard deviation of the
+half-normal prior on the mean of the additional error terms. Defaults to 10
 times the mean observation error in obs_err.}
 
-\item{infl_shape_shape, infl_shape_mean}{Hyperparameters: parametrises the 
+\item{infl_shape_shape, infl_shape_mean}{Hyperparameters: parametrises the
 gamma prior on the shape of the distribution of the additional error terms.
  Default to 1, 1.}
 
