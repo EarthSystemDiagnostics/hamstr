@@ -145,7 +145,7 @@ with their 1-sigma uncertainties. The structure of the sections is shown
 along the top of the age-model plot.
 
 ``` r
-plot_hamstr(hamstr_fit_1)
+plot(hamstr_fit_1)
 #> Joining, by = "idx"
 #> Joining, by = "alpha_idx"
 ```
@@ -159,7 +159,7 @@ iterations are plotted, the default is to plot 1000 iterations.
 Additionally, plotting of the diagnostic plots can be switched off.
 
 ``` r
-plot_hamstr(hamstr_fit_1, type = "spag", plot_diagnostics = FALSE)
+plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 #> Joining, by = "idx"
 ```
 
@@ -167,12 +167,12 @@ plot_hamstr(hamstr_fit_1, type = "spag", plot_diagnostics = FALSE)
 
 Additional diagnostic plots are available. A plot of the prior and
 posterior distributions of the overall mean accumulation rate for
-example.
+example. See ?plot.hamstr\_fit for options.
 
 #### Prior and posterior of overall mean accumulation rate
 
 ``` r
-plot_acc_mean_prior_posterior(hamstr_fit_1)
+plot(hamstr_fit_1, type = "acc_mean_prior_post")
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
@@ -180,7 +180,7 @@ plot_acc_mean_prior_posterior(hamstr_fit_1)
 #### Plot modelled accumulation rates at each hierarchical level
 
 ``` r
-plot_hierarchical_acc_rate(hamstr_fit_1)
+plot(hamstr_fit_1, type = "hier_acc")
 #> Joining, by = "alpha_idx"
 ```
 
@@ -192,7 +192,7 @@ As for this example the highest resolution sections are approximately 1
 cm thick, there is not much difference between R and w.
 
 ``` r
-plot_memory_prior_posterior(hamstr_fit_1)
+plot(hamstr_fit_1, type = "mem")
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
@@ -289,7 +289,7 @@ rstan::get_elapsed_time(hamstr_fit_128$fit)
 ```
 
 ``` r
-plot_hamstr(hamstr_fit_2pow7)
+plot(hamstr_fit_2pow7)
 #> Joining, by = "idx"
 #> Joining, by = "alpha_idx"
 ```
@@ -297,7 +297,7 @@ plot_hamstr(hamstr_fit_2pow7)
 ![](readme_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
-plot_hamstr(hamstr_fit_5pow3)
+plot(hamstr_fit_5pow3)
 #> Joining, by = "idx"
 #> Joining, by = "alpha_idx"
 ```
@@ -305,7 +305,7 @@ plot_hamstr(hamstr_fit_5pow3)
 ![](readme_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 ``` r
-plot_hamstr(hamstr_fit_128)
+plot(hamstr_fit_128)
 #> Joining, by = "idx"
 #> Joining, by = "alpha_idx"
 ```
@@ -322,7 +322,7 @@ hamstr_fit_21 <- hamstr(depth = MSB2K_cal$depth,
 ```
 
 ``` r
-plot_hamstr(hamstr_fit_21, type = "spag")
+plot(hamstr_fit_21, summarise = FALSE)
 #> Joining, by = "idx"
 #> Joining, by = "alpha_idx"
 ```
@@ -373,7 +373,7 @@ the original fitted objects, but the n\_eff and Rhat information is
 lost.
 
 ``` r
-summarise_age_models(hamstr_fit_5pow3)
+summary(hamstr_fit_5pow3)
 #> Joining, by = "idx"
 #> # A tibble: 126 x 13
 #>    depth   idx par    mean se_mean    sd `2.5%` `25%` `50%` `75%` `97.5%` n_eff
@@ -392,7 +392,7 @@ summarise_age_models(hamstr_fit_5pow3)
 ```
 
 ``` r
-summarise_age_models(age.mods.interp)
+summary(age.mods.interp)
 #> # A tibble: 101 x 8
 #>    depth  mean    sd `2.5%` `25%` `50%` `75%` `97.5%`
 #>    <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl>
@@ -436,7 +436,7 @@ rstan::traceplot(hamstr_fit_5pow3$fit, par = c("alpha[1]"),
 for this model.
 
 ``` r
-plot_hierarchical_acc_rate(hamstr_fit_5pow3)
+plot(hamstr_fit_5pow3, type = "hier")
 #> Joining, by = "alpha_idx"
 ```
 

@@ -137,8 +137,8 @@ SummariseEmpiricalPDF <- function(x, p){
 }
 
 
-#' Compare the full empirical calendar age PDF of a radiocarbon date with a
-#' t-distribution approximation
+#' Compare the Full Empirical Calendar Age PDF of a Radiocarbon Date with a
+#' t-distribution Approximation
 #'
 #' @param age.14C vector of radiocarbon dates in years BP
 #' @param age.14C.se vector of radiocarbon date uncertainties

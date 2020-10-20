@@ -30,3 +30,4 @@ fit <- hamstr(
 plot_summary_age_models(fit)
 }
 }
+\keyword{internal}

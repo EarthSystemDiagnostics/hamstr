@@ -151,8 +151,7 @@ summarise_new_ages <- function(new_ages){
 #' @description Extracts the summary statistics of posterior age models and attached the depths 
 #' @return data.frame / tibble
 #' @importFrom readr parse_number
-#' @export
-#'
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' fit <- hamstr(

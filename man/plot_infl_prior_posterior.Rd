@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_stan_hamstr.R
 \name{plot_infl_prior_posterior}
 \alias{plot_infl_prior_posterior}
-\title{Title}
+\title{Plot the Prior and Posterior Distributions of the Inflation Factor Parameters}
 \usage{
 plot_infl_prior_posterior(hamstr_fit)
 }
@@ -13,7 +13,7 @@ plot_infl_prior_posterior(hamstr_fit)
 A ggplot2 object
 }
 \description{
-Title
+Plot the Prior and Posterior Distributions of the Inflation Factor Parameters
 }
 \examples{
 \dontrun{
@@ -30,3 +30,4 @@ fit <- hamstr(
 plot_infl_prior_posterior(fit)
 }
 }
+\keyword{internal}

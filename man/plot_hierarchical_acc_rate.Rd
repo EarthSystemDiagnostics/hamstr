@@ -30,3 +30,4 @@ fit <- hamstr(
 plot_hierarchical_acc_rate(fit)
 }
 }
+\keyword{internal}
