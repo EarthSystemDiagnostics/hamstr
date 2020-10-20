@@ -139,9 +139,6 @@ A sample of six dates are plotted here.
 
 ```{r}
 i <- seq(1, 40, by = floor(40/6))[1:6]
-compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal13")
-
-i <- seq(1, 40, by = floor(40/6))[1:6]
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")
 ```
 

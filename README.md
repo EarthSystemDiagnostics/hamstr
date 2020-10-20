@@ -207,18 +207,10 @@ A sample of six dates are plotted here.
 
 ``` r
 i <- seq(1, 40, by = floor(40/6))[1:6]
-compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal13")
-```
-
-![](readme_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
-
-``` r
-
-i <- seq(1, 40, by = floor(40/6))[1:6]
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-11-2.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 ### Varying the number and structure of the modelled sections.
 
