@@ -6,7 +6,7 @@
 \usage{
 plot_hamstr(
   hamstr_fit,
-  type = c("ribbon", "spaghetti"),
+  summarise = TRUE,
   n.iter = 1000,
   plot_diagnostics = TRUE
 )
@@ -14,8 +14,8 @@ plot_hamstr(
 \arguments{
 \item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 
-\item{type}{Plot the realisations as a summarised "ribbon" (faster) or as a
-spaghetti plot.}
+\item{summarise}{logical TRUE or FALSE. Plot the realisations as a summarised "ribbon" (faster) or as a
+spaghetti plot. Defaults to TRUE}
 
 \item{n.iter}{The number of iterations of the model to plot, defaults to
 1000.}
@@ -50,6 +50,6 @@ fit <- hamstr(
 plot_hamstr(fit)
 
 # With age models as spaghetti plots. Can see individual realisations, but slower to plot.
-plot_hamstr(fit, type = "spag")
+plot_hamstr(fit, summarise = FALSE)
 }
 }

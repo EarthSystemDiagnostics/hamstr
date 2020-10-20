@@ -98,27 +98,27 @@ hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
 The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.
 
 ```{r}
-plot_hamstr(hamstr_fit_1)
+plot(hamstr_fit_1)
 ```
 
 A "spaghetti" plot can be created instead of shaded regions. This shows a random sample of iterations from the posterior distribution (realisation of the age-depth model). This can be slow if lots of iterations are plotted, the default is to plot 1000 iterations. Additionally, plotting of the diagnostic plots can be switched off.
 
 ```{r}
-plot_hamstr(hamstr_fit_1, type = "spag", plot_diagnostics = FALSE)
+plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 ```
 
-Additional diagnostic plots are available. A plot of the prior and posterior distributions of the overall mean accumulation rate for example. 
+Additional diagnostic plots are available. A plot of the prior and posterior distributions of the overall mean accumulation rate for example. See ?plot.hamstr_fit for options.
 
 #### Prior and posterior of overall mean accumulation rate
 
 ```{r}
-plot_acc_mean_prior_posterior(hamstr_fit_1)
+plot(hamstr_fit_1, type = "acc_mean_prior_post")
 ```
 
 #### Plot modelled accumulation rates at each hierarchical level
 
 ```{r}
-plot_hierarchical_acc_rate(hamstr_fit_1)
+plot(hamstr_fit_1, type = "hier_acc")
 ```
 
 
@@ -127,7 +127,7 @@ plot_hierarchical_acc_rate(hamstr_fit_1)
 As for this example the highest resolution sections are approximately 1 cm thick, there is not much difference between R and w. 
 
 ```{r}
-plot_memory_prior_posterior(hamstr_fit_1)
+plot(hamstr_fit_1, type = "mem")
 ```
 
 
@@ -181,9 +181,9 @@ rstan::get_elapsed_time(hamstr_fit_128$fit)
 
 
 ```{r}
-plot_hamstr(hamstr_fit_2pow7)
-plot_hamstr(hamstr_fit_5pow3)
-plot_hamstr(hamstr_fit_128)
+plot(hamstr_fit_2pow7)
+plot(hamstr_fit_5pow3)
+plot(hamstr_fit_128)
 
 ```
 
@@ -200,7 +200,7 @@ hamstr_fit_21 <- hamstr(depth = MSB2K_cal$depth,
 
 
 ```{r}
-plot_hamstr(hamstr_fit_21, type = "spag")
+plot(hamstr_fit_21, summarise = FALSE)
 ```
 
 
@@ -228,11 +228,11 @@ age.mods.interp <- interpolate_age_models(hamstr_fit_5pow3,
 These interpolated age models can summarised with the same function as the original fitted objects, but the n_eff and Rhat information is lost.
 
 ```{r}
-summarise_age_models(hamstr_fit_5pow3)
+summary(hamstr_fit_5pow3)
 ```
 
 ```{r}
-summarise_age_models(age.mods.interp)
+summary(age.mods.interp)
 ```
 
 
@@ -254,7 +254,7 @@ rstan::traceplot(hamstr_fit_5pow3$fit, par = c("alpha[1]"),
 `alpha[2]` to `alpha[6]` will be the first hierarchical level of 5 rates for this model.
 
 ```{r}
-plot_hierarchical_acc_rate(hamstr_fit_5pow3)
+plot(hamstr_fit_5pow3, type = "hier")
 
 rstan::traceplot(hamstr_fit_5pow3$fit, par = paste0("alpha[", 2:6, "]"),
                  inc_warmup = TRUE)

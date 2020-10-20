@@ -110,7 +110,7 @@ hamstr <- function(depth, obs_age, obs_err,
 
   out <- list(fit=fit, data=stan_dat)
 
-  class(out) <- append(class(out), "hamstr_fit")
+  class(out) <- append("hamstr_fit", class(out))
 
 
   return(out)

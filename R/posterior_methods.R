@@ -77,12 +77,48 @@ interpolate_age_models <- function(hamstr_fit, new_depth){
         age = stats::approx(.$depth, .$age, new_depth)$y
       )
     }) %>% 
-    ungroup()
+    dplyr::ungroup()
   
-  class(new_age) <- append(class(new_age), "hamstr_interpolated_ages")
+  class(new_age) <- append("hamstr_interpolated_ages", class(new_age))
   
   return(new_age)
 }
+
+
+#' Title
+#'
+#' @param object 
+#' @param type 
+#'
+#' @return
+#'
+#' @examples
+#' @export
+#' @method summary hamstr_fit
+summary.hamstr_fit <- function(object, type = "age_models"){
+  if (type == "age_models"){
+    summarise_age_models(object)
+  }
+}
+
+
+#' Title
+#'
+#' @param object 
+#' @param type 
+#'
+#' @return
+#'
+#' @examples
+#' @export
+#' @method summary hamstr_interpolated_ages
+summary.hamstr_interpolated_ages <- function(object, type = "age_models"){
+ 
+   if (type == "age_models"){
+    summarise_new_ages(object)
+     }
+}
+
 
 
 #' Summarise Interpolated Posterior Age Models
@@ -150,84 +186,5 @@ summarise_age_models <- function(hamstr_fit){
 }
 
 
-
-#' Plot Summary of Posterior Age Models
-#'
-#' @inheritParams plot_hamstr
-#'
-#' @return A ggplot2 object
-#' @export
-#' @importFrom readr parse_number
-#' @examples
-#' \dontrun{
-#' fit <- hamstr(
-#'   depth = MSB2K$depth,
-#'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.7, mem_strength = 4,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
-#'   
-#' plot_summary_age_models(fit)
-#' }
-plot_summary_age_models <- function(hamstr_fit){
-  
-  age_summary <- summarise_age_models(hamstr_fit)
-
-  obs_ages <- data.frame(
-    depth = hamstr_fit$data$depth,
-    age = hamstr_fit$data$obs_age,
-    err = hamstr_fit$data$obs_err)
-  
-  obs_ages <- dplyr::mutate(obs_ages,
-                            age_upr = age + 2*err,
-                            age_lwr = age - 2*err)
-  
-  
-  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
-    tibble::as_tibble(., rownames = "par") %>% 
-    dplyr::mutate(dat_idx = readr::parse_number(par))
-  
-  p.age.sum <- age_summary %>% 
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`), fill = "Lightgrey") +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`), fill = "Darkgrey") +
-    ggplot2::geom_line() +
-    ggplot2::geom_line(ggplot2::aes(y = `50%`), colour = "Green") +
-    ggplot2::labs(x = "Depth", y = "Age") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank())
-   
-   
-  if (hamstr_fit$data$inflate_errors == 1){
-    obs_ages <- obs_ages %>% 
-      dplyr::mutate(infl_err = infl_errs$mean,
-             age_lwr_infl = age + 2*infl_err,
-             age_upr_infl = age - 2*infl_err)
-    
-   p.age.sum <- p.age.sum +
-    ggplot2::geom_linerange(
-      data = obs_ages,
-      ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
-      group = NA,
-      colour = "Red",
-      alpha = 0.5, inherit.aes = F)
-  }
-  
-  p.age.sum <- p.age.sum +
-    ggplot2::geom_linerange(data = obs_ages,
-                   ggplot2::aes(x = depth, 
-                       ymax = age_upr, ymin = age_lwr), inherit.aes = FALSE,
-                    colour = "Blue", size = 1.25) +
-    ggplot2::geom_point(data = obs_ages, ggplot2::aes(y = age),
-               colour = "Blue")
-  
-  
-  p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
-  
-  p.age.sum
-}
 
 
