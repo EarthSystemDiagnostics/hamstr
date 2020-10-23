@@ -151,20 +151,25 @@ interpolate_age_models <- function(hamstr_fit, new_depth = NULL){
   # get posterior age models
   pst_age <- get_posterior_ages(hamstr_fit)
   
-  new_age <- pst_age %>% 
-    dplyr::group_by(iter) %>% 
-    dplyr::do({
-      tibble::tibble(
-        iter = .$iter[1],
-        depth = new_depth,
-        age = stats::approx(.$depth, .$age, new_depth)$y
-      )
-    }) %>% 
-    dplyr::ungroup()
+  # use base list, split methods, much faster than dplyr::do
+  pst_age_lst <- split(pst_age, pst_age$iter)
   
-  class(new_age) <- append("hamstr_interpolated_ages", class(new_age))
+  new_pst_age <- lapply(pst_age_lst, function(x) {
+    stats::approx(x$depth, x$age, new_depth)$y
+  })
   
-  return(new_age)
+  out <- expand.grid(depth = new_depth,
+                     iter = 1:length(pst_age_lst)
+                     )
+  
+  out$age <- unlist(new_pst_age)
+  
+  out <- as_tibble(out) 
+  out <- out[,c(2,1,3)]
+  
+  class(out) <- append("hamstr_interpolated_ages", class(out))
+  
+  return(out)
 }
 
 
@@ -252,7 +257,7 @@ summarise_new_ages <- function(new_ages){
 summarise_age_models <- function(hamstr_fit){
   
   if (is_hamstr_interpolated_ages(hamstr_fit)){
-    age_summary <-summarise_new_ages(hamstr_fit)
+    age_summary <- summarise_new_ages(hamstr_fit)
   } else {
     age_summary <- rstan::summary(hamstr_fit$fit, par = "c_ages")[["summary"]] %>% 
       tibble::as_tibble(., rownames = "par")

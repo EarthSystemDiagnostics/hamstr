@@ -23,7 +23,8 @@ plot.hamstr_fit <- function(object,
   
   switch(type,
          default = plot_hamstr(object, summarise = summarise, ...),
-         age_models = plot_hamstr(object, summarise = summarise, ...),
+         age_models = plot_hamstr(object, summarise = summarise,
+                                  plot_diagnostics  = FALSE, ...),
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
          mem_prior_post = plot_memory_prior_posterior(object))
