@@ -41,7 +41,7 @@
 #' @importFrom Bchron BchronCalibrate
 calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               age.14C.se = "age.14C.se",
-                              cal_curve = "intcal13",
+                              cal_curve = "intcal20",
                               return.type = "dat", offset = 0){
   
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
