@@ -10,7 +10,8 @@
 #'   \code{\link[Bchron]{BchronCalibrate}}
 #' @param return.type Return the ammended dataframe or additionally the list of
 #'   PDFs, Default: 'dat'
-#' @param offset Optional offset applied to all 14C ages, Default: 0
+#' @param offset Name of offset, e.g. reservoir age, column. If null no offset
+#' applied
 #' @return A dataframe or list
 #' @details A wrapper for Bchron::Bchroncalibrate
 #' @examples
@@ -42,48 +43,54 @@
 calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               age.14C.se = "age.14C.se",
                               cal_curve = "intcal13",
-                              return.type = "dat", offset = 0){
-  
+                              return.type = "dat", offset = NULL){
+
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
-  cal_curve <- 
+  cal_curve <-
     match.arg(cal_curve,
               choices = c("intcal13", "shcal13", "marine13",
                           "intcal20", "marine20", "shcal20",
                           "normal"))
-  
+
+  if (is.null(offset)){
+    dat$offset <- 0
+  } else{
+    dat$offset <- dat[[offset]]
+  }
+
   cal.ages <- lapply(1:nrow(dat), function(x) {
     tryCatch(Bchron::BchronCalibrate(
-      ages = dat[[age.14C]][x] + offset,
+      ages = dat[[age.14C]][x] + dat[["offset"]][x],
       ageSds = dat[[age.14C.se]][x],
       calCurves = cal_curve,
       ids = x),
       error = function(i){
         cat(strsplit(as.character(i), " : ", fixed = TRUE)[[1]][2])
-        
+
         NA
       })
   })
-  
-  
+
+
   # Use mean and sd of empirical PDFs as point estimates of calendar ages
   dat$age.14C.cal <- sapply(cal.ages, function(x){
     if (is.na(x) == FALSE)
     {SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["mean"]} else {NA}
   })
-  
+
   dat$age.14C.cal.se <- sapply(cal.ages, function(x){
     if (is.na(x) == FALSE)
     {SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["sd"]} else {NA}
   })
-  
+
   if (return.type == "data.frame"){
     out <- dat
   }
-  
+
   if (return.type == "list"){
     out <- list(dat = dat, cal.ages = cal.ages)
   }
-  
+
   return(out)
 }
 
@@ -99,32 +106,32 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
 #' deviation of the empirical PDF
 #' @keywords internal
 #' @examples
-#' \dontrun{#' 
+#' \dontrun{#'
 #' df <- data.frame(x = 1:10)
 #' df$p <- dnorm(df$x, 5, 2)
 #' hamstr:::SummariseEmpiricalPDF(df$x, df$p)
 #' }
 SummariseEmpiricalPDF <- function(x, p){
-  
+
   # Ensure x and p are sorted
   p <- p[order(x)]
   x <- sort(x)
-  
+
   # Ensure p sum to 1
   p <- p / sum(p)
-  
+
   # Mean
   w.mean <- sum(x * p)
-  
+
   # SD
   M <- sum(p > 0)
   w.sd <- sqrt(sum(p * (x-w.mean)^2) / ((M-1)/M * sum(p)))
-  
+
   # Median
   csum.p <- cumsum(p)
   med.ind <- which.min(abs(csum.p - 0.5))
   w.median <- x[med.ind]
-  
+
   # Mode
   max.wt <- max(p)
   n.max <- sum(p == max.wt)
@@ -132,7 +139,7 @@ SummariseEmpiricalPDF <- function(x, p){
     warning(paste0(n.max,
                    " x with equal maximum probability. Returning the first"))
   mode <- x[which.max(p)]
-  
+
   return(c("mean" = w.mean, "median" = w.median, "mode" = mode, "sd" = w.sd))
 }
 
@@ -155,32 +162,32 @@ SummariseEmpiricalPDF <- function(x, p){
 
 compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 6,
                              return.type = c("plot", "list")){
-  
+
   dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * stats::dt((x - mu)/sigma, dat)
-  
+
   stopifnot(length(age.14C) == length(age.14C.se))
-  
+
   cal.dat <- data.frame(age.14C = age.14C, age.14C.se = age.14C.se)
-  
+
   return.type <- match.arg(return.type, choices = c("plot", "list"))
-  
+
   cal_curve <-
     match.arg(cal_curve,
               choices = c("intcal13", "shcal13", "marine13",
                           "intcal20", "marine20", "shcal20",
                           "normal"))
-  
+
   calib <- calibrate_14C_age(cal.dat,
                              return.type = "list",
                              offset = 0, cal_curve = cal_curve)
-  
+
   # The summarised calendar ages are appended to the input data
   C14 <- calib$dat
   C14$.id <- 1:nrow(cal.dat)
-  
+
   # These are the full PDFs
   cal.ages <- calib$cal.ages
-  
+
   cali.pdf.dat <- plyr::ldply(1:length(cal.ages), function(i){
     x <- cal.ages[[i]]
     if (is.na(x)==FALSE){
@@ -189,7 +196,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
       data.frame(age = 0, density = 0, .id = i)
     }
   })
-  
+
   t_df <- C14 %>%
     dplyr::group_by(.data$.id) %>%
     dplyr::do({
@@ -202,7 +209,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
                         sigma = .$age.14C.cal.se)
       )
     })
-  
+
   gg <- cali.pdf.dat %>%
     ggplot2::ggplot(ggplot2::aes(x = age/1000, y = density, group = .id)) +
     ggplot2::geom_line(ggplot2::aes(colour = "Empirical PDF")) +
@@ -210,7 +217,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
     ggplot2::labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
     ggplot2::facet_wrap(~.id, scales = "free") +
     ggplot2::theme_bw()
-  
+
   if (return.type == "list"){
     return(list(plot = gg, cal.age.pdf = cali.pdf.dat, t.dist.age = t_df))
   } else if (return.type == "plot") {
