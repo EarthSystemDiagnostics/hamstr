@@ -4,12 +4,13 @@
 \alias{interpolate_age_models}
 \title{Interpolate Posterior Age Model At New Depths}
 \usage{
-interpolate_age_models(hamstr_fit, new_depth)
+interpolate_age_models(hamstr_fit, new_depth = NULL)
 }
 \arguments{
 \item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 
-\item{new_depth}{a vector of depths at which to interpolate the age models}
+\item{new_depth}{a vector of depths at which to interpolate the age models. 
+If left NULL, the depths of the age control points are used.}
 }
 \value{
 hamstr_interpolated_ages object
@@ -33,3 +34,4 @@ interpolate.age.models(fit, new_depth = seq(1000, 15000, by = 1000))
 }
 
 }
+\keyword{internal}

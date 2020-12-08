@@ -1,5 +1,64 @@
 # Extractor functions
 
+#' Extract posterior age models or parameters
+#'
+#' @param object 
+#' @param pars The parameters to extract. If pars = "ages" (the default) a special
+#' method is invoke to return the age-depth models. If pars = "pars" the memory parameters
+#' and the overall mean accumulation rate are returned. Any other specification
+#' invokes the default rstan as.data.frame extract method for the use specified parameters.
+#' @param ... Other arguments to rstan::extract
+#' @return
+#'
+#' @examples
+#' @importFrom rstan extract
+#' @export
+#' 
+extract_hamstr_fit <- function(object, pars = c("ages"), ...){
+  
+  switch(pars[1], 
+         ages = get_posterior_ages(object),
+         pars = get_posterior_parameters(object),
+                as.data.frame(object$fit, pars = pars, ...)
+         )
+  
+}
+
+
+#' Get Posterior Parameters
+#'
+#' @inheritParams plot_hamstr
+#'
+#' @return a dataframe/tibble with posterior ages for all iterations after warmup
+#' @export
+#' @importFrom readr parse_number
+#' @importFrom rstan extract
+#' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' get_posterior_parameters(fit)
+#' }
+get_posterior_parameters <- function(hamstr_fit){
+  
+  posterior_pars <- as.data.frame(hamstr_fit$fit,
+                                  pars = c("R", "w", "alpha[1]")) %>% 
+    tibble::as_tibble() %>% 
+    dplyr::mutate(iter = 1:nrow(.))
+  
+  return(posterior_pars)
+  
+}
+
+
 #' Get Posterior Age Models
 #'
 #' @inheritParams plot_hamstr
@@ -7,6 +66,7 @@
 #' @return a dataframe/tibble with posterior ages for all iterations after warmup
 #' @export
 #' @importFrom readr parse_number
+#' @importFrom rstan extract
 #' @examples
 #' \dontrun{
 #' fit <- hamstr(
@@ -40,13 +100,32 @@ get_posterior_ages <- function(hamstr_fit){
 }
 
 
+#' Interpolate Age Models at Given Depths
+#' @description Method for generic function predict. Returns the posterior age
+#' models interpolated to new depths given in new_depth.
+#' @param object 
+#' @param new_depth
+#' @inheritParams interpolate_age_models
+#' @return
+#'
+#' @examples
+#' @export
+#' @method predict hamstr_fit
+predict.hamstr_fit <- function(object, new_depth = NULL){
+  
+  interpolate_age_models(object, new_depth)
+  
+}
+
+
 #' Interpolate Posterior Age Model At New Depths
 #'
 #' @inheritParams plot_hamstr
-#' @param new_depth a vector of depths at which to interpolate the age models
+#' @param new_depth a vector of depths at which to interpolate the age models. 
+#' If left NULL, the depths of the age control points are used.
 #'
 #' @return hamstr_interpolated_ages object
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' \dontrun{
@@ -63,26 +142,71 @@ get_posterior_ages <- function(hamstr_fit){
 #' interpolate.age.models(fit, new_depth = seq(1000, 15000, by = 1000))
 #' }
 #' 
-interpolate_age_models <- function(hamstr_fit, new_depth){
+interpolate_age_models <- function(hamstr_fit, new_depth = NULL){
+  
+  if (is.null(new_depth)) {
+    new_depth <- hamstr_fit$data$depth
+  }
   
   # get posterior age models
   pst_age <- get_posterior_ages(hamstr_fit)
   
-  new_age <- pst_age %>% 
-    dplyr::group_by(iter) %>% 
-    dplyr::do({
-      tibble::tibble(
-        iter = .$iter[1],
-        depth = new_depth,
-        age = stats::approx(.$depth, .$age, new_depth)$y
-      )
-    }) %>% 
-    ungroup()
+  # use base list, split methods, much faster than dplyr::do
+  pst_age_lst <- split(pst_age, pst_age$iter)
   
-  class(new_age) <- append(class(new_age), "hamstr_interpolated_ages")
+  new_pst_age <- lapply(pst_age_lst, function(x) {
+    stats::approx(x$depth, x$age, new_depth)$y
+  })
   
-  return(new_age)
+  out <- expand.grid(depth = new_depth,
+                     iter = 1:length(pst_age_lst)
+                     )
+  
+  out$age <- unlist(new_pst_age)
+  
+  out <- as_tibble(out) 
+  out <- out[,c(2,1,3)]
+  
+  class(out) <- append("hamstr_interpolated_ages", class(out))
+  
+  return(out)
 }
+
+
+#' Title
+#'
+#' @param object 
+#' @param type 
+#'
+#' @return
+#'
+#' @examples
+#' @export
+#' @method summary hamstr_fit
+summary.hamstr_fit <- function(object, type = "age_models"){
+  if (type == "age_models"){
+    summarise_age_models(object)
+  }
+}
+
+
+#' Title
+#'
+#' @param object 
+#' @param type 
+#'
+#' @return
+#'
+#' @examples
+#' @export
+#' @method summary hamstr_interpolated_ages
+summary.hamstr_interpolated_ages <- function(object, type = "age_models"){
+ 
+   if (type == "age_models"){
+    summarise_new_ages(object)
+     }
+}
+
 
 
 #' Summarise Interpolated Posterior Age Models
@@ -115,8 +239,7 @@ summarise_new_ages <- function(new_ages){
 #' @description Extracts the summary statistics of posterior age models and attached the depths 
 #' @return data.frame / tibble
 #' @importFrom readr parse_number
-#' @export
-#'
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' fit <- hamstr(
@@ -134,7 +257,7 @@ summarise_new_ages <- function(new_ages){
 summarise_age_models <- function(hamstr_fit){
   
   if (is_hamstr_interpolated_ages(hamstr_fit)){
-    age_summary <-summarise_new_ages(hamstr_fit)
+    age_summary <- summarise_new_ages(hamstr_fit)
   } else {
     age_summary <- rstan::summary(hamstr_fit$fit, par = "c_ages")[["summary"]] %>% 
       tibble::as_tibble(., rownames = "par")
@@ -150,84 +273,5 @@ summarise_age_models <- function(hamstr_fit){
 }
 
 
-
-#' Plot Summary of Posterior Age Models
-#'
-#' @inheritParams plot_hamstr
-#'
-#' @return A ggplot2 object
-#' @export
-#' @importFrom readr parse_number
-#' @examples
-#' \dontrun{
-#' fit <- hamstr(
-#'   depth = MSB2K$depth,
-#'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.7, mem_strength = 4,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
-#'   
-#' plot_summary_age_models(fit)
-#' }
-plot_summary_age_models <- function(hamstr_fit){
-  
-  age_summary <- summarise_age_models(hamstr_fit)
-
-  obs_ages <- data.frame(
-    depth = hamstr_fit$data$depth,
-    age = hamstr_fit$data$obs_age,
-    err = hamstr_fit$data$obs_err)
-  
-  obs_ages <- dplyr::mutate(obs_ages,
-                            age_upr = age + 2*err,
-                            age_lwr = age - 2*err)
-  
-  
-  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
-    tibble::as_tibble(., rownames = "par") %>% 
-    dplyr::mutate(dat_idx = readr::parse_number(par))
-  
-  p.age.sum <- age_summary %>% 
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`), fill = "Lightgrey") +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`), fill = "Darkgrey") +
-    ggplot2::geom_line() +
-    ggplot2::geom_line(ggplot2::aes(y = `50%`), colour = "Green") +
-    ggplot2::labs(x = "Depth", y = "Age") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank())
-   
-   
-  if (hamstr_fit$data$inflate_errors == 1){
-    obs_ages <- obs_ages %>% 
-      dplyr::mutate(infl_err = infl_errs$mean,
-             age_lwr_infl = age + 2*infl_err,
-             age_upr_infl = age - 2*infl_err)
-    
-   p.age.sum <- p.age.sum +
-    ggplot2::geom_linerange(
-      data = obs_ages,
-      ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
-      group = NA,
-      colour = "Red",
-      alpha = 0.5, inherit.aes = F)
-  }
-  
-  p.age.sum <- p.age.sum +
-    ggplot2::geom_linerange(data = obs_ages,
-                   ggplot2::aes(x = depth, 
-                       ymax = age_upr, ymin = age_lwr), inherit.aes = FALSE,
-                    colour = "Blue", size = 1.25) +
-    ggplot2::geom_point(data = obs_ages, ggplot2::aes(y = age),
-               colour = "Blue")
-  
-  
-  p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
-  
-  p.age.sum
-}
 
 

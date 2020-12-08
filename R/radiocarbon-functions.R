@@ -42,7 +42,7 @@
 #' @importFrom Bchron BchronCalibrate
 calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               age.14C.se = "age.14C.se",
-                              cal_curve = "intcal13",
+                              cal_curve = "intcal20",
                               return.type = "dat", offset = NULL){
 
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
@@ -144,8 +144,8 @@ SummariseEmpiricalPDF <- function(x, p){
 }
 
 
-#' Compare the full empirical calendar age PDF of a radiocarbon date with a
-#' t-distribution approximation
+#' Compare the Full Empirical Calendar Age PDF of a Radiocarbon Date with a
+#' t-distribution Approximation
 #'
 #' @param age.14C vector of radiocarbon dates in years BP
 #' @param age.14C.se vector of radiocarbon date uncertainties

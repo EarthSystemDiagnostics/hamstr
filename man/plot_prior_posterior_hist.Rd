@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_stan_hamstr.R
 \name{plot_prior_posterior_hist}
 \alias{plot_prior_posterior_hist}
-\title{Title}
+\title{Plot a Prior and Posterior}
 \usage{
 plot_prior_posterior_hist(prior, posterior)
 }
@@ -15,6 +15,6 @@ plot_prior_posterior_hist(prior, posterior)
 A ggplot2 object
 }
 \description{
-Title
+Plot a Prior and Posterior
 }
 \keyword{internal}

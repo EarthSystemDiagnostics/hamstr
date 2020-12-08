@@ -1,11 +1,48 @@
+# Methods -------
+
+#' Title
+#'
+#' @param object a hamstr_fit object
+#' @param type One of "default", "age_models", "hier_acc_rates",
+#'                               "acc_mean_prior_post", "mem_prior_post"
+#' @inheritParams plot_hamstr  
+#' @return A ggplot object
+#'
+#' @examples
+#' @export
+#' @method plot hamstr_fit
+plot.hamstr_fit <- function(object,
+                            type = c("default",
+                              "age_models", "hier_acc_rates",
+                              "acc_mean_prior_post", "mem_prior_post"
+                              ),
+                            summarise = TRUE,
+                            ...){
+  
+  type <- match.arg(type)
+  
+  switch(type,
+         default = plot_hamstr(object, summarise = summarise, ...),
+         age_models = plot_hamstr(object, summarise = summarise,
+                                  plot_diagnostics  = FALSE, ...),
+         hier_acc_rates = plot_hierarchical_acc_rate(object),
+         acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
+         mem_prior_post = plot_memory_prior_posterior(object))
+  
+}
+
+
+# Functions ------
+
 #' Plot an hamstr_fit object
 #'
 #' @param hamstr_fit The object returned from \code{stan_hamstr}.
 #'
 #' @param n.iter The number of iterations of the model to plot, defaults to
 #'   1000.
-#' @param type Plot the realisations as a summarised "ribbon" (faster) or as a
-#'   spaghetti plot.
+#' @param summarise logical TRUE or FALSE. Plot the realisations as a summarised
+#'  "ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot 
+#'  showing individual realisations. Defaults to TRUE (ribbon).
 #' @param plot_diagnostics logical, include diagnostic plots: traceplot of
 #'   log-posterior, hierarchical accumulations rates, memory parameter. Defaults
 #'   to TRUE.
@@ -36,15 +73,15 @@
 #' plot_hamstr(fit)
 #' 
 #' # With age models as spaghetti plots. Can see individual realisations, but slower to plot.
-#' plot_hamstr(fit, type = "spag")
+#' plot_hamstr(fit, summarise = FALSE)
 #' }
-plot_hamstr <- function(hamstr_fit, type = c("ribbon", "spaghetti"), n.iter = 1000, plot_diagnostics = TRUE) {
+plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagnostics = TRUE) {
 
-  type <- match.arg(type)
+  #summarise <- match.arg(summarise)
 
-  if (type == "ribbon"){
+  if (summarise == TRUE){
     p.fit <- plot_summary_age_models(hamstr_fit)
-  } else if (type == "spaghetti"){
+  } else if (summarise == FALSE){
     p.fit <- plot_age_models(hamstr_fit, n.iter = n.iter)
   }
 
@@ -65,8 +102,178 @@ plot_hamstr <- function(hamstr_fit, type = c("ribbon", "spaghetti"), n.iter = 10
     nrow = 2, heights = c(1, 2))
 }
 
+#' Plot Summary of Posterior Age Models
+#'
+#' @inheritParams plot_hamstr
+#'
+#' @return A ggplot2 object
+#' @keywords internal
+#' @importFrom readr parse_number
+#' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_summary_age_models(fit)
+#' }
+plot_summary_age_models <- function(hamstr_fit){
+  
+  age_summary <- summarise_age_models(hamstr_fit)
+  
+  obs_ages <- data.frame(
+    depth = hamstr_fit$data$depth,
+    age = hamstr_fit$data$obs_age,
+    err = hamstr_fit$data$obs_err)
+  
+  obs_ages <- dplyr::mutate(obs_ages,
+                            age_upr = age + 2*err,
+                            age_lwr = age - 2*err)
+  
+  
+  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
+    tibble::as_tibble(., rownames = "par") %>% 
+    dplyr::mutate(dat_idx = readr::parse_number(par))
+  
+  p.age.sum <- age_summary %>% 
+    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`), fill = "Lightgrey") +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`), fill = "Darkgrey") +
+    ggplot2::geom_line() +
+    ggplot2::geom_line(ggplot2::aes(y = `50%`), colour = "Green") +
+    ggplot2::labs(x = "Depth", y = "Age") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank())
+  
+  
+  if (hamstr_fit$data$inflate_errors == 1){
+    obs_ages <- obs_ages %>% 
+      dplyr::mutate(infl_err = infl_errs$mean,
+                    age_lwr_infl = age + 2*infl_err,
+                    age_upr_infl = age - 2*infl_err)
+    
+    p.age.sum <- p.age.sum +
+      ggplot2::geom_linerange(
+        data = obs_ages,
+        ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
+        group = NA,
+        colour = "Red",
+        alpha = 0.5, inherit.aes = F)
+  }
+  
+  p.age.sum <- p.age.sum +
+    ggplot2::geom_linerange(data = obs_ages,
+                            ggplot2::aes(x = depth, 
+                                         ymax = age_upr, ymin = age_lwr), inherit.aes = FALSE,
+                            colour = "Blue", size = 1.25) +
+    ggplot2::geom_point(data = obs_ages, ggplot2::aes(y = age),
+                        colour = "Blue")
+  
+  
+  p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
+  
+  p.age.sum
+}
 
-#' Title
+#' Plot Age Models as Spaghetti Plot
+#'
+#' @inheritParams plot_hamstr 
+#' 
+#' @return A ggplot2 object
+#' @keywords internal
+#' @import ggplot2
+#' @importFrom rlang .data
+#' @importFrom readr parse_number
+#' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.7, mem_strength = 4,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_age_models(fit)
+#' }
+plot_age_models <- function(hamstr_fit, n.iter = 1000){
+  
+  
+  posterior_ages <- get_posterior_ages(hamstr_fit)
+  
+  obs_ages <- dplyr::tibble(
+    depth = hamstr_fit$data$depth,
+    age = hamstr_fit$data$obs_age,
+    err = hamstr_fit$data$obs_err)
+  
+  obs_ages <- dplyr::mutate(obs_ages,
+                            age_upr = .data$age + 2*.data$err,
+                            age_lwr = .data$age - 2*.data$err)
+  
+  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
+    tibble::as_tibble(., rownames = "par") %>% 
+    dplyr::mutate(dat_idx = readr::parse_number(.data$par))
+  
+  p.fit <- posterior_ages %>%
+    dplyr::filter(.data$iter %in% sample(unique(.data$iter), n.iter, replace = FALSE)) %>%
+    ggplot2::ggplot(ggplot2::aes(x = depth, y = age, group = iter))
+  
+  
+  p.fit <- p.fit +
+    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter))
+  
+  if (hamstr_fit$data$inflate_errors == 1){
+    obs_ages <- obs_ages %>% 
+      dplyr::mutate(infl_err = infl_errs$mean,
+                    age_lwr_infl = .data$age + 2*.data$infl_err,
+                    age_upr_infl = .data$age - 2*.data$infl_err)
+    
+    p.fit <- p.fit +
+      ggplot2::geom_linerange(
+        data = obs_ages,
+        ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
+        group = NA,
+        colour = "Red",
+        alpha = 0.5, inherit.aes = F)
+  }
+  
+  p.fit <- p.fit +
+    ggplot2::geom_linerange(
+      data = obs_ages,
+      ggplot2::aes(ymax = age_upr, ymin = age_lwr),
+      group = NA,
+      colour = "Blue",
+      size = 1.2,
+      alpha = 1) +
+    ggplot2::geom_point(
+      data = obs_ages,
+      ggplot2::aes(y = age),
+      group = NA,
+      colour = "Blue",
+      #size = 1.01,
+      alpha = 1) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank()) +
+    ggplot2::labs(x = "Depth", y = "Age")
+  
+  
+  # add subdivisions
+  p.fit <- add_subdivisions(p.fit, hamstr_fit)
+  
+  return(p.fit)
+  
+}
+
+
+#' Plot a Prior and Posterior
 #'
 #' @param prior 
 #' @param posterior 
@@ -96,16 +303,15 @@ plot_prior_posterior_hist <- function(prior, posterior){
 }
 
 
-#' Title
+#' Plot the Prior and Posterior Distributions of the Inflation Factor Parameters
 #'
 #' @return A ggplot2 object
-#' @export
 #' @import rstan 
 #' @import ggplot2
 #' @importFrom readr parse_number
 #' @importFrom rlang .data
 #' @inheritParams plot_hamstr
-#' 
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #' fit <- hamstr(
@@ -204,16 +410,13 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 }
 
 
-
-
-
 #' Plot Mean Accumulation Rate Prior and Posterior Distributions
 #' @inheritParams plot_hamstr
 #' 
 #' @import ggplot2
 #' @importFrom rlang .data
 #' @return A ggplot2 object
-#' @export
+#' @keywords internal
 #' @examples 
 #' \dontrun{
 #' fit <- hamstr(
@@ -283,11 +486,11 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #' @inheritParams plot_hamstr
 #'
 #' @return A ggplot2 object
-#' @export
 #' @import ggplot2
 #' @importFrom rlang .data
 #' 
 #' @examples
+#' @keywords internal
 #' \dontrun{
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -360,96 +563,6 @@ add_subdivisions <- function(gg, hamstr_fit){
 }
 
 
-#' Title
-#'
-#' @inheritParams plot_hamstr 
-#' 
-#' @return A ggplot2 object
-#' @export
-#' @import ggplot2
-#' @importFrom rlang .data
-#' @importFrom readr parse_number
-#' @examples
-#' \dontrun{
-#' fit <- hamstr(
-#'   depth = MSB2K$depth,
-#'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.7, mem_strength = 4,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
-#'   
-#' plot_age_models(fit)
-#' }
-plot_age_models <- function(hamstr_fit, n.iter = 1000){
-
-
-  posterior_ages <- get_posterior_ages(hamstr_fit)
-
-  obs_ages <- dplyr::tibble(
-    depth = hamstr_fit$data$depth,
-    age = hamstr_fit$data$obs_age,
-    err = hamstr_fit$data$obs_err)
-
-  obs_ages <- dplyr::mutate(obs_ages,
-                            age_upr = .data$age + 2*.data$err,
-                            age_lwr = .data$age - 2*.data$err)
-  
-  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>% 
-    tibble::as_tibble(., rownames = "par") %>% 
-    dplyr::mutate(dat_idx = readr::parse_number(.data$par))
-  
-  p.fit <- posterior_ages %>%
-    dplyr::filter(.data$iter %in% sample(unique(.data$iter), n.iter, replace = FALSE)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = age, group = iter))
-
-
-  p.fit <- p.fit +
-    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter))
-
-  if (hamstr_fit$data$inflate_errors == 1){
-    obs_ages <- obs_ages %>% 
-      dplyr::mutate(infl_err = infl_errs$mean,
-             age_lwr_infl = .data$age + 2*.data$infl_err,
-             age_upr_infl = .data$age - 2*.data$infl_err)
-    
-    p.fit <- p.fit +
-      ggplot2::geom_linerange(
-        data = obs_ages,
-        ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl),
-        group = NA,
-        colour = "Red",
-        alpha = 0.5, inherit.aes = F)
-  }
-  
-  p.fit <- p.fit +
-    ggplot2::geom_linerange(
-      data = obs_ages,
-      ggplot2::aes(ymax = age_upr, ymin = age_lwr),
-      group = NA,
-      colour = "Blue",
-      size = 1.2,
-      alpha = 1) +
-    ggplot2::geom_point(
-      data = obs_ages,
-      ggplot2::aes(y = age),
-      group = NA,
-      colour = "Blue",
-      #size = 1.01,
-      alpha = 1) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank()) +
-    ggplot2::labs(x = "Depth", y = "Age")
-
-
-  # add subdivisions
-  p.fit <- add_subdivisions(p.fit, hamstr_fit)
-
-  return(p.fit)
-
-}
 
 
 #' Plot the hierarchical accumulation rate parameters
@@ -457,8 +570,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 #' @inheritParams plot_hamstr
 #'
 #' @return ggplot2 object
-#' @export
-#'
+#' @keywords internal
 #' @import ggplot2
 #' @importFrom readr parse_number
 #' @importFrom rlang .data
@@ -524,3 +636,4 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
 
   return(gg)
 }
+

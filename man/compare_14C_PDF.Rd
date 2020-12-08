@@ -2,8 +2,8 @@
 % Please edit documentation in R/radiocarbon-functions.R
 \name{compare_14C_PDF}
 \alias{compare_14C_PDF}
-\title{Compare the full empirical calendar age PDF of a radiocarbon date with a
-t-distribution approximation}
+\title{Compare the Full Empirical Calendar Age PDF of a Radiocarbon Date with a
+t-distribution Approximation}
 \usage{
 compare_14C_PDF(
   age.14C,
@@ -29,8 +29,8 @@ object and two data frames with the empirical and t-distributions}
 A ggplot2 object or list with data and ggplot2 object
 }
 \description{
-Compare the full empirical calendar age PDF of a radiocarbon date with a
-t-distribution approximation
+Compare the Full Empirical Calendar Age PDF of a Radiocarbon Date with a
+t-distribution Approximation
 }
 \examples{
 compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_stan_hamstr.R
 \name{plot_age_models}
 \alias{plot_age_models}
-\title{Title}
+\title{Plot Age Models as Spaghetti Plot}
 \usage{
 plot_age_models(hamstr_fit, n.iter = 1000)
 }
@@ -16,7 +16,7 @@ plot_age_models(hamstr_fit, n.iter = 1000)
 A ggplot2 object
 }
 \description{
-Title
+Plot Age Models as Spaghetti Plot
 }
 \examples{
 \dontrun{
@@ -33,3 +33,4 @@ fit <- hamstr(
 plot_age_models(fit)
 }
 }
+\keyword{internal}

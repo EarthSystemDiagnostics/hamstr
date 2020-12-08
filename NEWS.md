@@ -1,4 +1,9 @@
 
+# hamstr 0.4.1
+
+* methods written for generic functions plot and summary
+
+
 # hamstr 0.4
 
 * package and main function renamed to hamstr (hierarchical accumulation models with Stan and R)

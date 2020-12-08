@@ -30,3 +30,4 @@ fit <- hamstr(
 plot_acc_mean_prior_posterior(fit)
 }
 }
+\keyword{internal}
