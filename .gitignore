@@ -35,3 +35,6 @@ doc/*.pdf
 inst/doc
 
 !readme_files/
+
+Bacon_runs/
+package-dev-scipts/cached-runs/
