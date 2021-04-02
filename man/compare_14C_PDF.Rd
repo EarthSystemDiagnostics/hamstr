@@ -8,7 +8,7 @@ t-distribution Approximation}
 compare_14C_PDF(
   age.14C,
   age.14C.se,
-  cal_curve = "intcal13",
+  cal_curve = "intcal20",
   t_df = 6,
   return.type = c("plot", "list")
 )

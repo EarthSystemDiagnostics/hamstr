@@ -45,11 +45,12 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               cal_curve = "intcal20",
                               return.type = "dat", offset = NULL){
 
-  return.type <- match.arg(return.type, choices = c("data.frame", "list"))
+  return.type <- match.arg(return.type,
+                           choices = c("data.frame", "list"))
   cal_curve <-
     match.arg(cal_curve,
-              choices = c("intcal13", "shcal13", "marine13",
-                          "intcal20", "marine20", "shcal20",
+              choices = c("intcal20", "marine20", "shcal20",
+                          "intcal13", "marine13", "shcal13",
                           "normal"))
 
   if (is.null(offset)){
@@ -75,7 +76,7 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
   # Use mean and sd of empirical PDFs as point estimates of calendar ages
   dat$age.14C.cal <- sapply(cal.ages, function(x){
     if (is.na(x) == FALSE)
-    {SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["mean"]} else {NA}
+    {SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["median"]} else {NA}
   })
 
   dat$age.14C.cal.se <- sapply(cal.ages, function(x){
@@ -160,7 +161,7 @@ SummariseEmpiricalPDF <- function(x, p){
 #' compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),
 #'  cal_curve = "intcal13", return.type = "plot")
 
-compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 6,
+compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal20", t_df = 6,
                              return.type = c("plot", "list")){
 
   dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * stats::dt((x - mu)/sigma, dat)
@@ -173,8 +174,8 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal13", t_df = 
 
   cal_curve <-
     match.arg(cal_curve,
-              choices = c("intcal13", "shcal13", "marine13",
-                          "intcal20", "marine20", "shcal20",
+              choices = c("intcal20", "marine20", "shcal20",
+                          "intcal13", "marine13", "shcal13",
                           "normal"))
 
   calib <- calibrate_14C_age(cal.dat,
