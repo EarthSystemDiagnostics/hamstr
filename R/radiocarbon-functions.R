@@ -45,8 +45,7 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               cal_curve = "intcal20",
                               return.type = "dat", offset = NULL){
 
-  return.type <- match.arg(return.type,
-                           choices = c("data.frame", "list"))
+  return.type <- match.arg(return.type, choices = c("data.frame", "list"))
   cal_curve <-
     match.arg(cal_curve,
               choices = c("intcal20", "marine20", "shcal20",
@@ -76,12 +75,21 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
   # Use mean and sd of empirical PDFs as point estimates of calendar ages
   dat$age.14C.cal <- sapply(cal.ages, function(x){
     if (is.na(x) == FALSE)
-    {SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["median"]} else {NA}
+    {
+      # suppress warnings about modes as mode not used anyway
+      suppressWarnings(
+        SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["median"]
+      )
+    } else {NA}
   })
 
   dat$age.14C.cal.se <- sapply(cal.ages, function(x){
-    if (is.na(x) == FALSE)
-    {SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["sd"]} else {NA}
+    if (is.na(x) == FALSE) {
+      # suppress warnings about modes as mode not used anyway
+      suppressWarnings(
+        SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["sd"]
+      )
+    } else {NA}
   })
 
   if (return.type == "data.frame"){
@@ -136,13 +144,14 @@ SummariseEmpiricalPDF <- function(x, p){
   # Mode
   max.wt <- max(p)
   n.max <- sum(p == max.wt)
-  if (n.max > 1)
-    warning(paste0(n.max,
-                   " x with equal maximum probability. Returning the first"))
+  if (n.max > 1) warning(
+    paste0("In mode calculation, these values have equal probability: ",
+           paste0(x[p == max.wt], collapse = ", "), ". returning first"))
   mode <- x[which.max(p)]
 
   return(c("mean" = w.mean, "median" = w.median, "mode" = mode, "sd" = w.sd))
 }
+
 
 
 #' Compare the Full Empirical Calendar Age PDF of a Radiocarbon Date with a
@@ -161,8 +170,9 @@ SummariseEmpiricalPDF <- function(x, p){
 #' compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),
 #'  cal_curve = "intcal13", return.type = "plot")
 
-compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal20", t_df = 6,
-                             return.type = c("plot", "list")){
+compare_14C_PDF <- function(age.14C, age.14C.se,
+                            cal_curve = "intcal20", t_df = 6,
+                            return.type = c("plot", "list")){
 
   dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * stats::dt((x - mu)/sigma, dat)
 
@@ -180,7 +190,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal20", t_df = 
 
   calib <- calibrate_14C_age(cal.dat,
                              return.type = "list",
-                             offset = 0, cal_curve = cal_curve)
+                             offset = NULL, cal_curve = cal_curve)
 
   # The summarised calendar ages are appended to the input data
   C14 <- calib$dat
@@ -193,7 +203,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal20", t_df = 
     x <- cal.ages[[i]]
     if (is.na(x)==FALSE){
       data.frame(age = x[[1]]$ageGrid, density = x[[1]]$densities, .id = i)
-      }else{
+    }else{
       data.frame(age = 0, density = 0, .id = i)
     }
   })
@@ -213,7 +223,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se, cal_curve = "intcal20", t_df = 
 
   gg <- cali.pdf.dat %>%
     ggplot2::ggplot(ggplot2::aes(x = age/1000, y = density, group = .id)) +
-    ggplot2::geom_line(ggplot2::aes(colour = "Empirical PDF")) +
+    ggplot2::geom_line(ggplot2::aes(colour = cal_curve)) +
     ggplot2::geom_line(data = t_df, ggplot2::aes(y = density, colour = "t-distribution")) +
     ggplot2::labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
     ggplot2::facet_wrap(~.id, scales = "free") +
