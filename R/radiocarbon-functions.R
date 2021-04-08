@@ -133,7 +133,7 @@ SummariseEmpiricalPDF <- function(x, p){
   # Allow for changes in resolution of x
   dx <- diff(x)
   
-  if (length(unique(dx)) > 1){
+  if (max(abs(dx - mean(dx))) > median(dx) / 100){
       warning("Empirical PDF has variable resolution - this is accounted for but the results may be less reliable.")
   
   } 
