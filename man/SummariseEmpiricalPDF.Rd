@@ -28,6 +28,18 @@ the highest is returned, in the case of 2 or more modes with exactly the same
 df <- data.frame(x = 1:10)
 df$p <- dnorm(df$x, 5, 2)
 hamstr:::SummariseEmpiricalPDF(df$x, df$p)
+
+x <- 1:100
+y <- dnorm(x, 50, 10)
+plot(x, y)
+SummariseEmpiricalPDF(x, y)
+
+
+x2 <- x[c(1:50, seq(51, 70, 3), seq(71, 100, 1))]
+y2 <- y[x2]
+
+plot(x2, y2)
+SummariseEmpiricalPDF(x2, y2)
 }
 }
 \keyword{internal}
