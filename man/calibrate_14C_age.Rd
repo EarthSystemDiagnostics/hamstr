@@ -8,9 +8,9 @@ calibrate_14C_age(
   dat,
   age.14C = "age.14C",
   age.14C.se = "age.14C.se",
-  cal_curve = "intcal13",
+  cal_curve = "intcal20",
   return.type = "dat",
-  offset = 0
+  offset = NULL
 )
 }
 \arguments{
@@ -27,7 +27,8 @@ calibrate_14C_age(
 \item{return.type}{Return the ammended dataframe or additionally the list of
 PDFs, Default: 'dat'}
 
-\item{offset}{Optional offset applied to all 14C ages, Default: 0}
+\item{offset}{Name of offset, e.g. reservoir age, column. If null no offset
+applied}
 }
 \value{
 A dataframe or list

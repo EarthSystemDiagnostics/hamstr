@@ -110,12 +110,37 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
 #' df <- data.frame(x = 1:10)
 #' df$p <- dnorm(df$x, 5, 2)
 #' hamstr:::SummariseEmpiricalPDF(df$x, df$p)
+#' 
+#' x <- 1:100
+#' y <- dnorm(x, 50, 10)
+#' plot(x, y)
+#' SummariseEmpiricalPDF(x, y)
+#' 
+#' 
+#' x2 <- x[c(1:50, seq(51, 70, 3), seq(71, 100, 1))]
+#' y2 <- y[x2]
+#' 
+#' plot(x2, y2)
+#' SummariseEmpiricalPDF(x2, y2)
 #' }
 SummariseEmpiricalPDF <- function(x, p){
 
   # Ensure x and p are sorted
   p <- p[order(x)]
   x <- sort(x)
+  
+  
+  # Allow for changes in resolution of x
+  dx <- diff(x)
+  
+  if (length(unique(dx)) > 1){
+      warning("Empirical PDF has variable resolution - this is accounted for but the results may be less reliable.")
+  
+  } 
+  
+  dx <- c(dx[1], dx)
+  
+  p <- p * dx
 
   # Ensure p sum to 1
   p <- p / sum(p)
