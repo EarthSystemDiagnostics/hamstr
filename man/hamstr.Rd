@@ -13,10 +13,10 @@ hamstr(
   bottom_depth = NULL,
   pad_top_bottom = FALSE,
   acc_mean_prior = NULL,
-  shape = 1.5,
+  acc_shape = 1.5,
   scale_shape = TRUE,
-  mem_mean = 0.7,
-  mem_strength = 4,
+  mem_mean = 0.5,
+  mem_strength = 10,
   scale_R = TRUE,
   nu = 6,
   inflate_errors = FALSE,
@@ -54,7 +54,7 @@ overall mean accumulation rate is given a weak half-normal prior with mean
 mean accumulation rate estimated by fitting a robust linear model using
 \link[MASS]{rlm}.}
 
-\item{shape}{Hyperparameter for the shape of the priors on accumulation rates.
+\item{acc_shape}{Hyperparameter for the shape of the priors on accumulation rates.
 Defaults to 1.5 - as for Bacon 2.2.}
 
 \item{scale_shape}{Scale the shape parameter according to the number of hierarchical
@@ -67,10 +67,10 @@ The prior on the correlation between layers is scaled according to the
 thickness of the sediment sections in the highest resolution hierarchical
 layer, *delta_c*, which is determined by the total length age-models and
 the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
-0.7), while *w* = R^(delta_c)}
+0.5), while *w* = R^(delta_c)}
 
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
-defaults to 4 as in Bacon 2.2}
+defaults to 10 as in Bacon >= 2.5.1}
 
 \item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 not. Defaults to TRUE.}
@@ -117,7 +117,7 @@ fit <- hamstr(
   obs_err = MSB2K$error,
   K = c(10, 10), nu = 6,
   acc_mean_prior = 20,
-  mem_mean = 0.7, mem_strength = 4,
+  mem_mean = 0.5, mem_strength = 10,
   inflate_errors = 0,
   iter = 2000, chains = 3)
 

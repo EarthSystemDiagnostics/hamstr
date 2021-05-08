@@ -21,7 +21,7 @@
 #'   = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 #'   mean accumulation rate estimated by fitting a robust linear model using
 #'   \link[MASS]{rlm}.
-#' @param shape Hyperparameter for the shape of the priors on accumulation rates.
+#' @param acc_shape Hyperparameter for the shape of the priors on accumulation rates.
 #'  Defaults to 1.5 - as for Bacon 2.2.
 #' @param scale_shape Scale the shape parameter according to the number of hierarchical
 #' levels, to control the total variance of the alpha innovations. This defaults
@@ -32,9 +32,9 @@
 #'   thickness of the sediment sections in the highest resolution hierarchical
 #'   layer, *delta_c*, which is determined by the total length age-models and
 #'   the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
-#'   0.7), while *w* = R^(delta_c)
+#'   0.5), while *w* = R^(delta_c)
 #' @param mem_strength Hyperparameter: sets the strength of the memory prior,
-#'   defaults to 4 as in Bacon 2.2
+#'   defaults to 10 as in Bacon >= 2.5.1
 #' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 #' not. Defaults to TRUE.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
@@ -63,7 +63,7 @@
 #'   obs_err = MSB2K$error,
 #'   K = c(10, 10), nu = 6,
 #'   acc_mean_prior = 20,
-#'   mem_mean = 0.7, mem_strength = 4,
+#'   mem_mean = 0.5, mem_strength = 10,
 #'   inflate_errors = 0,
 #'   iter = 2000, chains = 3)
 #'
@@ -77,9 +77,9 @@ hamstr <- function(depth, obs_age, obs_err,
                    top_depth = NULL, bottom_depth = NULL,
                    pad_top_bottom = FALSE,
                    acc_mean_prior = NULL,
-                   shape = 1.5,
+                   acc_shape = 1.5,
                    scale_shape = TRUE,
-                   mem_mean = 0.7, mem_strength = 4,
+                   mem_mean = 0.5, mem_strength = 10,
                    scale_R = TRUE,
                    nu = 6,
                    inflate_errors = FALSE,
@@ -95,7 +95,7 @@ hamstr <- function(depth, obs_age, obs_err,
                                    bottom_depth = bottom_depth,
                                    pad_top_bottom = pad_top_bottom,
                                    acc_mean_prior = acc_mean_prior,
-                                   shape = shape,
+                                   acc_shape = acc_shape,
                                    scale_shape = scale_shape,
                                    mem_mean=mem_mean, mem_strength=mem_strength,
                                    scale_R = as.numeric(scale_R),

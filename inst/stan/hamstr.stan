@@ -28,7 +28,7 @@ data {
   real<lower = 0> acc_mean_prior;
   
   // shape of the gamma distributions
-  real<lower = 0> shape; 
+  real<lower = 0> acc_shape; 
   
   // scale the shape parameter to control the total variance of the alpha 
   // innovations for the number of hierarchical levels
@@ -68,11 +68,11 @@ transformed data{
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
   
   // scale shape
-  real<lower = 1> shape_adj;
+  real<lower = 1> acc_shape_adj;
   if (scale_shape == 1){
-    shape_adj = shape * n_lvls + ((n_lvls - 1)/(shape+1));
+    acc_shape_adj = acc_shape * n_lvls + ((n_lvls - 1)/(acc_shape+1));
   } else{
-    shape_adj = shape;
+    acc_shape_adj = acc_shape;
   }
  
 }
@@ -153,7 +153,7 @@ model {
   
   // the gamma distributed innovations
   // prior parameterised by use set shape and the value of it's parent section
-  alpha[2:K_tot] ~ gamma(shape_adj, shape_adj ./ alpha[parent[2:K_tot]]);
+  alpha[2:K_tot] ~ gamma(acc_shape_adj, acc_shape_adj ./ alpha[parent[2:K_tot]]);
   
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);

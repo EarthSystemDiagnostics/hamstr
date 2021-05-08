@@ -237,12 +237,9 @@ hamstr_fit_2pow7 <- hamstr(depth = MSB2K_cal$depth,
                    obs_age = MSB2K_cal$age.14C.cal,
                    obs_err = MSB2K_cal$age.14C.cal.se,
                    K = c(2, 2, 2, 2, 2, 2, 2))
-#> Warning: Bulk Effective Samples Size (ESS) is too low, indicating posterior means and medians may be unreliable.
-#> Running the chains for more iterations may help. See
-#> http://mc-stan.org/misc/warnings.html#bulk-ess
-#> Warning: Tail Effective Samples Size (ESS) is too low, indicating posterior variances and tail quantiles may be unreliable.
-#> Running the chains for more iterations may help. See
-#> http://mc-stan.org/misc/warnings.html#tail-ess
+#> Warning: There were 20 transitions after warmup that exceeded the maximum treedepth. Increase max_treedepth above 10. See
+#> http://mc-stan.org/misc/warnings.html#maximum-treedepth-exceeded
+#> Warning: Examine the pairs() plot to diagnose sampling problems
 
 hamstr_fit_5pow3 <- hamstr(depth = MSB2K_cal$depth,
                    obs_age = MSB2K_cal$age.14C.cal,
@@ -258,19 +255,19 @@ hamstr_fit_128 <- hamstr(depth = MSB2K_cal$depth,
 ``` r
 rstan::get_elapsed_time(hamstr_fit_2pow7$fit)
 #>         warmup sample
-#> chain:1 16.377  8.657
-#> chain:2 16.666  8.627
-#> chain:3 16.486 10.367
+#> chain:1 12.887 28.445
+#> chain:2 14.395 26.182
+#> chain:3 13.857 11.897
 rstan::get_elapsed_time(hamstr_fit_5pow3$fit)
 #>         warmup sample
-#> chain:1  4.894  2.809
-#> chain:2  5.113  2.772
-#> chain:3  5.373  2.778
+#> chain:1  4.518  2.899
+#> chain:2  4.483  3.143
+#> chain:3  4.377  2.893
 rstan::get_elapsed_time(hamstr_fit_128$fit)
 #>         warmup sample
-#> chain:1  4.637  4.815
-#> chain:2  4.757  4.716
-#> chain:3  4.971  4.829
+#> chain:1  5.678  5.591
+#> chain:2  5.408  5.388
+#> chain:3  5.432  5.343
 ```
 
 ``` r
@@ -328,16 +325,16 @@ age.mods
 #> # A tibble: 378,000 x 5
 #>     iter par      age   idx depth
 #>    <int> <chr>  <dbl> <dbl> <dbl>
-#>  1     1 c_ages 4541.     1  1.5 
-#>  2     1 c_ages 4550.     2  2.28
-#>  3     1 c_ages 4559.     3  3.07
-#>  4     1 c_ages 4570.     4  3.85
-#>  5     1 c_ages 4580.     5  4.64
-#>  6     1 c_ages 4590.     6  5.42
-#>  7     1 c_ages 4599.     7  6.20
-#>  8     1 c_ages 4608.     8  6.99
-#>  9     1 c_ages 4616.     9  7.77
-#> 10     1 c_ages 4624.    10  8.56
+#>  1     1 c_ages 4403.     1  1.5 
+#>  2     1 c_ages 4409.     2  2.28
+#>  3     1 c_ages 4424.     3  3.07
+#>  4     1 c_ages 4440.     4  3.85
+#>  5     1 c_ages 4458.     5  4.64
+#>  6     1 c_ages 4472.     6  5.42
+#>  7     1 c_ages 4484.     7  6.20
+#>  8     1 c_ages 4492.     8  6.99
+#>  9     1 c_ages 4503.     9  7.77
+#> 10     1 c_ages 4515.    10  8.56
 #> # ... with 377,990 more rows
 ```
 
@@ -363,16 +360,16 @@ summary(hamstr_fit_5pow3)
 #> # A tibble: 126 x 13
 #>    depth   idx par    mean se_mean    sd `2.5%` `25%` `50%` `75%` `97.5%` n_eff
 #>    <dbl> <dbl> <chr> <dbl>   <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl> <dbl>
-#>  1  1.5      1 c_ag~ 4513.    3.04  68.7  4363. 4468. 4518. 4562.   4634.  510.
-#>  2  2.28     2 c_ag~ 4523.    2.90  65.4  4382. 4481. 4527. 4570.   4640.  507.
-#>  3  3.07     3 c_ag~ 4534.    2.77  62.4  4400. 4493. 4537. 4579.   4646.  509.
-#>  4  3.85     4 c_ag~ 4544.    2.63  59.7  4416. 4505. 4548. 4587.   4652.  515.
-#>  5  4.64     5 c_ag~ 4555.    2.49  57.3  4435. 4518. 4557. 4597.   4659.  530.
-#>  6  5.42     6 c_ag~ 4566.    2.36  55.4  4452. 4529. 4567. 4606.   4669.  551.
-#>  7  6.20     7 c_ag~ 4577.    2.22  53.3  4466. 4542. 4578. 4615.   4676.  576.
-#>  8  6.99     8 c_ag~ 4588.    2.08  51.1  4483. 4555. 4590. 4624.   4684.  607.
-#>  9  7.77     9 c_ag~ 4600.    1.92  49.0  4501. 4568. 4602. 4634.   4692.  649.
-#> 10  8.56    10 c_ag~ 4612.    1.76  46.9  4516. 4582. 4613. 4644.   4701.  709.
+#>  1  1.5      1 c_ag~ 4510.    3.64  73.0  4350. 4466. 4515. 4561.   4640.  402.
+#>  2  2.28     2 c_ag~ 4522.    3.41  69.1  4370. 4479. 4525. 4570.   4645.  411.
+#>  3  3.07     3 c_ag~ 4533.    3.19  65.6  4391. 4493. 4536. 4579.   4653.  422.
+#>  4  3.85     4 c_ag~ 4545.    2.98  62.4  4412. 4507. 4548. 4588.   4661.  438.
+#>  5  4.64     5 c_ag~ 4557.    2.77  59.6  4428. 4520. 4559. 4597.   4668.  461.
+#>  6  5.42     6 c_ag~ 4568.    2.56  57.2  4447. 4532. 4570. 4607.   4675.  498.
+#>  7  6.20     7 c_ag~ 4580.    2.36  54.7  4463. 4545. 4582. 4618.   4682.  537.
+#>  8  6.99     8 c_ag~ 4591.    2.17  52.2  4482. 4559. 4593. 4628.   4689.  579.
+#>  9  7.77     9 c_ag~ 4603.    1.97  49.8  4499. 4571. 4604. 4637.   4697.  637.
+#> 10  8.56    10 c_ag~ 4614.    1.79  47.7  4515. 4583. 4615. 4647.   4706.  707.
 #> # ... with 116 more rows, and 1 more variable: Rhat <dbl>
 ```
 
@@ -383,14 +380,14 @@ summary(age.mods.interp)
 #>    <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl>
 #>  1     0   NA   NA      NA    NA    NA    NA      NA 
 #>  2     1   NA   NA      NA    NA    NA    NA      NA 
-#>  3     2 4520.  66.5  4375. 4476. 4524. 4567.   4637.
-#>  4     3 4533.  62.6  4398. 4492. 4536. 4578.   4646.
-#>  5     4 4546.  59.2  4419. 4508. 4549. 4589.   4653.
-#>  6     5 4560.  56.4  4444. 4523. 4562. 4601.   4663.
-#>  7     6 4574.  53.8  4462. 4539. 4575. 4612.   4673.
-#>  8     7 4589.  51.1  4483. 4556. 4590. 4624.   4684.
-#>  9     8 4604.  48.3  4505. 4573. 4605. 4637.   4695.
-#> 10     9 4619.  45.9  4525. 4589. 4620. 4650.   4706.
+#>  3     2 4518.  70.5  4362. 4474. 4521. 4566.   4644.
+#>  4     3 4532.  65.9  4390. 4492. 4535. 4578.   4652.
+#>  5     4 4547.  61.8  4417. 4510. 4550. 4590.   4662.
+#>  6     5 4562.  58.4  4437. 4526. 4565. 4602.   4671.
+#>  7     6 4577.  55.3  4458. 4541. 4579. 4615.   4680.
+#>  8     7 4592.  52.1  4482. 4559. 4593. 4628.   4690.
+#>  9     8 4606.  49.1  4504. 4575. 4608. 4640.   4700.
+#> 10     9 4621.  46.7  4522. 4591. 4622. 4653.   4710.
 #> # ... with 91 more rows
 ```
 

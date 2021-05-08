@@ -16,12 +16,12 @@ A ggplot2 object
 Plot Memory Prior and Posterior
 }
 \keyword{0,}
-\keyword{0.7,}
+\keyword{0.5,}
 \keyword{10),}
+\keyword{10,}
 \keyword{20,}
 \keyword{2000,}
 \keyword{3)}
-\keyword{4,}
 \keyword{6,}
 \keyword{<-}
 \keyword{=}

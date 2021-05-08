@@ -111,7 +111,7 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
                                  pad_top_bottom=NULL,
                                  K=NULL, nu=NULL,
                                  acc_mean_prior=NULL,
-                                 shape=NULL,
+                                 acc_shape=NULL,
                                  scale_shape = NULL,
                                  mem_mean=NULL, mem_strength=NULL,
                                  scale_R=NULL,
@@ -249,8 +249,7 @@ get_inits_hamstr <- function(stan_dat){
     alpha = with(stan_dat, abs(stats::rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
     #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
 
-    #shape = abs(rnorm(1, 1.5, 1.5/3)),
-
+   
     age0 = stats::rnorm(1, min(stan_dat$obs_age), 2)
   )
 

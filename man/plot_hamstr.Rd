@@ -43,7 +43,7 @@ fit <- hamstr(
   obs_err = MSB2K$error,
   K = c(10, 10), nu = 6,
   acc_mean_prior = 20,
-  mem_mean = 0.7, mem_strength = 4,
+  mem_mean = 0.5, mem_strength = 10,
   inflate_errors = 0,
   iter = 2000, chains = 3)
   
