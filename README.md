@@ -142,8 +142,6 @@ along the top of the age-model plot.
 
 ``` r
 plot(hamstr_fit_1)
-#> Joining, by = "idx"
-#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
@@ -156,7 +154,6 @@ Additionally, plotting of the diagnostic plots can be switched off.
 
 ``` r
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
-#> Joining, by = "idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
@@ -177,7 +174,6 @@ plot(hamstr_fit_1, type = "acc_mean_prior_post")
 
 ``` r
 plot(hamstr_fit_1, type = "hier_acc")
-#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -255,41 +251,35 @@ hamstr_fit_128 <- hamstr(depth = MSB2K_cal$depth,
 ``` r
 rstan::get_elapsed_time(hamstr_fit_2pow7$fit)
 #>         warmup sample
-#> chain:1 12.887 28.445
-#> chain:2 14.395 26.182
-#> chain:3 13.857 11.897
+#> chain:1 13.288 29.106
+#> chain:2 14.822 26.558
+#> chain:3 14.494 11.921
 rstan::get_elapsed_time(hamstr_fit_5pow3$fit)
 #>         warmup sample
-#> chain:1  4.518  2.899
-#> chain:2  4.483  3.143
-#> chain:3  4.377  2.893
+#> chain:1  4.970  2.772
+#> chain:2  4.747  3.022
+#> chain:3  4.623  2.857
 rstan::get_elapsed_time(hamstr_fit_128$fit)
 #>         warmup sample
-#> chain:1  5.678  5.591
-#> chain:2  5.408  5.388
-#> chain:3  5.432  5.343
+#> chain:1  4.597  4.896
+#> chain:2  4.470  4.803
+#> chain:3  4.480  4.805
 ```
 
 ``` r
 plot(hamstr_fit_2pow7)
-#> Joining, by = "idx"
-#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 plot(hamstr_fit_5pow3)
-#> Joining, by = "idx"
-#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 ``` r
 plot(hamstr_fit_128)
-#> Joining, by = "idx"
-#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-14-3.png)<!-- -->
@@ -305,8 +295,6 @@ hamstr_fit_21 <- hamstr(depth = MSB2K_cal$depth,
 
 ``` r
 plot(hamstr_fit_21, summarise = FALSE)
-#> Joining, by = "idx"
-#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
@@ -320,21 +308,20 @@ age-depth model
 
 ``` r
 age.mods <- get_posterior_ages(hamstr_fit_5pow3)
-#> Joining, by = "idx"
 age.mods
-#> # A tibble: 378,000 x 5
-#>     iter par      age   idx depth
-#>    <int> <chr>  <dbl> <dbl> <dbl>
-#>  1     1 c_ages 4403.     1  1.5 
-#>  2     1 c_ages 4409.     2  2.28
-#>  3     1 c_ages 4424.     3  3.07
-#>  4     1 c_ages 4440.     4  3.85
-#>  5     1 c_ages 4458.     5  4.64
-#>  6     1 c_ages 4472.     6  5.42
-#>  7     1 c_ages 4484.     7  6.20
-#>  8     1 c_ages 4492.     8  6.99
-#>  9     1 c_ages 4503.     9  7.77
-#> 10     1 c_ages 4515.    10  8.56
+#> # A tibble: 378,000 x 3
+#>     iter depth   age
+#>    <int> <dbl> <dbl>
+#>  1     1  1.5  4403.
+#>  2     1  2.28 4409.
+#>  3     1  3.07 4424.
+#>  4     1  3.85 4440.
+#>  5     1  4.64 4458.
+#>  6     1  5.42 4472.
+#>  7     1  6.20 4484.
+#>  8     1  6.99 4492.
+#>  9     1  7.77 4503.
+#> 10     1  8.56 4515.
 #> # ... with 377,990 more rows
 ```
 
@@ -346,8 +333,7 @@ depths that are outside the modelled depths.
 
 ``` r
 age.mods.interp <- predict(hamstr_fit_5pow3,
-                           new_depth = seq(0, 100, by = 1))
-#> Joining, by = "idx"
+                           depth = seq(0, 100, by = 1))
 ```
 
 These interpolated age models can summarised with the same function as
@@ -356,7 +342,6 @@ lost.
 
 ``` r
 summary(hamstr_fit_5pow3)
-#> Joining, by = "idx"
 #> # A tibble: 126 x 13
 #>    depth   idx par    mean se_mean    sd `2.5%` `25%` `50%` `75%` `97.5%` n_eff
 #>    <dbl> <dbl> <chr> <dbl>   <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl> <dbl>
@@ -419,7 +404,6 @@ for this model.
 
 ``` r
 plot(hamstr_fit_5pow3, type = "hier")
-#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
