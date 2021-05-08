@@ -10,6 +10,7 @@ data {
   vector[N] obs_err;
 
   // resolution of age-depth model
+  int<lower = 1> n_lvls; // number of hierarchical levels, including overall mean
   int<lower=0> K_fine;  // number of highest resolution sections
   int<lower=0> K_tot;  // total no of gamma parameters
   
@@ -29,6 +30,9 @@ data {
   // shape of the gamma distributions
   real<lower = 0> shape; 
   
+  // scale the shape parameter to control the total variance of the alpha 
+  // innovations for the number of hierarchical levels
+  int<lower=0, upper=1> scale_shape; 
   
   // hyperparameters for prior distribution on memory strength (the AR1 coefficient)
   real<lower = 0> mem_mean;
@@ -63,6 +67,13 @@ transformed data{
   // position of the first highest resolution innovation (alpha)
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
   
+  // scale shape
+  real<lower = 1> shape_adj;
+  if (scale_shape == 1){
+    shape_adj = shape * n_lvls + ((n_lvls - 1)/(shape+1));
+  } else{
+    shape_adj = shape;
+  }
  
 }
 parameters {
@@ -142,7 +153,7 @@ model {
   
   // the gamma distributed innovations
   // prior parameterised by use set shape and the value of it's parent section
-  alpha[2:K_tot] ~ gamma(shape, shape ./ alpha[parent[2:K_tot]]);
+  alpha[2:K_tot] ~ gamma(shape_adj, shape_adj ./ alpha[parent[2:K_tot]]);
   
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);

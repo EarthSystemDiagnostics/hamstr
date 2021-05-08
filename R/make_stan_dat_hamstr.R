@@ -104,13 +104,15 @@ alpha_indices <- function(K){
 #' @examples
 #' make_stan_dat_hamstr(depth = MSB2K$depth,
 #'               obs_age = MSB2K$age,
-#'               obs_err = MSB2K$error)
+#'               obs_err = MSB2K$error,
+#'               K = 128)
 make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
                                  top_depth=NULL, bottom_depth=NULL,
                                  pad_top_bottom=NULL,
                                  K=NULL, nu=NULL,
                                  acc_mean_prior=NULL,
                                  shape=NULL,
+                                 scale_shape = NULL,
                                  mem_mean=NULL, mem_strength=NULL,
                                  scale_R=NULL,
                                  inflate_errors=NULL,
@@ -205,7 +207,8 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
 
   l <- append(l, alpha_idx)
 
-  #l$K_lvls <- length(l$K)
+  l$n_lvls <- length(K)
+  l$scale_shape = as.numeric(l$scale_shape)
   #l$K_idx <- l$lvl - 1
 
   return(l)

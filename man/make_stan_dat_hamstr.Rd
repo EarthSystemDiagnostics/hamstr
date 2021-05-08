@@ -15,6 +15,7 @@ make_stan_dat_hamstr(
   nu = NULL,
   acc_mean_prior = NULL,
   shape = NULL,
+  scale_shape = NULL,
   mem_mean = NULL,
   mem_strength = NULL,
   scale_R = NULL,
@@ -63,6 +64,10 @@ mean accumulation rate estimated by fitting a robust linear model using
 \item{shape}{Hyperparameter for the shape of the priors on accumulation rates.
 Defaults to 1.5 - as for Bacon 2.2.}
 
+\item{scale_shape}{Scale the shape parameter according to the number of hierarchical
+levels, to control the total variance of the alpha innovations. This defaults
+to TRUE as of Hamstr verion 0.5.}
+
 \item{mem_mean}{Hyperparameter: a parameter of the Beta prior distribution on
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 The prior on the correlation between layers is scaled according to the
@@ -105,5 +110,6 @@ Make the data object required by the Stan program
 \examples{
 make_stan_dat_hamstr(depth = MSB2K$depth,
               obs_age = MSB2K$age,
-              obs_err = MSB2K$error)
+              obs_err = MSB2K$error,
+              K = 128)
 }

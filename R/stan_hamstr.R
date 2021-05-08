@@ -23,6 +23,9 @@
 #'   \link[MASS]{rlm}.
 #' @param shape Hyperparameter for the shape of the priors on accumulation rates.
 #'  Defaults to 1.5 - as for Bacon 2.2.
+#' @param scale_shape Scale the shape parameter according to the number of hierarchical
+#' levels, to control the total variance of the alpha innovations. This defaults
+#' to TRUE as of Hamstr verion 0.5.
 #' @param mem_mean Hyperparameter: a parameter of the Beta prior distribution on
 #'   "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 #'   The prior on the correlation between layers is scaled according to the
@@ -75,6 +78,7 @@ hamstr <- function(depth, obs_age, obs_err,
                    pad_top_bottom = FALSE,
                    acc_mean_prior = NULL,
                    shape = 1.5,
+                   scale_shape = TRUE,
                    mem_mean = 0.7, mem_strength = 4,
                    scale_R = TRUE,
                    nu = 6,
@@ -92,6 +96,7 @@ hamstr <- function(depth, obs_age, obs_err,
                                    pad_top_bottom = pad_top_bottom,
                                    acc_mean_prior = acc_mean_prior,
                                    shape = shape,
+                                   scale_shape = scale_shape,
                                    mem_mean=mem_mean, mem_strength=mem_strength,
                                    scale_R = as.numeric(scale_R),
                                    nu=nu,

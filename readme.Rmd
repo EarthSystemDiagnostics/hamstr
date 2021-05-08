@@ -217,8 +217,8 @@ The hierarchical structure of the sections makes it difficult to specify the exa
 
 
 ```{r}
-age.mods.interp <- interpolate_age_models(hamstr_fit_5pow3,
-                                          new_depth = seq(0, 100, by = 1))
+age.mods.interp <- predict(hamstr_fit_5pow3,
+                           new_depth = seq(0, 100, by = 1))
 ```
 
 
