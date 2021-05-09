@@ -4,7 +4,7 @@ author: Andrew M. Dolman
 date: "`r Sys.Date()`"
 output:
   github_document:
-    html_preview: false
+    html_preview: true
 ---
 
 -------------------------------
@@ -14,18 +14,19 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  cache = TRUE, autodep = TRUE
+  cache = TRUE, autodep = TRUE,
+  fig.width = 9,
+  dev = "png",
+  dev.args = list(type = "cairo-png"),
+  dpi = 300
 )
 ```
 
 
 **hamstr** implements a *Bacon-like* (Blaauw and Christen, 2011) sediment accumulation or age-depth model with hierarchically structured multi-resolution sediment sections. The Bayesian model is implemented in the Stan probabilistic programming language (https://mc-stan.org/). 
 
-We aim to develop this package following the [Guidelines for R packages providing interfaces to  Stan](https://cran.r-project.org/web/packages/rstantools/vignettes/developer-guidelines.html)
 
-
-
-### Installation
+## Installation
 
 **hamstr** can be installed directly from Github
 
@@ -38,7 +39,7 @@ remotes::install_github("earthsystemdiagnostics/hamstr", args = "--preclean", bu
 ```
 
 
-### Using hamstr
+## Using **hamstr**
 
 Examples using the example core "MSB2K" from the [rbacon](https://cran.r-project.org/web/packages/rbacon/index.html) package.
 
@@ -52,11 +53,11 @@ set.seed(20200827)
 ```
 
 
-#### Converting radiocarbon ages to calendar ages.
+### Converting radiocarbon ages to calendar ages.
 
-Unlike Bacon, hamstr does not do the conversion of radiocarbon dates to calendar ages as part of the model fitting process. This must be done in advance. hamstr includes the helper function `calibrate_14C_age` to do this, which in turn uses the function `BchronCalibrate` from the [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html) package.
+Unlike Bacon, **hamstr** does not do the conversion of radiocarbon dates to calendar ages as part of the model fitting process. This must be done in advance. **hamstr** includes the helper function `calibrate_14C_age` to do this, which in turn uses the function `BchronCalibrate` from the [Bchron](https://cran.r-project.org/web/packages/Bchron/index.html) package.
 
-Additionally, unlike Bacon, hamstr summarises the complex empirical calendar age PDF that results from calibration into a single point estimate and 1-sigma uncertainty. This is a necessary compromise in order to be able to use the power of the Stan platform. Viewed in context with the many other uncertainties in radiocarbon dates and the resulting age-models this will not usually be a major issue.
+Additionally, unlike Bacon, **hamstr** approximates the complex empirical calendar age PDF that results from calibration into a single point estimate and 1-sigma uncertainty. This is a necessary compromise in order to be able to use the power of the Stan platform. Viewed in context with the many other uncertainties in radiocarbon dates and the resulting age-models this will not usually be a major issue.
 
 
 The function `calibrate_14C_age` will append columns to a data.frame with the calendar ages and 1-sigma uncertainties.
@@ -66,33 +67,37 @@ MSB2K_cal <- calibrate_14C_age(MSB2K, age.14C = "age", age.14C.se = "error")
 ```
 
 
+The approximated calendar age PDFs can be compared with the empirical PDFs with the function `compare_14C_PDF`
 
-#### Fitting age-models with hamstr
+A sample of six dates are plotted here for the IntCal20 and Marine20 calibrations. This approximation is much less of an issue for marine radiocarbon dates, as the cosmogenic radiocarbon signal has been smoothed by mixing in the ocean.
 
-Age-depth (sediment accumulation) models are fit with the function `hamstr`.
+```{r}
+i <- seq(1, 40, by = floor(40/6))[1:6]
+compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
+  labs(title = "Intcal20")
+```
 
-By default hamstr runs with three Markov chains and these can be run in parallel. This code will assign 3 (processor) cores as long as the machine has at least 3.
+```{r}
+compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
+  labs(title = "Marine20")
+```
+
+
+
+### Fitting age-models with **hamstr**
+
+By default **hamstr** runs with three Markov chains and these can be run in parallel. This code will assign 3 (processor) cores as long as the machine has at least 3. The number of cores can also be set for specfic calls of the `hamstr` function using the `cores` argument. 
 
 ```{r}
 if (parallel::detectCores() >= 3) options(mc.cores = 3)
 ```
 
-The key structural difference between Bacon and hamstr models is that with hamstr the sediment profile is modelled at multiple resolutions with a hierarchical structure. This removes the need to trade-off smoothness and flexibility. One of the more critical tuning parameters in the Bacon model is the parameter `thick`, which determines the thickness and number of discrete core sections. Finding a good or optimal value for a given core is often critical to getting a good age-depth model. Too few sections and the resulting age-model is very "blocky" and can miss changes in sedimentation rate; however, counter-intuitively, too many very thin sections can also often result in an age-model that "under-fits" the data - ploughing a straight line through the age-control points when a lower resolution model shows variation in accumulation rate. 
-
-The parameter `K` controls the number and structure of the hierarchical sections. It is specified as a vector, where each value indicates the number of new child sections for each parent section at each finer hierarchical level. E.g. `c(10, 10)` specifies 10 sections at the coarsest level, with 10 new sections for each coarse section at the next finer level, for a total of 100 sections at the highest / finest resolution level. `c(10, 10, 10)` would specify 1000 sections at the finest level and 3 hierarchical levels of 10, 100 and 1000 sections.
-
-The structure is hierarchical in the sense that the accumulation rates for the parent sections act as priors for their child sections, specifically the mean accumulation rate for a given parent is the mean of the gamma prior for it's child sections. In turn, the overall mean accumulation rate for the whole core is itself a parameter estimated by the fitting process. The hierarchical structure of increasing resolution allows the model to adapt to low-frequency changes in the accumulation rate, that is changes between "regimes" of high or low accumulation that persist for long periods, perhaps due to glacial-interglacial cycles. 
-
-By default, hamstr uses robust linear regression (`MASS::rlm`) to estimate the mean accumulation rate from the data, and then uses this to parametrise a prior distribution for the overall mean accumulation rate. This prior is a half-normal with zero mean and standard deviation equal to 10 times the estimated mean. Although this does introduce an element of "data-peaking" or using the data twice, for both the prior and likelihood, the resulting prior is only weakly-informative and unless the data set is very poor, the data exert very strong control over this parameter anyway. The advantage is that the prior is automatically scaled appropriately regardless of the units of depth or age. 
-
-Here we fit a model with a 10, 100 section structure.
-
+Age-depth (sediment accumulation) models are fit with the function `hamstr`. A vectors of depth, observed age and age uncertainty are passed as arguments to the function.
 
 ```{r}
 hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
-                   obs_age = MSB2K_cal$age.14C.cal,
-                   obs_err = MSB2K_cal$age.14C.cal.se,
-                   K = c(10, 10))
+                       obs_age = MSB2K_cal$age.14C.cal,
+                       obs_err = MSB2K_cal$age.14C.cal.se)
 ```
 
 The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.
@@ -107,20 +112,90 @@ A "spaghetti" plot can be created instead of shaded regions. This shows a random
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 ```
 
-Additional diagnostic plots are available. A plot of the prior and posterior distributions of the overall mean accumulation rate for example. See ?plot.hamstr_fit for options.
 
-#### Prior and posterior of overall mean accumulation rate
+#### Mean accumulation rate
+
+There is no need to specify a prior value for the mean accumulation rate, parameter `acc.mean` in Bacon, as in **hamstr**, this overall mean accumulation rate is a full parameter estimated from the data. 
+
+By default, **hamstr** uses robust linear regression (`MASS::rlm`) to estimate the mean accumulation rate from the data, and then uses this to parametrise a prior distribution for the overall mean accumulation rate. This prior is a half-normal with zero mean and standard deviation equal to 10 times the estimated mean. Although this does introduce an element of "data-peaking", using the data twice (for both the prior and likelihood), the resulting prior is only weakly-informative. The advantage is that the prior is automatically scaled appropriately regardless of the units of depth or age.
+
+This prior can be checked visually against the posterior.
 
 ```{r}
 plot(hamstr_fit_1, type = "acc_mean_prior_post")
 ```
+
+
+Default parameter values for the shape of the accumulation prior `acc_shape = 1.5`, the memory mean `mem_mean = 0.5` and strength `mem_strength = 10`, are the same as for Bacon >= 2.5.1.
+
+
+
+#### Setting the thickness and number of discrete sections
+
+One of the more critical tuning parameters in the **Bacon** model is the parameter `thick`, which determines the thickness and number of discrete core sections. Finding a good or optimal value for a given core is often critical to getting a good age-depth model. Too few sections and the resulting age-model is very "blocky" and can miss changes in sedimentation rate; however, counter-intuitively, too many very thin sections can also often result in an age-model that "under-fits" the data - ploughing a straight line through the age-control points when a lower resolution model shows variation in accumulation rate. 
+
+The key structural difference between **Bacon** and **hamstr** models is that with **hamstr** the sediment core is modelled at multiple resolutions simultaneously with a hierarchical structure. This removes the need to trade-off smoothness and flexibility. 
+
+The parameter `K` controls the number and structure of the hierarchical sections. It is specified as a vector, where each value indicates the number of new child sections for each parent section at each finer hierarchical level. E.g. `c(10, 10)` specifies 10 sections at the coarsest level, with 10 new sections at the next finer level for each coarse section, giving a total of 100 sections at the highest / finest resolution level. `c(10, 10, 10)` would specify 1000 sections at the finest level and 3 hierarchical levels of 10, 100 and 1000 sections.
+
+The structure is hierarchical in the sense that the modelled accumulation rates for the parent sections act as priors for their child sections; specifically, the mean accumulation rate for a given parent is the mean of the gamma prior for it's child sections. In turn, the overall mean accumulation rate for the whole core is itself a parameter estimated by the fitting process. The hierarchical structure of increasing resolution allows the model to adapt to low-frequency changes in the accumulation rate, that is changes between "regimes" of high or low accumulation that persist for long periods. 
+
+By default `K` is set to `c(10, 10)`. 
+
+Here is an example of a coarser model.
+
+```{r}
+hamstr_fit_2 <- hamstr(depth = MSB2K_cal$depth,
+                   obs_age = MSB2K_cal$age.14C.cal,
+                   obs_err = MSB2K_cal$age.14C.cal.se,
+                   K = c(5, 5))
+```
+
+
+```{r}
+plot(hamstr_fit_2)
+```
+
+
+### Getting the fitted age models
+
+The fitted age models can be obtained with the `predict` and `summary` methods. *iter* is the iteration of the sampler, or "realisation" of the age model.
+
+```{r}
+predict(hamstr_fit_1)
+```
+
+`summary` returns the age model summarised over the realisations.
+
+```{r}
+summary(hamstr_fit_1)
+```
+
+The hierarchical structure of the sections makes it difficult to specify the exact depth resolution that you want for your resulting age-depth model. The `predict` method takes an additional argument `depth` to interpolate to a specific set of depths. The function returns NA for depths that are outside the modelled depths.
+
+```{r}
+age.mods.interp <- predict(hamstr_fit_1, depth = seq(0, 100, by = 1))
+```
+
+These interpolated age models can summarised with the same function as the original fitted objects, but the n_eff and Rhat information is lost.
+
+
+```{r}
+summary(age.mods.interp)
+```
+
+
+
+### Diagnostic plots
+
+Additional diagnostic plots are available. See ?plot.hamstr_fit for options.
+
 
 #### Plot modelled accumulation rates at each hierarchical level
 
 ```{r}
 plot(hamstr_fit_1, type = "hier_acc")
 ```
-
 
 #### Plot memory prior and posterior
 
@@ -131,129 +206,35 @@ plot(hamstr_fit_1, type = "mem")
 ```
 
 
-#### Examine calendar age PDFs
-
-As mentioned earlier, unlike Bacon, hamstr approximates the complicated empirical calendar age PDFs with t-distributions. These can be examined with the function `compare_14C_PDF`
-
-A sample of six dates are plotted here.
-
-```{r}
-i <- seq(1, 40, by = floor(40/6))[1:6]
-compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")
-```
 
 
-### Varying the number and structure of the modelled sections.
+### Other `rstan` functions
 
-To get to approximately 100 sections at the finest level, we could have a single level `c(100)` or at the other extreme c(2,2,2,2,2,2,2), which would result in 2^7 = 128 sections. 
 
-There is a trade-off between these two approaches. Having the maximum number of hierarchical levels maximises the ultimate flexibility of the model, but comes at a cost of computation time and model stability. More hierarchical levels means that more parameters are ultimately being estimated to end up with the same number at the finest level. For example, `c(10, 10)` results in 110 fine sections but 110 accumulation rates are estimated. `c(2, 2, 2, 2, 2, 2, 2)` results in 128 sections but 254 parameters are estimated. However, more importantly, having fewer child sections means that less information is being used "pooled" to estimate the parent section mean. Each parameter is estimated with less certainty and therefore is a less informative prior for its child sections. This makes sampling the posterior distribution more difficult, slower, and less stable. The optimal structure will likely depend on the given dataset and optimising this is under investigation, but hierarchical levels of about 10 seem to work well.
 
-Here we compare a 2^7 structure with a single level of 128 sections. 
+Within the hamstr_fit object is an *rstan* object on which all the standard rstan functions should operate correctly.
 
+For example:
 
 ```{r}
-hamstr_fit_2pow7 <- hamstr(depth = MSB2K_cal$depth,
-                   obs_age = MSB2K_cal$age.14C.cal,
-                   obs_err = MSB2K_cal$age.14C.cal.se,
-                   K = c(2, 2, 2, 2, 2, 2, 2))
+rstan::check_divergences(hamstr_fit_1$fit)
 
-hamstr_fit_5pow3 <- hamstr(depth = MSB2K_cal$depth,
-                   obs_age = MSB2K_cal$age.14C.cal,
-                   obs_err = MSB2K_cal$age.14C.cal.se,
-                   K = c(5,5,5))
-
-hamstr_fit_128 <- hamstr(depth = MSB2K_cal$depth,
-                   obs_age = MSB2K_cal$age.14C.cal,
-                   obs_err = MSB2K_cal$age.14C.cal.se,
-                   K = c(128))
-```
-
-```{r}
-rstan::get_elapsed_time(hamstr_fit_2pow7$fit)
-rstan::get_elapsed_time(hamstr_fit_5pow3$fit)
-rstan::get_elapsed_time(hamstr_fit_128$fit)
-```
-
-
-
-```{r}
-plot(hamstr_fit_2pow7)
-plot(hamstr_fit_5pow3)
-plot(hamstr_fit_128)
-
-```
-
-
-#### Refit with 21 non-hierarchical sections for comparison with figures in Blaauw and Christen (2011)
-
-
-```{r}
-hamstr_fit_21 <- hamstr(depth = MSB2K_cal$depth,
-                   obs_age = MSB2K_cal$age.14C.cal,
-                   obs_err = MSB2K_cal$age.14C.cal.se,
-                   K = c(21))
-```
-
-
-```{r}
-plot(hamstr_fit_21, summarise = FALSE)
-```
-
-
-### Convenience functions
-
-#### Extracting the age models
-
-`get_posterior_ages` extracts all iterations (realisations) of the age-depth model
-
-```{r}
-age.mods <- get_posterior_ages(hamstr_fit_5pow3)
-age.mods
-```
-
-
-The hierarchical structure of the sections makes it difficult to specify the exact depth resolution that you want for your resulting age-depth model. The function `interpolate_age_models` makes it easier to interpolate to a specific set of depths. The function returns NA for depths that are outside the modelled depths.
-
-
-```{r}
-age.mods.interp <- predict(hamstr_fit_5pow3,
-                           depth = seq(0, 100, by = 1))
-```
-
-
-These interpolated age models can summarised with the same function as the original fitted objects, but the n_eff and Rhat information is lost.
-
-```{r}
-summary(hamstr_fit_5pow3)
-```
-
-```{r}
-summary(age.mods.interp)
-```
-
-
-Within the hamstr_fit object is an rstan object on which all the standard rstan functions should operate correctly.
-
-```{r}
-rstan::check_divergences(hamstr_fit_5pow3$fit)
-
-rstan::stan_rhat(hamstr_fit_5pow3$fit)
+rstan::stan_rhat(hamstr_fit_1$fit)
 ```
 
 The first `alpha` parameter is the overall mean accumulation rate.
 
 ```{r}
-rstan::traceplot(hamstr_fit_5pow3$fit, par = c("alpha[1]"),
+rstan::traceplot(hamstr_fit_1$fit, par = c("alpha[1]"),
                  inc_warmup = TRUE)
 ```
 
-`alpha[2]` to `alpha[6]` will be the first hierarchical level of 5 rates for this model.
+`alpha[2]` to `alpha[6]` will be the first 5 accumulations rates at the coarsest hierarchical level.
 
 ```{r}
-plot(hamstr_fit_5pow3, type = "hier")
+plot(hamstr_fit_1, type = "hier")
 
-rstan::traceplot(hamstr_fit_5pow3$fit, par = paste0("alpha[", 2:6, "]"),
+rstan::traceplot(hamstr_fit_1$fit, par = paste0("alpha[", 2:6, "]"),
                  inc_warmup = TRUE)
 
 ```
