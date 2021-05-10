@@ -73,7 +73,7 @@
 #'
 #' }
 hamstr <- function(depth, obs_age, obs_err,
-                   K = c(10, 10),
+                   K = NULL,
                    top_depth = NULL, bottom_depth = NULL,
                    pad_top_bottom = FALSE,
                    acc_mean_prior = NULL,

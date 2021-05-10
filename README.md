@@ -1,7 +1,7 @@
 hamstr: Hierarchical Accumulation Modelling with Stan and R.
 ================
 Andrew M. Dolman
-2021-05-09
+2021-05-10
 
 ------------------------------------------------------------------------
 
@@ -88,7 +88,7 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
 
 By default **hamstr** runs with three Markov chains and these can be run
 in parallel. This code will assign 3 (processor) cores as long as the
-machine has at least 3. The number of cores can also be set for specfic
+machine has at least 3. The number of cores can also be set for specific
 calls of the `hamstr` function using the `cores` argument.
 
 ``` r
@@ -180,7 +180,7 @@ the need to trade-off smoothness and flexibility.
 The parameter `K` controls the number and structure of the hierarchical
 sections. It is specified as a vector, where each value indicates the
 number of new child sections for each parent section at each finer
-hierarchical level. E.g. `c(10, 10)` specifies 10 sections at the
+hierarchical level. E.g. `c(10, 10)` would specify 10 sections at the
 coarsest level, with 10 new sections at the next finer level for each
 coarse section, giving a total of 100 sections at the highest / finest
 resolution level. `c(10, 10, 10)` would specify 1000 sections at the
@@ -196,7 +196,12 @@ increasing resolution allows the model to adapt to low-frequency changes
 in the accumulation rate, that is changes between “regimes” of high or
 low accumulation that persist for long periods.
 
-By default `K` is set to `c(10, 10)`.
+By default `K` is chosen so that the number of hierarchical levels, and
+the number of new child sections per level, are approximately equal,
+e.g. c(4, 4, 4, 4). The total number of sections at the finest level is
+set so that the resolution is 1 cm per section, up to a total length of
+900 cm, above which the default remains 900 sections and a coarser
+resolution is used. This can changed with the parameter K.
 
 Here is an example of a coarser model.
 

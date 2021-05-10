@@ -35,6 +35,57 @@ optimal_K <- function(K_tot, target_K_per_lvl = 10){
   return(K)
 }
 
+#' Adjust numbers of splits per level
+#'
+#' @param K_fine 
+#'
+#' @return
+#' @keywords internal
+AdjustK <- function(K_fine, base){
+  
+  a <- log(K_fine, base)
+  nLevels <- floor(a)
+  
+  K <- rep(base, nLevels)
+  
+  tot <- cumprod(K)[nLevels]
+  
+  i <- 0
+  while(tot < K_fine){
+    K[nLevels - i] <- K[nLevels - i] +1
+    i <- i + 1
+    if (i >= nLevels) i <- 0
+    tot <- cumprod(K)[nLevels]
+  }
+  
+  if (cumprod(K)[nLevels] > K_fine) {
+    if (i == 0) i <- nLevels
+    K[nLevels - i+1] <- K[nLevels - i+1] -1
+  }
+  
+  K
+  
+}
+
+
+#' Find a good hierarchical structure
+#'
+#' @param K_fine 
+#'
+#' @return
+#' @keywords internal
+OptK <- function(K_fine){
+  
+  bar <- function(x, y){
+    abs(y - x^x)
+  }
+  
+  base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
+  
+  AdjustK(K_fine, base)
+  
+}
+
 
 #' Calculate number of parameters being estimated for a given hierarchical structure
 #'
@@ -135,6 +186,8 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   
   l <- default.args
   
+ 
+  
   if (is.null(l$acc_mean_prior)){
 
     d <- data.frame(depth = depth, obs_age = obs_age)
@@ -178,7 +231,14 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   if(l$top_depth > min(l$depth)) stop("top_depth must be above or equal to the shallowest data point")
   if(l$bottom_depth < max(l$depth)) stop("bottom_depth must be deeper or equal to the deepest data point")
 
-
+  
+  if (is.null(K)){
+    K_fine <- l$bottom_depth - l$top_depth
+    if (K_fine > 1000) K_fine <- 1000
+    l$K <- OptK(K_fine)
+  }
+  
+  
   # Transformed arguments
   l$N <- length(l$depth)
 
@@ -207,7 +267,7 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
 
   l <- append(l, alpha_idx)
 
-  l$n_lvls <- length(K)
+  l$n_lvls <- length(l$K)
   l$scale_shape = as.numeric(l$scale_shape)
   #l$K_idx <- l$lvl - 1
 
