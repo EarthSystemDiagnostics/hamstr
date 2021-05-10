@@ -1,7 +1,7 @@
 Package: hamstr
 Type: Package
 Title: Hierarchical Accumulation Modelling with Stan and R
-Version: 0.5.0
+Version: 0.5.1
 Encoding: UTF-8
 Authors@R: c(person("Andrew", "Dolman", email = "andrew.dolman@awi.de", role = c("aut", "cre")))
 Description: hamstr implements a "Bacon-like" Bayesian sediment accumulation or 

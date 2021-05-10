@@ -116,6 +116,8 @@ along the top of the age-model plot.
 
 ``` r
 plot(hamstr_fit_1)
+#> Joining, by = "idx"
+#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
@@ -128,6 +130,7 @@ Additionally, plotting of the diagnostic plots can be switched off.
 
 ``` r
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
+#> Joining, by = "idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
@@ -214,6 +217,8 @@ hamstr_fit_2 <- hamstr(depth = MSB2K_cal$depth,
 
 ``` r
 plot(hamstr_fit_2)
+#> Joining, by = "idx"
+#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
@@ -226,40 +231,42 @@ age model.
 
 ``` r
 predict(hamstr_fit_1)
-#> # A tibble: 303,000 x 3
+#> Joining, by = "idx"
+#> # A tibble: 120,000 x 3
 #>     iter depth   age
 #>    <int> <dbl> <dbl>
-#>  1     1  1.5  4535.
-#>  2     1  2.48 4545.
-#>  3     1  3.46 4562.
-#>  4     1  4.44 4586.
-#>  5     1  5.42 4607.
-#>  6     1  6.4  4625.
-#>  7     1  7.38 4637.
-#>  8     1  8.36 4648.
-#>  9     1  9.34 4658.
-#> 10     1 10.3  4673.
-#> # ... with 302,990 more rows
+#>  1     1   1.5 4524.
+#>  2     1   4.5 4577.
+#>  3     1   8.5 4610.
+#>  4     1  12.5 4648.
+#>  5     1  14.5 4681.
+#>  6     1  14.5 4681.
+#>  7     1  14.5 4681.
+#>  8     1  17.5 4761.
+#>  9     1  20.5 4862.
+#> 10     1  21.5 4890.
+#> # ... with 119,990 more rows
 ```
 
 `summary` returns the age model summarised over the realisations.
 
 ``` r
 summary(hamstr_fit_1)
-#> # A tibble: 101 x 13
+#> Joining, by = "idx"
+#> # A tibble: 81 x 13
 #>    depth   idx par    mean se_mean    sd `2.5%` `25%` `50%` `75%` `97.5%` n_eff
 #>    <dbl> <dbl> <chr> <dbl>   <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl> <dbl>
-#>  1  1.5      1 c_ag~ 4532.    2.19  63.6  4393. 4494. 4537. 4575.   4643.  844.
-#>  2  2.48     2 c_ag~ 4542.    2.00  59.7  4416. 4506. 4546. 4583.   4649.  892.
-#>  3  3.46     3 c_ag~ 4553.    1.81  56.4  4431. 4519. 4556. 4590.   4657.  966.
-#>  4  4.44     4 c_ag~ 4563.    1.65  53.4  4450. 4530. 4565. 4599.   4663. 1048.
-#>  5  5.42     5 c_ag~ 4574.    1.51  51.0  4466. 4542. 4575. 4608.   4669. 1139.
-#>  6  6.4      6 c_ag~ 4584.    1.39  49.0  4481. 4554. 4585. 4617.   4676. 1242.
-#>  7  7.38     7 c_ag~ 4595.    1.30  47.4  4496. 4565. 4596. 4627.   4685. 1338.
-#>  8  8.36     8 c_ag~ 4605.    1.22  46.2  4511. 4576. 4607. 4636.   4696. 1424.
-#>  9  9.34     9 c_ag~ 4616.    1.19  45.3  4523. 4587. 4617. 4645.   4706. 1450.
-#> 10 10.3     10 c_ag~ 4627.    1.22  45.1  4533. 4597. 4628. 4656.   4715. 1362.
-#> # ... with 91 more rows, and 1 more variable: Rhat <dbl>
+#>  1  1.5      1 c_ag~ 4498.   2.28   67.4  4357. 4455. 4503. 4544.   4617.  875.
+#>  2  2.72     2 c_ag~ 4515.   2.07   62.3  4386. 4477. 4519. 4559.   4627.  908.
+#>  3  3.95     3 c_ag~ 4534.   1.87   58.1  4417. 4498. 4536. 4574.   4639.  965.
+#>  4  5.18     4 c_ag~ 4552.   1.68   54.7  4442. 4517. 4554. 4589.   4653. 1059.
+#>  5  6.4      5 c_ag~ 4570.   1.54   52.3  4461. 4537. 4571. 4605.   4666. 1155.
+#>  6  7.62     6 c_ag~ 4588.   1.45   50.9  4482. 4556. 4590. 4621.   4682. 1233.
+#>  7  8.85     7 c_ag~ 4607.   1.31   48.0  4508. 4576. 4608. 4638.   4696. 1348.
+#>  8 10.1      8 c_ag~ 4626.   1.13   44.7  4535. 4596. 4626. 4656.   4710. 1573.
+#>  9 11.3      9 c_ag~ 4645.   0.931  42.1  4560. 4617. 4645. 4674.   4726. 2051.
+#> 10 12.5     10 c_ag~ 4664.   0.806  40.6  4583. 4637. 4664. 4692.   4743. 2535.
+#> # ... with 71 more rows, and 1 more variable: Rhat <dbl>
 ```
 
 The hierarchical structure of the sections makes it difficult to specify
@@ -270,6 +277,7 @@ depths that are outside the modelled depths.
 
 ``` r
 age.mods.interp <- predict(hamstr_fit_1, depth = seq(0, 100, by = 1))
+#> Joining, by = "idx"
 ```
 
 These interpolated age models can summarised with the same function as
@@ -283,14 +291,14 @@ summary(age.mods.interp)
 #>    <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl>
 #>  1     0   NA   NA      NA    NA    NA    NA      NA 
 #>  2     1   NA   NA      NA    NA    NA    NA      NA 
-#>  3     2 4537.  61.5  4404. 4500. 4541. 4579.   4646.
-#>  4     3 4548.  57.9  4423. 4513. 4551. 4586.   4653.
-#>  5     4 4558.  54.7  4443. 4526. 4561. 4594.   4660.
-#>  6     5 4569.  51.9  4459. 4537. 4571. 4604.   4666.
-#>  7     6 4580.  49.7  4475. 4549. 4581. 4613.   4673.
-#>  8     7 4591.  47.9  4491. 4561. 4592. 4623.   4680.
-#>  9     8 4601.  46.5  4506. 4572. 4603. 4632.   4692.
-#> 10     9 4612.  45.5  4519. 4583. 4613. 4642.   4702.
+#>  3     2 4505.  65.1  4372. 4465. 4509. 4550.   4621.
+#>  4     3 4520.  61.2  4394. 4482. 4522. 4563.   4630.
+#>  5     4 4534.  57.9  4418. 4499. 4537. 4575.   4640.
+#>  6     5 4549.  55.1  4439. 4515. 4552. 4587.   4651.
+#>  7     6 4564.  52.9  4454. 4531. 4566. 4599.   4661.
+#>  8     7 4579.  51.4  4470. 4546. 4581. 4613.   4673.
+#>  9     8 4594.  49.9  4490. 4562. 4596. 4627.   4686.
+#> 10     9 4609.  47.5  4511. 4578. 4611. 4641.   4698.
 #> # ... with 91 more rows
 ```
 
@@ -303,6 +311,7 @@ options.
 
 ``` r
 plot(hamstr_fit_1, type = "hier_acc")
+#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
@@ -350,6 +359,7 @@ coarsest hierarchical level.
 
 ``` r
 plot(hamstr_fit_1, type = "hier")
+#> Joining, by = "alpha_idx"
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->

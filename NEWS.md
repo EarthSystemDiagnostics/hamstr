@@ -1,3 +1,8 @@
+# hamstr 0.5.1
+
+New default hierarchical structure K based on default resolution of 1 cm (up to 1000 cm)
+and number of levels approximately equal to number of new child sections per parent per level.
+
 
 # hamstr 0.5.0
 

@@ -4,12 +4,12 @@
 \alias{predict.hamstr_fit}
 \title{Interpolate Age Models at Given Depths}
 \usage{
-\method{predict}{hamstr_fit}(object, new_depth = NULL)
+\method{predict}{hamstr_fit}(object, depth = NULL)
 }
 \arguments{
 \item{object}{}
 
-\item{new_depth}{a vector of depths at which to interpolate the age models. 
+\item{depth}{a vector of depths at which to interpolate the age models. 
 If left NULL, the depths of the age control points are used.}
 }
 \value{
@@ -17,5 +17,5 @@ If left NULL, the depths of the age control points are used.}
 }
 \description{
 Method for generic function predict. Returns the posterior age
-models interpolated to new depths given in new_depth.
+models interpolated to new depths given in depth.
 }

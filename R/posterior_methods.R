@@ -102,18 +102,18 @@ get_posterior_ages <- function(hamstr_fit){
 
 #' Interpolate Age Models at Given Depths
 #' @description Method for generic function predict. Returns the posterior age
-#' models interpolated to new depths given in new_depth.
+#' models interpolated to new depths given in depth.
 #' @param object 
-#' @param new_depth
+#' @param depth
 #' @inheritParams interpolate_age_models
 #' @return
 #'
 #' @examples
 #' @export
 #' @method predict hamstr_fit
-predict.hamstr_fit <- function(object, new_depth = NULL){
+predict.hamstr_fit <- function(object, depth = NULL){
   
-  interpolate_age_models(object, new_depth)
+  interpolate_age_models(object, depth)
   
 }
 
@@ -121,7 +121,7 @@ predict.hamstr_fit <- function(object, new_depth = NULL){
 #' Interpolate Posterior Age Model At New Depths
 #'
 #' @inheritParams plot_hamstr
-#' @param new_depth a vector of depths at which to interpolate the age models. 
+#' @param depth a vector of depths at which to interpolate the age models. 
 #' If left NULL, the depths of the age control points are used.
 #'
 #' @return hamstr_interpolated_ages object
@@ -139,13 +139,13 @@ predict.hamstr_fit <- function(object, new_depth = NULL){
 #'   inflate_errors = 0,
 #'   iter = 2000, chains = 3)
 #'   
-#' interpolate.age.models(fit, new_depth = seq(1000, 15000, by = 1000))
+#' interpolate.age.models(fit, depth = seq(1000, 15000, by = 1000))
 #' }
 #' 
-interpolate_age_models <- function(hamstr_fit, new_depth = NULL){
+interpolate_age_models <- function(hamstr_fit, depth = NULL){
   
-  if (is.null(new_depth)) {
-    new_depth <- hamstr_fit$data$depth
+  if (is.null(depth)) {
+    depth <- hamstr_fit$data$depth
   }
   
   # get posterior age models
@@ -155,10 +155,10 @@ interpolate_age_models <- function(hamstr_fit, new_depth = NULL){
   pst_age_lst <- split(pst_age, pst_age$iter)
   
   new_pst_age <- lapply(pst_age_lst, function(x) {
-    stats::approx(x$depth, x$age, new_depth)$y
+    stats::approx(x$depth, x$age, depth)$y
   })
   
-  out <- expand.grid(depth = new_depth,
+  out <- expand.grid(depth = depth,
                      iter = 1:length(pst_age_lst)
                      )
   

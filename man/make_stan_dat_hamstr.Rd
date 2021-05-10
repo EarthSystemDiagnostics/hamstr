@@ -14,7 +14,7 @@ make_stan_dat_hamstr(
   K = NULL,
   nu = NULL,
   acc_mean_prior = NULL,
-  shape = NULL,
+  acc_shape = NULL,
   scale_shape = NULL,
   mem_mean = NULL,
   mem_strength = NULL,
@@ -60,6 +60,9 @@ overall mean accumulation rate is given a weak half-normal prior with mean
 = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 mean accumulation rate estimated by fitting a robust linear model using
 \link[MASS]{rlm}.}
+
+\item{acc_shape}{Hyperparameter for the shape of the priors on accumulation rates.
+Defaults to 1.5 - as for Bacon 2.2.}
 
 \item{scale_shape}{Scale the shape parameter according to the number of hierarchical
 levels, to control the total variance of the alpha innovations. This defaults
