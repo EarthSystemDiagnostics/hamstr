@@ -13,7 +13,9 @@
 #' @method plot hamstr_fit
 plot.hamstr_fit <- function(object,
                             type = c("default",
-                              "age_models", "hier_acc_rates",
+                              "age_models",
+                              "acc_rates",
+                              "hier_acc_rates",
                               "acc_mean_prior_post", "mem_prior_post"
                               ),
                             summarise = TRUE,
@@ -25,6 +27,7 @@ plot.hamstr_fit <- function(object,
          default = plot_hamstr(object, summarise = summarise, ...),
          age_models = plot_hamstr(object, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
+         acc_rates = plot_hamstr_acc_rates(object, ...),
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
          mem_prior_post = plot_memory_prior_posterior(object))
@@ -142,14 +145,25 @@ plot_summary_age_models <- function(hamstr_fit){
     dplyr::mutate(dat_idx = readr::parse_number(par))
   
   p.age.sum <- age_summary %>% 
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`), fill = "Lightgrey") +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`), fill = "Darkgrey") +
-    ggplot2::geom_line() +
-    ggplot2::geom_line(ggplot2::aes(y = `50%`), colour = "Green") +
-    ggplot2::labs(x = "Depth", y = "Age") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank())
+    plot_downcore_summary(.) + 
+    # ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
+    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`, fill = "Lightgrey")) +
+    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`, fill = "Darkgrey")) +
+    # ggplot2::geom_line(aes(colour = "Green")) +
+    # ggplot2::geom_line(ggplot2::aes(y = `50%`, colour = "Black")) +
+    # 
+    # ggplot2::theme_bw() +
+    # ggplot2::theme(panel.grid = ggplot2::element_blank())+
+    # ggplot2::scale_fill_identity(name = "Interval",
+    #                              breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
+    #                              labels = c("Median", "Mean", "95%", "50%"),
+    #                              guide = "legend") +
+    # ggplot2::scale_colour_identity(name = "",
+    #                                breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
+    #                                labels = c("Median", "Mean", "95%", "50%"),
+    #                                guide = "legend") 
+  ggplot2::labs(x = "Depth", y = "Age") 
+  
   
   
   if (hamstr_fit$data$inflate_errors == 1){
@@ -180,6 +194,7 @@ plot_summary_age_models <- function(hamstr_fit){
   
   p.age.sum
 }
+
 
 #' Plot Age Models as Spaghetti Plot
 #'
@@ -272,6 +287,152 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
   
 }
 
+## Accumulation rates ----
+
+
+#' Plot Downcore Summary
+#' @param ds a downcore summary of age or accumulation rate 
+#' @return
+#' @examples
+#' @keywords internal
+plot_downcore_summary <- function(ds){
+  p <- ds %>% 
+    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`, fill = "Lightgrey")) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`, fill = "Darkgrey")) +
+    ggplot2::geom_line(aes(colour = "Green")) +
+    ggplot2::geom_line(ggplot2::aes(y = `50%`, colour = "Black")) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank()) +
+    ggplot2::scale_fill_identity(name = "Interval",
+                                 breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
+                                 labels = c("Median", "Mean", "95%", "50%"),
+                                 guide = "legend") +
+    ggplot2::scale_colour_identity(name = "",
+                                   breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
+                                   labels = c("Median", "Mean", "95%", "50%"),
+                                   guide = "legend") 
+  return(p)
+}
+
+
+#' Plot accumulation rates
+#' @inheritParams plot_hamstr
+#' @return
+#' @examples
+#' @keywords internal
+plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_per_depth")){
+  
+  units <- match.arg(units,
+                     choices = c("depth_per_time", "time_per_depth"),
+                     several.ok = TRUE)
+  
+  acc_rates <- get_posterior_acc_rates(hamstr_fit)
+  acc_rates <- summarise_hamstr_acc_rates(acc_rates)
+  
+  acc_rates_long <- acc_rates %>% 
+    select(-depth) %>% 
+    pivot_longer(cols = c("c_depth_top", "c_depth_bottom"), names_to = "depth_type", values_to = "depth")
+  
+  acc_rates_long %>% 
+    filter(acc_rate_unit %in% units) %>% 
+    plot_downcore_summary(.) +
+    # ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
+    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`, fill = "Lightgrey")) +
+    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`, fill = "Darkgrey")) +
+    # ggplot2::geom_line(aes(colour = "Green")) +
+    # ggplot2::geom_line(ggplot2::aes(y = `50%`, colour = "Black")) +
+    # ggplot2::theme_bw() +
+    # ggplot2::theme(panel.grid = ggplot2::element_blank()) +
+    # ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
+    # ggplot2::scale_fill_identity(name = "Interval",
+    #                              breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
+    #                              labels = c("Median", "Mean", "95%", "50%"),
+    #                              guide = "legend") +
+    # ggplot2::scale_colour_identity(name = "",
+    #                                breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
+    #                                labels = c("Median", "Mean", "95%", "50%"),
+    #                                guide = "legend")  +
+    ggplot2::labs(x = "Depth", y = "Accumulation rate") +
+    ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y")
+  
+  
+}
+
+
+#' Plot the hierarchical accumulation rate parameters
+#'
+#' @inheritParams plot_hamstr
+#'
+#' @return ggplot2 object
+#' @keywords internal
+#' @import ggplot2
+#' @importFrom readr parse_number
+#' @importFrom rlang .data
+#' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.5, mem_strength = 10,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' plot_hierarchical_acc_rate(fit)
+#' }
+plot_hierarchical_acc_rate <- function(hamstr_fit){
+  
+  idx <- tibble::as_tibble(alpha_indices(hamstr_fit$data$K)[1:3]) %>%
+    dplyr::mutate(alpha_idx = (alpha_idx))
+  
+  a3 <- rstan::summary(hamstr_fit$fit, pars = "alpha")$summary
+  
+  alph <- tibble::as_tibble(a3, rownames = "par") %>%
+    dplyr::mutate(alpha_idx = readr::parse_number(par)) %>%
+    dplyr::left_join(idx, .) %>%
+    dplyr::mutate(lvl = factor(lvl))
+  
+  # for each unit at each level in hierarchy get max and min depth 
+  alph$depth1 <- c(min(hamstr_fit$data$modelled_depths),
+                   unlist(sapply((
+                     hierarchical_depths(hamstr_fit$data)
+                   ),
+                   function(x) {
+                     utils::head(x, -1)
+                   })))
+  
+  alph$depth2 <- c(max(hamstr_fit$data$modelled_depths),
+                   unlist(sapply((
+                     hierarchical_depths(hamstr_fit$data)
+                   ),
+                   function(x) {
+                     utils::tail(x, -1)
+                   })))
+  
+  alph2 <- alph %>% 
+    dplyr::select(lvl, alpha_idx, depth1, depth2, mean) %>% 
+    dplyr::group_by(lvl) %>% 
+    tidyr::gather(type, depth, -mean, -lvl, -alpha_idx) %>% 
+    dplyr::select(lvl, alpha_idx, depth, mean) %>% 
+    dplyr::arrange(lvl, alpha_idx, depth, mean)
+  
+  
+  gg <- alph2 %>%
+    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean, colour = lvl)) +
+    ggplot2::geom_path() +
+    ggplot2::expand_limits(y = 0) +
+    ggplot2::labs(y = "Accummulation rate [age/depth]", x = "Depth",
+                  colour = "Hierarchical\nlevel") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
+  
+  return(gg)
+}
+
+## Prior and posteriors --------
 
 #' Plot a Prior and Posterior
 #'
@@ -565,75 +726,5 @@ add_subdivisions <- function(gg, hamstr_fit){
 
 
 
-#' Plot the hierarchical accumulation rate parameters
-#'
-#' @inheritParams plot_hamstr
-#'
-#' @return ggplot2 object
-#' @keywords internal
-#' @import ggplot2
-#' @importFrom readr parse_number
-#' @importFrom rlang .data
-#' @examples
-#' \dontrun{
-#' fit <- hamstr(
-#'   depth = MSB2K$depth,
-#'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
-#'   
-#' plot_hierarchical_acc_rate(fit)
-#' }
-plot_hierarchical_acc_rate <- function(hamstr_fit){
 
-  idx <- tibble::as_tibble(alpha_indices(hamstr_fit$data$K)[1:3]) %>%
-    dplyr::mutate(alpha_idx = (alpha_idx))
-
-  a3 <- rstan::summary(hamstr_fit$fit, pars = "alpha")$summary
-  
-  alph <- tibble::as_tibble(a3, rownames = "par") %>%
-    dplyr::mutate(alpha_idx = readr::parse_number(par)) %>%
-    dplyr::left_join(idx, .) %>%
-    dplyr::mutate(lvl = factor(lvl))
-
-  # for each unit at each level in hierarchy get max and min depth 
-  alph$depth1 <- c(min(hamstr_fit$data$modelled_depths),
-                   unlist(sapply((
-                     hierarchical_depths(hamstr_fit$data)
-                   ),
-                   function(x) {
-                    utils::head(x, -1)
-                   })))
-  
-  alph$depth2 <- c(max(hamstr_fit$data$modelled_depths),
-                   unlist(sapply((
-                     hierarchical_depths(hamstr_fit$data)
-                   ),
-                   function(x) {
-                     utils::tail(x, -1)
-                   })))
-  
-  alph2 <- alph %>% 
-    dplyr::select(lvl, alpha_idx, depth1, depth2, mean) %>% 
-    dplyr::group_by(lvl) %>% 
-    tidyr::gather(type, depth, -mean, -lvl, -alpha_idx) %>% 
-    dplyr::select(lvl, alpha_idx, depth, mean) %>% 
-    dplyr::arrange(lvl, alpha_idx, depth, mean)
-  
-
-  gg <- alph2 %>%
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean, colour = lvl)) +
-    ggplot2::geom_path() +
-    ggplot2::expand_limits(y = 0) +
-    ggplot2::labs(y = "Accummulation rate [age/depth]", x = "Depth",
-         colour = "Hierarchical\nlevel") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
-
-  return(gg)
-}
 

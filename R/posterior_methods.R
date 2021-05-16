@@ -236,7 +236,7 @@ summarise_new_ages <- function(new_ages){
 #' Summarise Posterior Age Models
 #'
 #' @inheritParams plot_hamstr
-#' @description Extracts the summary statistics of posterior age models and attached the depths 
+#' @description Extracts the summary statistics of posterior age models and attaches the depths 
 #' @return data.frame / tibble
 #' @importFrom readr parse_number
 #' @keywords internal
@@ -271,6 +271,86 @@ summarise_age_models <- function(hamstr_fit){
   }
   return(age_summary)
 }
+
+
+
+## Accumulation rates -----
+
+#' Get Posterior Accumulation Rates
+#'
+#' @inheritParams plot_hamstr
+#'
+#' @return a dataframe/tibble with posterior ages for all iterations after warmup
+#' @export
+#' @importFrom readr parse_number
+#' @importFrom rstan extract
+#' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10), nu = 6,
+#'   acc_mean_prior = 20,
+#'   mem_mean = 0.5, mem_strength = 10,
+#'   inflate_errors = 0,
+#'   iter = 2000, chains = 3)
+#'   
+#' get_posterior_acc_rates(fit)
+#' }
+get_posterior_acc_rates <- function(hamstr_fit){
+  
+  depths <- as_tibble(hamstr_fit$data[c("c", "c_depth_top", "c_depth_bottom")]) %>% 
+    dplyr::mutate(depth = c_depth_top) %>% 
+    dplyr::rename(idx = c)
+  
+  out <- as.data.frame(hamstr_fit$fit, pars = "x") %>% 
+    tibble::as_tibble() %>% 
+    dplyr::mutate(iter = 1:nrow(.)) %>% 
+    tidyr::gather(par, time_per_depth, -iter) %>% 
+    dplyr::mutate(idx = readr::parse_number(par),
+                  par = "x") %>% 
+    dplyr::left_join(depths, .data$.) %>% 
+    dplyr::mutate(depth_per_time = 1000/time_per_depth) %>% 
+    dplyr::arrange(.data$par, .data$iter, .data$idx, .data$depth) %>% 
+    dplyr::select(iter, idx, depth, c_depth_top, c_depth_bottom, time_per_depth, depth_per_time)
+  
+  class(out) <- append("hamstr_acc_rates", class(out))
+  
+  return(out)
+  
+}
+
+
+#' Title
+#'
+#' @param x 
+#'
+#' @return
+#'
+#' @examples
+#' @export
+#' @method summary hamstr_acc_rates
+summarise_hamstr_acc_rates <- function(x){
+  
+  x_sum <- x %>% 
+    pivot_longer(cols = c(time_per_depth, depth_per_time), names_to = "acc_rate_unit") %>% 
+    dplyr::group_by(depth, c_depth_top, c_depth_bottom, acc_rate_unit, idx) %>% 
+    dplyr::summarise(mean = mean(value),
+                     #se_mean = NA,
+                     sd = stats::sd(value),
+                     `2.5%` = stats::quantile(value, probs = c(0.025), na.rm = T),
+                     `25%` = stats::quantile(value, probs = c(0.25), na.rm = T),
+                     `50%` = stats::quantile(value, probs = c(0.50), na.rm = T),
+                     `75%` = stats::quantile(value, probs = c(0.75), na.rm = T),
+                     `97.5%` = stats::quantile(value, probs = c(0.975), na.rm = T)) %>% 
+    ungroup() %>% 
+    arrange(acc_rate_unit, depth)
+  
+  return(x_sum)
+  
+}
+
 
 
 
