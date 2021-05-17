@@ -6,8 +6,8 @@
 \usage{
 \method{plot}{hamstr_fit}(
   object,
-  type = c("default", "age_models", "hier_acc_rates", "acc_mean_prior_post",
-    "mem_prior_post"),
+  type = c("default", "age_models", "acc_rates", "hier_acc_rates",
+    "acc_mean_prior_post", "mem_prior_post"),
   summarise = TRUE,
   ...
 )

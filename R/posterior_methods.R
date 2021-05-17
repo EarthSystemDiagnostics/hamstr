@@ -111,9 +111,14 @@ get_posterior_ages <- function(hamstr_fit){
 #' @examples
 #' @export
 #' @method predict hamstr_fit
-predict.hamstr_fit <- function(object, depth = NULL){
+predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"), depth = NULL){
   
-  interpolate_age_models(object, depth)
+  type <- match.arg(type)
+  
+  switch(type,
+         age_models = interpolate_age_models(object, depth),
+         acc_rates = get_posterior_acc_rates(object)
+  )
   
 }
 
@@ -183,11 +188,15 @@ interpolate_age_models <- function(hamstr_fit, depth = NULL){
 #' @examples
 #' @export
 #' @method summary hamstr_fit
-summary.hamstr_fit <- function(object, type = "age_models"){
-  if (type == "age_models"){
-    summarise_age_models(object)
+summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates")){
+   
+  type <- match.arg(type)
+   
+  switch(type,
+         age_models = summarise_age_models(object),
+         acc_rates = summarise_hamstr_acc_rates(object)
+  )
   }
-}
 
 
 #' Title
@@ -300,7 +309,9 @@ summarise_age_models <- function(hamstr_fit){
 #' }
 get_posterior_acc_rates <- function(hamstr_fit){
   
-  depths <- as_tibble(hamstr_fit$data[c("c", "c_depth_top", "c_depth_bottom")]) %>% 
+  depths <- tibble::as_tibble(
+    hamstr_fit$data[c("c", "c_depth_top", "c_depth_bottom")]
+    ) %>% 
     dplyr::mutate(depth = c_depth_top) %>% 
     dplyr::rename(idx = c)
   
@@ -324,17 +335,18 @@ get_posterior_acc_rates <- function(hamstr_fit){
 
 #' Title
 #'
-#' @param x 
+#' @param hamstr_fit 
 #'
 #' @return
 #'
 #' @examples
 #' @export
-#' @method summary hamstr_acc_rates
-summarise_hamstr_acc_rates <- function(x){
+summarise_hamstr_acc_rates <- function(hamstr_fit){
+  
+  x <- get_posterior_acc_rates(hamstr_fit)
   
   x_sum <- x %>% 
-    pivot_longer(cols = c(time_per_depth, depth_per_time), names_to = "acc_rate_unit") %>% 
+    tidyr::pivot_longer(cols = c(time_per_depth, depth_per_time), names_to = "acc_rate_unit") %>% 
     dplyr::group_by(depth, c_depth_top, c_depth_bottom, acc_rate_unit, idx) %>% 
     dplyr::summarise(mean = mean(value),
                      #se_mean = NA,
@@ -344,8 +356,8 @@ summarise_hamstr_acc_rates <- function(x){
                      `50%` = stats::quantile(value, probs = c(0.50), na.rm = T),
                      `75%` = stats::quantile(value, probs = c(0.75), na.rm = T),
                      `97.5%` = stats::quantile(value, probs = c(0.975), na.rm = T)) %>% 
-    ungroup() %>% 
-    arrange(acc_rate_unit, depth)
+    dplyr::ungroup() %>% 
+    dplyr::arrange(acc_rate_unit, depth)
   
   return(x_sum)
   

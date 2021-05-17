@@ -1,7 +1,7 @@
 hamstr: Hierarchical Accumulation Modelling with Stan and R.
 ================
 Andrew M. Dolman
-2021-05-10
+2021-05-17
 
 ------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
 ### Fitting age-models with **hamstr**
 
 By default **hamstr** runs with three Markov chains and these can be run
-in parallel. This code will assign 3 (processor) cores as long as the
+in parallel. This code will assign 3 processor cores as long as the
 machine has at least 3. The number of cores can also be set for specific
 calls of the `hamstr` function using the `cores` argument.
 
@@ -137,21 +137,22 @@ plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 
 #### Mean accumulation rate
 
-There is no need to specify a prior value for the mean accumulation
-rate, parameter `acc.mean` in Bacon, as in **hamstr**, this overall mean
+There is no need to specify a prior value for the mean accumulation rate
+(parameter `acc.mean` in Bacon) as in **hamstr**, this overall mean
 accumulation rate is a full parameter estimated from the data.
 
 By default, **hamstr** uses robust linear regression (`MASS::rlm`) to
 estimate the mean accumulation rate from the data, and then uses this to
 parametrise a prior distribution for the overall mean accumulation rate.
 This prior is a half-normal with zero mean and standard deviation equal
-to 10 times the estimated mean. Although this does introduce an element
-of “data-peaking”, using the data twice (for both the prior and
-likelihood), the resulting prior is only weakly-informative. The
-advantage is that the prior is automatically scaled appropriately
-regardless of the units of depth or age.
+to 10 times the estimated mean. Although this does introduce a slight
+element of “double-dipping”, using the data twice (for both the prior
+and likelihood), the resulting prior is only weakly-informative. The
+advantage of this approach is that the prior is automatically scaled
+appropriately regardless of the units of depth or age.
 
-This prior can be checked visually against the posterior.
+This prior can be checked visually against the posterior. The posterior
+distribution should be much narrower than the weakly informative prior.
 
 ``` r
 plot(hamstr_fit_1, type = "acc_mean_prior_post")
@@ -159,21 +160,24 @@ plot(hamstr_fit_1, type = "acc_mean_prior_post")
 
 ![](readme_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
-Default parameter values for the shape of the accumulation prior
-`acc_shape = 1.5`, the memory mean `mem_mean = 0.5` and strength
-`mem_strength = 10`, are the same as for Bacon &gt;= 2.5.1.
+#### Other hyperparameters
 
-#### Setting the thickness and number of discrete sections
+Default parameter values for the shape of the gamma distributed
+accumulation rates `acc_shape = 1.5`, the memory mean `mem_mean = 0.5`
+and memory strength `mem_strength = 10`, are the same as for Bacon &gt;=
+2.5.1.
+
+### Setting the thickness, number, and hierarchical structure of the discrete sections
 
 One of the more critical tuning parameters in the **Bacon** model is the
 parameter `thick`, which determines the thickness and number of discrete
-core sections. Finding a good or optimal value for a given core is often
-critical to getting a good age-depth model. Too few sections and the
-resulting age-model is very “blocky” and can miss changes in
-sedimentation rate; however, counter-intuitively, too many very thin
-sections can also often result in an age-model that “under-fits” the
-data - ploughing a straight line through the age-control points when a
-lower resolution model shows variation in accumulation rate.
+down-core sediment sections modelled. Finding a good or optimal value
+for a given core is often critical to getting a good age-depth model.
+Too few sections and the resulting age-model is very “blocky” and can
+miss changes in sedimentation rate; however, counter-intuitively, too
+many very thin sections can also often result in an age-model that
+“under-fits” the data - a straight line through the age-control points
+when a lower resolution model shows variation in accumulation rate.
 
 The key structural difference between **Bacon** and **hamstr** models is
 that with **hamstr** the sediment core is modelled at multiple
@@ -204,24 +208,15 @@ the number of new child sections per level, are approximately equal,
 e.g. c(4, 4, 4, 4). The total number of sections at the finest level is
 set so that the resolution is 1 cm per section, up to a total length of
 900 cm, above which the default remains 900 sections and a coarser
-resolution is used. This can changed with the parameter K.
+resolution is used. This can be changed from the default via the
+parameter `K`.
 
-Here is an example of a coarser model.
-
-``` r
-hamstr_fit_2 <- hamstr(depth = MSB2K_cal$depth,
-                   obs_age = MSB2K_cal$age.14C.cal,
-                   obs_err = MSB2K_cal$age.14C.cal.se,
-                   K = c(5, 5))
-```
-
-``` r
-plot(hamstr_fit_2)
-#> Joining, by = "idx"
-#> Joining, by = "alpha_idx"
-```
-
-![](readme_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+For a given shape parameter `acc_shape`, increasing the number of
+modelled hierarchical levels increases the total variance in the
+accumulation rates at the highest / finest resolution level. From
+**hamstr** version 0.5.0 and onwards, the total variance is controlled
+by modifying the shape parameter according to the number of hierarchical
+levels.
 
 ### Getting the fitted age models
 
@@ -302,6 +297,41 @@ summary(age.mods.interp)
 #> # ... with 91 more rows
 ```
 
+### Getting and plotting the accumulation rate
+
+The down-core accumulation rates are returned and plotted in both
+depth-per-time, and time-per-depth units. If the input data are in years
+and cm then the units will be cm/kyr and yrs/cm respectively. Note that
+the acc\_mean parameter in both **hamstr** and Bacon is parametrised in
+terms of time per depth.
+
+``` r
+plot(hamstr_fit_1, type = "acc_rates")
+#> Joining, by = "idx"
+```
+
+![](readme_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+
+``` r
+summary(hamstr_fit_1, type = "acc_rates") 
+#> Joining, by = "idx"
+#> # A tibble: 160 x 12
+#>    depth c_depth_top c_depth_bottom acc_rate_unit   idx  mean    sd `2.5%` `25%`
+#>    <dbl>       <dbl>          <dbl> <chr>         <dbl> <dbl> <dbl>  <dbl> <dbl>
+#>  1  1.5         1.5            2.72 depth_per_ti~     1 102.   83.6   27.4  52.7
+#>  2  2.72        2.72           3.95 depth_per_ti~     2  91.4  59.4   29.0  53.0
+#>  3  3.95        3.95           5.18 depth_per_ti~     3  89.4  55.0   30.6  53.0
+#>  4  5.18        5.18           6.4  depth_per_ti~     4  88.6  54.1   30.9  52.9
+#>  5  6.4         6.4            7.62 depth_per_ti~     5  88.3  54.6   31.2  53.0
+#>  6  7.62        7.62           8.85 depth_per_ti~     6  78.0  35.8   34.1  53.7
+#>  7  8.85        8.85          10.1  depth_per_ti~     7  78.5  39.5   31.3  51.7
+#>  8 10.1        10.1           11.3  depth_per_ti~     8  79.8  43.4   29.9  51.4
+#>  9 11.3        11.3           12.5  depth_per_ti~     9  80.0  43.9   29.0  50.1
+#> 10 12.5        12.5           13.8  depth_per_ti~    10  80.4  49.4   29.3  50.2
+#> # ... with 150 more rows, and 3 more variables: `50%` <dbl>, `75%` <dbl>,
+#> #   `97.5%` <dbl>
+```
+
 ### Diagnostic plots
 
 Additional diagnostic plots are available. See ?plot.hamstr\_fit for
@@ -353,23 +383,6 @@ rstan::traceplot(hamstr_fit_1$fit, par = c("alpha[1]"),
 ```
 
 ![](readme_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
-
-`alpha[2]` to `alpha[6]` will be the first 5 accumulations rates at the
-coarsest hierarchical level.
-
-``` r
-plot(hamstr_fit_1, type = "hier")
-#> Joining, by = "alpha_idx"
-```
-
-![](readme_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
-
-``` r
-rstan::traceplot(hamstr_fit_1$fit, par = paste0("alpha[", 2:6, "]"),
-                 inc_warmup = TRUE)
-```
-
-![](readme_files/figure-gfm/unnamed-chunk-21-2.png)<!-- -->
 
 ### References
 

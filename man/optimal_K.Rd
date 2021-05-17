@@ -2,19 +2,17 @@
 % Please edit documentation in R/make_stan_dat_hamstr.R
 \name{optimal_K}
 \alias{optimal_K}
-\title{Estimate Optimal Hierarchical Structure}
+\title{Find a good hierarchical structure}
 \usage{
-optimal_K(K_tot, target_K_per_lvl = 10)
+optimal_K(K_fine)
 }
 \arguments{
-\item{K_tot}{}
-
-\item{target_K_per_lvl}{}
+\item{K_fine}{}
 }
 \value{
 
 }
 \description{
-Estimate Optimal Hierarchical Structure
+Find a good hierarchical structure
 }
 \keyword{internal}

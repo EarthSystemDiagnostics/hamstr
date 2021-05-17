@@ -27,7 +27,7 @@ plot.hamstr_fit <- function(object,
          default = plot_hamstr(object, summarise = summarise, ...),
          age_models = plot_hamstr(object, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
-         acc_rates = plot_hamstr_acc_rates(object, ...),
+         acc_rates = plot_hamstr_acc_rates(object),
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
          mem_prior_post = plot_memory_prior_posterior(object))
@@ -327,8 +327,8 @@ plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_
                      choices = c("depth_per_time", "time_per_depth"),
                      several.ok = TRUE)
   
-  acc_rates <- get_posterior_acc_rates(hamstr_fit)
-  acc_rates <- summarise_hamstr_acc_rates(acc_rates)
+  
+  acc_rates <- summarise_hamstr_acc_rates(hamstr_fit)
   
   acc_rates_long <- acc_rates %>% 
     select(-depth) %>% 
@@ -337,22 +337,6 @@ plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_
   acc_rates_long %>% 
     filter(acc_rate_unit %in% units) %>% 
     plot_downcore_summary(.) +
-    # ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
-    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`, fill = "Lightgrey")) +
-    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`, fill = "Darkgrey")) +
-    # ggplot2::geom_line(aes(colour = "Green")) +
-    # ggplot2::geom_line(ggplot2::aes(y = `50%`, colour = "Black")) +
-    # ggplot2::theme_bw() +
-    # ggplot2::theme(panel.grid = ggplot2::element_blank()) +
-    # ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
-    # ggplot2::scale_fill_identity(name = "Interval",
-    #                              breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
-    #                              labels = c("Median", "Mean", "95%", "50%"),
-    #                              guide = "legend") +
-    # ggplot2::scale_colour_identity(name = "",
-    #                                breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
-    #                                labels = c("Median", "Mean", "95%", "50%"),
-    #                                guide = "legend")  +
     ggplot2::labs(x = "Depth", y = "Accumulation rate") +
     ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y")
   

@@ -1,40 +1,3 @@
-
-#' Estimate Optimal Hierarchical Structure
-#'
-#' @param K_tot 
-#' @param target_K_per_lvl
-#'
-#' @return
-#' @keywords internal
-optimal_K <- function(K_tot, target_K_per_lvl = 10){
-  
-  K_per_lvl <- seq(floor(target_K_per_lvl/2), 2*target_K_per_lvl, by = 1)
-  
-  K_per_lvl <- K_per_lvl[K_per_lvl>1]
- 
-  n_lvls <- unlist(
-    lapply(K_per_lvl,
-           function(x) seq(floor(log(K_tot, base = x)/2),
-                           ceiling(2*log(K_tot, base = x)))
-           )
-    )
-  
-  df <- expand.grid(K_per_lvl = unique(K_per_lvl), n_lvls = unique(n_lvls))
-  
-  df$K_fine <- with(df, K_per_lvl^n_lvls)
-  
-  idx <- which.min(abs(df$K_fine - K_tot))
-  
-  n_lvls <- df[idx, "n_lvls"]
-  K_per_lvl <- df[idx, "K_per_lvl"]
- 
-  K <- rep(K_per_lvl, n_lvls)
-   
-  message(cat(cumprod(K)))
-  
-  return(K)
-}
-
 #' Adjust numbers of splits per level
 #'
 #' @param K_fine 
@@ -67,14 +30,13 @@ AdjustK <- function(K_fine, base){
   
 }
 
-
 #' Find a good hierarchical structure
 #'
 #' @param K_fine 
 #'
 #' @return
 #' @keywords internal
-OptK <- function(K_fine){
+optimal_K <- function(K_fine){
   
   bar <- function(x, y){
     abs(y - x^x)
@@ -235,7 +197,7 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   if (is.null(K)){
     K_fine <- l$bottom_depth - l$top_depth
     if (K_fine > 1000) K_fine <- 1000
-    l$K <- OptK(K_fine)
+    l$K <- optimal_K(K_fine)
   }
   
   

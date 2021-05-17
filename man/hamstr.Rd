@@ -48,7 +48,7 @@ each end}
 
 \item{acc_mean_prior}{Hyperparameter for the prior on the overall mean
 accumulation rate for the record. Units are obs_age / depth. E.g. if depth
-is in cm and age in kyr then the accumulation rate is in kyr/cm. The
+is in cm and age in years then the accumulation rate is in years/cm. The
 overall mean accumulation rate is given a weak half-normal prior with mean
 = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 mean accumulation rate estimated by fitting a robust linear model using

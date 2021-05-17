@@ -4,7 +4,7 @@
 \alias{predict.hamstr_fit}
 \title{Interpolate Age Models at Given Depths}
 \usage{
-\method{predict}{hamstr_fit}(object, depth = NULL)
+\method{predict}{hamstr_fit}(object, type = c("age_models", "acc_rates"), depth = NULL)
 }
 \arguments{
 \item{object}{}
