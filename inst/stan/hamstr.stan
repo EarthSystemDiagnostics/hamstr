@@ -70,7 +70,7 @@ transformed data{
   // scale shape
   real<lower = 1> acc_shape_adj;
   if (scale_shape == 1){
-    acc_shape_adj = acc_shape * n_lvls + ((n_lvls - 1)/(acc_shape+1));
+    acc_shape_adj = acc_shape * n_lvls;
   } else{
     acc_shape_adj = acc_shape;
   }
