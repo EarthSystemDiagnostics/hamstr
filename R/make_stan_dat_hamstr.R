@@ -67,13 +67,17 @@ AdjustK <- function(K_fine, base){
   
 }
 
-#' Find a good hierarchical structure
+#' Default K structure
 #'
-#' @param K_fine 
+#' @param K_fine total number of sections at the finest resolution
 #'
-#' @return
-#' @keywords internal
-optimal_K <- function(K_fine){
+#' @return a vector
+#' @export
+#' @examples 
+#' default_K(100)
+#' default_K(500)
+
+default_K <- function(K_fine){
   
   bar <- function(x, y){
     abs(y - x^x)
@@ -233,8 +237,8 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   
   if (is.null(K)){
     K_fine <- l$bottom_depth - l$top_depth
-    if (K_fine > 1000) K_fine <- 1000
-    l$K <- optimal_K(K_fine)
+    if (K_fine > 900) K_fine <- 900
+    l$K <- default_K(K_fine)
   }
   
   
