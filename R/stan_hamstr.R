@@ -2,7 +2,7 @@
 #' @param depth Depths of observed ages (age control points)
 #' @param obs_age Observed age at each depth (age control points)
 #' @param obs_err Error associated with each observed age (1 standard error)
-#' @param min_age The minimum age that any modelled depth can be. Useful if
+#' @param min_age The minimum age that the first modelled depth can be. Useful if
 #'   extrapolating above the shallowest age control point to e.g. the surface.
 #'   While the surface age is unlikely to be zero, it cannot be in the future.
 #'   So set this to the year the core was collected. E.g. for a core collected
