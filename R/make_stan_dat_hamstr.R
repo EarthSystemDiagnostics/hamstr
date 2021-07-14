@@ -161,6 +161,7 @@ alpha_indices <- function(K){
 #'               obs_err = MSB2K$error,
 #'               K = 128)
 make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
+                                 min_age = NULL,
                                  top_depth=NULL, bottom_depth=NULL,
                                  pad_top_bottom=NULL,
                                  K=NULL, nu=NULL,
@@ -216,6 +217,9 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
     l$infl_sigma_sd <- 10 * mean(obs_err)
   }
 
+  if (l$min_age > min(l$obs_age)) {
+    warning("Minumum age is older than minimum observed age")
+  }
 
   if (l$pad_top_bottom == TRUE){
     # Set start depth to 5% less than first depth observation, and DO allow negative depths

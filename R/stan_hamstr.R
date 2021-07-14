@@ -2,6 +2,12 @@
 #' @param depth Depths of observed ages (age control points)
 #' @param obs_age Observed age at each depth (age control points)
 #' @param obs_err Error associated with each observed age (1 standard error)
+#' @param min_age The minimum age that any modelled depth can be. Useful if
+#'   extrapolating above the shallowest age control point to e.g. the surface.
+#'   While the surface age is unlikely to be zero, it cannot be in the future.
+#'   So set this to the year the core was collected. E.g. for a core collected
+#'   in 1990, with ages in years BP this would be -40 (present = 1950 by
+#'   convention). Default value is -1e06, so effectively no minimum value.
 #' @param top_depth,bottom_depth The top and bottom depths of the desired
 #'   age-depth model. Must encompass the range of the data. Defaults to the
 #'   shallowest and deepest data points unless \code{pad_top_bottom = TRUE}
@@ -33,11 +39,11 @@
 #'   = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 #'   mean accumulation rate estimated by fitting a robust linear model using
 #'   \link[MASS]{rlm}.
-#' @param acc_shape Hyperparameter for the shape of the priors on accumulation rates.
-#'  Defaults to 1.5 - as for Bacon 2.2.
-#' @param scale_shape Scale the shape parameter according to the number of hierarchical
-#' levels, to control the total variance of the alpha innovations. This defaults
-#' to TRUE as of Hamstr verion 0.5.
+#' @param acc_shape Hyperparameter for the shape of the priors on accumulation
+#'   rates. Defaults to 1.5 - as for Bacon 2.2.
+#' @param scale_shape Scale the shape parameter according to the number of
+#'   hierarchical levels, to control the total variance of the alpha
+#'   innovations. This defaults to TRUE as of Hamstr verion 0.5.
 #' @param mem_mean Hyperparameter: a parameter of the Beta prior distribution on
 #'   "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 #'   The prior on the correlation between layers is scaled according to the
@@ -48,24 +54,24 @@
 #' @param mem_strength Hyperparameter: sets the strength of the memory prior,
 #'   defaults to 10 as in Bacon >= 2.5.1
 #' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
-#' not. Defaults to TRUE.
+#'   not. Defaults to TRUE.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
 #'   inflated so that data are consistent with a "Bacon-style" monotonic
 #'   age-depth model. This is an experimental feature under active development.
 #'   Defaults to FALSE.
 #' @param infl_sigma_sd Hyperparameter: sets the standard deviation of the
-#' half-normal prior on the mean of the additional error terms. Defaults to 10
-#' times the mean observation error in obs_err.
+#'   half-normal prior on the mean of the additional error terms. Defaults to 10
+#'   times the mean observation error in obs_err.
 #' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
-#' gamma prior on the shape of the distribution of the additional error terms.
-#'  Default to 1, 1.
+#'   gamma prior on the shape of the distribution of the additional error terms.
+#'   Default to 1, 1.
 #' @param ... additional arguments to \link[rstan]{sampling}
 #' @inheritParams rstan::sampling
 #'
 #' @return Returns a list composed of the output from the Stan sampler .$fit,
 #'   and the list of data passed to the sampler, .$data
 #' @export
-#'
+#' 
 #' @examples
 #' \dontrun{
 #'
@@ -85,6 +91,7 @@
 #'
 #' }
 hamstr <- function(depth, obs_age, obs_err,
+                   min_age = -1e06,
                    K = NULL,
                    top_depth = NULL, bottom_depth = NULL,
                    pad_top_bottom = FALSE,
@@ -102,6 +109,7 @@ hamstr <- function(depth, obs_age, obs_err,
 
   stan_dat <- make_stan_dat_hamstr(depth = depth,
                                    obs_age = obs_age, obs_err = obs_err,
+                                   min_age = min_age,
                                    K=K,
                                    top_depth = top_depth,
                                    bottom_depth = bottom_depth,

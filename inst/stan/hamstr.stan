@@ -8,6 +8,7 @@ data {
   vector[N] depth;
   vector[N] obs_age;
   vector[N] obs_err;
+  real min_age;
 
   // resolution of age-depth model
   int<lower = 1> n_lvls; // number of hierarchical levels, including overall mean
@@ -84,7 +85,7 @@ parameters {
   vector<lower = 0>[K_tot] alpha;
   
   // the age at the first modelled depth
-  real age0;
+  real<lower = min_age> age0;
   
   // the measurement error inflation factors
   // these have length 0 if inflate_errors == 0 meaning that the parameters are 
