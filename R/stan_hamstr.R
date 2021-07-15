@@ -4,10 +4,10 @@
 #' @param obs_err Error associated with each observed age (1 standard error)
 #' @param min_age The minimum age that the first modelled depth can be. Useful if
 #'   extrapolating above the shallowest age control point to e.g. the surface.
-#'   While the surface age is unlikely to be zero, it cannot be in the future.
-#'   So set this to the year the core was collected. E.g. for a core collected
+#'   So set min_age to the year the core was collected. E.g. for a core collected
 #'   in 1990, with ages in years BP this would be -40 (present = 1950 by
-#'   convention). Default value is -1e06, so effectively no minimum value.
+#'   convention). The default value is the current year in calendar age BP
+#'   (currently -71 for 2021).
 #' @param top_depth,bottom_depth The top and bottom depths of the desired
 #'   age-depth model. Must encompass the range of the data. Defaults to the
 #'   shallowest and deepest data points unless \code{pad_top_bottom = TRUE}
@@ -71,7 +71,7 @@
 #' @return Returns a list composed of the output from the Stan sampler .$fit,
 #'   and the list of data passed to the sampler, .$data
 #' @export
-#' 
+#'
 #' @examples
 #' \dontrun{
 #'
@@ -91,7 +91,7 @@
 #'
 #' }
 hamstr <- function(depth, obs_age, obs_err,
-                   min_age = -1e06,
+                   min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
                    K = NULL,
                    top_depth = NULL, bottom_depth = NULL,
                    pad_top_bottom = FALSE,
