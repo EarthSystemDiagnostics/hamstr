@@ -11,7 +11,7 @@ data {
   real min_age;
 
   // resolution of age-depth model
-  int<lower = 1> n_lvls; // number of hierarchical levels, including overall mean
+  int<lower = 1> n_lvls; // number of hierarchical levels, not including overall mean
   int<lower=0> K_fine;  // number of highest resolution sections
   int<lower=0> K_tot;  // total no of gamma parameters
   
@@ -153,9 +153,10 @@ model {
   alpha[1] ~ normal(0, 10*acc_mean_prior);
   
   // the gamma distributed innovations
+
   // prior parameterised by use set shape and the value of it's parent section
   alpha[2:K_tot] ~ gamma(acc_shape_adj, acc_shape_adj ./ alpha[parent[2:K_tot]]);
-  
+
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);
   
