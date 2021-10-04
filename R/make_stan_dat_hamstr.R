@@ -158,8 +158,7 @@ alpha_indices <- function(K){
 #' @examples
 #' make_stan_dat_hamstr(depth = MSB2K$depth,
 #'               obs_age = MSB2K$age,
-#'               obs_err = MSB2K$error,
-#'               K = 128)
+#'               obs_err = MSB2K$error)
 make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
                                  min_age = NULL,
                                  top_depth=NULL, bottom_depth=NULL,
@@ -315,7 +314,6 @@ get_inits_hamstr <- function(stan_dat){
     # create starting alpha values +- 3 SD from the overal prior mean (but always +ve)
     alpha = with(stan_dat, abs(stats::rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
     #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
-
 
     age0 = stats::rnorm(1, min(stan_dat$obs_age), 2)
   )
