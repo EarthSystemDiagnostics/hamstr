@@ -125,9 +125,7 @@ hamstr <- function(depth, obs_age, obs_err,
                                    infl_shape_shape = infl_shape_shape,
                                    infl_shape_mean = infl_shape_mean)
 
-  inits <- get_inits_hamstr(stan_dat)
-
-  inits <- rep(list(inits), chains)
+  inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 
   fit <- rstan::sampling(stanmodels$hamstr,
                          data = stan_dat, init = inits, iter = iter, chains = chains,
