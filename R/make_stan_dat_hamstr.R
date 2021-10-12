@@ -160,6 +160,7 @@ alpha_indices <- function(K){
 #'               obs_age = MSB2K$age,
 #'               obs_err = MSB2K$error)
 make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
+                                 n_ind = NULL,
                                  min_age = NULL,
                                  top_depth=NULL, bottom_depth=NULL,
                                  pad_top_bottom=NULL,
@@ -172,6 +173,9 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
                                  inflate_errors=NULL,
                                  infl_sigma_sd=NULL,
                                  infl_shape_shape=NULL, infl_shape_mean=NULL,
+                                 model_bioturbation = NULL,
+                                 L_prior_mean = NULL,
+                                 L_prior_shape = NULL,
                                  ...) {
 
   l <- c(as.list(environment()))
@@ -211,6 +215,12 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   l$obs_age <- obs_age[ord]
   l$obs_err <- obs_err[ord]
 
+  if (model_bioturbation == TRUE){
+    l$n_ind <- n_ind[ord]
+  } else if(model_bioturbation == FALSE){
+    l$n_ind <- rep(1, length(l$obs_age))
+  }
+
 
   if (is.null(infl_sigma_sd)){
     l$infl_sigma_sd <- 10 * mean(obs_err)
@@ -248,7 +258,7 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   # Transformed arguments
   l$N <- length(l$depth)
 
-  stopifnot(l$N == length(obs_err), l$N == length(obs_age))
+  stopifnot(l$N == length(obs_err), l$N == length(obs_age), l$N == length(l$n_ind))
 
   alpha_idx <- alpha_indices(l$K)
 

@@ -91,6 +91,7 @@
 #'
 #' }
 hamstr <- function(depth, obs_age, obs_err,
+                   n_ind = NULL,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
                    K = NULL,
                    top_depth = NULL, bottom_depth = NULL,
@@ -104,11 +105,15 @@ hamstr <- function(depth, obs_age, obs_err,
                    inflate_errors = FALSE,
                    infl_sigma_sd = NULL,
                    infl_shape_shape = 1, infl_shape_mean = 1,
+                   model_bioturbation = FALSE,
+                   L_prior_mean = 10,
+                   L_prior_shape = 2,
                    iter = 2000, chains = 3, ...){
 
 
   stan_dat <- make_stan_dat_hamstr(depth = depth,
                                    obs_age = obs_age, obs_err = obs_err,
+                                   n_ind = n_ind,
                                    min_age = min_age,
                                    K=K,
                                    top_depth = top_depth,
@@ -123,7 +128,10 @@ hamstr <- function(depth, obs_age, obs_err,
                                    inflate_errors = as.numeric(inflate_errors),
                                    infl_sigma_sd = infl_sigma_sd,
                                    infl_shape_shape = infl_shape_shape,
-                                   infl_shape_mean = infl_shape_mean)
+                                   infl_shape_mean = infl_shape_mean,
+                                   model_bioturbation = model_bioturbation,
+                                   L_prior_mean = L_prior_mean,
+                                   L_prior_shape = L_prior_shape)
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 
