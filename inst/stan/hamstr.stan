@@ -151,12 +151,12 @@ transformed parameters{
 
   // the inflated observation errors
   real<lower = 0> infl_shape[inflate_errors];
-  vector[N] obs_err_infl;
+  vector[inflate_errors ? N : 0] obs_err_infl;
 
 
   // latent bioturbation corrected age
   //vector[model_bioturbation ? N : 0] bt_age;
-  vector[N] bt_age;
+  vector[model_bioturbation ? N : 0] bt_age;
 
   // age heterogeneity due to bioturbation at locations of observed ages
   vector[model_bioturbation ? N : 0] age_het;
@@ -173,9 +173,9 @@ transformed parameters{
     //obs_err_infl[n] = obs_err[n] + infl_sigma[1] * infl[n];
     obs_err_infl[n] = obs_err[n] + infl[n];
     infl_shape[1] = infl_shape_1[1] + 1;
-  } else {
-    obs_err_infl = obs_err;
-  }
+  } //else {
+ //   obs_err_infl = obs_err;
+ // }
 
 
   // only the "fine" alphas
@@ -201,10 +201,7 @@ transformed parameters{
      age_het[n] = L[1] * x[which_c[n]];
      bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
    }
- } else {
-   bt_age = obs_age;
  }
-
 
 }
 
@@ -242,10 +239,23 @@ model {
 
     // additional error in ages due to age-heterogeneity
     bt_error ~ gamma(n_ind, n_ind ./ age_het);
+
+    if (inflate_errors == 1){
+      // the Likelihood of the data given the model
+      bt_age ~ student_t(nu, Mod_age, obs_err_infl);
+    } else {
+      bt_age ~ student_t(nu, Mod_age, obs_err);
+    }
+
+
+  } else {
+    if (inflate_errors == 1){
+      // the Likelihood of the data given the model
+      obs_age ~ student_t(nu, Mod_age, obs_err_infl);
+    } else {
+      obs_age ~ student_t(nu, Mod_age, obs_err);
+    }
   }
 
-  // the Likelihood of the data given the model
-  bt_age ~ student_t(nu, Mod_age, obs_err_infl);
-  //obs_age ~ student_t(nu, Mod_age, obs_err_infl);
 
 }

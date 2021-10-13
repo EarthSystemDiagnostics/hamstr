@@ -1,6 +1,4 @@
-
-
-## Fit Bayesian model
+## Fit Bayesian model -----
 
 library(cmdstanr)
 library(posterior)
@@ -38,7 +36,7 @@ str(stan_dat)
 
 
 # compile model ------
-file <- file.path("inst/stan/hamstr-bioturbation.stan")
+file <- file.path("inst/stan/hamstr.stan")
 mod <- cmdstan_model(file)
 
 tmp1 <- mod$sample(data = stan_dat, chains = 3, parallel_chains = 3,#, iter_warmup = 100, iter_sampling = 100,
@@ -199,8 +197,12 @@ bc %>%
   geom_point() +
   facet_wrap(~tube)
 
-bc.sub <- bc #%>%
- #filter(tube == 8) %>%
+bc.sub <- bc %>%
+  #filter(tube == 2) %>%
+  filter(n.forams == 200) %>%
+  arrange(depth_cm) %>%
+  mutate(dpt = 1:n())#%>%
+
  #filter(n.forams == 200)
 
 
@@ -220,71 +222,85 @@ ham.bt.bc <- hamstr(bc.sub$depth_cm, obs_age = bc.sub$age.14C.cal, obs_err = bc.
                     n_ind = bc.sub$n.forams,
                     #n_ind = rep(1, nrow(bc.sub)),
                     model_bioturbation = TRUE,
-                    #L_prior_shape = 2000,
+                    inflate_errors = FALSE,
+                    L_prior_mean = 10,
+                    L_prior_shape = 2,
                  cores = 3)
 
-plot(ham.bt.bc)
+p1 <- plot(ham.bc, type = "age")
+p2 <- plot(ham.bt.bc, type = "age")
 
-plot(ham.bt.bc, type = "age_") +
-  geom_point(data = bc, aes(x = depth_cm, y = age.14C.cal))
+egg::ggarrange(p1, p2)
 
-plot(ham.bc, type = "age_") +
-  geom_point(data = bc, aes(x = depth_cm, y = age.14C.cal))
+pairs(ham.bt.bc$fit, pars = c("L",
+                              #"alpha[1]", "x[1]",
+                              "age0", "R", "bt_age[1]"))
 
+pairs(ham.bt.bc$fit, pars = c("R", "age0"))
+pairs(ham.bt.bc$fit, pars = c("L", "bt_age[1]", "bt_age[2]"))
 
+#shinystan::launch_shinystan(ham.bt.bc$fit)
 
-rstan::summary(ham.bt.bc$fit, pars = "L")
-
-
-
-tmp <- as.data.frame(ham.bt.bc$fit, pars = c("bt_age")) %>%
+post <- as.data.frame(ham.bt.bc$fit, pars = c("L", "bt_age")) %>%
   as_tibble() %>%
   dplyr::mutate(iter = 1:nrow(.)) %>%
   pivot_longer(cols = -iter) %>%
   mutate(dpt = readr::parse_number(name))
 
+prior <- tibble(
+  x = seq(0, 50, 0.1),
+  y = dgamma(x, ham.bt.bc$data$L_prior_shape,
+             rate = ham.bt.bc$data$L_prior_shape/ham.bt.bc$data$L_prior_mean)
+)
+
+post %>%
+  filter(name == "L[1]") %>%
+  ggplot(aes(x = value, after_stat(density))) +
+  geom_histogram(alpha = 0.5, aes(fill = "Posterior", colour = "Posterior")) +
+  geom_line(data = prior, aes(x =x, y = y, colour = "Prior", fill = "Prior")) +
+  theme_bw()
+
+rstan::summary(ham.bt.bc$fit, pars = "L")$summary
+
 
 tmp <- bc.sub %>%
-  arrange(depth_cm) %>%
-  mutate(dpt = 1:n()) %>%
-  left_join(., tmp)
+  left_join(., filter(post, name != "L[1]"))
 
 
-tmp %>%
-  ggplot(aes(x = depth_cm, group = as.factor(dpt), y = value, fill = factor(n.forams))) +
-  geom_violin() +
-  facet_wrap(~depth_cm, scales = "free")
+p2 +
+  geom_violin(data = tmp,
+              aes(x = depth_cm, y = value, group = as.factor(dpt)),
+              fill = "pink", colour = "pink", scale = "area",
+              position = position_identity(), alpha = 0.15)
 
 
 
-hist(tmp$`bt_age[1]`)
+## compile model ------
+file <- file.path("inst/stan/hamstr.stan")
+mod <- cmdstan_model(file)
+
 
 stan_dat <- make_stan_dat_hamstr(
-  depth = bc$depth_cm,
-  obs_age = bc$age.14C.cal,
-  obs_err = bc$age.14C.cal.se,
+  depth = bc.sub$depth_cm,
+  obs_age = bc.sub$age.14C.cal,
+  obs_err = bc.sub$age.14C.cal.se,
+  n_ind = bc.sub$n.forams,
   min_age = 0,
   mem_mean = 0.5,
   mem_strength = 10,
-  scale_R  =1,
-  inflate_errors = 0,
+  scale_R = 1,
+  inflate_errors = 1,
   pad_top_bottom = 0,
-  model_bioturbation = FALSE
-
+  model_bioturbation = TRUE,
+  L_prior_mean = 10,
+  L_prior_shape = 20
 )
 
-stan_dat <- append(stan_dat, list(
-  n_ind = bc$n.forams,
-  L_prior_mean = 10,
-  L_prior_shape = 2
-))
+
+stan_dat <- stan_dat[-26]
 
 
-stan_dat <- stan_dat[-22]
-
-
-stan.bt.bc <- mod$sample(data = stan_dat, chains = 3, parallel_chains = 3,#, iter_warmup = 100, iter_sampling = 100,
-                          init = 1)
+stan.bt.bc <- mod$sample(data = stan_dat, chains = 3, parallel_chains = 3)
 
 stan_posterior <- stan.bt.bc$draws(variables = c("L", "alpha[1]", "age_het", "bt_age")) %>% as_draws_df()
 
