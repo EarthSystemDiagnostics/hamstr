@@ -112,15 +112,20 @@ plot(ham.muc.err)
 
 ham.muc.bt <- hamstr(muc$depth_cm, obs_age = muc$age.14C.cal, obs_err = muc$age.14C.cal.se,
                      n_ind = muc$n.forams,
-                      model_bioturbation = 1,
+                     model_bioturbation = 1,
+                     L_prior_mean = 10,
                     L_prior_shape = 2,
-                     #K = c(3,3,3,3),
-                     cores = 3)
+                    control = list(max_treedepth = 15),
+                    #K = c(3,3,3,3),
+                    cores = 3)
 
 plot(ham.muc.bt)
+#plot(ham.muc.bt, summarise = FALSE)
 
 rstan::summary(ham.muc.bt$fit, pars = "L")
 
+rstan::check_divergences(ham.muc.bt$fit)
+rstan::check_treedepth(ham.muc.bt$fit)
 
 stan_dat <- make_stan_dat_hamstr(
   depth = muc$depth_cm,
@@ -219,8 +224,8 @@ plot(ham.bc.err)
 
 
 ham.bt.bc <- hamstr(bc.sub$depth_cm, obs_age = bc.sub$age.14C.cal, obs_err = bc.sub$age.14C.cal.se,
-                    n_ind = bc.sub$n.forams,
-                    #n_ind = rep(1, nrow(bc.sub)),
+                    #n_ind = bc.sub$n.forams,
+                    n_ind = rep(25, nrow(bc.sub)),
                     model_bioturbation = TRUE,
                     inflate_errors = FALSE,
                     L_prior_mean = 10,
