@@ -678,6 +678,48 @@ plot_memory_prior_posterior <- function(hamstr_fit){
   return(p.mem)
 }
 
+
+plot_L_prior_posterior <- function(hamstr_fit){
+  
+  get_posterior_parameters(ham.bt.bc.sp)
+  
+  
+  post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
+    as_tibble() %>%
+    pivot_longer(cols = everything(), names_to = "par", values_to = "x") %>% 
+    #dplyr::mutate(iter = 1:nrow(.)) %>%
+    #pivot_longer(cols = -iter) %>%
+    mutate(dpt = readr::parse_number(par),
+           par = "L")
+  
+  
+  L_shp <- hamstr_fit$data$L_prior_shape
+  L_mean <- hamstr_fit$data$L_prior_mean
+  
+  L_prior_rng <- stats::qgamma(c(0.0001, 0.999),
+                               shape = L_shp, 
+                               scale = L_mean / L_shp)
+  
+  L_prior_rng[1] <- min(c(L_prior_rng[1]), post$x)
+  L_prior_rng[2] <- max(c(L_prior_rng[2]), post$x)
+  
+  L_prior <-  tibble::tibble(
+    x = seq(L_prior_rng[1], L_prior_rng[2], length.out = 1000)
+    ) %>%
+    dplyr::mutate(
+      par = "L",
+      d = 2 * stats::dgamma(
+        x,
+        shape = L_shp, 
+        scale = L_mean / L_shp)
+      )
+    
+  plot_prior_posterior_hist(L_prior, post)
+  
+  }
+
+
+
 #' Add subdivision tickmarks 
 #'
 #' @param gg 
