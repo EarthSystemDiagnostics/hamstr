@@ -122,7 +122,7 @@ transformed parameters{
   if (inflate_errors == 1){
     for (n in 1:N)
     //obs_err_infl[n] = obs_err[n] + infl_sigma[1] * infl[n];
-    obs_err_infl[n] = obs_err[n] + infl[n];
+    obs_err_infl[n] = sqrt((obs_err[n])^2 + (infl[n])^2);
     infl_shape[1] = infl_shape_1[1] + 1;
   } else {
     obs_err_infl = obs_err;
