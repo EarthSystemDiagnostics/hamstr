@@ -58,25 +58,15 @@ data {
 
   real<lower = 0> infl_sigma_sd;
 
- // real<lower = 0> infl_mean_shape;
- // real<lower = 0> infl_mean_mean;
-
 
  // Additional data for bioturbation model
 
  // use bioturbation model or not
  int<lower=0, upper=1> model_bioturbation;
 
- //if(model_bioturbation == 1){
-
- //}
-
  real<lower = 0> L_prior_mean;
- real<lower = 1> L_prior_shape;
+ real<lower = 0> L_prior_shape;
 
- // only look for these data if model_biotrubation == 1
- // real<lower=0> L_prior_mean[model_bioturbation ? 1 : 0];
- // real<lower=1> L_prior_shape[model_bioturbation ? 1 : 0];
 
  vector[N] n_ind;
  //vector[model_bioturbation ? 0 : N] n_ind;
@@ -86,8 +76,8 @@ transformed data{
 
   // inverse scale of the prior on L
   real L_rate;
-  //real L_rate[model_bioturbation ? 1 : 0];
-
+  int<lower = 0, upper = 1> sample_L;
+  
   // transform mean and strength of memory beta distribution to alpha and beta
   // as used to parameterise beta dist in stan function
   real<lower=0> mem_alpha = mem_strength * mem_mean;
@@ -106,6 +96,13 @@ transformed data{
 
 //if (model_bioturbation == 1){
   L_rate = L_prior_shape / L_prior_mean;
+  
+  if (L_prior_shape == 0) {
+    sample_L = 0;
+  } else {
+    sample_L = 1;
+  }
+
 // }
 
 
@@ -129,12 +126,13 @@ parameters {
   //real<lower = 0> infl_sigma[inflate_errors];
 
   //real<lower = 0> L;
-  real<lower = 0> L[model_bioturbation];
+  real<lower = 0> L[model_bioturbation * sample_L];
 
   // vector<lower = 0>[N] bt_error;
   vector<lower = 0>[model_bioturbation ? N : 0] bt_error;
-
+ 
 }
+
 transformed parameters{
 
   // the AR1 coefficient scaled for the thickness of the modelled sediment sections
@@ -197,13 +195,27 @@ transformed parameters{
 
 
  if (model_bioturbation == 1){
-   for (n in 1:N){
-     age_het[n] = L[1] * x[which_c[n]];
-     bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
-   }
- }
-
+   
+   if (sample_L == 1){
+     for (n in 1:N){
+       age_het[n] = L[1] * x[which_c[n]];
+       // the modelled (shifted) gamma distributed bioturbation error
+       // subtract the age_het to centre the error around the obs_age
+       bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
+       } 
+       }
+   
+    if (sample_L == 0){
+      for (n in 1:N){
+        age_het[n] = L_prior_mean * x[which_c[n]];
+        // the modelled (shifted) gamma distributed bioturbation error
+        // subtract the age_het to centre the error around the obs_age
+        bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
+        }
+        }
+  }
 }
+
 
 model {
 

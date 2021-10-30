@@ -147,6 +147,28 @@ alpha_indices <- function(K){
   list(alpha_idx=alpha_idx, lvl=lvl, parent=parent, nK = nK[-1])
 }
 
+#' Convert between parametrisations of the gamma distribution
+#'
+#' @param mean 
+#' @param sigma 
+#' @param shape 
+#'
+#' @return a list
+#' @keywords internal
+#'
+#' @examples
+#' gamma_sigma_shape(mean = 10, sigma = 2)
+gamma_sigma_shape <- function(mean, sigma=NULL, shape=NULL){
+  if (is.null(sigma)){
+    rate <- shape / mean
+    sigma <- sqrt(shape/(rate^2))
+  } else if (is.null(shape)){
+    rate <- mean / sigma^2
+    shape <- mean^2 / sigma^2
+  }
+  return(list(mean = mean, rate = rate, shape = shape, sigma = sigma))
+}
+
 
 #' Make the data object required by the Stan program
 #'
@@ -176,6 +198,7 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
                                  model_bioturbation = NULL,
                                  L_prior_mean = NULL,
                                  L_prior_shape = NULL,
+                                 L_prior_sigma = NULL,
                                  ...) {
 
   l <- c(as.list(environment()))
@@ -216,7 +239,23 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   l$obs_err <- obs_err[ord]
 
   if (model_bioturbation == TRUE){
+    
+    # check parameters
+      if (length(c(L_prior_sigma, L_prior_shape)) > 1) 
+        stop("Specify only one of either L_prior_sigma or L_prior_shape. 
+             The other will be calculated.")
+      
+      if (length(c(L_prior_sigma, L_prior_shape)) == 0) 
+        stop("One of either L_prior_sigma or L_prior_shape must be specified. 
+             Set either to 0 to impose a fixed mixing depth.")
+      
     l$n_ind <- n_ind[ord]
+    
+    if (is.null(L_prior_shape)) {
+      if (L_prior_sigma == 0) L_prior_shape <- 0 else 
+        L_prior_shape <- gamma_sigma_shape(L_prior_mean, L_prior_sigma)$shape
+    }
+    
   } else if(model_bioturbation == FALSE){
     l$n_ind <- rep(1, length(l$obs_age))
   }

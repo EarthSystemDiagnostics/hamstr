@@ -108,6 +108,7 @@ hamstr <- function(depth, obs_age, obs_err,
                    model_bioturbation = FALSE,
                    L_prior_mean = 10,
                    L_prior_shape = 2,
+                   L_prior_sigma = NULL,
                    iter = 2000, chains = 3, ...){
 
 
@@ -153,6 +154,4 @@ hamstr <- function(depth, obs_age, obs_err,
 
 is_hamstr_fit <- function(x) inherits(x, "hamstr_fit")
 is_hamstr_interpolated_ages <- function(x) inherits(x, "hamstr_interpolated_ages")
-
-
 
