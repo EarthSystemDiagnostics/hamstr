@@ -7,12 +7,21 @@
 \method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates"))
 }
 \arguments{
-\item{object}{}
+\item{object}{hamstr_fit object}
 
-\item{type}{}
+\item{type}{age models "age_models" or accumulation rates "acc_rates"}
 }
 \value{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
+  K = c(10, 10))
 
+summary(fit)
+summary(fit, type = c("acc_rates"))
+}
 }
 \description{
 Title

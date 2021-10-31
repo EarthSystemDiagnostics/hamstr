@@ -15,34 +15,19 @@ A ggplot2 object
 \description{
 Plot Memory Prior and Posterior
 }
-\keyword{0,}
-\keyword{0.5,}
-\keyword{10),}
-\keyword{10,}
-\keyword{20,}
-\keyword{2000,}
-\keyword{3)}
-\keyword{6,}
-\keyword{<-}
-\keyword{=}
-\keyword{K}
-\keyword{MSB2K$age,}
-\keyword{MSB2K$depth,}
-\keyword{MSB2K$error,}
-\keyword{\dontrun{}
-\keyword{acc_mean_prior}
-\keyword{c(10,}
-\keyword{chains}
-\keyword{depth}
-\keyword{fit}
-\keyword{hamstr(}
-\keyword{inflate_errors}
+\examples{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
+  K = c(10, 10), nu = 6,
+  acc_mean_prior = 20,
+  mem_mean = 0.5, mem_strength = 10,
+  inflate_errors = 0,
+  iter = 2000, chains = 3)
+  
+plot_memory_prior_posterior(fit)
+}
+}
 \keyword{internal}
-\keyword{iter}
-\keyword{mem_mean}
-\keyword{mem_strength}
-\keyword{nu}
-\keyword{obs_age}
-\keyword{obs_err}
-\keyword{plot_memory_prior_posterior(fit)}
-\keyword{}}

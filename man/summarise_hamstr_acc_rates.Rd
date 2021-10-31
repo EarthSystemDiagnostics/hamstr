@@ -2,7 +2,7 @@
 % Please edit documentation in R/posterior_methods.R
 \name{summarise_hamstr_acc_rates}
 \alias{summarise_hamstr_acc_rates}
-\title{Title}
+\title{Summarise accumulation rates}
 \usage{
 summarise_hamstr_acc_rates(hamstr_fit)
 }
@@ -13,5 +13,6 @@ summarise_hamstr_acc_rates(hamstr_fit)
 
 }
 \description{
-Title
+Summarise accumulation rates
 }
+\keyword{internal}

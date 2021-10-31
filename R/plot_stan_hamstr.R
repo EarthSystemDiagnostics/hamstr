@@ -5,7 +5,7 @@
 #' @param object a hamstr_fit object
 #' @param type One of "default", "age_models", "hier_acc_rates",
 #'                               "acc_mean_prior_post", "mem_prior_post",
-#'                               "L_prior_post"
+#'                               "L_prior_post", "PDF_14C"
 #' @inheritParams plot_hamstr  
 #' @return A ggplot object
 #'
@@ -19,7 +19,8 @@ plot.hamstr_fit <- function(object,
                               "hier_acc_rates",
                               "acc_mean_prior_post",
                               "mem_prior_post",
-                              "L_prior_post"
+                              "L_prior_post",
+                              "PDF_14C"
                               ),
                             summarise = TRUE,
                             ...){
@@ -34,7 +35,8 @@ plot.hamstr_fit <- function(object,
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
          mem_prior_post = plot_memory_prior_posterior(object),
-         L_prior_post  = plot_L_prior_posterior(object)
+         L_prior_post  = plot_L_prior_posterior(object),
+         PDF_14C = plot_14C_PDF(object, ...)
          )
   
 }
@@ -346,7 +348,6 @@ add_colour_scale <- function(gg){
 #' Plot Downcore Summary
 #' @param ds a downcore summary of age or accumulation rate 
 #' @return
-#' @examples
 #' @keywords internal
 plot_downcore_summary <- function(ds){
   p <- ds %>% 
@@ -367,7 +368,6 @@ plot_downcore_summary <- function(ds){
 #' Plot accumulation rates
 #' @inheritParams plot_hamstr
 #' @return
-#' @examples
 #' @keywords internal
 plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_per_depth")){
   
@@ -401,7 +401,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_
 #' @import ggplot2
 #' @importFrom readr parse_number
 #' @importFrom rlang .data
-#' @examples
+#' @examples 
 #' \dontrun{
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -664,8 +664,8 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #' @import ggplot2
 #' @importFrom rlang .data
 #' 
-#' @examples
 #' @keywords internal
+#' @examples
 #' \dontrun{
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -767,6 +767,16 @@ plot_L_prior_posterior <- function(hamstr_fit){
   }
   
   }
+
+
+plot_14C_PDF <- function(hamstr_fit, nu = 6, cal_curve) {
+  
+  compare_14C_PDF(age.14C = hamstr_fit$data$obs_age,
+                  age.14C.se = hamstr_fit$data$obs_err, 
+                  cal_curve = cal_curve,
+                  nu = nu)
+  
+}
 
 
 

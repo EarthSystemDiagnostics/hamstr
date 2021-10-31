@@ -7,9 +7,9 @@
 GetK(K_tot, target_K_per_lvl = 10)
 }
 \arguments{
-\item{K_tot}{}
+\item{K_tot}{total number of required sections at highest resolution}
 
-\item{target_K_per_lvl}{}
+\item{target_K_per_lvl}{approximate number of sections per level}
 }
 \value{
 

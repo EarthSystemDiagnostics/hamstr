@@ -4,18 +4,38 @@
 \alias{predict.hamstr_fit}
 \title{Interpolate Age Models at Given Depths}
 \usage{
-\method{predict}{hamstr_fit}(object, type = c("age_models", "acc_rates"), depth = NULL)
+\method{predict}{hamstr_fit}(object, depth = c("modelled", "data"))
+
+\method{predict}{hamstr_fit}(object, depth = c("modelled", "data"))
 }
 \arguments{
-\item{object}{}
+\item{object}{hamstr_fit object}
 
-\item{depth}{a vector of depths at which to interpolate the age models. 
-If left NULL, the depths of the age control points are used.}
+\item{depth}{Defaults to "modelled", which returns the modelled depths.
+"data" returns age models at the depths of the observations,
+or a numerical vector to specify depths}
 }
 \value{
+
+
 
 }
 \description{
 Method for generic function predict. Returns the posterior age
 models interpolated to new depths given in depth.
+
+Method for generic function predict. Returns the posterior age
+models interpolated to new depths given in depth.
+}
+\examples{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error,
+  K = c(10, 10))
+
+predict(fit, depth = "data")
+predict(fit, depth = c(5, 15, 20))
+}
 }

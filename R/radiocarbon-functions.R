@@ -185,7 +185,8 @@ SummariseEmpiricalPDF <- function(x, p){
 #' @param age.14C vector of radiocarbon dates in years BP
 #' @param age.14C.se vector of radiocarbon date uncertainties
 #' @param cal_curve calibration curve
-#' @param t_df degrees of freedom of the t-distribution
+#' @param nu degrees of freedom of the t-distribution approximation, default in 
+#' hamstr is 6
 #' @param return.type return a ggplot object or a list containing the ggplot
 #'   object and two data frames with the empirical and t-distributions
 #' @return A ggplot2 object or list with data and ggplot2 object
@@ -194,16 +195,15 @@ SummariseEmpiricalPDF <- function(x, p){
 #' @examples
 #' compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),
 #'  cal_curve = "intcal13", return.type = "plot")
-
 compare_14C_PDF <- function(age.14C, age.14C.se,
-                            cal_curve = "intcal20", t_df = 6,
+                            cal_curve = "intcal20", nu = 6,
                             return.type = c("plot", "list")){
 
   dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * stats::dt((x - mu)/sigma, dat)
 
   stopifnot(length(age.14C) == length(age.14C.se))
 
-  cal.dat <- data.frame(age.14C = age.14C, age.14C.se = age.14C.se)
+  cal.dat <- data.frame(age.14C = round(age.14C), age.14C.se = round(age.14C.se))
 
   return.type <- match.arg(return.type, choices = c("plot", "list"))
 
@@ -233,14 +233,14 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
     }
   })
 
-  t_df <- C14 %>%
+  nu <- C14 %>%
     dplyr::group_by(.data$.id) %>%
     dplyr::do({
       rng <- .$age.14C.cal.se * 5
       age = seq(.$age.14C.cal - rng, .$age.14C.cal + rng, length.out = 100)
       data.frame(
         age = age,
-        density = dt_ls(age, dat = t_df,
+        density = dt_ls(age, dat = nu,
                         mu = .$age.14C.cal,
                         sigma = .$age.14C.cal.se)
       )
@@ -249,13 +249,13 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
   gg <- cali.pdf.dat %>%
     ggplot2::ggplot(ggplot2::aes(x = age/1000, y = density, group = .id)) +
     ggplot2::geom_line(ggplot2::aes(colour = cal_curve)) +
-    ggplot2::geom_line(data = t_df, ggplot2::aes(y = density, colour = "t-distribution")) +
+    ggplot2::geom_line(data = nu, ggplot2::aes(y = density, colour = "t-distribution")) +
     ggplot2::labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
     ggplot2::facet_wrap(~.id, scales = "free") +
     ggplot2::theme_bw()
 
   if (return.type == "list"){
-    return(list(plot = gg, cal.age.pdf = cali.pdf.dat, t.dist.age = t_df))
+    return(list(plot = gg, cal.age.pdf = cali.pdf.dat, t.dist.age = nu))
   } else if (return.type == "plot") {
     return(gg)
   }

@@ -1,7 +1,7 @@
 #' Create K structure from K_tot and target_K_per_lvl
 #'
-#' @param K_tot
-#' @param target_K_per_lvl
+#' @param K_tot total number of required sections at highest resolution
+#' @param target_K_per_lvl approximate number of sections per level
 #'
 #' @return
 #' @keywords internal
@@ -37,7 +37,7 @@ GetK <- function(K_tot, target_K_per_lvl = 10){
 
 #' Adjust numbers of splits per level
 #'
-#' @param K_fine
+#' @param K_fine total number of required sections at highest resolution
 #'
 #' @return
 #' @keywords internal
@@ -175,8 +175,7 @@ gamma_sigma_shape <- function(mean, sigma=NULL, shape=NULL){
 #' @inheritParams hamstr
 #'
 #' @return a list of data and parameters to be passed as data to the Stan sampler
-#' @export
-#'
+#' @keywords internal
 #' @examples
 #' make_stan_dat_hamstr(depth = MSB2K$depth,
 #'               obs_age = MSB2K$age,
