@@ -135,25 +135,16 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagno
       
       p.fit <- ggpubr::ggarrange(
         p.fit,
-<<<<<<< HEAD
+
         ggpubr::ggarrange(t.lp, p.L, p.acc, p.mem, ncol = 4, widths = c(3,3,3,3)),
-=======
-        ggpubr::ggarrange(t.lp, p.L, p.acc, p.mem, ncol = 4, widths = c(3, 3,3,3)),
->>>>>>> 28f9da16d247223cb6687643814d82328479244d
-        
+
         nrow = 2, heights = c(2, 1))
     } else {
       p.fit <- ggpubr::ggarrange(
-<<<<<<< HEAD
         p.fit,
         ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,3)),
         
         nrow = 2, heights = c(2, 1))
-=======
-        ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,2)),
-        p.fit,
-        nrow = 2, heights = c(1, 2))
->>>>>>> 28f9da16d247223cb6687643814d82328479244d
     }
     
     return(p.fit)
