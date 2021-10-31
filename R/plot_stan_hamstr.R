@@ -4,7 +4,8 @@
 #'
 #' @param object a hamstr_fit object
 #' @param type One of "default", "age_models", "hier_acc_rates",
-#'                               "acc_mean_prior_post", "mem_prior_post"
+#'                               "acc_mean_prior_post", "mem_prior_post",
+#'                               "L_prior_post"
 #' @inheritParams plot_hamstr  
 #' @return A ggplot object
 #'
@@ -83,9 +84,9 @@ plot.hamstr_fit <- function(object,
 #' plot_hamstr(fit, summarise = FALSE)
 #' }
 plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagnostics = TRUE) {
-
+  
   #summarise <- match.arg(summarise)
-
+  
   if (summarise == TRUE){
     p.fit <- plot_summary_age_models(hamstr_fit)
   } else if (summarise == FALSE){
@@ -94,7 +95,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagno
   
   ## Add latent variable estimated ages accounting for bioturbation error
   
-  if (hamstr_fit$data$model_bioturbation == 1 & hamstr_fit$data$L_prior_shape != 0){
+  if (hamstr_fit$data$model_bioturbation == 1){
     
     post <- as.data.frame(hamstr_fit$fit, pars = c("bt_age")) %>%
       as_tibble() %>%
@@ -108,31 +109,45 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagno
     
     p.fit <- p.fit +
       geom_violin(data = tmp,
-                aes(x = depth, y = value, group = as.factor(dpt),
-                    colour = "Orange"), fill = NA,
-                scale = "width",
-                position = position_identity(), alpha = 0.5,
-                show.legend = FALSE)
-  
-  }
+                  aes(x = depth, y = value, group = as.factor(dpt),
+                      colour = "Orange"), fill = NA,
+                  scale = "width",
+                  position = position_identity(), alpha = 0.5,
+                  show.legend = FALSE)
     
+  }
   
-
+  
+  
   if (plot_diagnostics == FALSE) return(p.fit)
-
+  
   if (plot_diagnostics){
     p.mem <- plot_memory_prior_posterior(hamstr_fit)
     p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
+    
+    t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
+      ggplot2::theme(legend.position = "top") +
+      ggplot2::labs(x = "Iteration")
+    
+    if (hamstr_fit$data$model_bioturbation == 1){
+      p.L <- plot_L_prior_posterior(hamstr_fit) +
+        theme(legend.position = "top")
+      
+      p.fit <- ggpubr::ggarrange(
+        p.fit,
+        ggpubr::ggarrange(t.lp, p.L, p.acc, p.mem, ncol = 4, widths = c(3, 3,3,3)),
+        
+        nrow = 2, heights = c(2, 1))
+    } else {
+      p.fit <- ggpubr::ggarrange(
+        ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,2)),
+        p.fit,
+        nrow = 2, heights = c(1, 2))
     }
-
-  t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
-    ggplot2::theme(legend.position = "top") +
-    ggplot2::labs(x = "Iteration")
-
-  ggpubr::ggarrange(
-    ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,2)),
-    p.fit,
-    nrow = 2, heights = c(1, 2))
+    
+    return(p.fit)
+    
+  }
 }
 
 #' Plot Summary of Posterior Age Models
@@ -203,7 +218,8 @@ plot_summary_age_models <- function(hamstr_fit){
                             inherit.aes = FALSE, size = 1.25) +
     ggplot2::geom_point(data = obs_ages, ggplot2::aes(y = age,
                                                       colour = "Blue")
-                        )
+                        ) +
+    labs(x = "Depth", y = "Age")
   
   
   p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
@@ -438,7 +454,7 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
     ggplot2::ggplot(ggplot2::aes(x = depth, y = mean, colour = lvl)) +
     ggplot2::geom_path() +
     ggplot2::expand_limits(y = 0) +
-    ggplot2::labs(y = "Accummulation rate [age/depth]", x = "Depth",
+    ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
                   colour = "Hierarchical\nlevel") +
     ggplot2::theme_bw() +
     ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
@@ -702,7 +718,8 @@ plot_memory_prior_posterior <- function(hamstr_fit){
 #' @keywords internal
 plot_L_prior_posterior <- function(hamstr_fit){
   
-  post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
+  if (hamstr_fit$data$L_prior_shape > 0){
+    post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
     as_tibble() %>%
     pivot_longer(cols = everything(), names_to = "par", values_to = "x") %>% 
     mutate(dpt = readr::parse_number(par),
@@ -736,6 +753,16 @@ plot_L_prior_posterior <- function(hamstr_fit){
       strip.text.x = element_blank()
     ) +
     labs(x = "Mixing depth [L]") 
+  } else {
+    
+    ggplot(data = tibble(x = hamstr_fit$data$L_prior_mean * c(1, 1), y = c(0, 1))) + 
+      geom_line( aes(x = x , y = y, colour = "Fixed")) +
+      expand_limits(x = c(0, 2*hamstr_fit$data$L_prior_mean))+
+      labs(x = "Mixing depth [L]", y = "Density") +
+      theme_bw() +
+      scale_colour_manual("", values = c(Fixed = "Red"))
+    
+  }
   
   }
 
