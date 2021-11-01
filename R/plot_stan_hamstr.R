@@ -121,7 +121,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagno
       geom_violin(data = tmp,
                   aes(x = depth, y = value, group = as.factor(dpt),
                       colour = "Orange"), fill = NA,
-                  scale = "width",
+                  scale = "area",
                   position = position_identity(), alpha = 0.5,
                   show.legend = FALSE)
     
