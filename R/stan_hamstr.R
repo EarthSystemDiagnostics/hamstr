@@ -55,6 +55,18 @@
 #'   defaults to 10 as in Bacon >= 2.5.1
 #' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 #'   not. Defaults to TRUE.
+#' @param model_bioturbation Defaults to FALSE. If TRUE, additional uncertainty in the
+#' observed ages due to sediment mixing (bioturbation) is modelled via a latent 
+#' variable process. The amount of additional uncertainty is a function of the 
+#' mixing depth L, the sedimentation rate, and the number of particles 
+#' (e.g. individual foraminifera) per measured date. See description for details.
+#' @param n_ind The number of individual particles (e.g. Foraminifera) in each 
+#' sample that was dated by e.g. radiocarbon dating. This can be a single value
+#' or a vector the same length as obs_age.
+#' @param L_prior_mean Mean of the gamma prior on mixing depth, defaults to 10.
+#' @param L_prior_shape,L_prior_sigma Shape and standard deviation of the gamma
+#'  prior on the mixing depth. Set only one of these, the other will be 
+#'  calculated. Defaults to shape = 2.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
 #'   inflated so that data are consistent with a "Bacon-style" monotonic
 #'   age-depth model. This is an experimental feature under active development.
@@ -91,7 +103,6 @@
 #'
 #' }
 hamstr <- function(depth, obs_age, obs_err,
-                   n_ind = NULL,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
                    K = NULL,
                    top_depth = NULL, bottom_depth = NULL,
@@ -106,6 +117,7 @@ hamstr <- function(depth, obs_age, obs_err,
                    infl_sigma_sd = NULL,
                    infl_shape_shape = 1, infl_shape_mean = 1,
                    model_bioturbation = FALSE,
+                   n_ind = NULL,
                    L_prior_mean = 10,
                    L_prior_shape = 2,
                    L_prior_sigma = NULL,

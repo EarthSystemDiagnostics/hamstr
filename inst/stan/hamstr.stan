@@ -68,7 +68,7 @@ data {
  real<lower = 0> L_prior_shape;
 
 
- vector[N] n_ind;
+ vector[N*model_bioturbation] n_ind;
  //vector[model_bioturbation ? 0 : N] n_ind;
 
 }

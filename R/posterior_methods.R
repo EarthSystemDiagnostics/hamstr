@@ -10,7 +10,6 @@
 #' @param ... Other arguments to rstan::extract
 #' @return
 #'
-#' @examples
 #' @importFrom rstan extract
 #' @export
 #'
@@ -38,12 +37,7 @@ extract_hamstr_fit <- function(object, pars = c("ages"), ...){
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
 #' get_posterior_parameters(fit)
 #' }
@@ -100,28 +94,6 @@ get_posterior_ages <- function(hamstr_fit){
   return(posterior_ages)
 }
 
-#' Interpolate Age Models at Given Depths
-#' @description Method for generic function predict. Returns the posterior age
-#' models interpolated to new depths given in depth.
-#' @param object hamstr_fit object
-#' @param depth Depths at which to return modelled ages.
-#' @inheritParams interpolate_age_models
-#' @return
-#'
-#' @examples
-#' @export
-#' @method predict hamstr_fit
-predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"), depth = NULL){
-
-  type <- match.arg(type)
-
-  switch(type,
-         age_models = interpolate_age_models(object, depth),
-         acc_rates = get_posterior_acc_rates(object)
-  )
-
-
-}
 
 
 
@@ -289,9 +261,9 @@ summarise_age_models <- function(hamstr_fit){
 #' models interpolated to new depths given in depth.
 #' @param object hamstr_fit object
 #' @param depth Defaults to "modelled", which returns the modelled depths.
-#' "data" returns age models at the depths of the observations,
-#' or a numerical vector to specify depths
-#' @inheritParams interpolate_age_models
+#' "data" returns age models at the depths of the observations, or a numerical
+#'  vector to specify depths. Accumulation rates are only returned at the 
+#'  modelled depths.
 #' @return
 #'
 #' @examples
@@ -299,20 +271,27 @@ summarise_age_models <- function(hamstr_fit){
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10))
+#'   obs_err = MSB2K$error
+#'   )
 #'
+#' predict(fit, depth = seq(1, 100, by = 10))
 #' predict(fit, depth = "data")
-#' predict(fit, depth = c(5, 15, 20))
+#' predict(fit)
+#' predict(fit, type = "acc_rates")
 #' }
+#'
 #' @export
 #' @method predict hamstr_fit
-predict.hamstr_fit <- function(object, depth = c("modelled", "data")){
-
-  #depth <- match.arg(depth)
-
-  interpolate_age_models(object, depth)
-
+predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
+                               depth = c("modelled", "data"), ...){
+  
+  type <- match.arg(type)
+  
+  
+  switch(type,
+         age_models = interpolate_age_models(object, depth),
+         acc_rates = get_posterior_acc_rates(object)
+  )
 }
 
 

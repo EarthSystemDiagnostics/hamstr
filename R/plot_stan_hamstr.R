@@ -10,6 +10,14 @@
 #' @return A ggplot object
 #'
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error)
+#'
+#' plot(fit)
+#' }
 #' @export
 #' @method plot hamstr_fit
 plot.hamstr_fit <- function(object,
@@ -715,8 +723,6 @@ plot_memory_prior_posterior <- function(hamstr_fit){
 #' @return A ggplot2 object
 #' @import ggplot2
 #' @importFrom rlang .data
-#' 
-#' @examples
 #' @keywords internal
 plot_L_prior_posterior <- function(hamstr_fit){
   
