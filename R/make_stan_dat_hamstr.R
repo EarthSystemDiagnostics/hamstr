@@ -176,31 +176,10 @@ gamma_sigma_shape <- function(mean, sigma=NULL, shape=NULL){
 #'
 #' @return a list of data and parameters to be passed as data to the Stan sampler
 #' @keywords internal
-#' @examples
-#' make_stan_dat_hamstr(depth = MSB2K$depth,
-#'               obs_age = MSB2K$age,
-#'               obs_err = MSB2K$error)
-make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
-                                 n_ind = NULL,
-                                 min_age = NULL,
-                                 top_depth=NULL, bottom_depth=NULL,
-                                 pad_top_bottom=NULL,
-                                 K=NULL, nu=NULL,
-                                 acc_mean_prior=NULL,
-                                 acc_shape=NULL,
-                                 scale_shape = NULL,
-                                 mem_mean=NULL, mem_strength=NULL,
-                                 scale_R=NULL,
-                                 inflate_errors=NULL,
-                                 infl_sigma_sd=NULL,
-                                 infl_shape_shape=NULL, infl_shape_mean=NULL,
-                                 model_bioturbation = NULL,
-                                 L_prior_mean = NULL,
-                                 L_prior_shape = NULL,
-                                 L_prior_sigma = NULL,
-                                 ...) {
+make_stan_dat_hamstr <- function(...) {
 
-  l <- c(as.list(environment()))
+  # take the calling environment and create the data required for stan
+  l <- c(as.list(parent.frame()))
 
   # get defaults
   default.args <- formals(hamstr)
@@ -216,10 +195,9 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   l <- default.args
 
 
+ if (is.null(l$acc_mean_prior)){
 
-  if (is.null(l$acc_mean_prior)){
-
-    d <- data.frame(depth = depth, obs_age = obs_age)
+    d <- data.frame(depth = l$depth, obs_age = l$obs_age)
     acc_mean <- stats::coef(MASS::rlm(obs_age~depth, data = d))[2]
 
     # if negative replace with 20
@@ -231,100 +209,108 @@ make_stan_dat_hamstr <- function(depth=NULL, obs_age=NULL, obs_err=NULL,
   }
 
 
-  ord <- order(depth)
+  ord <- order(l$depth)
 
-  l$depth <- depth[ord]
-  l$obs_age <- obs_age[ord]
-  l$obs_err <- obs_err[ord]
+  l$depth <- l$depth[ord]
+  l$obs_age <- l$obs_age[ord]
+  l$obs_err <- l$obs_err[ord]
 
-  if (model_bioturbation == TRUE){
-    
-    # check parameters
-      if (length(c(L_prior_sigma, L_prior_shape)) > 1) 
+ 
+    if (l$model_bioturbation == TRUE){
+      
+      # check parameters
+      if (length(c(l$L_prior_sigma, l$L_prior_shape)) > 1) 
         stop("Specify only one of either L_prior_sigma or L_prior_shape. 
              The other will be calculated.")
       
-      if (length(c(L_prior_sigma, L_prior_shape)) == 0) 
+      if (length(c(l$L_prior_sigma, l$L_prior_shape)) == 0) 
         stop("One of either L_prior_sigma or L_prior_shape must be specified. 
              Set either to 0 to impose a fixed mixing depth.")
       
-    l$n_ind <- n_ind[ord]
-    
-    if (is.null(L_prior_shape)) {
-      if (L_prior_sigma == 0) L_prior_shape <- 0 else 
-        L_prior_shape <- gamma_sigma_shape(L_prior_mean, L_prior_sigma)$shape
+      if ((length(l$n_ind) == 1 | length(l$n_ind) == length(l$obs_age)) == FALSE) 
+        stop("n_ind must be either a single value or a vector the same length as obs_age")
+      
+      if (length(l$n_ind == 1)) l$n_ind <- rep(l$n_ind, length(l$obs_age))
+      
+      l$n_ind <- l$n_ind[ord]
+      
+      if (is.null(l$L_prior_shape)) {
+        if (l$L_prior_sigma == 0) l$L_prior_shape <- 0 else 
+          l$L_prior_shape <- gamma_sigma_shape(l$L_prior_mean, l$L_prior_sigma)$shape
+      }
+      
+    } else if(l$model_bioturbation == FALSE){
+      l$n_ind <- numeric(0)
     }
     
-  } else if(model_bioturbation == FALSE){
-    l$n_ind <- rep(1, length(l$obs_age))
-  }
+    
+    if (is.null(l$infl_sigma_sd)){
+      l$infl_sigma_sd <- 10 * mean(l$obs_err)
+    }
+    
+    if (l$min_age > min(l$obs_age)) {
+      warning("min_age is older than minimum obs_age")
+    }
+    
+    if (l$pad_top_bottom == TRUE){
+      # Set start depth to 5% less than first depth observation, and DO allow negative depths
+      depth_range <- diff(range(l$depth))
+      buff <- 0.05 * depth_range
+    } else {
+      buff <- 0
+    }
+    
+    if (is.null(l$top_depth)) l$top_depth <- l$depth[1] - buff
+    
+    if (is.null(l$bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) + buff
+    
+    depth_range <- l$bottom_depth - l$top_depth
+    
+    if(l$top_depth > min(l$depth)) stop("top_depth must be above or equal to the shallowest data point")
+    if(l$bottom_depth < max(l$depth)) stop("bottom_depth must be deeper or equal to the deepest data point")
+    
+    
+    if (is.null(l$K)){
+      K_fine <- l$bottom_depth - l$top_depth
+      if (K_fine > 900) K_fine <- 900
+      l$K <- default_K(K_fine)
+    }
+    
+    
+    # Transformed arguments
+    l$N <- length(l$depth)
+    
+    stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))#, l$N == length(l$n_ind))
+    
+    alpha_idx <- alpha_indices(l$K)
+    
+    l$K_tot <- sum(alpha_idx$nK)
+    l$K_fine <- utils::tail(alpha_idx$nK, 1)
+    l$c <- 1:l$K_fine
+    
+    l$mem_alpha = l$mem_strength * l$mem_mean
+    l$mem_beta = l$mem_strength * (1-l$mem_mean)
+    
+    l$mem_mean = l$mem_mean
+    l$mem_strength = l$mem_strength
+    
+    l$delta_c = depth_range / l$K_fine
+    l$c_depth_bottom = l$delta_c * l$c + l$top_depth
+    l$c_depth_top = c(l$top_depth, l$c_depth_bottom[1:(l$K_fine-1)])
+    
+    l$modelled_depths <- c(l$c_depth_top[1], l$c_depth_bottom)
+    
+    # Index for which sections the target depth is in
+    l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))
+    
+    l <- append(l, alpha_idx)
+    
+    l$n_lvls <- length(l$K)
+    l$scale_shape = as.numeric(l$scale_shape)
+    l$model_bioturbation = as.numeric(l$model_bioturbation)
+    #l$K_idx <- l$lvl - 1
 
-
-  if (is.null(infl_sigma_sd)){
-    l$infl_sigma_sd <- 10 * mean(obs_err)
-  }
-
-  if (l$min_age > min(l$obs_age)) {
-    warning("min_age is older than minimum obs_age")
-  }
-
-  if (l$pad_top_bottom == TRUE){
-    # Set start depth to 5% less than first depth observation, and DO allow negative depths
-    depth_range <- diff(range(l$depth))
-    buff <- 0.05 * depth_range
-  } else {
-    buff <- 0
-  }
-
-  if (is.null(top_depth)) l$top_depth <- l$depth[1] - buff
-
-  if (is.null(bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) + buff
-
-  depth_range <- l$bottom_depth - l$top_depth
-
-  if(l$top_depth > min(l$depth)) stop("top_depth must be above or equal to the shallowest data point")
-  if(l$bottom_depth < max(l$depth)) stop("bottom_depth must be deeper or equal to the deepest data point")
-
-
-  if (is.null(K)){
-    K_fine <- l$bottom_depth - l$top_depth
-    if (K_fine > 900) K_fine <- 900
-    l$K <- default_K(K_fine)
-  }
-
-
-  # Transformed arguments
-  l$N <- length(l$depth)
-
-  stopifnot(l$N == length(obs_err), l$N == length(obs_age), l$N == length(l$n_ind))
-
-  alpha_idx <- alpha_indices(l$K)
-
-  l$K_tot <- sum(alpha_idx$nK)
-  l$K_fine <- utils::tail(alpha_idx$nK, 1)
-  l$c <- 1:l$K_fine
-
-  l$mem_alpha = mem_strength * mem_mean
-  l$mem_beta = mem_strength * (1-mem_mean)
-
-  l$mem_mean = mem_mean
-  l$mem_strength = mem_strength
-
-  l$delta_c = depth_range / l$K_fine
-  l$c_depth_bottom = l$delta_c * l$c + l$top_depth
-  l$c_depth_top = c(l$top_depth, l$c_depth_bottom[1:(l$K_fine-1)])
-
-  l$modelled_depths <- c(l$c_depth_top[1], l$c_depth_bottom)
-
-  # Index for which sections the target depth is in
-  l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))
-
-  l <- append(l, alpha_idx)
-
-  l$n_lvls <- length(l$K)
-  l$scale_shape = as.numeric(l$scale_shape)
-  #l$K_idx <- l$lvl - 1
-
+  
   return(l)
 }
 

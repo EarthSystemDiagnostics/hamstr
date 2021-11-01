@@ -29,3 +29,13 @@ A ggplot object
 \description{
 Title
 }
+\examples{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error)
+
+plot(fit)
+}
+}

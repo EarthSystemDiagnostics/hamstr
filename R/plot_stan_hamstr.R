@@ -339,7 +339,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 add_colour_scale <- function(gg){
   
   clrs <- c("Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey")
-  lbls <- c("Obs age", "Mod age", "Median", "Mean", "95%", "50%")
+  lbls <- c("Obs age", "Latent age", "Median", "Mean", "95%", "50%")
   
   gg +  
     ggplot2::scale_fill_identity(name = "Interval",
@@ -432,7 +432,7 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
   
   alph <- tibble::as_tibble(a3, rownames = "par") %>%
     dplyr::mutate(alpha_idx = readr::parse_number(par)) %>%
-    dplyr::left_join(idx, .) %>%
+    dplyr::left_join(idx, ., by = "alpha_idx") %>%
     dplyr::mutate(lvl = factor(lvl))
   
   # for each unit at each level in hierarchy get max and min depth 

@@ -66,7 +66,9 @@
 #' @param L_prior_mean Mean of the gamma prior on mixing depth, defaults to 10.
 #' @param L_prior_shape,L_prior_sigma Shape and standard deviation of the gamma
 #'  prior on the mixing depth. Set only one of these, the other will be 
-#'  calculated. Defaults to shape = 2.
+#'  calculated. Defaults to shape = 2. If either the shape or sigma parameter is 
+#'  set to zero, the mixing depth is fixed at the value of L_prior_mean, rather 
+#'  than being sampled with a gamma prior.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
 #'   inflated so that data are consistent with a "Bacon-style" monotonic
 #'   age-depth model. This is an experimental feature under active development.
@@ -80,7 +82,7 @@
 #' @param ... additional arguments to \link[rstan]{sampling}
 #' @inheritParams rstan::sampling
 #'
-#' @return Returns a list composed of the output from the Stan sampler .$fit,
+#' @return Returns a list composed of the output from the stan sampler .$fit,
 #'   and the list of data passed to the sampler, .$data
 #' @export
 #'
