@@ -123,7 +123,8 @@ hamstr <- function(depth, obs_age, obs_err,
                    L_prior_mean = 10,
                    L_prior_shape = 2,
                    L_prior_sigma = NULL,
-                   iter = 2000, chains = 3, ...){
+                   iter = 2000, chains = 3,
+                   seed = NA, ...){
 
 
   stan_dat <- make_stan_dat_hamstr(depth = depth,
@@ -152,6 +153,7 @@ hamstr <- function(depth, obs_age, obs_err,
 
   fit <- rstan::sampling(stanmodels$hamstr,
                          data = stan_dat, init = inits, iter = iter, chains = chains,
+                         seed = seed,
                          verbose = FALSE, ...)
 
   out <- list(fit=fit, data=stan_dat)
