@@ -1,3 +1,9 @@
+# hamstr 0.6.0
+
+* Ability added to model age-heterogeneity from bioturbation and its effect on age models.
+* Default plot changed to put diagnostic plots at the bottom.
+
+
 # hamstr 0.5.2
 
 * Minor change to the way acc_shape is adjusted to account for the number of hierarchical levels. acc_shape is now adjusted to control the shape of the gamma distributed alpha parameters, not the total variance. The difference is minor.
