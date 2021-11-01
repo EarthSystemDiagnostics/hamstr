@@ -7,7 +7,7 @@
 AdjustK(K_fine, base)
 }
 \arguments{
-\item{K_fine}{}
+\item{K_fine}{total number of required sections at highest resolution}
 }
 \value{
 

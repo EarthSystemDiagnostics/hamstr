@@ -55,6 +55,20 @@
 #'   defaults to 10 as in Bacon >= 2.5.1
 #' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 #'   not. Defaults to TRUE.
+#' @param model_bioturbation Defaults to FALSE. If TRUE, additional uncertainty in the
+#' observed ages due to sediment mixing (bioturbation) is modelled via a latent 
+#' variable process. The amount of additional uncertainty is a function of the 
+#' mixing depth L, the sedimentation rate, and the number of particles 
+#' (e.g. individual foraminifera) per measured date. See description for details.
+#' @param n_ind The number of individual particles (e.g. Foraminifera) in each 
+#' sample that was dated by e.g. radiocarbon dating. This can be a single value
+#' or a vector the same length as obs_age.
+#' @param L_prior_mean Mean of the gamma prior on mixing depth, defaults to 10.
+#' @param L_prior_shape,L_prior_sigma Shape and standard deviation of the gamma
+#'  prior on the mixing depth. Set only one of these, the other will be 
+#'  calculated. Defaults to shape = 2. If either the shape or sigma parameter is 
+#'  set to zero, the mixing depth is fixed at the value of L_prior_mean, rather 
+#'  than being sampled with a gamma prior.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
 #'   inflated so that data are consistent with a "Bacon-style" monotonic
 #'   age-depth model. This is an experimental feature under active development.
@@ -68,7 +82,7 @@
 #' @param ... additional arguments to \link[rstan]{sampling}
 #' @inheritParams rstan::sampling
 #'
-#' @return Returns a list composed of the output from the Stan sampler .$fit,
+#' @return Returns a list composed of the output from the stan sampler .$fit,
 #'   and the list of data passed to the sampler, .$data
 #' @export
 #'
@@ -104,11 +118,17 @@ hamstr <- function(depth, obs_age, obs_err,
                    inflate_errors = FALSE,
                    infl_sigma_sd = NULL,
                    infl_shape_shape = 1, infl_shape_mean = 1,
+                   model_bioturbation = FALSE,
+                   n_ind = NULL,
+                   L_prior_mean = 10,
+                   L_prior_shape = 2,
+                   L_prior_sigma = NULL,
                    iter = 2000, chains = 3, ...){
 
 
   stan_dat <- make_stan_dat_hamstr(depth = depth,
                                    obs_age = obs_age, obs_err = obs_err,
+                                   n_ind = n_ind,
                                    min_age = min_age,
                                    K=K,
                                    top_depth = top_depth,
@@ -123,7 +143,10 @@ hamstr <- function(depth, obs_age, obs_err,
                                    inflate_errors = as.numeric(inflate_errors),
                                    infl_sigma_sd = infl_sigma_sd,
                                    infl_shape_shape = infl_shape_shape,
-                                   infl_shape_mean = infl_shape_mean)
+                                   infl_shape_mean = infl_shape_mean,
+                                   model_bioturbation = model_bioturbation,
+                                   L_prior_mean = L_prior_mean,
+                                   L_prior_shape = L_prior_shape)
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 
@@ -145,6 +168,4 @@ hamstr <- function(depth, obs_age, obs_err,
 
 is_hamstr_fit <- function(x) inherits(x, "hamstr_fit")
 is_hamstr_interpolated_ages <- function(x) inherits(x, "hamstr_interpolated_ages")
-
-
 

@@ -9,7 +9,7 @@ compare_14C_PDF(
   age.14C,
   age.14C.se,
   cal_curve = "intcal20",
-  t_df = 6,
+  nu = 6,
   return.type = c("plot", "list")
 )
 }
@@ -20,7 +20,8 @@ compare_14C_PDF(
 
 \item{cal_curve}{calibration curve}
 
-\item{t_df}{degrees of freedom of the t-distribution}
+\item{nu}{degrees of freedom of the t-distribution approximation, default in 
+hamstr is 6}
 
 \item{return.type}{return a ggplot object or a list containing the ggplot
 object and two data frames with the empirical and t-distributions}

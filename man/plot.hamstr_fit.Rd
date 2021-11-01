@@ -7,7 +7,7 @@
 \method{plot}{hamstr_fit}(
   object,
   type = c("default", "age_models", "acc_rates", "hier_acc_rates",
-    "acc_mean_prior_post", "mem_prior_post"),
+    "acc_mean_prior_post", "mem_prior_post", "L_prior_post", "PDF_14C"),
   summarise = TRUE,
   ...
 )
@@ -16,7 +16,8 @@
 \item{object}{a hamstr_fit object}
 
 \item{type}{One of "default", "age_models", "hier_acc_rates",
-"acc_mean_prior_post", "mem_prior_post"}
+"acc_mean_prior_post", "mem_prior_post",
+"L_prior_post", "PDF_14C"}
 
 \item{summarise}{logical TRUE or FALSE. Plot the realisations as a summarised
 "ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot 
@@ -27,4 +28,14 @@ A ggplot object
 }
 \description{
 Title
+}
+\examples{
+\dontrun{
+fit <- hamstr(
+  depth = MSB2K$depth,
+  obs_age = MSB2K$age,
+  obs_err = MSB2K$error)
+
+plot(fit)
+}
 }

@@ -4,11 +4,20 @@
 #'
 #' @param object a hamstr_fit object
 #' @param type One of "default", "age_models", "hier_acc_rates",
-#'                               "acc_mean_prior_post", "mem_prior_post"
+#'                               "acc_mean_prior_post", "mem_prior_post",
+#'                               "L_prior_post", "PDF_14C"
 #' @inheritParams plot_hamstr  
 #' @return A ggplot object
 #'
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error)
+#'
+#' plot(fit)
+#' }
 #' @export
 #' @method plot hamstr_fit
 plot.hamstr_fit <- function(object,
@@ -16,7 +25,10 @@ plot.hamstr_fit <- function(object,
                               "age_models",
                               "acc_rates",
                               "hier_acc_rates",
-                              "acc_mean_prior_post", "mem_prior_post"
+                              "acc_mean_prior_post",
+                              "mem_prior_post",
+                              "L_prior_post",
+                              "PDF_14C"
                               ),
                             summarise = TRUE,
                             ...){
@@ -30,7 +42,10 @@ plot.hamstr_fit <- function(object,
          acc_rates = plot_hamstr_acc_rates(object),
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
-         mem_prior_post = plot_memory_prior_posterior(object))
+         mem_prior_post = plot_memory_prior_posterior(object),
+         L_prior_post  = plot_L_prior_posterior(object),
+         PDF_14C = plot_14C_PDF(object, ...)
+         )
   
 }
 
@@ -79,30 +94,72 @@ plot.hamstr_fit <- function(object,
 #' plot_hamstr(fit, summarise = FALSE)
 #' }
 plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagnostics = TRUE) {
-
+  
   #summarise <- match.arg(summarise)
-
+  
   if (summarise == TRUE){
     p.fit <- plot_summary_age_models(hamstr_fit)
   } else if (summarise == FALSE){
     p.fit <- plot_age_models(hamstr_fit, n.iter = n.iter)
   }
-
+  
+  ## Add latent variable estimated ages accounting for bioturbation error
+  
+  if (hamstr_fit$data$model_bioturbation == 1){
+    
+    post <- as.data.frame(hamstr_fit$fit, pars = c("bt_age")) %>%
+      as_tibble() %>%
+      dplyr::mutate(iter = 1:nrow(.)) %>%
+      pivot_longer(cols = -iter) %>%
+      mutate(dpt = readr::parse_number(name))
+    
+    tmp <- tibble(depth = hamstr_fit$data$depth, 
+                  dpt = 1:hamstr_fit$data$N) %>% 
+      left_join(., post, by = "dpt")
+    
+    p.fit <- p.fit +
+      geom_violin(data = tmp,
+                  aes(x = depth, y = value, group = as.factor(dpt),
+                      colour = "Orange"), fill = NA,
+                  scale = "area",
+                  position = position_identity(), alpha = 0.5,
+                  show.legend = FALSE)
+    
+  }
+  
+  
+  
   if (plot_diagnostics == FALSE) return(p.fit)
-
+  
   if (plot_diagnostics){
     p.mem <- plot_memory_prior_posterior(hamstr_fit)
     p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
+    
+    t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
+      ggplot2::theme(legend.position = "top") +
+      ggplot2::labs(x = "Iteration")
+    
+    if (hamstr_fit$data$model_bioturbation == 1){
+      p.L <- plot_L_prior_posterior(hamstr_fit) +
+        theme(legend.position = "top")
+      
+      p.fit <- ggpubr::ggarrange(
+        p.fit,
+
+        ggpubr::ggarrange(t.lp, p.L, p.acc, p.mem, ncol = 4, widths = c(3,3,3,3)),
+
+        nrow = 2, heights = c(2, 1))
+    } else {
+      p.fit <- ggpubr::ggarrange(
+        p.fit,
+        ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,3)),
+        
+        nrow = 2, heights = c(2, 1))
     }
-
-  t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
-    ggplot2::theme(legend.position = "top") +
-    ggplot2::labs(x = "Iteration")
-
-  ggpubr::ggarrange(
-    ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,2)),
-    p.fit,
-    nrow = 2, heights = c(1, 2))
+    
+    return(p.fit)
+    
+  }
 }
 
 #' Plot Summary of Posterior Age Models
@@ -145,23 +202,7 @@ plot_summary_age_models <- function(hamstr_fit){
     dplyr::mutate(dat_idx = readr::parse_number(par))
   
   p.age.sum <- age_summary %>% 
-    plot_downcore_summary(.) + 
-    # ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
-    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`, fill = "Lightgrey")) +
-    # ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`, fill = "Darkgrey")) +
-    # ggplot2::geom_line(aes(colour = "Green")) +
-    # ggplot2::geom_line(ggplot2::aes(y = `50%`, colour = "Black")) +
-    # 
-    # ggplot2::theme_bw() +
-    # ggplot2::theme(panel.grid = ggplot2::element_blank())+
-    # ggplot2::scale_fill_identity(name = "Interval",
-    #                              breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
-    #                              labels = c("Median", "Mean", "95%", "50%"),
-    #                              guide = "legend") +
-    # ggplot2::scale_colour_identity(name = "",
-    #                                breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
-    #                                labels = c("Median", "Mean", "95%", "50%"),
-    #                                guide = "legend") 
+    plot_downcore_summary(.) 
   ggplot2::labs(x = "Depth", y = "Age") 
   
   
@@ -184,10 +225,13 @@ plot_summary_age_models <- function(hamstr_fit){
   p.age.sum <- p.age.sum +
     ggplot2::geom_linerange(data = obs_ages,
                             ggplot2::aes(x = depth, 
-                                         ymax = age_upr, ymin = age_lwr), inherit.aes = FALSE,
-                            colour = "Blue", size = 1.25) +
-    ggplot2::geom_point(data = obs_ages, ggplot2::aes(y = age),
-                        colour = "Blue")
+                                         ymax = age_upr, ymin = age_lwr),
+                            colour = "Blue",
+                            inherit.aes = FALSE, size = 1.25) +
+    ggplot2::geom_point(data = obs_ages, ggplot2::aes(y = age,
+                                                      colour = "Blue")
+                        ) +
+    labs(x = "Depth", y = "Age")
   
   
   p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
@@ -263,16 +307,16 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
   p.fit <- p.fit +
     ggplot2::geom_linerange(
       data = obs_ages,
-      ggplot2::aes(ymax = age_upr, ymin = age_lwr),
+      ggplot2::aes(ymax = age_upr, ymin = age_lwr,
+      colour = "Blue"),
       group = NA,
-      colour = "Blue",
       size = 1.2,
       alpha = 1) +
     ggplot2::geom_point(
       data = obs_ages,
-      ggplot2::aes(y = age),
+      ggplot2::aes(y = age,
+      colour = "Blue"),
       group = NA,
-      colour = "Blue",
       #size = 1.01,
       alpha = 1) +
     ggplot2::theme_bw() +
@@ -283,17 +327,35 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
   # add subdivisions
   p.fit <- add_subdivisions(p.fit, hamstr_fit)
   
+  # add colour scales
+  p.fit <- add_colour_scale(p.fit)
+  
   return(p.fit)
   
 }
 
 ## Accumulation rates ----
 
+add_colour_scale <- function(gg){
+  
+  clrs <- c("Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey")
+  lbls <- c("Obs age", "Latent age", "Median", "Mean", "95%", "50%")
+  
+  gg +  
+    ggplot2::scale_fill_identity(name = "Interval",
+                                     breaks = clrs,
+                                     labels = lbls,
+                                     guide = "legend") +
+    ggplot2::scale_colour_identity(name = "",
+                                   breaks = clrs,
+                                   labels = lbls,
+                                   guide = "legend") 
+}
+
 
 #' Plot Downcore Summary
 #' @param ds a downcore summary of age or accumulation rate 
 #' @return
-#' @examples
 #' @keywords internal
 plot_downcore_summary <- function(ds){
   p <- ds %>% 
@@ -303,15 +365,10 @@ plot_downcore_summary <- function(ds){
     ggplot2::geom_line(aes(colour = "Green")) +
     ggplot2::geom_line(ggplot2::aes(y = `50%`, colour = "Black")) +
     ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank()) +
-    ggplot2::scale_fill_identity(name = "Interval",
-                                 breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
-                                 labels = c("Median", "Mean", "95%", "50%"),
-                                 guide = "legend") +
-    ggplot2::scale_colour_identity(name = "",
-                                   breaks = c("Black", "Green", "Lightgrey", "Darkgrey"),
-                                   labels = c("Median", "Mean", "95%", "50%"),
-                                   guide = "legend") 
+    ggplot2::theme(panel.grid = ggplot2::element_blank()) 
+  
+  p <- add_colour_scale(p)
+ 
   return(p)
 }
 
@@ -319,7 +376,6 @@ plot_downcore_summary <- function(ds){
 #' Plot accumulation rates
 #' @inheritParams plot_hamstr
 #' @return
-#' @examples
 #' @keywords internal
 plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_per_depth")){
   
@@ -353,7 +409,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_
 #' @import ggplot2
 #' @importFrom readr parse_number
 #' @importFrom rlang .data
-#' @examples
+#' @examples 
 #' \dontrun{
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -376,7 +432,7 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
   
   alph <- tibble::as_tibble(a3, rownames = "par") %>%
     dplyr::mutate(alpha_idx = readr::parse_number(par)) %>%
-    dplyr::left_join(idx, .) %>%
+    dplyr::left_join(idx, ., by = "alpha_idx") %>%
     dplyr::mutate(lvl = factor(lvl))
   
   # for each unit at each level in hierarchy get max and min depth 
@@ -408,7 +464,7 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
     ggplot2::ggplot(ggplot2::aes(x = depth, y = mean, colour = lvl)) +
     ggplot2::geom_path() +
     ggplot2::expand_limits(y = 0) +
-    ggplot2::labs(y = "Accummulation rate [age/depth]", x = "Depth",
+    ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
                   colour = "Hierarchical\nlevel") +
     ggplot2::theme_bw() +
     ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
@@ -432,6 +488,7 @@ plot_prior_posterior_hist <- function(prior, posterior){
     ggplot2::geom_histogram(data = posterior,
                    ggplot2::aes(x = x, ggplot2::after_stat(density),
                        fill = "Posterior"),
+                   colour = clrs["Posterior"],
                    alpha = 0.5, bins = 100) +
     ggplot2::geom_line(data = prior, ggplot2::aes(x = x, y = d, colour = "Prior")) +
     ggplot2::facet_wrap(~par, scales = "free") +
@@ -577,49 +634,30 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 #' plot_acc_mean_prior_posterior(fit)
 #' }
 plot_acc_mean_prior_posterior <- function(hamstr_fit) {
-  clrs <- c("Posterior" = "Blue", "Prior" = "Red")
   
-  hamstr_dat <- hamstr_fit$data
-  
-  prior_mean <- hamstr_dat$acc_mean_prior
+ 
+  prior_mean <- hamstr_fit$data$acc_mean_prior
   
   acc_prior_rng <- stats::qnorm(c(0.99), mean = 0, sd = 10 * prior_mean)
   
-  acc_prior <-
-    tibble::tibble(acc_rate = seq(0, acc_prior_rng[1], length.out = 1000)) %>%
+  prior <-  tibble::tibble(
+    x = seq(-1, acc_prior_rng[1], length.out = 1000)
+    ) %>%
     dplyr::mutate(
-      density = 2 * stats::dnorm(.data$acc_rate, 0, 10 * prior_mean),
-      density = ifelse(.data$acc_rate <= 0, 0, .data$density)
+      par = "acc_mean",
+      d = 2 * stats::dnorm(.data$x, 0, 10 * prior_mean)
     )
   
-  acc_post <-
-    tibble::tibble(alpha = as.vector(rstan::extract(hamstr_fit$fit, "alpha[1]")[[1]]))
+  post <-
+    tibble::tibble(x = as.vector(rstan::extract(hamstr_fit$fit, "alpha[1]")[[1]]))
   
-  p <- acc_prior %>%
-    ggplot2::ggplot(ggplot2::aes(x = acc_rate, y = density)) +
-    # plot the posterior first
-    ggplot2::geom_histogram(
-      data = acc_post,
-      ggplot2::aes(x = alpha, ggplot2::after_stat(density), fill = "Posterior"),
-      inherit.aes = FALSE,
-      alpha = 0.5,
-      # set the colour for the outline of the bins but don't include in colour 
-      # legend
-      colour = clrs["Posterior"],
-      bins = 100
+  p <- plot_prior_posterior_hist(prior, post) +
+    theme(
+      strip.background = element_blank(),
+      strip.text.x = element_blank()
     ) +
-    ggplot2::geom_line(ggplot2::aes(colour = "Prior")) +
-    ggplot2::labs(
-      x = "Mean accumulation rate",
-      y = "Density",
-      colour = "",
-      fill = ""
-    ) +
-    ggplot2::scale_fill_manual(values = clrs) +
-    ggplot2::scale_colour_manual(values = clrs) +
-    ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(alpha = c(0.5)))) +
-    
-    ggplot2::theme_bw()
+    labs(x = "Mean accumulation rate [age/depth]") 
+ 
   
   return(p)
   
@@ -634,8 +672,8 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #' @import ggplot2
 #' @importFrom rlang .data
 #' 
-#' @examples
 #' @keywords internal
+#' @examples
 #' \dontrun{
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -677,6 +715,76 @@ plot_memory_prior_posterior <- function(hamstr_fit){
 
   return(p.mem)
 }
+
+#' Plot Mixing Depth Prior and Posterior
+#'
+#' @inheritParams plot_hamstr
+#'
+#' @return A ggplot2 object
+#' @import ggplot2
+#' @importFrom rlang .data
+#' @keywords internal
+plot_L_prior_posterior <- function(hamstr_fit){
+  
+  if (hamstr_fit$data$L_prior_shape > 0){
+    post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
+    as_tibble() %>%
+    pivot_longer(cols = everything(), names_to = "par", values_to = "x") %>% 
+    mutate(dpt = readr::parse_number(par),
+           par = "L")
+  
+  
+  L_shp <- hamstr_fit$data$L_prior_shape
+  L_mean <- hamstr_fit$data$L_prior_mean
+  
+  L_prior_rng <- stats::qgamma(c(0.0001, 0.999),
+                               shape = L_shp, 
+                               scale = L_mean / L_shp)
+  
+  L_prior_rng[1] <- min(c(L_prior_rng[1]), post$x)
+  L_prior_rng[2] <- max(c(L_prior_rng[2]), post$x)
+  
+  L_prior <-  tibble::tibble(
+    x = seq(L_prior_rng[1], L_prior_rng[2], length.out = 1000)
+    ) %>%
+    dplyr::mutate(
+      par = "L",
+      d = 2 * stats::dgamma(
+        .data$x,
+        shape = L_shp, 
+        scale = L_mean / L_shp)
+      )
+    
+  plot_prior_posterior_hist(L_prior, post)+
+    theme(
+      strip.background = element_blank(),
+      strip.text.x = element_blank()
+    ) +
+    labs(x = "Mixing depth [L]") 
+  } else {
+    
+    ggplot(data = tibble(x = hamstr_fit$data$L_prior_mean * c(1, 1), y = c(0, 1))) + 
+      geom_line( aes(x = x , y = y, colour = "Fixed")) +
+      expand_limits(x = c(0, 2*hamstr_fit$data$L_prior_mean))+
+      labs(x = "Mixing depth [L]", y = "Density") +
+      theme_bw() +
+      scale_colour_manual("", values = c(Fixed = "Red"))
+    
+  }
+  
+  }
+
+
+plot_14C_PDF <- function(hamstr_fit, nu = 6, cal_curve) {
+  
+  compare_14C_PDF(age.14C = hamstr_fit$data$obs_age,
+                  age.14C.se = hamstr_fit$data$obs_err, 
+                  cal_curve = cal_curve,
+                  nu = nu)
+  
+}
+
+
 
 #' Add subdivision tickmarks 
 #'

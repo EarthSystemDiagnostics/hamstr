@@ -2,7 +2,7 @@
 
 #' Extract posterior age models or parameters
 #'
-#' @param object
+#' @param object hamstr_fit object
 #' @param pars The parameters to extract. If pars = "ages" (the default) a special
 #' method is invoke to return the age-depth models. If pars = "pars" the memory parameters
 #' and the overall mean accumulation rate are returned. Any other specification
@@ -10,7 +10,6 @@
 #' @param ... Other arguments to rstan::extract
 #' @return
 #'
-#' @examples
 #' @importFrom rstan extract
 #' @export
 #'
@@ -38,12 +37,7 @@ extract_hamstr_fit <- function(object, pars = c("ages"), ...){
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
 #' get_posterior_parameters(fit)
 #' }
@@ -100,28 +94,6 @@ get_posterior_ages <- function(hamstr_fit){
   return(posterior_ages)
 }
 
-#' Interpolate Age Models at Given Depths
-#' @description Method for generic function predict. Returns the posterior age
-#' models interpolated to new depths given in depth.
-#' @param object
-#' @param depth
-#' @inheritParams interpolate_age_models
-#' @return
-#'
-#' @examples
-#' @export
-#' @method predict hamstr_fit
-predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"), depth = NULL){
-
-  type <- match.arg(type)
-
-  switch(type,
-         age_models = interpolate_age_models(object, depth),
-         acc_rates = get_posterior_acc_rates(object)
-  )
-
-
-}
 
 
 
@@ -287,34 +259,59 @@ summarise_age_models <- function(hamstr_fit){
 #' Interpolate Age Models at Given Depths
 #' @description Method for generic function predict. Returns the posterior age
 #' models interpolated to new depths given in depth.
-#' @param object
+#' @param object hamstr_fit object
 #' @param depth Defaults to "modelled", which returns the modelled depths.
-#' "data" returns age models at the depths of the observations,
-#' or a numerical vector to specify depths
-#' @inheritParams interpolate_age_models
+#' "data" returns age models at the depths of the observations, or a numerical
+#'  vector to specify depths. Accumulation rates are only returned at the 
+#'  modelled depths.
 #' @return
 #'
 #' @examples
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error
+#'   )
+#'
+#' predict(fit, depth = seq(1, 100, by = 10))
+#' predict(fit, depth = "data")
+#' predict(fit)
+#' predict(fit, type = "acc_rates")
+#' }
+#'
 #' @export
 #' @method predict hamstr_fit
-predict.hamstr_fit <- function(object, depth = "modelled"){
-
-  #depth <- match.arg(depth)
-
-  interpolate_age_models(object, depth)
-
+predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
+                               depth = c("modelled", "data"), ...){
+  
+  type <- match.arg(type)
+  
+  
+  switch(type,
+         age_models = interpolate_age_models(object, depth),
+         acc_rates = get_posterior_acc_rates(object)
+  )
 }
 
 
 
 #' Title
 #'
-#' @param object
-#' @param type
+#' @param object hamstr_fit object
+#' @param type age models "age_models" or accumulation rates "acc_rates"
 #'
 #' @return
+#' \dontrun{
+#' fit <- hamstr(
+#'   depth = MSB2K$depth,
+#'   obs_age = MSB2K$age,
+#'   obs_err = MSB2K$error,
+#'   K = c(10, 10))
 #'
-#' @examples
+#' summary(fit)
+#' summary(fit, type = c("acc_rates"))
+#' }
 #' @export
 #' @method summary hamstr_fit
 summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates")){
@@ -330,20 +327,14 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates")){
 
 #' Title
 #'
-#' @param object
-#' @param type
-#'
+#' @param object hamstr_interpolated_ages object
 #' @return
 #'
-#' @examples
 #' @export
 #' @method summary hamstr_interpolated_ages
-summary.hamstr_interpolated_ages <- function(object, type = "age_models"){
-
-  if (type == "age_models"){
+summary.hamstr_interpolated_ages <- function(object){
     summarise_new_ages(object)
   }
-}
 
 
 
@@ -398,14 +389,12 @@ get_posterior_acc_rates <- function(hamstr_fit){
 }
 
 
-#' Title
+#' Summarise accumulation rates
 #'
 #' @param hamstr_fit
 #'
 #' @return
-#'
-#' @examples
-#' @export
+#' @keywords internal
 summarise_hamstr_acc_rates <- function(hamstr_fit){
 
   x <- get_posterior_acc_rates(hamstr_fit)

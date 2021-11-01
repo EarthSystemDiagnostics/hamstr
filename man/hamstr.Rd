@@ -8,6 +8,7 @@ hamstr(
   depth,
   obs_age,
   obs_err,
+  min_age = 1950 - as.numeric(format(Sys.Date(), "\%Y")),
   K = NULL,
   top_depth = NULL,
   bottom_depth = NULL,
@@ -23,6 +24,11 @@ hamstr(
   infl_sigma_sd = NULL,
   infl_shape_shape = 1,
   infl_shape_mean = 1,
+  model_bioturbation = FALSE,
+  n_ind = NULL,
+  L_prior_mean = 10,
+  L_prior_shape = 2,
+  L_prior_sigma = NULL,
   iter = 2000,
   chains = 3,
   ...
@@ -34,6 +40,13 @@ hamstr(
 \item{obs_age}{Observed age at each depth (age control points)}
 
 \item{obs_err}{Error associated with each observed age (1 standard error)}
+
+\item{min_age}{The minimum age that the first modelled depth can be. Useful if
+extrapolating above the shallowest age control point to e.g. the surface.
+So set min_age to the year the core was collected. E.g. for a core collected
+in 1990, with ages in years BP this would be -40 (present = 1950 by
+convention). The default value is the current year in calendar age BP
+(currently -71 for 2021).}
 
 \item{K}{K controls the number and structure of the hierarchically modelled
   down-core sections. It is specified as a vector, where each value indicates
@@ -66,12 +79,12 @@ overall mean accumulation rate is given a weak half-normal prior with mean
 mean accumulation rate estimated by fitting a robust linear model using
 \link[MASS]{rlm}.}
 
-\item{acc_shape}{Hyperparameter for the shape of the priors on accumulation rates.
-Defaults to 1.5 - as for Bacon 2.2.}
+\item{acc_shape}{Hyperparameter for the shape of the priors on accumulation
+rates. Defaults to 1.5 - as for Bacon 2.2.}
 
-\item{scale_shape}{Scale the shape parameter according to the number of hierarchical
-levels, to control the total variance of the alpha innovations. This defaults
-to TRUE as of Hamstr verion 0.5.}
+\item{scale_shape}{Scale the shape parameter according to the number of
+hierarchical levels, to control the total variance of the alpha
+innovations. This defaults to TRUE as of Hamstr verion 0.5.}
 
 \item{mem_mean}{Hyperparameter: a parameter of the Beta prior distribution on
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
@@ -103,7 +116,25 @@ times the mean observation error in obs_err.}
 
 \item{infl_shape_shape, infl_shape_mean}{Hyperparameters: parametrises the
 gamma prior on the shape of the distribution of the additional error terms.
- Default to 1, 1.}
+Default to 1, 1.}
+
+\item{model_bioturbation}{Defaults to FALSE. If TRUE, additional uncertainty in the
+observed ages due to sediment mixing (bioturbation) is modelled via a latent 
+variable process. The amount of additional uncertainty is a function of the 
+mixing depth L, the sedimentation rate, and the number of particles 
+(e.g. individual foraminifera) per measured date. See description for details.}
+
+\item{n_ind}{The number of individual particles (e.g. Foraminifera) in each 
+sample that was dated by e.g. radiocarbon dating. This can be a single value
+or a vector the same length as obs_age.}
+
+\item{L_prior_mean}{Mean of the gamma prior on mixing depth, defaults to 10.}
+
+\item{L_prior_shape, L_prior_sigma}{Shape and standard deviation of the gamma
+prior on the mixing depth. Set only one of these, the other will be 
+calculated. Defaults to shape = 2. If either the shape or sigma parameter is 
+set to zero, the mixing depth is fixed at the value of L_prior_mean, rather 
+than being sampled with a gamma prior.}
 
 \item{iter}{A positive integer specifying the number of iterations for each 
     chain (including warmup). The default is 2000.}
@@ -114,7 +145,7 @@ gamma prior on the shape of the distribution of the additional error terms.
 \item{...}{additional arguments to \link[rstan]{sampling}}
 }
 \value{
-Returns a list composed of the output from the Stan sampler .$fit,
+Returns a list composed of the output from the stan sampler .$fit,
   and the list of data passed to the sampler, .$data
 }
 \description{
