@@ -219,9 +219,8 @@ make_stan_dat_hamstr <- function(...) {
     if (l$model_bioturbation == TRUE){
 
       # check parameters
-      if (length(c(l$L_prior_sigma, l$L_prior_shape)) > 1)
-        stop("Specify only one of either L_prior_sigma or L_prior_shape.
-             The other will be calculated.")
+      if (is.null(l$L_prior_sigma) == FALSE)
+        message("L_prior_shape is being overriden by L_prior_sigma.")
 
       if (length(c(l$L_prior_sigma, l$L_prior_shape)) == 0)
         stop("One of either L_prior_sigma or L_prior_shape must be specified.
@@ -234,7 +233,7 @@ make_stan_dat_hamstr <- function(...) {
 
       l$n_ind <- l$n_ind[ord]
 
-      if (is.null(l$L_prior_shape)) {
+      if (is.null(l$L_prior_sigma) == FALSE) {
         if (l$L_prior_sigma == 0) l$L_prior_shape <- 0 else
           l$L_prior_shape <- gamma_sigma_shape(l$L_prior_mean, l$L_prior_sigma)$shape
       }

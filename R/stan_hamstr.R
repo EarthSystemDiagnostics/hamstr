@@ -2,11 +2,11 @@
 #' @param depth Depths of observed ages (age control points)
 #' @param obs_age Observed age at each depth (age control points)
 #' @param obs_err Error associated with each observed age (1 standard error)
-#' @param min_age The minimum age that the first modelled depth can be. Useful if
-#'   extrapolating above the shallowest age control point to e.g. the surface.
-#'   So set min_age to the year the core was collected. E.g. for a core collected
-#'   in 1990, with ages in years BP this would be -40 (present = 1950 by
-#'   convention). The default value is the current year in calendar age BP
+#' @param min_age The minimum age that the first modelled depth can be. Useful
+#'   if extrapolating above the shallowest age control point to e.g. the
+#'   surface. So set min_age to the year the core was collected. E.g. for a core
+#'   collected in 1990, with ages in years BP this would be -40 (present = 1950
+#'   by convention). The default value is the current year in calendar age BP
 #'   (currently -71 for 2021).
 #' @param top_depth,bottom_depth The top and bottom depths of the desired
 #'   age-depth model. Must encompass the range of the data. Defaults to the
@@ -55,20 +55,21 @@
 #'   defaults to 10 as in Bacon >= 2.5.1
 #' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 #'   not. Defaults to TRUE.
-#' @param model_bioturbation Defaults to FALSE. If TRUE, additional uncertainty in the
-#' observed ages due to sediment mixing (bioturbation) is modelled via a latent 
-#' variable process. The amount of additional uncertainty is a function of the 
-#' mixing depth L, the sedimentation rate, and the number of particles 
-#' (e.g. individual foraminifera) per measured date. See description for details.
-#' @param n_ind The number of individual particles (e.g. Foraminifera) in each 
-#' sample that was dated by e.g. radiocarbon dating. This can be a single value
-#' or a vector the same length as obs_age.
+#' @param model_bioturbation Defaults to FALSE. If TRUE, additional uncertainty
+#'   in the observed ages due to sediment mixing (bioturbation) is modelled via
+#'   a latent variable process. The amount of additional uncertainty is a
+#'   function of the mixing depth L, the sedimentation rate, and the number of
+#'   particles (e.g. individual foraminifera) per measured date. See description
+#'   for details.
+#' @param n_ind The number of individual particles (e.g. Foraminifera) in each
+#'   sample that was dated by e.g. radiocarbon dating. This can be a single
+#'   value or a vector the same length as obs_age.
 #' @param L_prior_mean Mean of the gamma prior on mixing depth, defaults to 10.
 #' @param L_prior_shape,L_prior_sigma Shape and standard deviation of the gamma
-#'  prior on the mixing depth. Set only one of these, the other will be 
-#'  calculated. Defaults to shape = 2. If either the shape or sigma parameter is 
-#'  set to zero, the mixing depth is fixed at the value of L_prior_mean, rather 
-#'  than being sampled with a gamma prior.
+#'   prior on the mixing depth. Set only one of these, the other will be
+#'   calculated. Defaults to shape = 2. If either the shape or sigma parameter
+#'   is set to zero, the mixing depth is fixed at the value of L_prior_mean,
+#'   rather than being sampled with a gamma prior.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
 #'   inflated so that data are consistent with a "Bacon-style" monotonic
 #'   age-depth model. This is an experimental feature under active development.
@@ -124,7 +125,9 @@ hamstr <- function(depth, obs_age, obs_err,
                    L_prior_shape = 2,
                    L_prior_sigma = NULL,
                    iter = 2000, chains = 3,
-                   seed = NA, ...){
+                   seed = NA,
+                   sample_posterior = TRUE,
+                   ...){
 
 
   stan_dat <- make_stan_dat_hamstr(depth = depth,
@@ -151,10 +154,15 @@ hamstr <- function(depth, obs_age, obs_err,
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 
-  fit <- rstan::sampling(stanmodels$hamstr,
-                         data = stan_dat, init = inits, iter = iter, chains = chains,
-                         seed = seed,
-                         verbose = FALSE, ...)
+  if (sample_posterior){
+    fit <- rstan::sampling(stanmodels$hamstr,
+                           data = stan_dat, init = inits, iter = iter, chains = chains,
+                           seed = seed,
+                           verbose = FALSE, ...)
+  } else if (sample_posterior == FALSE){
+    fit <- NA
+  }
+
 
   out <- list(fit=fit, data=stan_dat)
 
