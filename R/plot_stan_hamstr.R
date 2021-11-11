@@ -388,14 +388,15 @@ plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_
 
   acc_rates_long <- acc_rates %>%
     select(-depth) %>%
-    pivot_longer(cols = c("c_depth_top", "c_depth_bottom"), names_to = "depth_type", values_to = "depth")
+    pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
+                 names_to = "depth_type", values_to = "depth")
 
   acc_rates_long %>%
     filter(acc_rate_unit %in% units) %>%
     plot_downcore_summary(.) +
     ggplot2::labs(x = "Depth", y = "Accumulation rate") +
-    ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y")
-
+    ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
+    scale_y_log10() + annotation_logticks(sides = "l")
 
 }
 
@@ -749,7 +750,7 @@ plot_L_prior_posterior <- function(hamstr_fit){
     ) %>%
     dplyr::mutate(
       par = "L",
-      d = 2 * stats::dgamma(
+      d = stats::dgamma(
         .data$x,
         shape = L_shp,
         scale = L_mean / L_shp)
