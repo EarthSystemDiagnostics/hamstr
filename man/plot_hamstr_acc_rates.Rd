@@ -6,11 +6,17 @@
 \usage{
 plot_hamstr_acc_rates(
   hamstr_fit,
+  axis = c("depth", "age"),
   units = c("depth_per_time", "time_per_depth")
 )
 }
 \arguments{
 \item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+
+\item{axis}{Plot accumulation rate against depth or age}
+
+\item{units}{Plot accumulation rate in depth per time, or time per depth
+(or both)}
 }
 \value{
 

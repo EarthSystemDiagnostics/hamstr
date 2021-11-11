@@ -149,9 +149,9 @@ alpha_indices <- function(K){
 
 #' Convert between parametrisations of the gamma distribution
 #'
-#' @param mean
-#' @param sigma
-#' @param shape
+#' @param mean Mean of gamma distribution
+#' @param sigma Standard deviation of gamma distribution
+#' @param shape Shape of gamma distribution
 #'
 #' @return a list
 #' @keywords internal

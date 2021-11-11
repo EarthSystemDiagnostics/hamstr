@@ -15,7 +15,7 @@ plot_hamstr(
 \item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
 
 \item{summarise}{logical TRUE or FALSE. Plot the realisations as a summarised
-"ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot 
+"ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot
 showing individual realisations. Defaults to TRUE (ribbon).}
 
 \item{n.iter}{The number of iterations of the model to plot, defaults to
@@ -46,7 +46,7 @@ fit <- hamstr(
   mem_mean = 0.5, mem_strength = 10,
   inflate_errors = 0,
   iter = 2000, chains = 3)
-  
+
 # With age models summarised as a ribbon. Faster than spaghetti plots.
 plot_hamstr(fit)
 

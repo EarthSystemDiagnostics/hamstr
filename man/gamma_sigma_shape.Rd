@@ -7,11 +7,11 @@
 gamma_sigma_shape(mean, sigma = NULL, shape = NULL)
 }
 \arguments{
-\item{mean}{}
+\item{mean}{Mean of gamma distribution}
 
-\item{sigma}{}
+\item{sigma}{Standard deviation of gamma distribution}
 
-\item{shape}{}
+\item{shape}{Shape of gamma distribution}
 }
 \value{
 a list

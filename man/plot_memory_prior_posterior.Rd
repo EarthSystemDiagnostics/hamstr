@@ -26,7 +26,7 @@ fit <- hamstr(
   mem_mean = 0.5, mem_strength = 10,
   inflate_errors = 0,
   iter = 2000, chains = 3)
-  
+
 plot_memory_prior_posterior(fit)
 }
 }

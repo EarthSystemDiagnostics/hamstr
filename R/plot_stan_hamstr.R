@@ -39,7 +39,7 @@ plot.hamstr_fit <- function(object,
          default = plot_hamstr(object, summarise = summarise, ...),
          age_models = plot_hamstr(object, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
-         acc_rates = plot_hamstr_acc_rates(object),
+         acc_rates = plot_hamstr_acc_rates(object, ...),
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
          mem_prior_post = plot_memory_prior_posterior(object),
@@ -93,7 +93,8 @@ plot.hamstr_fit <- function(object,
 #' # With age models as spaghetti plots. Can see individual realisations, but slower to plot.
 #' plot_hamstr(fit, summarise = FALSE)
 #' }
-plot_hamstr <- function(hamstr_fit, summarise = TRUE, n.iter = 1000, plot_diagnostics = TRUE) {
+plot_hamstr <- function(hamstr_fit, summarise = TRUE,
+                        n.iter = 1000, plot_diagnostics = TRUE) {
 
   #summarise <- match.arg(summarise)
 
@@ -338,8 +339,8 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 add_colour_scale <- function(gg){
 
-  clrs <- c("Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey")
-  lbls <- c("Obs age", "Latent age", "Median", "Mean", "95%", "50%")
+  clrs <- c("DarkBlue", "Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey")
+  lbls <- c("Age point", "Obs age", "Latent age", "Median", "Mean", "95%", "50%")
 
   gg +
     ggplot2::scale_fill_identity(name = "Interval",
@@ -355,11 +356,15 @@ add_colour_scale <- function(gg){
 
 #' Plot Downcore Summary
 #' @param ds a downcore summary of age or accumulation rate
+#' @param axis units for the x axis, depth or age
 #' @return
 #' @keywords internal
-plot_downcore_summary <- function(ds){
+plot_downcore_summary <- function(ds, axis = c("depth", "age")){
+
+  axis <- match.arg(axis)
+
   p <- ds %>%
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean)) +
+    ggplot2::ggplot(ggplot2::aes_string(x = axis, y = "mean")) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`, fill = "Lightgrey")) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`, fill = "Darkgrey")) +
     ggplot2::geom_line(aes(colour = "Green")) +
@@ -375,28 +380,70 @@ plot_downcore_summary <- function(ds){
 
 #' Plot accumulation rates
 #' @inheritParams plot_hamstr
+#' @param axis Plot accumulation rate against depth or age
+#' @param units Plot accumulation rate in depth per time, or time per depth
+#' (or both)
 #' @return
 #' @keywords internal
-plot_hamstr_acc_rates <- function(hamstr_fit, units = c("depth_per_time", "time_per_depth")){
+plot_hamstr_acc_rates <- function(hamstr_fit,
+                                  axis = c("depth", "age"),
+                                  units = c("depth_per_time", "time_per_depth")
+                                  ){
 
   units <- match.arg(units,
-                     choices = c("depth_per_time", "time_per_depth"),
+                     #choices = c("depth_per_time", "time_per_depth"),
                      several.ok = TRUE)
 
+  axis <- match.arg(axis,
+                     #choices = c("depth_per_time", "time_per_depth"),
+                     several.ok = TRUE)
 
   acc_rates <- summarise_hamstr_acc_rates(hamstr_fit)
 
-  acc_rates_long <- acc_rates %>%
-    select(-depth) %>%
-    pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
-                 names_to = "depth_type", values_to = "depth")
+  if (axis == "depth"){
+    acc_rates_long <- acc_rates %>%
+      dplyr::select(-depth) %>%
+      tidyr::pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
+                          names_to = "depth_type", values_to = "depth")
 
-  acc_rates_long %>%
-    filter(acc_rate_unit %in% units) %>%
-    plot_downcore_summary(.) +
-    ggplot2::labs(x = "Depth", y = "Accumulation rate") +
-    ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
-    scale_y_log10() + annotation_logticks(sides = "l")
+    rug_dat <- data.frame(d = hamstr_fit$data$depth)
+
+    p <- acc_rates_long %>%
+      dplyr::filter(acc_rate_unit %in% units) %>%
+      plot_downcore_summary(.) +
+      ggplot2::labs(x = "Depth", y = "Accumulation rate") +
+      ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
+      ggplot2::scale_y_log10() +
+      ggplot2::annotation_logticks(sides = "l") +
+      ggplot2::geom_rug(data = rug_dat, aes(x = d, colour = "DarkBlue"),
+                        inherit.aes = FALSE)
+
+    p <- add_subdivisions(p, hamstr_fit = hamstr_fit)
+
+  } else if (axis == "age"){
+
+    median_age <- summary(hamstr_fit) %>%
+      #mutate(unit = "age") %>%
+      rename(age = `50%`) %>%
+      select(depth, age)
+
+    jnt <- left_join(median_age, acc_rates) %>%
+      filter(complete.cases(mean))
+
+    rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
+
+    p <- jnt %>%
+      dplyr::filter(acc_rate_unit %in% units) %>%
+      plot_downcore_summary(., axis = "age") +
+      ggplot2::labs(x = "Age", y = "Accumulation rate") +
+      ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
+      ggplot2::scale_y_log10() +
+      ggplot2::annotation_logticks(sides = "l") +
+      ggplot2::geom_rug(data = rug_dat, aes(x = a, colour = "DarkBlue"),
+                        inherit.aes = FALSE)
+  }
+
+  p
 
 }
 
@@ -477,8 +524,8 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
 
 #' Plot a Prior and Posterior
 #'
-#' @param prior
-#' @param posterior
+#' @param prior Numerical PDF of prior
+#' @param posterior Sample from posterior distribution
 #'
 #' @return A ggplot2 object
 #' @keywords internal
@@ -789,7 +836,7 @@ plot_14C_PDF <- function(hamstr_fit, nu = 6, cal_curve) {
 
 #' Add subdivision tickmarks
 #'
-#' @param gg
+#' @param gg A ggplot2 object
 #' @inheritParams plot_hamstr
 #'
 #' @return A ggplot2 object

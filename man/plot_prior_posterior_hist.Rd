@@ -7,9 +7,9 @@
 plot_prior_posterior_hist(prior, posterior)
 }
 \arguments{
-\item{prior}{}
+\item{prior}{Numerical PDF of prior}
 
-\item{posterior}{}
+\item{posterior}{Sample from posterior distribution}
 }
 \value{
 A ggplot2 object

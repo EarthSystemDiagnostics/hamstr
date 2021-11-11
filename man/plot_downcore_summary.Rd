@@ -4,10 +4,12 @@
 \alias{plot_downcore_summary}
 \title{Plot Downcore Summary}
 \usage{
-plot_downcore_summary(ds)
+plot_downcore_summary(ds, axis = c("depth", "age"))
 }
 \arguments{
 \item{ds}{a downcore summary of age or accumulation rate}
+
+\item{axis}{units for the x axis, depth or age}
 }
 \value{
 
