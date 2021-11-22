@@ -38,7 +38,7 @@ extract_hamstr_fit <- function(object, pars = c("ages"), ...){
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
 #'   obs_err = MSB2K$error)
-#'
+#'   
 #' get_posterior_parameters(fit)
 #' }
 get_posterior_parameters <- function(hamstr_fit){
@@ -95,8 +95,6 @@ get_posterior_ages <- function(hamstr_fit){
 }
 
 
-
-
 #' Interpolate Posterior Age Model At New Depths
 #'
 #' @inheritParams plot_hamstr
@@ -121,6 +119,7 @@ get_posterior_ages <- function(hamstr_fit){
 #' interpolate_age_models(fit, depth = seq(1000, 15000, by = 1000))
 #' }
 #'
+
 
 #' Interpolate Posterior Age Model At New Depths
 #'
@@ -314,13 +313,13 @@ predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
 #' }
 #' @export
 #' @method summary hamstr_fit
-summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates")){
+summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates"), ...){
 
   type <- match.arg(type)
 
   switch(type,
          age_models = summarise_age_models(object),
-         acc_rates = summarise_hamstr_acc_rates(object)
+         acc_rates = summarise_hamstr_acc_rates(object, ...)
   )
 }
 
@@ -433,17 +432,18 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau, kern){
     
   }
   
-  x_sum <- hamstr_acc_rates %>%
-    tidyr::pivot_longer(cols = c(time_per_depth, depth_per_time),
-                        names_to = "acc_rate_unit") %>%
-    dplyr::group_by(acc_rate_unit, iter) %>% 
-    dplyr::mutate(value = if (tau == 0) {value} else {
+  x_sum <- hamstr_acc_rates %>% 
+    dplyr::group_by(iter) %>% 
+    dplyr::mutate(time_per_depth = if (tau == 0) {time_per_depth} else {
       # pad the vector with reversed head and tail
       # fl is half the filter length
       stats::filter(
-        c(rev(head(value, fl)), value, rev(tail(value, fl))),
+        c(rev(head(time_per_depth, fl)), time_per_depth, rev(tail(time_per_depth, fl))),
         filter = f)[(fl+1):(dplyr::n()+fl)]
-    })
+    }) %>% 
+    dplyr::mutate(depth_per_time = 1000 * 1/time_per_depth)%>%
+    tidyr::pivot_longer(cols = c(time_per_depth, depth_per_time),
+                        names_to = "acc_rate_unit") 
   
   x_sum
   
@@ -451,7 +451,7 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau, kern){
 
 #' Summarise accumulation rates
 #'
-#' @param hamstr_fit
+#' @param hamstr_fit A hamstr_fit object
 #' @inheritParams filter_hamstr_acc_rates
 #' @return
 #' @keywords internal
@@ -460,7 +460,9 @@ summarise_hamstr_acc_rates <- function(hamstr_fit,
                                        kern = c("U", "G", "BH")
                                        ){
 
-  x <- get_posterior_acc_rates(hamstr_fit)
+  kern <- match.arg(kern)
+  
+  x <- predict(hamstr_fit, type = "acc_rates")
   x <- filter_hamstr_acc_rates(x, tau, kern)
   
   x_sum <- x %>%

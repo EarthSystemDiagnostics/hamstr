@@ -4,7 +4,7 @@
 \alias{summary.hamstr_fit}
 \title{Title}
 \usage{
-\method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates"))
+\method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates"), ...)
 }
 \arguments{
 \item{object}{hamstr_fit object}

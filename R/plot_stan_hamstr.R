@@ -17,6 +17,7 @@
 #'   obs_err = MSB2K$error)
 #'
 #' plot(fit)
+#' plot(fit, type = "acc_rates", tau = 5, kern = "U")
 #' }
 #' @export
 #' @method plot hamstr_fit
@@ -45,9 +46,8 @@ plot.hamstr_fit <- function(object,
          mem_prior_post = plot_memory_prior_posterior(object),
          L_prior_post  = plot_L_prior_posterior(object),
          PDF_14C = plot_14C_PDF(object, ...)
-         )
-
-}
+  )
+  }
 
 
 # Functions ------
@@ -83,7 +83,7 @@ plot.hamstr_fit <- function(object,
 #'   obs_err = MSB2K$error,
 #'   K = c(10, 10), nu = 6,
 #'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
+#'   mem_mean = 0.5, mem_strength= 10,
 #'   inflate_errors = 0,
 #'   iter = 2000, chains = 3)
 #'
@@ -208,7 +208,7 @@ plot_summary_age_models <- function(hamstr_fit){
 
 
 
-  if (hamstr_fit$data$inflate_errors == 1){
+ if (hamstr_fit$data$inflate_errors == 1){
     obs_ages <- obs_ages %>%
       dplyr::mutate(infl_err = infl_errs$mean,
                     age_lwr_infl = age + 2*infl_err,
@@ -233,7 +233,6 @@ plot_summary_age_models <- function(hamstr_fit){
                                                       colour = "Blue")
                         ) +
     labs(x = "Depth", y = "Age")
-
 
   p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
 
@@ -395,10 +394,10 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
   units <- match.arg(units,
                      #choices = c("depth_per_time", "time_per_depth"),
                      several.ok = TRUE)
-  
+
   axis <- match.arg(axis,
                     #choices = c("depth_per_time", "time_per_depth"),
-                    several.ok = TRUE)
+                    several.ok = FALSE)
   
   kern <- match.arg(kern)
   
@@ -417,34 +416,42 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
       plot_downcore_summary(.) +
       ggplot2::labs(x = "Depth", y = "Accumulation rate") +
       ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
-      ggplot2::scale_y_log10() +
-      ggplot2::annotation_logticks(sides = "l") +
+      #ggplot2::scale_y_log10() +
+      #ggplot2::annotation_logticks(sides = "l") +
       ggplot2::geom_rug(data = rug_dat, aes(x = d, colour = "DarkBlue"),
                         inherit.aes = FALSE)
     
-    p <- add_subdivisions(p, hamstr_fit = hamstr_fit)
+    if ("hamstr_fit" %in% class(hamstr_fit)){
+      p <- add_subdivisions(p, hamstr_fit = hamstr_fit)
+    }
+    
     
   } else if (axis == "age"){
     
     median_age <- summary(hamstr_fit) %>%
       #mutate(unit = "age") %>%
-      rename(age = `50%`) %>%
-      select(depth, age)
+      dplyr::rename(age = `50%`) %>%
+      dplyr::select(depth, age)
     
-    jnt <- left_join(median_age, acc_rates) %>%
-      filter(complete.cases(mean))
+    jnt <- dplyr::left_join(median_age, acc_rates) %>%
+      dplyr::filter(complete.cases(mean))
     
-    rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
+    
     
     p <- jnt %>%
       dplyr::filter(acc_rate_unit %in% units) %>%
       plot_downcore_summary(., axis = "age") +
       ggplot2::labs(x = "Age", y = "Accumulation rate") +
-      ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
-      ggplot2::scale_y_log10() +
-      ggplot2::annotation_logticks(sides = "l") +
-      ggplot2::geom_rug(data = rug_dat, aes(x = a, colour = "DarkBlue"),
-                        inherit.aes = FALSE)
+      ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") #+
+      #ggplot2::scale_y_log10() +
+      #ggplot2::annotation_logticks(sides = "l")
+    
+    if ("hamstr_fit" %in% class(hamstr_fit)){
+      rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
+      p <- p +
+        ggplot2::geom_rug(data = rug_dat, aes(x = a, colour = "DarkBlue"),
+                          inherit.aes = FALSE)
+    }
   }
   
   p
@@ -531,7 +538,6 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
 #'
 #' @param prior Numerical PDF of prior
 #' @param posterior Sample from posterior distribution
-#'
 #' @return A ggplot2 object
 #' @keywords internal
 #' @import ggplot2
@@ -575,7 +581,7 @@ plot_prior_posterior_hist <- function(prior, posterior){
 #'   obs_err = MSB2K$error,
 #'   K = c(10, 10), nu = 6,
 #'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
+#'   mem_mean = 0.5, mem_strength= 10,
 #'   inflate_errors = 0,
 #'   iter = 2000, chains = 3)
 #'
@@ -688,7 +694,6 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 #' }
 plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 
-
   prior_mean <- hamstr_fit$data$acc_mean_prior
 
   acc_prior_rng <- stats::qnorm(c(0.99), mean = 0, sd = 10 * prior_mean)
@@ -696,6 +701,7 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
   prior <-  tibble::tibble(
     x = seq(-1, acc_prior_rng[1], length.out = 1000)
     ) %>%
+
     dplyr::mutate(
       par = "acc_mean",
       d = 2 * stats::dnorm(.data$x, 0, 10 * prior_mean)
@@ -724,7 +730,6 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #' @return A ggplot2 object
 #' @import ggplot2
 #' @importFrom rlang .data
-#'
 #' @keywords internal
 #' @examples
 #' \dontrun{
@@ -768,6 +773,7 @@ plot_memory_prior_posterior <- function(hamstr_fit){
 
   return(p.mem)
 }
+
 
 #' Plot Mixing Depth Prior and Posterior
 #'
@@ -843,33 +849,33 @@ plot_14C_PDF <- function(hamstr_fit, nu = 6, cal_curve) {
 #'
 #' @param gg A ggplot2 object
 #' @inheritParams plot_hamstr
-#'
 #' @return A ggplot2 object
 #'
 #' @import ggplot2
 #'
 #' @keywords internal
-add_subdivisions <- function(gg, hamstr_fit){
-
+add_subdivisions <- function(gg, hamstr_fit) {
+  
   tick_dat <- hierarchical_depths(hamstr_fit$data)
-
-  for (x in seq_along(tick_dat)){
-
+  
+  for (x in seq_along(tick_dat)) {
+    
     df <- data.frame(x = tick_dat[[x]])
-
-    lnth <- length(tick_dat) - (x-1)
-
-    gg <- gg + ggplot2::geom_rug(data = df, ggplot2::aes(x = x),
-                        inherit.aes = F, sides = "top",
-                        length = ggplot2::unit(0.01*lnth, "npc"))
-
+    
+    lnth <- length(tick_dat) - (x - 1)
+    
+    gg <- gg + ggplot2::geom_rug(
+      data = df,
+      ggplot2::aes(x = x),
+      inherit.aes = F,
+      sides = "top",
+      length = ggplot2::unit(0.01 * lnth, "npc")
+      )
+    
   }
-
+  
   return(gg)
+  
 }
-
-
-
-
 
 

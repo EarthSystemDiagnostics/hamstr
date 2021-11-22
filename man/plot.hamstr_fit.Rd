@@ -37,5 +37,6 @@ fit <- hamstr(
   obs_err = MSB2K$error)
 
 plot(fit)
+plot(fit, type = "acc_rates", tau = 5, kern = "U")
 }
 }

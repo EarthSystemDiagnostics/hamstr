@@ -7,6 +7,8 @@
 summarise_hamstr_acc_rates(hamstr_fit, tau = 0, kern = c("U", "G", "BH"))
 }
 \arguments{
+\item{hamstr_fit}{A hamstr_fit object}
+
 \item{tau}{Scale of the smoothing kernel in depth units. If tau > 0,
 accumulation rates are smoothed (filtered) before summary statistics are 
 calculated, so that the accumulation rate at a given depth corresponds to the
