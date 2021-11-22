@@ -383,31 +383,35 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
 #' @param axis Plot accumulation rate against depth or age
 #' @param units Plot accumulation rate in depth per time, or time per depth
 #' (or both)
+#' @inheritParams filter_hamstr_acc_rates
 #' @return
 #' @keywords internal
 plot_hamstr_acc_rates <- function(hamstr_fit,
                                   axis = c("depth", "age"),
-                                  units = c("depth_per_time", "time_per_depth")
-                                  ){
-
+                                  units = c("depth_per_time", "time_per_depth"),
+                                  tau = 0, kern = c("U", "G", "BH")
+){
+  
   units <- match.arg(units,
                      #choices = c("depth_per_time", "time_per_depth"),
                      several.ok = TRUE)
-
+  
   axis <- match.arg(axis,
-                     #choices = c("depth_per_time", "time_per_depth"),
-                     several.ok = TRUE)
-
-  acc_rates <- summarise_hamstr_acc_rates(hamstr_fit)
-
+                    #choices = c("depth_per_time", "time_per_depth"),
+                    several.ok = TRUE)
+  
+  kern <- match.arg(kern)
+  
+  acc_rates <- summarise_hamstr_acc_rates(hamstr_fit, tau = tau, kern=kern)
+  
   if (axis == "depth"){
     acc_rates_long <- acc_rates %>%
       dplyr::select(-depth) %>%
       tidyr::pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
                           names_to = "depth_type", values_to = "depth")
-
+    
     rug_dat <- data.frame(d = hamstr_fit$data$depth)
-
+    
     p <- acc_rates_long %>%
       dplyr::filter(acc_rate_unit %in% units) %>%
       plot_downcore_summary(.) +
@@ -417,21 +421,21 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
       ggplot2::annotation_logticks(sides = "l") +
       ggplot2::geom_rug(data = rug_dat, aes(x = d, colour = "DarkBlue"),
                         inherit.aes = FALSE)
-
+    
     p <- add_subdivisions(p, hamstr_fit = hamstr_fit)
-
+    
   } else if (axis == "age"){
-
+    
     median_age <- summary(hamstr_fit) %>%
       #mutate(unit = "age") %>%
       rename(age = `50%`) %>%
       select(depth, age)
-
+    
     jnt <- left_join(median_age, acc_rates) %>%
       filter(complete.cases(mean))
-
+    
     rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
-
+    
     p <- jnt %>%
       dplyr::filter(acc_rate_unit %in% units) %>%
       plot_downcore_summary(., axis = "age") +
@@ -442,10 +446,11 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
       ggplot2::geom_rug(data = rug_dat, aes(x = a, colour = "DarkBlue"),
                         inherit.aes = FALSE)
   }
-
+  
   p
-
+  
 }
+
 
 
 #' Plot the hierarchical accumulation rate parameters

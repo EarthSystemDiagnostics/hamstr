@@ -4,7 +4,7 @@
 \alias{gamma_sigma_shape}
 \title{Convert between parametrisations of the gamma distribution}
 \usage{
-gamma_sigma_shape(mean, sigma = NULL, shape = NULL)
+gamma_sigma_shape(mean = NULL, mode = NULL, sigma = NULL, shape = NULL)
 }
 \arguments{
 \item{mean}{Mean of gamma distribution}

@@ -158,7 +158,26 @@ alpha_indices <- function(K){
 #'
 #' @examples
 #' gamma_sigma_shape(mean = 10, sigma = 2)
-gamma_sigma_shape <- function(mean, sigma=NULL, shape=NULL){
+gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
+  
+  if (is.null(mean) & is.null(mode)) stop("One of either the mean or mode must be specified")
+  if (is.null(shape) & is.null(sigma)) stop("One of either the shape or sigma must be specified")
+  
+  if (is.null(mean)==FALSE & is.null(mode)==FALSE) stop("Only one of the mean and mode can be specified")
+  if (is.null(shape)==FALSE & is.null(sigma)==FALSE) stop("Only one of the shape and sigma can be specified")
+  
+  if (is.null(mean)){
+    if (is.null(shape) == FALSE){
+      if (shape <= 1) stop("Gamma cannot be defined by mode and shape if shape <= 1")
+      mean <- (shape * mode) / (shape -1)
+    } else if (is.null(shape)){
+      shape <- -sigma^2 / (mode - sigma^2)
+      if (shape <= 1) stop("No solution for Gamma with this mode and sigma")
+      mean <- (shape * mode) / (shape -1)
+      rate <- shape / mean
+    }
+  }
+  
   if (is.null(sigma)){
     rate <- shape / mean
     sigma <- sqrt(shape/(rate^2))
@@ -166,7 +185,12 @@ gamma_sigma_shape <- function(mean, sigma=NULL, shape=NULL){
     rate <- mean / sigma^2
     shape <- mean^2 / sigma^2
   }
-  return(list(mean = mean, rate = rate, shape = shape, sigma = sigma))
+  
+  if (is.null(mode)){
+   mode <- (shape - 1) / rate 
+  }
+  
+  return(list(mean = mean, mode = mode, rate = rate, shape = shape, sigma = sigma))
 }
 
 
