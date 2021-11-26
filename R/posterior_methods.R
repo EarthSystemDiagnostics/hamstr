@@ -283,16 +283,16 @@ summarise_age_models <- function(hamstr_fit){
 #' @method predict hamstr_fit
 predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
                                depth = c("modelled", "data"),
-                               tau = 0,
-                               kern = c("U", "G", "BH"),
+                               #tau = 0,
+                               #kern = c("U", "G", "BH"),
                                ...){
   
   type <- match.arg(type)
   
   switch(type,
          age_models = interpolate_age_models(object, depth),
-         acc_rates = get_posterior_acc_rates(object, tau = tau,
-                                             kern = kern, ...)
+         acc_rates = get_posterior_acc_rates(object, #tau = tau, kern = kern,
+                                             ...)
   )
 }
 
@@ -317,14 +317,15 @@ predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
 #' @export
 #' @method summary hamstr_fit
 summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
-                               tau = 0, kern = c("U", "G", "BH"), ...){
+                               #tau = 0, kern = c("U", "G", "BH"),
+                               ...){
 
   type <- match.arg(type)
 
   switch(type,
          age_models = summarise_age_models(object),
          acc_rates = summarise_hamstr_acc_rates(object,
-                                                tau = tau, kern = kern,
+                                                #tau = tau, kern = kern,
                                                 ...)
   )
 }
