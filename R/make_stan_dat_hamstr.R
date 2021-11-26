@@ -259,7 +259,8 @@ make_stan_dat_hamstr <- function(...) {
 
       if (is.null(l$L_prior_sigma) == FALSE) {
         if (l$L_prior_sigma == 0) l$L_prior_shape <- 0 else
-          l$L_prior_shape <- gamma_sigma_shape(l$L_prior_mean, l$L_prior_sigma)$shape
+          l$L_prior_shape <- gamma_sigma_shape(mean = l$L_prior_mean,
+                                               sigma = l$L_prior_sigma)$shape
       }
 
     } else if(l$model_bioturbation == FALSE){

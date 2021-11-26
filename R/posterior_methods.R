@@ -441,9 +441,7 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau, kern){
         c(rev(head(time_per_depth, fl)), time_per_depth, rev(tail(time_per_depth, fl))),
         filter = f)[(fl+1):(dplyr::n()+fl)]
     }) %>% 
-    dplyr::mutate(depth_per_time = 1000 * 1/time_per_depth)%>%
-    tidyr::pivot_longer(cols = c(time_per_depth, depth_per_time),
-                        names_to = "acc_rate_unit") 
+    dplyr::mutate(depth_per_time = 1000 * 1/time_per_depth)
   
   x_sum
   
@@ -463,7 +461,9 @@ summarise_hamstr_acc_rates <- function(hamstr_fit,
   kern <- match.arg(kern)
   
   x <- predict(hamstr_fit, type = "acc_rates")
-  x <- filter_hamstr_acc_rates(x, tau, kern)
+  x <- filter_hamstr_acc_rates(x, tau, kern) %>%
+    tidyr::pivot_longer(cols = c(time_per_depth, depth_per_time),
+                        names_to = "acc_rate_unit") 
   
   x_sum <- x %>%
     dplyr::group_by(depth, c_depth_top, c_depth_bottom, acc_rate_unit, idx) %>%

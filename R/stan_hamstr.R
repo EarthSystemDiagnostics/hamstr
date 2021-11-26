@@ -150,7 +150,8 @@ hamstr <- function(depth, obs_age, obs_err,
                                    infl_shape_mean = infl_shape_mean,
                                    model_bioturbation = model_bioturbation,
                                    L_prior_mean = L_prior_mean,
-                                   L_prior_shape = L_prior_shape)
+                                   L_prior_shape = L_prior_shape,
+                                   L_prior_sigma = L_prior_sigma)
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 
