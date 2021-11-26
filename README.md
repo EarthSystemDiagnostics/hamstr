@@ -1,7 +1,7 @@
 hamstr: Hierarchical Accumulation Modelling with Stan and R.
 ================
 Andrew M. Dolman
-2021-11-01
+2021-11-26
 
 ------------------------------------------------------------------------
 
