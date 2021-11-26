@@ -4,10 +4,18 @@
 \alias{get_posterior_acc_rates}
 \title{Get Posterior Accumulation Rates}
 \usage{
-get_posterior_acc_rates(hamstr_fit)
+get_posterior_acc_rates(hamstr_fit, tau = 0, kern = "U")
 }
 \arguments{
 \item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+
+\item{tau}{Scale of the smoothing kernel in depth units. If tau > 0,
+accumulation rates are smoothed (filtered) before summary statistics are 
+calculated, so that the accumulation rate at a given depth corresponds to the
+average rate over the depth interval tau. Default to 0.}
+
+\item{kern}{Choice of smoothin kernal. U for uniform (moving average), G for
+Gaussian, BH for Berger and Heath (exponential). Defaults to U}
 }
 \value{
 a dataframe/tibble with posterior ages for all iterations after warmup
