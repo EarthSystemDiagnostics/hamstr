@@ -4,7 +4,7 @@
 \alias{get_posterior_acc_rates}
 \title{Get Posterior Accumulation Rates}
 \usage{
-get_posterior_acc_rates(hamstr_fit, tau = 0, kern = "U")
+get_posterior_acc_rates(hamstr_fit, tau = 0, kern = c("U", "G", "BH"))
 }
 \arguments{
 \item{hamstr_fit}{The object returned from \code{stan_hamstr}.}

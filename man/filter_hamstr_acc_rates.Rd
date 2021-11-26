@@ -4,7 +4,7 @@
 \alias{filter_hamstr_acc_rates}
 \title{Smooth accumulation rates}
 \usage{
-filter_hamstr_acc_rates(hamstr_acc_rates, tau, kern)
+filter_hamstr_acc_rates(hamstr_acc_rates, tau = 0, kern = c("U", "G", "BH"))
 }
 \arguments{
 \item{hamstr_acc_rates}{Accumulation rates from get_posterior_acc_rates}

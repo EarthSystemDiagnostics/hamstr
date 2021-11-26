@@ -282,10 +282,11 @@ summarise_age_models <- function(hamstr_fit){
 #' @export
 #' @method predict hamstr_fit
 predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
-                               depth = c("modelled", "data"), ...){
+                               depth = c("modelled", "data"),
+                               kern = c("U", "G", "BH"),
+                               ...){
   
   type <- match.arg(type)
-  
   
   switch(type,
          age_models = interpolate_age_models(object, depth),
@@ -362,7 +363,7 @@ summary.hamstr_interpolated_ages <- function(object){
 #'
 #' get_posterior_acc_rates(fit)
 #' }
-get_posterior_acc_rates <- function(hamstr_fit, tau=0, kern="U"){
+get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH")){
 
   depths <- tibble::as_tibble(
     hamstr_fit$data[c("c", "c_depth_top", "c_depth_bottom")]
@@ -402,8 +403,9 @@ get_posterior_acc_rates <- function(hamstr_fit, tau=0, kern="U"){
 #'  Gaussian, BH for Berger and Heath (exponential). Defaults to U
 #' @return
 #' @keywords internal
-filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau, kern){
+filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G", "BH")){
   
+  kern <- match.arg(kern)
   
   if (tau > 0){
     # scale tau by delta_c
@@ -461,10 +463,10 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau, kern){
 #' @keywords internal
 summarise_hamstr_acc_rates <- function(hamstr_fit,
                                        tau = 0,
-                                       kern = c("U", "G", "BH")
+                                       kern =  c("U", "G", "BH")
                                        ){
 
-  kern <- match.arg(kern)
+  #kern <- match.arg(kern)
   
   x <- predict(hamstr_fit, type = "acc_rates", tau = tau, kern = kern) %>%
     tidyr::pivot_longer(cols = c(time_per_depth, depth_per_time),

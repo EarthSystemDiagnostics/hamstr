@@ -8,6 +8,7 @@
   object,
   type = c("age_models", "acc_rates"),
   depth = c("modelled", "data"),
+  kern = c("U", "G", "BH"),
   ...
 )
 }
