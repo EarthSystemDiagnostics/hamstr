@@ -283,6 +283,7 @@ summarise_age_models <- function(hamstr_fit){
 #' @method predict hamstr_fit
 predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
                                depth = c("modelled", "data"),
+                               tau = 0,
                                kern = c("U", "G", "BH"),
                                ...){
   
@@ -314,7 +315,8 @@ predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
 #' }
 #' @export
 #' @method summary hamstr_fit
-summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates"), ...){
+summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
+                               tau = 0, kern = c("U", "G", "BH"), ...){
 
   type <- match.arg(type)
 

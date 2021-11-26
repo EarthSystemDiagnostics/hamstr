@@ -8,6 +8,7 @@
   object,
   type = c("age_models", "acc_rates"),
   depth = c("modelled", "data"),
+  tau = 0,
   kern = c("U", "G", "BH"),
   ...
 )

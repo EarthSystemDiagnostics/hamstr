@@ -31,6 +31,7 @@ plot.hamstr_fit <- function(object,
                               "L_prior_post",
                               "PDF_14C"
                               ),
+                            tau = 0, kern = c("U", "G", "BH"),
                             summarise = TRUE,
                             ...){
 

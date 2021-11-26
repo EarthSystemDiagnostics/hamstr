@@ -4,7 +4,13 @@
 \alias{summary.hamstr_fit}
 \title{Title}
 \usage{
-\method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates"), ...)
+\method{summary}{hamstr_fit}(
+  object,
+  type = c("age_models", "acc_rates"),
+  tau = 0,
+  kern = c("U", "G", "BH"),
+  ...
+)
 }
 \arguments{
 \item{object}{hamstr_fit object}
