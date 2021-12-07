@@ -316,7 +316,7 @@ predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
 #' }
 #' @export
 #' @method summary hamstr_fit
-summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
+summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars"),
                                #tau = 0, kern = c("U", "G", "BH"),
                                ...){
 
@@ -326,7 +326,13 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
          age_models = summarise_age_models(object),
          acc_rates = summarise_hamstr_acc_rates(object,
                                                 #tau = tau, kern = kern,
-                                                ...)
+                                                ...),
+         pars = summary(object$fit,
+                        par = c("alpha[1]", "R", "w", "L")
+                        )$summary %>% 
+           dplyr::as_tibble(., rownames = "Parameter") %>% 
+           dplyr::select(-se_mean)
+         
   )
 }
 

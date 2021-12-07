@@ -112,7 +112,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
   if (hamstr_fit$data$model_bioturbation == 1){
 
     post <- as.data.frame(hamstr_fit$fit, pars = c("bt_age")) %>%
-      as_tibble() %>%
+      dplyr::as_tibble() %>%
       dplyr::mutate(iter = 1:nrow(.)) %>%
       tidyr::pivot_longer(cols = -iter) %>%
       dplyr::mutate(dpt = readr::parse_number(name))
@@ -790,9 +790,9 @@ plot_L_prior_posterior <- function(hamstr_fit){
 
   if (hamstr_fit$data$L_prior_shape > 0){
     post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
-    as_tibble() %>%
-    pivot_longer(cols = everything(), names_to = "par", values_to = "x") %>%
-    mutate(dpt = readr::parse_number(par),
+    dplyr::as_tibble() %>%
+    tidyr::pivot_longer(cols = dplyr::everything(), names_to = "par", values_to = "x") %>%
+    dplyr::mutate(dpt = readr::parse_number(par),
            par = "L")
 
 

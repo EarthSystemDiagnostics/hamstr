@@ -224,6 +224,8 @@ make_stan_dat_hamstr <- function(...) {
     d <- data.frame(depth = l$depth, obs_age = l$obs_age)
     acc_mean <- stats::coef(MASS::rlm(obs_age~depth, data = d))[2]
 
+    acc_mean <- signif(acc_mean, 2)
+    
     # if negative replace with 20
     if (acc_mean <= 0) {
       warning("Estimated mean accumulation rate is negative - using value = 20")
