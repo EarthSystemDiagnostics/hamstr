@@ -549,14 +549,17 @@ plot_prior_posterior_hist <- function(prior, posterior){
   ggplot2::ggplot() +
     ggplot2::geom_histogram(data = posterior,
                    ggplot2::aes(x = x, ggplot2::after_stat(density),
-                       fill = "Posterior"),
-                   colour = clrs["Posterior"],
-                   alpha = 0.5, bins = 100) +
-    ggplot2::geom_line(data = prior, ggplot2::aes(x = x, y = d, colour = "Prior")) +
+                   fill = "Posterior"),
+                   #colour = clrs["Posterior"],
+                   colour = NA,
+                   alpha = 0.5, bins = 50) +
+    ggplot2::geom_line(data = prior, ggplot2::aes(x = x, y = d), colour = clrs["Prior"]) +
     ggplot2::facet_wrap(~par, scales = "free") +
-    ggplot2::scale_fill_manual(values = clrs) +
-    ggplot2::scale_colour_manual(values = clrs) +
-    ggplot2::guides(fill = ggplot2::guide_legend(override.aes = list(alpha = c(0.5))))+
+    ggplot2::scale_fill_manual(values = clrs, aesthetics = c("colour", "fill")) +
+    #ggplot2::scale_colour_manual(values = clrs) +
+    #ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(alpha = c(0.5, 0.5),
+     #                                                                  linetype = c(1, 1)))
+    #                )+
     ggplot2::labs(
       x = "Value",
       y = "Density",
@@ -750,29 +753,38 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #' }
 plot_memory_prior_posterior <- function(hamstr_fit){
   # memory prior
-  mem.prior <- tibble::tibble(mem = seq(0, 1, length.out = 1000)) %>%
-    dplyr::mutate(mem.dens = stats::dbeta(.data$mem, shape1 = hamstr_fit$data$mem_alpha,
-                            shape2 = hamstr_fit$data$mem_beta))
+  mem.prior <- tibble::tibble(x = seq(0, 1, length.out = 1000)) %>%
+    dplyr::mutate(d = stats::dbeta(.data$x, shape1 = hamstr_fit$data$mem_alpha,
+                            shape2 = hamstr_fit$data$mem_beta),
+                  par = "Memory at 1 depth unit")
 
   w <- rstan::extract(hamstr_fit$fit, "w")$w
   ifelse(is.matrix(w), w <- apply(w, 1, median),  w <- as.vector(w))
 
   mem.post <- tibble::tibble(w = w,
-                     R = as.vector(rstan::extract(hamstr_fit$fit, "R")$R))
+                     R = as.vector(rstan::extract(hamstr_fit$fit, "R")$R)) %>%
+    dplyr::rename(`Memory between sections` = w,
+                  `Memory at 1 depth unit` = R) %>% 
+    tidyr::pivot_longer(cols = c(`Memory between sections`, `Memory at 1 depth unit`),
+                        names_to = "par", values_to = "x")
 
+  p.mem <- plot_prior_posterior_hist(mem.prior, mem.post) +
+    expand_limits(x = c(0, 1))
 
-  p.mem <- mem.prior %>%
-    ggplot2::ggplot(ggplot2::aes(x = mem, y = mem.dens)) +
-    ggplot2::geom_density(data = mem.post, ggplot2::aes(x = R, fill = "at 1 cm 'R'"),
-                 inherit.aes = FALSE, show.legend = TRUE) +
-    ggplot2::geom_density(data = mem.post, ggplot2::aes(x = w, fill = "between\nsections 'w'"),
-                 inherit.aes = FALSE, show.legend = TRUE) +
-    ggplot2::geom_line(colour = "Red") +
-    ggplot2::scale_x_continuous("Memory [correlation]", limits = c(0, 1)) +
-    ggplot2::scale_y_continuous("") +
-    ggplot2::scale_fill_discrete("") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(legend.position = "top")
+  # p.mem <- mem.prior %>%
+  #   ggplot2::ggplot(ggplot2::aes(x = mem, y = mem.dens, fill = "R")) +
+  #   # ggplot2::geom_density(data = mem.post, ggplot2::aes(x = R, fill = "at 1 cm 'R'"),
+  #   #              inherit.aes = FALSE, show.legend = TRUE) +
+  #   # ggplot2::geom_density(data = mem.post, ggplot2::aes(x = w, fill = "between\nsections 'w'"),
+  #   #              inherit.aes = FALSE, show.legend = TRUE) +
+  #   ggplot2::geom_density(data = mem.post, ggplot2::aes(x = value, fill = parameter),
+  #                inherit.aes = FALSE, show.legend = TRUE) +
+  #   ggplot2::geom_line(colour = "Red") +
+  #   ggplot2::scale_x_continuous("Memory [correlation]", limits = c(0, 1)) +
+  #   ggplot2::scale_y_continuous("") +
+  #   ggplot2::scale_fill_manual("", values = c("R" = "Red", "w" = "Blue")) +
+  #   ggplot2::theme_bw() +
+  #   ggplot2::theme(legend.position = "top")
 
   return(p.mem)
 }
@@ -818,19 +830,19 @@ plot_L_prior_posterior <- function(hamstr_fit){
       )
 
   plot_prior_posterior_hist(L_prior, post)+
-    theme(
-      strip.background = element_blank(),
-      strip.text.x = element_blank()
+    ggplot2::theme(
+      strip.background = ggplot2::element_blank(),
+      strip.text.x = ggplot2::element_blank()
     ) +
-    labs(x = "Mixing depth [L]")
+    ggplot2::labs(x = "Mixing depth [L]")
   } else {
 
-    ggplot(data = tibble(x = hamstr_fit$data$L_prior_mean * c(1, 1), y = c(0, 1))) +
-      geom_line( aes(x = x , y = y, colour = "Fixed")) +
-      expand_limits(x = c(0, 2*hamstr_fit$data$L_prior_mean))+
-      labs(x = "Mixing depth [L]", y = "Density") +
-      theme_bw() +
-      scale_colour_manual("", values = c(Fixed = "Red"))
+    ggplot2::ggplot(data = tibble::tibble(x = hamstr_fit$data$L_prior_mean * c(1, 1), y = c(0, 1))) +
+      ggplot2::geom_line( aes(x = x , y = y, colour = "Fixed")) +
+      ggplot2::expand_limits(x = c(0, 2*hamstr_fit$data$L_prior_mean))+
+      ggplot2::labs(x = "Mixing depth [L]", y = "Density") +
+      ggplot2::theme_bw() +
+      ggplot2::scale_colour_manual("", values = c(Fixed = "Red"))
 
   }
 
