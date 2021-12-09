@@ -150,6 +150,7 @@ alpha_indices <- function(K){
 #' Convert between parametrisations of the gamma distribution
 #'
 #' @param mean Mean of gamma distribution
+#' @param mode Mode of the gamma distribution
 #' @param sigma Standard deviation of gamma distribution
 #' @param shape Shape of gamma distribution
 #'
@@ -171,10 +172,13 @@ gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
       if (shape <= 1) stop("Gamma cannot be defined by mode and shape if shape <= 1")
       mean <- (shape * mode) / (shape -1)
     } else if (is.null(shape)){
-      shape <- -sigma^2 / (mode - sigma^2)
+      
+      # from mode and sigma
+      rate = (mode + sqrt(mode^2 + 4*sigma^2)) / (2 * sigma^2)
+      shape = 1 + mode * rate
+      
       if (shape <= 1) stop("No solution for Gamma with this mode and sigma")
       mean <- (shape * mode) / (shape -1)
-      rate <- shape / mean
     }
   }
   
