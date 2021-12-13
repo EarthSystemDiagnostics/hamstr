@@ -348,12 +348,35 @@ make_stan_dat_hamstr <- function(...) {
     l$n_lvls <- length(l$K)
     l$scale_shape = as.numeric(l$scale_shape)
     l$model_bioturbation = as.numeric(l$model_bioturbation)
+    l$model_displacement = as.numeric(l$model_displacement)
     #l$K_idx <- l$lvl - 1
 
+    l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
+    l$I <- nrow(l$smooth_i)
 
   return(l)
 }
 
+
+get_smooth_i <- function(d, w){
+  
+  w <- (w / d$delta_c )
+  
+  ri <- (-floor(w/2):floor(w/2))
+  
+  mi <- sapply(d$which_c, function(x) x + ri)
+  
+  mi[mi <= 0] <- abs(mi[mi <= 0]) +1  
+  
+  #mi[mi > d$K_fine] <- mi[mi > d$K_fine]-(2*(mi[mi > d$K_fine] - d$K_fine)-1)
+  mi[mi > d$K_fine] <- 2*d$K_fine - mi[mi > d$K_fine] +1
+  
+  if (any(mi > d$K_fine)) stop("Acc rate smoothing index > K_fine")
+  if (any(mi < 1)) stop("Acc rate smoothing index < 1")
+  
+  mi
+  
+}
 
 #' Calculated depth of section boundary at all hierarchical levels
 #'
@@ -402,6 +425,18 @@ get_inits_hamstr <- function(stan_dat){
     l$infl_sd = numeric(0)
     l$infl = numeric(0)
   }
+  
+  # if (stan_dat$model_bioturbation == 1 & stan_dat$L_prior_shape > 0){
+  #   l$L = as.array(abs(stats::rnorm(1, stan_dat$L_prior_mean, stan_dat$L_prior_mean/3)))
+  # } else {
+  #   l$L = numeric(0)
+  # }
+  # 
+  # if (stan_dat$model_displacement == 1){
+  #   l$H = as.array(abs(stats::rnorm(1, stan_dat$H_prior_scale, stan_dat$H_prior_scale/3)))
+  # } else {
+  #   l$H = numeric(0)
+  # }
 
   return(l)
 }

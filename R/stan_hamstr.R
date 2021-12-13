@@ -124,8 +124,10 @@ hamstr <- function(depth, obs_age, obs_err,
                    L_prior_mean = 10,
                    L_prior_shape = 2,
                    L_prior_sigma = NULL,
+                   model_displacement = FALSE,
+                   H_prior_scale = 10,
                    iter = 2000, chains = 3,
-                   seed = NA,
+                   seed = 0,
                    sample_posterior = TRUE,
                    ...){
 
@@ -151,7 +153,9 @@ hamstr <- function(depth, obs_age, obs_err,
                                    model_bioturbation = model_bioturbation,
                                    L_prior_mean = L_prior_mean,
                                    L_prior_shape = L_prior_shape,
-                                   L_prior_sigma = L_prior_sigma)
+                                   L_prior_sigma = L_prior_sigma,
+                                   model_displacement = model_displacement,
+                                   H_prior_scale = H_prior_scale)
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 

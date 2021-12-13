@@ -63,6 +63,9 @@ data {
 
  // use bioturbation model or not
  int<lower=0, upper=1> model_bioturbation;
+ 
+ int<lower=0> I;
+ int smooth_i[I, N];
 
  real<lower = 0> L_prior_mean;
  real<lower = 0> L_prior_shape;
@@ -70,12 +73,19 @@ data {
 
  vector[N*model_bioturbation] n_ind;
  //vector[model_bioturbation ? 0 : N] n_ind;
+ 
+ 
+ // Additional data for modelling displacement
+ int<lower=0, upper=1> model_displacement;
+ real<lower = 0> H_prior_scale;
 
 }
 transformed data{
 
   // inverse scale of the prior on L
   real L_rate;
+  real H_rate;
+  
   int<lower = 0, upper = 1> sample_L;
   
   // transform mean and strength of memory beta distribution to alpha and beta
@@ -94,7 +104,6 @@ transformed data{
     acc_shape_adj = acc_shape;
   }
 
-//if (model_bioturbation == 1){
   L_rate = L_prior_shape / L_prior_mean;
   
   if (L_prior_shape == 0) {
@@ -103,8 +112,8 @@ transformed data{
     sample_L = 1;
   }
 
-// }
 
+ H_rate = 1/H_prior_scale;
 
 }
 parameters {
@@ -127,10 +136,13 @@ parameters {
 
   //real<lower = 0> L;
   real<lower = 0> L[model_bioturbation * sample_L];
-
+  
   // vector<lower = 0>[N] bt_error;
   vector<lower = 0>[model_bioturbation ? N : 0] bt_error;
  
+  real<lower = 0> H[model_displacement];
+  //vector[model_displacement ? N : 0] H_error;
+  
 }
 
 transformed parameters{
@@ -149,17 +161,20 @@ transformed parameters{
 
   // the inflated observation errors
   real<lower = 0> infl_shape[inflate_errors];
-  vector[inflate_errors ? N : 0] obs_err_infl;
-
+  
+  vector[(inflate_errors || model_displacement) ? N : 0] obs_err_infl;
+  //vector[model_displacement ? N : 0] obs_err_infl;
 
   // latent bioturbation corrected age
   //vector[model_bioturbation ? N : 0] bt_age;
   vector[model_bioturbation ? N : 0] bt_age;
-
+  vector[model_bioturbation ? N : 0] smooth_x;
+  
   // age heterogeneity due to bioturbation at locations of observed ages
-  vector[model_bioturbation ? N : 0] age_het;
+  vector[(model_bioturbation || model_displacement) ? N : 0] age_het;
 
-
+  vector<lower = 0>[model_displacement ? N : 0] disp_yrs;
+  
   if (scale_R == 1){
     w = R^(delta_c);
   } else {
@@ -194,26 +209,49 @@ transformed parameters{
   Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
 
 
- if (model_bioturbation == 1){
-   
-   if (sample_L == 1){
-     for (n in 1:N){
-       age_het[n] = L[1] * x[which_c[n]];
-       // the modelled (shifted) gamma distributed bioturbation error
-       // subtract the age_het to centre the error around the obs_age
-       bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
-       } 
-       }
-   
-    if (sample_L == 0){
-      for (n in 1:N){
-        age_het[n] = L_prior_mean * x[which_c[n]];
-        // the modelled (shifted) gamma distributed bioturbation error
-        // subtract the age_het to centre the error around the obs_age
-        bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
-        }
-        }
+if (model_bioturbation == 1 || model_displacement == 1){
+  for (n in 1:N){
+    smooth_x[n] =  mean(x[smooth_i[,n]]);
+    //smooth_x[n] =  x[which_c[n]];
   }
+}
+
+
+if (model_bioturbation == 1){
+  
+  if (sample_L == 1){
+    for (n in 1:N){
+      
+      age_het[n] = L[1] * smooth_x[n];
+      
+      // the modelled (shifted) gamma distributed bioturbation error
+      // subtract the age_het to centre the error around the obs_age
+      bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
+    } 
+    if (model_displacement == 1){
+      for (n in 1:N){
+        disp_yrs[n] = H[1] * smooth_x[n];
+        obs_err_infl[n] = sqrt((obs_err[n])^2 + (disp_yrs[n])^2); 
+      }
+    } 
+  }
+  
+  if (sample_L == 0){
+    for (n in 1:N){
+      age_het[n] = L_prior_mean * smooth_x[n];
+      // the modelled (shifted) gamma distributed bioturbation error
+      // subtract the age_het to centre the error around the obs_age
+      bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
+    }
+    if (model_displacement == 1){
+      for (n in 1:N){
+        disp_yrs[n] = H[1] * smooth_x[n];
+        obs_err_infl[n] = sqrt((obs_err[n])^2 + (disp_yrs[n])^2);  
+      }
+    } 
+  }
+} 
+  
 }
 
 
@@ -242,6 +280,14 @@ model {
     infl_mean ~ normal(0, infl_sigma_sd);
   }
 
+  if (model_displacement == 1){
+    
+    //H ~ exponential(H_rate);
+    H ~ normal(0, H_prior_scale);
+    //H_error ~ normal(0, disp_yrs);
+  }
+
+
 
   // bioturbation error model
 
@@ -252,7 +298,7 @@ model {
     // additional error in ages due to age-heterogeneity
     bt_error ~ gamma(n_ind, n_ind ./ age_het);
 
-    if (inflate_errors == 1){
+    if (inflate_errors == 1 || model_displacement == 1){
       // the Likelihood of the data given the model
       bt_age ~ student_t(nu, Mod_age, obs_err_infl);
     } else {
@@ -261,7 +307,7 @@ model {
 
 
   } else {
-    if (inflate_errors == 1){
+    if (inflate_errors == 1 || model_displacement == 1){
       // the Likelihood of the data given the model
       obs_age ~ student_t(nu, Mod_age, obs_err_infl);
     } else {
