@@ -374,6 +374,8 @@ get_smooth_i <- function(d, w){
   if (any(mi > d$K_fine)) stop("Acc rate smoothing index > K_fine")
   if (any(mi < 1)) stop("Acc rate smoothing index < 1")
   
+  if (is.matrix(mi) == FALSE) mi <- rbind(mi)
+  
   mi
   
 }
