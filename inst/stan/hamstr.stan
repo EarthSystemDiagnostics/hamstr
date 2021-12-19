@@ -1,12 +1,10 @@
 // Hamstr with additional error due to bioturbation
 // 11.10.2020 Andrew Dolman
-
 // Bioturbation modelling
 // Prior gamma distribution on L
 // vector of n_ind  = no. individual particles in a 14C measurement
 // latent variable approach - model bt_age,
-
-data {
+data{
   // age control points
   int<lower=0> N;
   vector[N] depth;
@@ -168,10 +166,10 @@ transformed parameters{
   // latent bioturbation corrected age
   //vector[model_bioturbation ? N : 0] bt_age;
   vector[model_bioturbation ? N : 0] bt_age;
-  vector[model_bioturbation ? N : 0] smooth_x;
+  vector[(model_bioturbation == 1 || model_displacement == 1) ? N : 0] smooth_x;
   
   // age heterogeneity due to bioturbation at locations of observed ages
-  vector[(model_bioturbation || model_displacement) ? N : 0] age_het;
+  vector[model_bioturbation ? N : 0] age_het;
 
   vector<lower = 0>[model_displacement ? N : 0] disp_yrs;
   
@@ -220,38 +218,31 @@ if (model_bioturbation == 1 || model_displacement == 1){
 if (model_bioturbation == 1){
   
   if (sample_L == 1){
-    for (n in 1:N){
-      
-      age_het[n] = L[1] * smooth_x[n];
-      
+      age_het = L[1] * smooth_x;
       // the modelled (shifted) gamma distributed bioturbation error
       // subtract the age_het to centre the error around the obs_age
-      bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
-    } 
+      bt_age = obs_age + bt_error - age_het;
+    
     if (model_displacement == 1){
-      for (n in 1:N){
-        disp_yrs[n] = H[1] * smooth_x[n];
-        obs_err_infl[n] = sqrt((obs_err[n])^2 + (disp_yrs[n])^2); 
-      }
+        disp_yrs = H[1] * smooth_x;
+        obs_err_infl = sqrt((obs_err .* obs_err) + (disp_yrs .* disp_yrs)); 
     } 
   }
-  
   if (sample_L == 0){
-    for (n in 1:N){
-      age_het[n] = L_prior_mean * smooth_x[n];
+      age_het = L_prior_mean * smooth_x;
       // the modelled (shifted) gamma distributed bioturbation error
       // subtract the age_het to centre the error around the obs_age
-      bt_age[n] = obs_age[n] + bt_error[n] - age_het[n];
-    }
-    if (model_displacement == 1){
-      for (n in 1:N){
-        disp_yrs[n] = H[1] * smooth_x[n];
-        obs_err_infl[n] = sqrt((obs_err[n])^2 + (disp_yrs[n])^2);  
-      }
-    } 
+      bt_age = obs_age + bt_error - age_het;
+    
+   
   }
 } 
-  
+
+ if (model_displacement == 1){
+        disp_yrs = H[1] * smooth_x;
+        obs_err_infl = sqrt((obs_err .* obs_err) + (disp_yrs .* disp_yrs));
+      } 
+
 }
 
 
