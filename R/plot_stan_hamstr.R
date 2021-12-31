@@ -31,7 +31,6 @@ plot.hamstr_fit <- function(object,
                               "L_prior_post",
                               "PDF_14C"
                               ),
-                            #tau = 0, kern = c("U", "G", "BH"),
                             summarise = TRUE,
                             ...){
 
@@ -42,7 +41,6 @@ plot.hamstr_fit <- function(object,
          age_models = plot_hamstr(object, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
          acc_rates = plot_hamstr_acc_rates(object,
-                                           #tau = tau, kern = kern,
                                            ...),
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
@@ -100,6 +98,8 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
                         n.iter = 1000, plot_diagnostics = TRUE) {
 
   #summarise <- match.arg(summarise)
+  
+  
 
   if (summarise == TRUE){
     p.fit <- plot_summary_age_models(hamstr_fit)
@@ -137,12 +137,22 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
 
   if (plot_diagnostics){
     p.mem <- plot_memory_prior_posterior(hamstr_fit)
-    p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
+    
+    
+    # only plot if model has been sampled
+    if (hamstr_fit$data$sample_posterior){
+     p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
 
     t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
       ggplot2::theme(legend.position = "top") +
       ggplot2::labs(x = "Iteration")
-
+ 
+    } else {
+      
+      p.acc <- NULL
+      t.lp <- NULL
+    }
+    
     if (hamstr_fit$data$model_bioturbation == 1){
       p.L <- plot_L_prior_posterior(hamstr_fit) +
         theme(legend.position = "top")
@@ -208,6 +218,7 @@ plot_summary_age_models <- function(hamstr_fit){
     
     gg <- add_datapoints(gg, obs_ages)
     gg <- add_subdivisions(gg, hamstr_fit)
+    gg <- add_colour_scale(gg)
     
     return(gg)
     
@@ -243,6 +254,8 @@ plot_summary_age_models <- function(hamstr_fit){
 
   p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
 
+  #p.age.sum <- add_colour_scale(p.age.sum)
+  
   p.age.sum
 }
 
@@ -253,13 +266,11 @@ add_datapoints <- function(gg, dat){
                             ggplot2::aes(x = depth,
                                          ymax = age_upr, ymin = age_lwr),
                             colour = "Blue",
-                            #alpha = 1,
                             group = NA,
                             inherit.aes = FALSE, size = 1.25) +
     ggplot2::geom_point(data = dat, ggplot2::aes(y = age,
-                                                 #alpha = 1,
-                                                 group = NA),
-                        colour = "Blue") +
+                                                 group = NA,
+                                         colour = "Blue")) +
     ggplot2::labs(x = "Depth", y = "Age")
 }
 
@@ -287,10 +298,8 @@ add_datapoints <- function(gg, dat){
 #' plot_age_models(fit)
 #' }
 plot_age_models <- function(hamstr_fit, n.iter = 1000){
-
-
-  posterior_ages <- get_posterior_ages(hamstr_fit)
-
+ 
+  
   obs_ages <- dplyr::tibble(
     depth = hamstr_fit$data$depth,
     age = hamstr_fit$data$obs_age,
@@ -300,6 +309,23 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
                             age_upr = .data$age + 2*.data$err,
                             age_lwr = .data$age - 2*.data$err)
 
+  if (hamstr_fit$data$sample_posterior == FALSE){
+    
+    gg <- ggplot2::ggplot(obs_ages, aes(x = depth, y = age)) +
+      geom_blank() +
+      theme_bw()
+    
+    gg <- add_datapoints(gg, obs_ages)
+    gg <- add_subdivisions(gg, hamstr_fit)
+    gg <- add_colour_scale(gg)
+    
+    return(gg)
+    
+  }
+  
+  posterior_ages <- get_posterior_ages(hamstr_fit)
+
+ 
   infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
     tibble::as_tibble(., rownames = "par") %>%
     dplyr::mutate(dat_idx = readr::parse_number(.data$par))
@@ -310,8 +336,8 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 
   p.fit <- p.fit +
-    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter))
-
+    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter), aes(colour = "grey0"))
+  
   if (hamstr_fit$data$inflate_errors == 1){
     obs_ages <- obs_ages %>%
       dplyr::mutate(infl_err = infl_errs$mean,
@@ -327,19 +353,10 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
         alpha = 0.5, inherit.aes = F)
   }
 
-  p.fit <- p.fit +
-    ggplot2::geom_linerange(
-      data = obs_ages,
-      ggplot2::aes(ymax = age_upr, ymin = age_lwr,
-      colour = "Blue"),
-      group = NA,
-      size = 1.2,
-      alpha = 1) +
-    ggplot2::theme_bw() +
+ 
+  p.fit <- add_datapoints(p.fit, obs_ages)+
     ggplot2::theme(panel.grid = ggplot2::element_blank()) +
-    ggplot2::labs(x = "Depth", y = "Age")
-
-  p.fit <- add_datapoints(p.fit, obs_ages)
+    ggplot2::theme_bw()
 
   # add subdivisions
   p.fit <- add_subdivisions(p.fit, hamstr_fit)
@@ -355,8 +372,8 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 add_colour_scale <- function(gg){
 
-  clrs <- c("DarkBlue", "Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey")
-  lbls <- c("Age point", "Obs age", "Latent age", "Median", "Mean", "95%", "50%")
+  clrs <- c("DarkBlue", "Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey", "grey0")
+  lbls <- c("Age point", "Obs age", "Latent age", "Median", "Mean", "95%", "50%", "Age models")
 
   gg +
     ggplot2::scale_fill_identity(name = "Interval",
@@ -414,13 +431,13 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
   axis <- match.arg(axis,
                     #choices = c("depth_per_time", "time_per_depth"),
-                    several.ok = FALSE)
+                    several.ok = TRUE)
   
   kern <- match.arg(kern)
   
   acc_rates <- summarise_hamstr_acc_rates(hamstr_fit, tau = tau, kern=kern)
   
-  if (axis == "depth"){
+  if ("depth" %in% axis){
     acc_rates_long <- acc_rates %>%
       dplyr::select(-depth) %>%
       tidyr::pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
@@ -428,7 +445,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
     
     rug_dat <- data.frame(d = hamstr_fit$data$depth)
     
-    p <- acc_rates_long %>%
+    p.depth <- acc_rates_long %>%
       dplyr::filter(acc_rate_unit %in% units) %>%
       plot_downcore_summary(.) +
       ggplot2::labs(x = "Depth", y = "Accumulation rate") +
@@ -439,11 +456,13 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
                         inherit.aes = FALSE)
     
     if ("hamstr_fit" %in% class(hamstr_fit)){
-      p <- add_subdivisions(p, hamstr_fit = hamstr_fit)
+      p.depth <- add_subdivisions(p.depth, hamstr_fit = hamstr_fit)
     }
     
     
-  } else if (axis == "age"){
+  } 
+  
+  if ("age" %in% axis){
     
     median_age <- summary(hamstr_fit) %>%
       #mutate(unit = "age") %>%
@@ -455,7 +474,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
     
     
     
-    p <- jnt %>%
+    p.age <- jnt %>%
       dplyr::filter(acc_rate_unit %in% units) %>%
       plot_downcore_summary(., axis = "age") +
       ggplot2::labs(x = "Age", y = "Accumulation rate") +
@@ -465,10 +484,18 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
     
     if ("hamstr_fit" %in% class(hamstr_fit)){
       rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
-      p <- p +
+      p.age <- p.age +
         ggplot2::geom_rug(data = rug_dat, aes(x = a, colour = "DarkBlue"),
                           inherit.aes = FALSE)
     }
+  }
+  
+  if (length(axis) == 2){
+    p <- ggpubr::ggarrange(p.depth, p.age, nrow = 2)
+  } else if (axis == "depth"){
+    p <- p.depth
+  } else {
+    p <- p.age
   }
   
   p
@@ -571,9 +598,10 @@ plot_prior_posterior_hist <- function(prior, posterior){
                    alpha = 0.5, bins = 50) 
   }
     gg +
-    ggplot2::geom_line(data = prior, ggplot2::aes(x = x, y = d), colour = clrs["Prior"]) +
+    ggplot2::geom_line(data = prior, ggplot2::aes(x = x, y = d, colour = "Prior")) +
     ggplot2::facet_wrap(~par, scales = "free") +
-    ggplot2::scale_colour_manual(values = clrs, aesthetics = c("colour", "fill")) +
+    ggplot2::scale_colour_manual("", values = clrs[2], aesthetics = c("colour")) +
+    ggplot2::scale_fill_manual("", values = clrs[1], aesthetics = c("fill")) +
     ggplot2::labs(
       x = "Value",
       y = "Density",
@@ -581,7 +609,7 @@ plot_prior_posterior_hist <- function(prior, posterior){
       fill = ""
     ) +
       expand_limits(y = 0) +
-    ggplot2::theme_bw()
+    ggplot2::theme_bw() 
 }
 
 
@@ -795,7 +823,8 @@ plot_memory_prior_posterior <- function(hamstr_fit){
   }
  
   p.mem <- plot_prior_posterior_hist(mem.prior, mem.post) +
-    expand_limits(x = c(0, 1))
+    expand_limits(x = c(0, 1)) +
+    theme(legend.position = "top")
 
   
   return(p.mem)
