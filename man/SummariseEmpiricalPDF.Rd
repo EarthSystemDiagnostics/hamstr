@@ -42,4 +42,3 @@ plot(x2, y2)
 SummariseEmpiricalPDF(x2, y2)
 }
 }
-\keyword{internal}

@@ -113,7 +113,7 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
 #'  probability, the first is returned.
 #' @return Returns a named vector with the mean, median, mode, and standard
 #' deviation of the empirical PDF
-#' @keywords internal
+#' @export
 #' @examples
 #' \dontrun{#'
 #' df <- data.frame(x = 1:10)
