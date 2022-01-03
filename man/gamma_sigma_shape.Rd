@@ -9,6 +9,8 @@ gamma_sigma_shape(mean = NULL, mode = NULL, sigma = NULL, shape = NULL)
 \arguments{
 \item{mean}{Mean of gamma distribution}
 
+\item{mode}{Mode of the gamma distribution}
+
 \item{sigma}{Standard deviation of gamma distribution}
 
 \item{shape}{Shape of gamma distribution}

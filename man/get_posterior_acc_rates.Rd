@@ -38,3 +38,4 @@ fit <- hamstr(
 get_posterior_acc_rates(fit)
 }
 }
+\keyword{internal}

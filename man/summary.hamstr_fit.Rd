@@ -4,7 +4,7 @@
 \alias{summary.hamstr_fit}
 \title{Title}
 \usage{
-\method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates"), ...)
+\method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates", "pars"), ...)
 }
 \arguments{
 \item{object}{hamstr_fit object}
@@ -12,6 +12,12 @@
 \item{type}{age models "age_models" or accumulation rates "acc_rates"}
 }
 \value{
+
+}
+\description{
+Title
+}
+\examples{
 \dontrun{
 fit <- hamstr(
   depth = MSB2K$depth,
@@ -22,7 +28,4 @@ fit <- hamstr(
 summary(fit)
 summary(fit, type = c("acc_rates"))
 }
-}
-\description{
-Title
 }

@@ -72,7 +72,7 @@ AdjustK <- function(K_fine, base){
 #' @param K_fine total number of sections at the finest resolution
 #'
 #' @return a vector
-#' @export
+#' @keywords internal
 #' @examples
 #' default_K(100)
 #' default_K(500)
@@ -96,7 +96,7 @@ default_K <- function(K_fine){
 #' @param n Number of hierarchical levels
 #'
 #' @return
-#' @export
+#' @keywords internal
 #'
 #' @examples
 #' hierarchy_efficiency(10, 3)

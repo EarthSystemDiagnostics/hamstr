@@ -1,10 +1,11 @@
 Package: hamstr
 Type: Package
 Title: Hierarchical Accumulation Modelling with Stan and R
-Version: 0.6.0
+Version: 0.6.1
 Encoding: UTF-8
 Authors@R: c(person("Andrew", "Dolman", email = "andrew.dolman@awi.de", role = c("aut", "cre")))
-Description: hamstr implements a "Bacon-like" Bayesian sediment accumulation or age-depth model with hierarchically structured multi-resolution discrete sediment sections. The Bayesian model is implemented in the Stan probabilistic programming language (https://mc-stan.org/). "Blaauw, Maarten, and J. Andrés Christen. 2011. 'Flexible Paleoclimate   Age-Depth Models Using an Autoregressive Gamma Process.'  Bayesian Analysis 6 (3): 457-74. doi:10.1214/ba/1339616472"
+Description: hamstr implements a Bacon-like sediment accumulation or age-depth model (Blaauw and Christen 2011) with hierarchically structured multi-resolution discrete sediment sections. The Bayesian model is implemented in the Stan probabilistic programming language (https://mc-stan.org/).
+References: Blaauw, Maarten, and J. Andrés Christen. 2011. 'Flexible Paleoclimate Age-Depth Models Using an Autoregressive Gamma Process.' Bayesian Analysis 6 (3): 457-74. doi:10.1214/ba/1339616472
 License: GPL-3
 LazyData: true
 Biarch: true

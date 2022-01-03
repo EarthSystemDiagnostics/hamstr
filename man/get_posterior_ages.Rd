@@ -30,3 +30,4 @@ fit <- hamstr(
 get_posterior_ages(fit)
 }
 }
+\keyword{internal}

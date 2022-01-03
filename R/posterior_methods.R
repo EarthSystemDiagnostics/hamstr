@@ -1,67 +1,12 @@
-# Extractor functions
-
-#' Extract posterior age models or parameters
-#'
-#' @param object hamstr_fit object
-#' @param pars The parameters to extract. If pars = "ages" (the default) a special
-#' method is invoke to return the age-depth models. If pars = "pars" the memory parameters
-#' and the overall mean accumulation rate are returned. Any other specification
-#' invokes the default rstan as.data.frame extract method for the use specified parameters.
-#' @param ... Other arguments to rstan::extract
-#' @return
-#'
-#' @importFrom rstan extract
-#' @export
-#'
-extract_hamstr_fit <- function(object, pars = c("ages"), ...){
-
-  switch(pars[1],
-         ages = get_posterior_ages(object),
-         pars = get_posterior_parameters(object),
-                as.data.frame(object$fit, pars = pars, ...)
-         )
-
-}
-
-
-#' Get Posterior Parameters
-#'
-#' @inheritParams plot_hamstr
-#'
-#' @return a dataframe/tibble with posterior ages for all iterations after warmup
-#' @export
-#' @importFrom readr parse_number
-#' @importFrom rstan extract
-#' @examples
-#' \dontrun{
-#' fit <- hamstr(
-#'   depth = MSB2K$depth,
-#'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error)
-#'   
-#' get_posterior_parameters(fit)
-#' }
-get_posterior_parameters <- function(hamstr_fit){
-
-  posterior_pars <- as.data.frame(hamstr_fit$fit,
-                                  pars = c("R", "w", "alpha[1]")) %>%
-    tibble::as_tibble() %>%
-    dplyr::mutate(iter = 1:nrow(.))
-
-  return(posterior_pars)
-
-}
-
+# Extractor functions -------
 
 #' Get Posterior Age Models
-#'
 #' @inheritParams plot_hamstr
-#'
 #' @return a dataframe/tibble with posterior ages for all iterations after warmup
-#' @export
 #' @importFrom readr parse_number
 #' @importFrom rstan extract
-#' @examples
+#' @keywords internal
+#' @examples 
 #' \dontrun{
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -94,31 +39,6 @@ get_posterior_ages <- function(hamstr_fit){
   return(posterior_ages)
 }
 
-
-#' Interpolate Posterior Age Model At New Depths
-#'
-#' @inheritParams plot_hamstr
-#' @param depth a vector of depths at which to interpolate the age models.
-#' If left NULL, the depths of the age control points are used.
-#'
-#' @return hamstr_interpolated_ages object
-#' @keywords internal
-#'
-#' @examples
-#' \dontrun{
-#' fit <- hamstr(
-#'   depth = MSB2K$depth,
-#'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
-#'
-#' interpolate_age_models(fit, depth = seq(1000, 15000, by = 1000))
-#' }
-#'
 
 
 #' Interpolate Posterior Age Model At New Depths
@@ -259,6 +179,7 @@ summarise_age_models <- function(hamstr_fit){
 #' @description Method for generic function predict. Returns the posterior age
 #' models interpolated to new depths given in depth.
 #' @param object hamstr_fit object
+#' @param type age models "age_models" or accumulation rates "acc_rates"
 #' @param depth Defaults to "modelled", which returns the modelled depths.
 #' "data" returns age models at the depths of the observations, or a numerical
 #'  vector to specify depths. Accumulation rates are only returned at the 
@@ -281,7 +202,8 @@ summarise_age_models <- function(hamstr_fit){
 #'
 #' @export
 #' @method predict hamstr_fit
-predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
+predict.hamstr_fit <- function(object,
+                               type = c("age_models", "acc_rates"),
                                depth = c("modelled", "data"),
                                #tau = 0,
                                #kern = c("U", "G", "BH"),
@@ -304,6 +226,7 @@ predict.hamstr_fit <- function(object, type = c("age_models", "acc_rates"),
 #' @param type age models "age_models" or accumulation rates "acc_rates"
 #'
 #' @return
+#' @examples 
 #' \dontrun{
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
@@ -358,7 +281,7 @@ summary.hamstr_interpolated_ages <- function(object){
 #' @inheritParams filter_hamstr_acc_rates
 #'
 #' @return a dataframe/tibble with posterior ages for all iterations after warmup
-#' @export
+#' @keywords internal
 #' @importFrom readr parse_number
 #' @importFrom rstan extract
 #' @examples

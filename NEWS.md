@@ -1,3 +1,8 @@
+# hamstr 0.6.1
+
+* Smoothing of accumulation rates in plots and output
+
+
 # hamstr 0.6.0
 
 * Ability added to model age-heterogeneity from bioturbation and its effect on age models.
