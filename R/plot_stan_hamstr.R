@@ -72,7 +72,7 @@ plot.hamstr_fit <- function(object,
 #'   points with +- 2*se error bars.
 #'
 #' @return A ggplot2 object
-#' @export
+#' @keywords internal
 #' @importFrom ggpubr ggarrange
 #' @importFrom rstan extract
 #' @importFrom magrittr %>%
