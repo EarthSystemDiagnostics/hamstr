@@ -14,29 +14,11 @@ If left NULL, the depths of the age control points are used.}
 }
 \value{
 hamstr_interpolated_ages object
-
-hamstr_interpolated_ages object
 }
 \description{
 Interpolate Posterior Age Model At New Depths
 }
 \examples{
-\dontrun{
-fit <- hamstr(
-  depth = MSB2K$depth,
-  obs_age = MSB2K$age,
-  obs_err = MSB2K$error,
-  K = c(10, 10), nu = 6,
-  acc_mean_prior = 20,
-  mem_mean = 0.5, mem_strength = 10,
-  inflate_errors = 0,
-  iter = 2000, chains = 3)
-
-interpolate_age_models(fit, depth = seq(1000, 15000, by = 1000))
-}
-
-Interpolate Posterior Age Model At New Depths
-
 \dontrun{
 fit <- hamstr(
   depth = MSB2K$depth,

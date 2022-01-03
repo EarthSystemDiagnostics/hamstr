@@ -54,3 +54,4 @@ plot_hamstr(fit)
 plot_hamstr(fit, summarise = FALSE)
 }
 }
+\keyword{internal}

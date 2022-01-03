@@ -12,6 +12,12 @@
 \item{type}{age models "age_models" or accumulation rates "acc_rates"}
 }
 \value{
+
+}
+\description{
+Title
+}
+\examples{
 \dontrun{
 fit <- hamstr(
   depth = MSB2K$depth,
@@ -22,7 +28,4 @@ fit <- hamstr(
 summary(fit)
 summary(fit, type = c("acc_rates"))
 }
-}
-\description{
-Title
 }

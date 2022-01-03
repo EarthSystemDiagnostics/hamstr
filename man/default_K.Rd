@@ -19,3 +19,4 @@ Default K structure
 default_K(100)
 default_K(500)
 }
+\keyword{internal}

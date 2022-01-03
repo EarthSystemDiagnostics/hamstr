@@ -20,3 +20,4 @@ Calculate number of parameters being estimated for a given hierarchical structur
 \examples{
 hierarchy_efficiency(10, 3)
 }
+\keyword{internal}
