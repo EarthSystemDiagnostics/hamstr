@@ -74,8 +74,19 @@ data{
   int<lower=0, upper=1> model_displacement;
   real<lower = 0> D_prior_scale;
   
+  int<lower=0, upper=1> smooth_s;
+  
+  // Model hiatuses
+  
+  int<lower=0, upper=1> model_hiatus;
+  
+  
 }
 transformed data{
+  
+  real min_depth = min(c_depth_top);
+  real max_depth = max(c_depth_bottom);
+  real data_age_range = max(obs_age) - min(obs_age);
   
   // inverse scale of the prior on L
   real L_rate;
@@ -111,6 +122,7 @@ transformed data{
   
   D_rate = 1/D_prior_scale;
   
+  
 }
 parameters {
   // AR1 coeffiecient at 1 depth unit
@@ -136,6 +148,8 @@ parameters {
   
   real<lower = 0> D[model_displacement];
   
+  real<lower = min_depth, upper = max_depth> H_depth[model_hiatus];
+  real<lower = 0, upper = data_age_range> H_length[model_hiatus];
 }
 
 transformed parameters{
@@ -188,14 +202,30 @@ transformed parameters{
   c_ages[1] = age0;
   c_ages[2:(K_fine+1)] = age0 + cumulative_sum(x * delta_c);
   
+  
+  
+  // hiatus vector
+  if (model_hiatus == 1){
+    for (i in 2:(K_fine+1)){
+      if (H_depth[1] < c_depth_top[i-1]) c_ages[i] = c_ages[i] + H_length[1];
+      }
+      }
+ 
+  
   // age model interpolated to the positions of the observations
   Mod_age = c_ages[which_c] + x[which_c] .* (depth - c_depth_top[which_c]);
   
   
+  
   if (model_bioturbation == 1 || model_displacement == 1){
-    for (n in 1:N){
-      smooth_x[n] =  mean(x[smooth_i[,n]]);
-      //smooth_x[n] =  x[which_c[n]];
+    if (smooth_s == 1){
+      for (n in 1:N){
+        smooth_x[n] =  mean(x[smooth_i[,n]]);
+      } 
+    } else {
+      for (n in 1:N){
+        smooth_x[n] =  x[which_c[n]];
+      } 
     }
   }
   
@@ -256,7 +286,7 @@ model {
     infl_mean ~ normal(0, infl_sigma_sd);
     infl ~ gamma(infl_shape[1], infl_shape[1] / infl_mean[1]);
   }
-   
+  
   // bioturbation error model
   
   // parameters that are zero length do not get sampled

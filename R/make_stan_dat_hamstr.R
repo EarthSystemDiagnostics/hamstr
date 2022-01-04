@@ -349,6 +349,8 @@ make_stan_dat_hamstr <- function(...) {
     l$scale_shape = as.numeric(l$scale_shape)
     l$model_bioturbation = as.numeric(l$model_bioturbation)
     l$model_displacement = as.numeric(l$model_displacement)
+    l$smooth_s = as.numeric(l$smooth_s)
+    l$model_hiatus = as.numeric(l$model_hiatus)
     #l$K_idx <- l$lvl - 1
 
     l$smooth_i <- get_smooth_i(l, l$L_prior_mean)

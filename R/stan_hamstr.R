@@ -131,9 +131,11 @@ hamstr <- function(depth, obs_age, obs_err,
                    L_prior_sigma = NULL,
                    model_displacement = FALSE,
                    D_prior_scale = 10,
+                   smooth_s = FALSE,
                    iter = 2000, chains = 3,
                    seed = 0,
                    sample_posterior = TRUE,
+                   model_hiatus = FALSE,
                    ...){
 
 
@@ -160,7 +162,10 @@ hamstr <- function(depth, obs_age, obs_err,
                                    L_prior_shape = L_prior_shape,
                                    L_prior_sigma = L_prior_sigma,
                                    model_displacement = model_displacement,
-                                   D_prior_scale = D_prior_scale)
+                                   D_prior_scale = D_prior_scale,
+                                   smooth_s = smooth_s, 
+                                   model_hiatus = model_hiatus
+                                   )
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 
