@@ -200,7 +200,7 @@ gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
 
 #' Make the data object required by the Stan program
 #'
-#' @inheritParams hamstr
+#' @param ... Arguments passed from \code{\link{hamstr}}
 #'
 #' @return a list of data and parameters to be passed as data to the Stan sampler
 #' @keywords internal
@@ -435,7 +435,7 @@ get_inits_hamstr <- function(stan_dat){
   # }
   # 
   # if (stan_dat$model_displacement == 1){
-  #   l$H = as.array(abs(stats::rnorm(1, stan_dat$H_prior_scale, stan_dat$H_prior_scale/3)))
+  #   l$H = as.array(abs(stats::rnorm(1, stan_dat$D_prior_scale, stan_dat$D_prior_scale/3)))
   # } else {
   #   l$H = numeric(0)
   # }

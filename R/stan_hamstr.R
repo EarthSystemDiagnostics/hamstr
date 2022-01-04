@@ -70,6 +70,11 @@
 #'   calculated. Defaults to shape = 2. If either the shape or sigma parameter
 #'   is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 #'   rather than being sampled with a gamma prior.
+#' @param D_prior_scale Scale of the half-normal prior on additional error on
+#'   observed ages that does not scale with the number of individual particles
+#'   in a sample, for example due to incomplete mixing. The mean and standard
+#'   deviation of a half-normal are equal to the scale. Units are those of the
+#'   depth variable, e.g. cm.
 #' @param inflate_errors logical: If set to TRUE, observation errors are
 #'   inflated so that data are consistent with a "Bacon-style" monotonic
 #'   age-depth model. This is an experimental feature under active development.
@@ -81,10 +86,10 @@
 #'   gamma prior on the shape of the distribution of the additional error terms.
 #'   Default to 1, 1.
 #' @param ... additional arguments to \link[rstan]{sampling}
-#' @inheritParams rstan::sampling
-#'
-#' @return Returns a list composed of the output from the stan sampler .$fit,
-#'   and the list of data passed to the sampler, .$data
+#' @inheritParams rstan::sampling#'
+#' @return Returns an object of class "hamstr_fit", which is a list composed of
+#'  the output from the stan sampler .$fit, and the list of data passed to the
+#'  sampler, .$data
 #' @export
 #'
 #' @examples
@@ -125,7 +130,7 @@ hamstr <- function(depth, obs_age, obs_err,
                    L_prior_shape = 2,
                    L_prior_sigma = NULL,
                    model_displacement = FALSE,
-                   H_prior_scale = 10,
+                   D_prior_scale = 10,
                    iter = 2000, chains = 3,
                    seed = 0,
                    sample_posterior = TRUE,
@@ -155,7 +160,7 @@ hamstr <- function(depth, obs_age, obs_err,
                                    L_prior_shape = L_prior_shape,
                                    L_prior_sigma = L_prior_sigma,
                                    model_displacement = model_displacement,
-                                   H_prior_scale = H_prior_scale)
+                                   D_prior_scale = D_prior_scale)
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
 

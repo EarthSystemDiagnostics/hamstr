@@ -4,7 +4,7 @@
 \alias{plot_prior_posterior_hist}
 \title{Plot a Prior and Posterior}
 \usage{
-plot_prior_posterior_hist(prior, posterior)
+plot_prior_posterior_hist(prior, posterior, bins = 50)
 }
 \arguments{
 \item{prior}{Numerical PDF of prior}

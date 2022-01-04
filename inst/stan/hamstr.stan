@@ -72,14 +72,14 @@ data{
   
   // Additional data for modelling displacement
   int<lower=0, upper=1> model_displacement;
-  real<lower = 0> H_prior_scale;
+  real<lower = 0> D_prior_scale;
   
 }
 transformed data{
   
   // inverse scale of the prior on L
   real L_rate;
-  real H_rate;
+  real D_rate;
   
   int<lower = 0, upper = 1> sample_L;
   
@@ -109,7 +109,7 @@ transformed data{
   }
   
   
-  H_rate = 1/H_prior_scale;
+  D_rate = 1/D_prior_scale;
   
 }
 parameters {
@@ -134,7 +134,7 @@ parameters {
   
   vector<lower = 0>[model_bioturbation ? N : 0] bt_error;
   
-  real<lower = 0> H[model_displacement];
+  real<lower = 0> D[model_displacement];
   
 }
 
@@ -220,7 +220,7 @@ transformed parameters{
   } 
   
   if (inflate_errors == 1 && model_displacement == 1){
-    disp_yrs = H[1] * smooth_x;
+    disp_yrs = D[1] * smooth_x;
     obs_err_infl = sqrt((obs_err .* obs_err) + (infl .* infl) + (disp_yrs .* disp_yrs));
     infl_shape[1] = infl_shape_1[1] + 1;
   } else if (inflate_errors == 1 && model_displacement == 0){
@@ -229,7 +229,7 @@ transformed parameters{
     obs_err_infl[n] = sqrt((obs_err[n])^2 + (infl[n])^2);
     infl_shape[1] = infl_shape_1[1] + 1;
   } else if (inflate_errors == 0 && model_displacement == 1){
-    disp_yrs = H[1] * smooth_x;
+    disp_yrs = D[1] * smooth_x;
     obs_err_infl = sqrt((obs_err .* obs_err) + (disp_yrs .* disp_yrs));
   }
   
@@ -261,7 +261,7 @@ model {
   
   // parameters that are zero length do not get sampled
   L ~ gamma(L_prior_shape, L_rate);
-  H ~ normal(0, H_prior_scale);
+  D ~ normal(0, D_prior_scale);
   
   // additional error in ages due to age-heterogeneity
   bt_error ~ gamma(n_ind, n_ind ./ age_het);

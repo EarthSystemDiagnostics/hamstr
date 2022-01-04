@@ -29,9 +29,11 @@ hamstr(
   L_prior_mean = 10,
   L_prior_shape = 2,
   L_prior_sigma = NULL,
+  model_displacement = FALSE,
+  D_prior_scale = 10,
   iter = 2000,
   chains = 3,
-  seed = NA,
+  seed = 0,
   sample_posterior = TRUE,
   ...
 )
@@ -138,6 +140,11 @@ prior on the mixing depth. Set only one of these, the other will be
 calculated. Defaults to shape = 2. If either the shape or sigma parameter
 is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 rather than being sampled with a gamma prior.}
+
+\item{D_prior_scale}{The mean and standard deviation of the half-normal prior
+on additional error on observed ages that does not scale with the number
+of individual particles in a sample. For example due to incomplete mixing. 
+Units are those of the depth variabel, e.g. cm.}
 
 \item{iter}{A positive integer specifying the number of iterations for each 
     chain (including warmup). The default is 2000.}

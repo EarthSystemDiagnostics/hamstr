@@ -7,7 +7,7 @@
 make_stan_dat_hamstr(...)
 }
 \arguments{
-\item{...}{additional arguments to \link[rstan]{sampling}}
+\item{...}{Arguments passed from \code{\link{hamstr}}}
 }
 \value{
 a list of data and parameters to be passed as data to the Stan sampler

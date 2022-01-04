@@ -29,6 +29,7 @@ plot.hamstr_fit <- function(object,
                               "acc_mean_prior_post",
                               "mem_prior_post",
                               "L_prior_post",
+                              "D_prior_post",
                               "PDF_14C"
                               ),
                             summarise = TRUE,
@@ -45,7 +46,8 @@ plot.hamstr_fit <- function(object,
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
          mem_prior_post = plot_memory_prior_posterior(object),
-         L_prior_post  = plot_L_prior_posterior(object),
+         L_prior_post = plot_L_prior_posterior(object),
+         D_prior_post = plot_D_prior_posterior(object), 
          PDF_14C = plot_14C_PDF(object, ...)
   )
   }
@@ -136,14 +138,18 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
   if (plot_diagnostics == FALSE) return(p.fit)
 
   if (plot_diagnostics){
-    p.mem <- plot_memory_prior_posterior(hamstr_fit)
     
+    
+    p.mem <- plot_memory_prior_posterior(hamstr_fit) +
+      ggplot2::labs(x = "AR1 coefficient") +
+      ggplot2::theme(panel.grid = ggplot2::element_blank())
     
     # only plot if model has been sampled
     if (hamstr_fit$data$sample_posterior){
      p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
 
     t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
+      ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top") +
       ggplot2::labs(x = "Iteration")
  
@@ -153,23 +159,28 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
       t.lp <- NULL
     }
     
+    diag.list <- list(t.lp, p.acc, p.mem)
+    
+    
     if (hamstr_fit$data$model_bioturbation == 1){
       p.L <- plot_L_prior_posterior(hamstr_fit) +
         theme(legend.position = "top")
 
-      p.fit <- ggpubr::ggarrange(
-        p.fit,
-
-        ggpubr::ggarrange(t.lp, p.L, p.acc, p.mem, ncol = 4, widths = c(3,3,3,3)),
-
-        nrow = 2, heights = c(2, 1))
-    } else {
-      p.fit <- ggpubr::ggarrange(
-        p.fit,
-        ggpubr::ggarrange(t.lp, p.acc, p.mem, ncol = 3, widths = c(3,3,3)),
-
-        nrow = 2, heights = c(2, 1))
+      diag.list <- append(diag.list, list(p.L))
     }
+    
+    if (hamstr_fit$data$model_displacement == 1){
+      p.D <- plot_D_prior_posterior(hamstr_fit) +
+        theme(legend.position = "top")
+      
+      diag.list <- append(diag.list, list(p.D))
+    }
+    
+    
+    p.fit <- ggpubr::ggarrange(
+      p.fit,
+      ggpubr::ggarrange(plotlist = diag.list, ncol = length(diag.list)),
+      nrow = 2, heights = c(2, 1))
 
     return(p.fit)
 
@@ -585,21 +596,24 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
 #' @return A ggplot2 object
 #' @keywords internal
 #' @import ggplot2
-plot_prior_posterior_hist <- function(prior, posterior){
+plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
   
   gg <- ggplot2::ggplot() 
   
   if (is.null(posterior) == FALSE){
+    
+    bw <- sd(posterior$x) / 2
+    
     gg <- gg + ggplot2::geom_histogram(data = posterior,
                    ggplot2::aes(x = x, ggplot2::after_stat(density),
                    fill = "Posterior"),
                    colour = NA,
-                   alpha = 0.5, bins = 50) 
+                   alpha = 0.5, binwidth = bw) 
   }
     gg +
     ggplot2::geom_line(data = prior, ggplot2::aes(x = x, y = d, colour = "Prior")) +
-    ggplot2::facet_wrap(~par, scales = "free") +
+    ggplot2::facet_wrap(~par, scales = "free_y", ncol = 1) +
     ggplot2::scale_colour_manual("", values = clrs[2], aesthetics = c("colour")) +
     ggplot2::scale_fill_manual("", values = clrs[1], aesthetics = c("fill")) +
     ggplot2::labs(
@@ -748,13 +762,16 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
   acc_prior_rng <- stats::qnorm(c(0.999), mean = 0, sd = 10 * prior_mean)
 
   prior <-  tibble::tibble(
-    x = seq(-1, acc_prior_rng[1], length.out = 1000)
+    x = seq(0, acc_prior_rng[1], length.out = 1000)
     ) %>%
 
     dplyr::mutate(
       par = "acc_mean",
       d = 2 * stats::dnorm(.data$x, 0, 10 * prior_mean)
     )
+  
+  prior$d[prior$x <= 0] <- 0
+  
 
   if (hamstr_fit$data$sample_posterior == TRUE){
     post <-
@@ -852,7 +869,7 @@ plot_L_prior_posterior <- function(hamstr_fit){
   L_shp <- hamstr_fit$data$L_prior_shape
   L_mean <- hamstr_fit$data$L_prior_mean
 
-  L_prior_rng <- stats::qgamma(c(0.0001, 0.999),
+  L_prior_rng <- stats::qgamma(c(0, 0.999),
                                shape = L_shp,
                                scale = L_mean / L_shp)
 
@@ -888,6 +905,57 @@ plot_L_prior_posterior <- function(hamstr_fit){
   }
 
   }
+
+
+#' Plot Displacement Depth Prior and Posterior
+#'
+#' @inheritParams plot_hamstr
+#'
+#' @return A ggplot2 object
+#' @import ggplot2
+#' @importFrom rlang .data
+#' @keywords internal
+plot_D_prior_posterior <- function(hamstr_fit) {
+  
+  prior_mean <- hamstr_fit$data$D_prior_scale
+  
+  prior_rng <- stats::qnorm(c(0.999), mean = 0, sd = prior_mean)
+  
+  prior <-  tibble::tibble(
+    x = seq(0, prior_rng[1], length.out = 1000)
+  ) %>%
+    
+    dplyr::mutate(
+      par = "D",
+      d = 2 * stats::dnorm(.data$x, 0, prior_mean)
+    )
+  
+  prior$d[prior$x <= 0] <- 0
+  
+  if (hamstr_fit$data$sample_posterior == TRUE){
+    post <-
+      tibble::tibble(x = as.vector(rstan::extract(hamstr_fit$fit, "D[1]")[[1]]))
+  } else {
+    post <- NULL
+  }
+  
+  p <- plot_prior_posterior_hist(prior, post) +
+    theme(
+      strip.background = element_blank(),
+      strip.text.x = element_blank()
+    ) +
+    labs(x = "Displacement [D]", y = "Density")
+  
+  return(p)
+  
+}
+
+
+
+
+
+
+
 
 
 plot_14C_PDF <- function(hamstr_fit, nu = 6, cal_curve) {
