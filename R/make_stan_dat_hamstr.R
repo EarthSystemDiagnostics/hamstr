@@ -351,6 +351,9 @@ make_stan_dat_hamstr <- function(...) {
     l$model_displacement = as.numeric(l$model_displacement)
     l$smooth_s = as.numeric(l$smooth_s)
     l$model_hiatus = as.numeric(l$model_hiatus)
+    if (is.null(l$H_top)) l$H_top = l$top_depth
+    if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
+    
     #l$K_idx <- l$lvl - 1
 
     l$smooth_i <- get_smooth_i(l, l$L_prior_mean)

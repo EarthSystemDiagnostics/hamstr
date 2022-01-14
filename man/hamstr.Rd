@@ -31,10 +31,14 @@ hamstr(
   L_prior_sigma = NULL,
   model_displacement = FALSE,
   D_prior_scale = 10,
+  smooth_s = FALSE,
   iter = 2000,
   chains = 3,
   seed = 0,
   sample_posterior = TRUE,
+  model_hiatus = FALSE,
+  H_top = NULL,
+  H_bottom = NULL,
   ...
 )
 }
@@ -141,10 +145,11 @@ calculated. Defaults to shape = 2. If either the shape or sigma parameter
 is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 rather than being sampled with a gamma prior.}
 
-\item{D_prior_scale}{The mean and standard deviation of the half-normal prior
-on additional error on observed ages that does not scale with the number
-of individual particles in a sample. For example due to incomplete mixing. 
-Units are those of the depth variabel, e.g. cm.}
+\item{D_prior_scale}{Scale of the half-normal prior on additional error on
+observed ages that does not scale with the number of individual particles
+in a sample, for example due to incomplete mixing. The mean and standard
+deviation of a half-normal are equal to the scale. Units are those of the
+depth variable, e.g. cm.}
 
 \item{iter}{A positive integer specifying the number of iterations for each 
     chain (including warmup). The default is 2000.}
@@ -161,11 +166,20 @@ Units are those of the depth variabel, e.g. cm.}
     The seed can also be specified as a character string of digits, such as
     \code{"12345"}, which is converted to integer.}
 
+\item{sample_posterior}{Defaults to TRUE, set to FALSE to return an empty 
+model which can be plotted to view the data and prior distributions}
+
+\item{model_hiatus}{Optionally model an hiatus.}
+
+\item{H_top, H_bottom}{Limits to the location of an hiatus. By default these
+are set to the top and bottom data points but can be set by the user}
+
 \item{...}{additional arguments to \link[rstan]{sampling}}
 }
 \value{
-Returns a list composed of the output from the stan sampler .$fit,
-  and the list of data passed to the sampler, .$data
+Returns an object of class "hamstr_fit", which is a list composed of
+ the output from the stan sampler .$fit, and the list of data passed to the
+ sampler, .$data
 }
 \description{
 hamstr

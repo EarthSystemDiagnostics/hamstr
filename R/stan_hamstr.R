@@ -85,8 +85,13 @@
 #' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
 #'   gamma prior on the shape of the distribution of the additional error terms.
 #'   Default to 1, 1.
+#' @param sample_posterior Defaults to TRUE, set to FALSE to return an empty 
+#' model which can be plotted to view the data and prior distributions
+#' @param model_hiatus Optionally model an hiatus. 
+#' @param H_top,H_bottom Limits to the location of an hiatus. By default these
+#' are set to the top and bottom data points but can be set by the user 
 #' @param ... additional arguments to \link[rstan]{sampling}
-#' @inheritParams rstan::sampling#'
+#' @inheritParams rstan::sampling
 #' @return Returns an object of class "hamstr_fit", which is a list composed of
 #'  the output from the stan sampler .$fit, and the list of data passed to the
 #'  sampler, .$data
@@ -136,6 +141,7 @@ hamstr <- function(depth, obs_age, obs_err,
                    seed = 0,
                    sample_posterior = TRUE,
                    model_hiatus = FALSE,
+                   H_top = NULL, H_bottom = NULL,
                    ...){
 
 
@@ -164,7 +170,8 @@ hamstr <- function(depth, obs_age, obs_err,
                                    model_displacement = model_displacement,
                                    D_prior_scale = D_prior_scale,
                                    smooth_s = smooth_s, 
-                                   model_hiatus = model_hiatus
+                                   model_hiatus = model_hiatus,
+                                   H_top = H_top, H_bottom = H_bottom,
                                    )
 
   inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))

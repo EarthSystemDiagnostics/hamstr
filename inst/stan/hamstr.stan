@@ -79,7 +79,8 @@ data{
   // Model hiatuses
   
   int<lower=0, upper=1> model_hiatus;
-  
+  real H_top;
+  real H_bottom;
   
 }
 transformed data{
@@ -148,7 +149,7 @@ parameters {
   
   real<lower = 0> D[model_displacement];
   
-  real<lower = min_depth, upper = max_depth> H_depth[model_hiatus];
+  real<lower = H_top, upper = H_bottom> H_depth[model_hiatus];
   real<lower = 0, upper = data_age_range> H_length[model_hiatus];
 }
 
