@@ -104,7 +104,7 @@ hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
 
 The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.
 
-```{r}
+```{r, fig.height=7}
 plot(hamstr_fit_1)
 ```
 

@@ -1,3 +1,8 @@
+
+# hamstr 0.6.2
+
+* Ability to model hiatuses
+
 # hamstr 0.6.1
 
 * Smoothing of accumulation rates in plots and output
