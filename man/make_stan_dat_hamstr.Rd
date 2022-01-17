@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_stan_dat_hamstr.R
 \name{make_stan_dat_hamstr}
 \alias{make_stan_dat_hamstr}
-\title{Make the data object required by the Stan program}
+\title{Make the data object required by the Stan sampler}
 \usage{
 make_stan_dat_hamstr(...)
 }
@@ -13,6 +13,6 @@ make_stan_dat_hamstr(...)
 a list of data and parameters to be passed as data to the Stan sampler
 }
 \description{
-Make the data object required by the Stan program
+Make the data object required by the Stan sampler
 }
 \keyword{internal}

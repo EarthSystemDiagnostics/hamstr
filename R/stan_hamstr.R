@@ -10,9 +10,7 @@
 #'   (currently -71 for 2021).
 #' @param top_depth,bottom_depth The top and bottom depths of the desired
 #'   age-depth model. Must encompass the range of the data. Defaults to the
-#'   shallowest and deepest data points unless \code{pad_top_bottom = TRUE}
-#' @param pad_top_bottom logical, pad the length of the age-depth model by 5% on
-#'   each end
+#'   shallowest and deepest data points.
 #' @param K K controls the number and structure of the hierarchically modelled
 #'   down-core sections. It is specified as a vector, where each value indicates
 #'   the number of new child sections for each parent section, e.g., c(10, 10,
@@ -28,10 +26,6 @@
 #'   The default hierarchical structure is chosen so that the number of
 #'   hierarchical levels, and the number of new child sections per level, are
 #'   approximately equal, e.g. c(5, 5, 5) for a total of 125 sections.
-#' @param nu Degrees of freedom for the Student-t distributed error model.
-#'   Defaults to 6, which is equivalent to the default parameterisation of
-#'   t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
-#'   error model, (nu = 100 should do it).
 #' @param acc_mean_prior Hyperparameter for the prior on the overall mean
 #'   accumulation rate for the record. Units are obs_age / depth. E.g. if depth
 #'   is in cm and age in years then the accumulation rate is in years/cm. The
@@ -41,9 +35,6 @@
 #'   \link[MASS]{rlm}.
 #' @param acc_shape Hyperparameter for the shape of the priors on accumulation
 #'   rates. Defaults to 1.5 - as for Bacon 2.2.
-#' @param scale_shape Scale the shape parameter according to the number of
-#'   hierarchical levels, to control the total variance of the alpha
-#'   innovations. This defaults to TRUE as of Hamstr verion 0.5.
 #' @param mem_mean Hyperparameter: a parameter of the Beta prior distribution on
 #'   "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 #'   The prior on the correlation between layers is scaled according to the
@@ -53,8 +44,6 @@
 #'   0.5), while *w* = R^(delta_c)
 #' @param mem_strength Hyperparameter: sets the strength of the memory prior,
 #'   defaults to 10 as in Bacon >= 2.5.1
-#' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
-#'   not. Defaults to TRUE.
 #' @param model_bioturbation Defaults to FALSE. If TRUE, additional uncertainty
 #'   in the observed ages due to sediment mixing (bioturbation) is modelled via
 #'   a latent variable process. The amount of additional uncertainty is a
@@ -70,21 +59,12 @@
 #'   calculated. Defaults to shape = 2. If either the shape or sigma parameter
 #'   is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 #'   rather than being sampled with a gamma prior.
+#' @param model_displacement Model additional error on observed ages that does 
+#' not scale with the number of individual particles in a sample, for example 
+#' due to incomplete mixing.
 #' @param D_prior_scale Scale of the half-normal prior on additional error on
-#'   observed ages that does not scale with the number of individual particles
-#'   in a sample, for example due to incomplete mixing. The mean and standard
-#'   deviation of a half-normal are equal to the scale. Units are those of the
-#'   depth variable, e.g. cm.
-#' @param inflate_errors logical: If set to TRUE, observation errors are
-#'   inflated so that data are consistent with a "Bacon-style" monotonic
-#'   age-depth model. This is an experimental feature under active development.
-#'   Defaults to FALSE.
-#' @param infl_sigma_sd Hyperparameter: sets the standard deviation of the
-#'   half-normal prior on the mean of the additional error terms. Defaults to 10
-#'   times the mean observation error in obs_err.
-#' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
-#'   gamma prior on the shape of the distribution of the additional error terms.
-#'   Default to 1, 1.
+#'   observed ages. The mean and standard deviation of a half-normal are equal 
+#'   to the scale. Units are those of the depth variable, e.g. cm.
 #' @param model_hiatus Optionally model an hiatus.
 #' @param H_top,H_bottom Limits to the location of an hiatus. By default these
 #'   are set to the top and bottom data points but can be set by the user
@@ -95,6 +75,25 @@
 #' @param stan_sampler_args Additional arguments to \link[rstan]{sampling} as a
 #' named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
 #' iterations instead of the default 4 chains of 2000 iterations. 
+#' @param scale_shape Scale the shape parameter according to the number of
+#'   hierarchical levels, to control the total variance of the alpha
+#'   innovations. This defaults to TRUE as of Hamstr verion 0.5.
+#' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
+#'   not. Defaults to TRUE.
+#' @param nu Degrees of freedom for the Student-t distributed error model.
+#'   Defaults to 6, which is equivalent to the default parameterisation of
+#'   t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
+#'   error model, (nu = 100 should do it).
+#' @param inflate_errors logical: If set to TRUE, observation errors are
+#'   inflated so that data are consistent with a "Bacon-style" monotonic
+#'   age-depth model. This is an experimental feature under active development.
+#'   Defaults to FALSE.
+#' @param infl_sigma_sd Hyperparameter: sets the standard deviation of the
+#'   half-normal prior on the mean of the additional error terms. Defaults to 10
+#'   times the mean observation error in obs_err.
+#' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
+#'   gamma prior on the shape of the distribution of the additional error terms.
+#'   Default to 1, 1.
 #' @return Returns an object of class "hamstr_fit", which is a list composed of
 #'   the output from the stan sampler .$fit, and the list of data passed to the
 #'   sampler, .$data
@@ -115,16 +114,10 @@ hamstr <- function(depth, obs_age, obs_err,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
                    K = NULL,
                    top_depth = NULL, bottom_depth = NULL,
-                   pad_top_bottom = FALSE,
+                   #pad_top_bottom = FALSE,
                    acc_mean_prior = NULL,
                    acc_shape = 1.5,
-                   scale_shape = TRUE,
                    mem_mean = 0.5, mem_strength = 10,
-                   scale_R = TRUE,
-                   nu = 6,
-                   inflate_errors = FALSE,
-                   infl_sigma_sd = NULL,
-                   infl_shape_shape = 1, infl_shape_mean = 1,
                    model_bioturbation = FALSE,
                    n_ind = NULL,
                    L_prior_mean = 10,
@@ -132,40 +125,49 @@ hamstr <- function(depth, obs_age, obs_err,
                    L_prior_sigma = NULL,
                    model_displacement = FALSE,
                    D_prior_scale = 10,
-                   smooth_s = FALSE,
                    model_hiatus = FALSE,
                    H_top = NULL, H_bottom = NULL,
                    sample_posterior = TRUE,
-                   stan_sampler_args = list()){
+                   stan_sampler_args = list(),
+                   # pars to move to hamstr_control
+                   smooth_s = FALSE,
+                   inflate_errors = FALSE,
+                   infl_sigma_sd = NULL,
+                   infl_shape_shape = 1,
+                   infl_shape_mean = 1,
+                   scale_R = TRUE,
+                   nu = 6,
+                   scale_shape = TRUE){
   
   
-  stan_dat <- make_stan_dat_hamstr(depth = depth,
-                                   obs_age = obs_age, obs_err = obs_err,
-                                   n_ind = n_ind,
-                                   min_age = min_age,
-                                   K=K,
-                                   top_depth = top_depth,
-                                   bottom_depth = bottom_depth,
-                                   pad_top_bottom = pad_top_bottom,
-                                   acc_mean_prior = acc_mean_prior,
-                                   acc_shape = acc_shape,
-                                   scale_shape = scale_shape,
-                                   mem_mean=mem_mean, mem_strength=mem_strength,
-                                   scale_R = as.numeric(scale_R),
-                                   nu=nu,
-                                   inflate_errors = as.numeric(inflate_errors),
-                                   infl_sigma_sd = infl_sigma_sd,
-                                   infl_shape_shape = infl_shape_shape,
-                                   infl_shape_mean = infl_shape_mean,
-                                   model_bioturbation = model_bioturbation,
-                                   L_prior_mean = L_prior_mean,
-                                   L_prior_shape = L_prior_shape,
-                                   L_prior_sigma = L_prior_sigma,
-                                   model_displacement = model_displacement,
-                                   D_prior_scale = D_prior_scale,
-                                   smooth_s = smooth_s, 
-                                   model_hiatus = model_hiatus,
-                                   H_top = H_top, H_bottom = H_bottom,
+  stan_dat <- make_stan_dat_hamstr(
+    # depth = depth,
+    #                                obs_age = obs_age, obs_err = obs_err,
+    #                                n_ind = n_ind,
+    #                                min_age = min_age,
+    #                                K=K,
+    #                                top_depth = top_depth,
+    #                                bottom_depth = bottom_depth,
+    #                                #pad_top_bottom = pad_top_bottom,
+    #                                acc_mean_prior = acc_mean_prior,
+    #                                acc_shape = acc_shape,
+    #                                scale_shape = scale_shape,
+    #                                mem_mean=mem_mean, mem_strength=mem_strength,
+    #                                scale_R = as.numeric(scale_R),
+    #                                nu=nu,
+    #                                inflate_errors = as.numeric(inflate_errors),
+    #                                infl_sigma_sd = infl_sigma_sd,
+    #                                infl_shape_shape = infl_shape_shape,
+    #                                infl_shape_mean = infl_shape_mean,
+    #                                model_bioturbation = model_bioturbation,
+    #                                L_prior_mean = L_prior_mean,
+    #                                L_prior_shape = L_prior_shape,
+    #                                L_prior_sigma = L_prior_sigma,
+    #                                model_displacement = model_displacement,
+    #                                D_prior_scale = D_prior_scale,
+    #                                smooth_s = smooth_s, 
+    #                                model_hiatus = model_hiatus,
+    #                                H_top = H_top, H_bottom = H_bottom,
                                    )
   
   

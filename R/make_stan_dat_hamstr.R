@@ -198,7 +198,7 @@ gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
 }
 
 
-#' Make the data object required by the Stan program
+#' Make the data object required by the Stan sampler
 #'
 #' @param ... Arguments passed from \code{\link{hamstr}}
 #'
@@ -282,17 +282,17 @@ make_stan_dat_hamstr <- function(...) {
       warning("min_age is older than minimum obs_age")
     }
 
-    if (l$pad_top_bottom == TRUE){
-      # Set start depth to 5% less than first depth observation, and DO allow negative depths
-      depth_range <- diff(range(l$depth))
-      buff <- 0.05 * depth_range
-    } else {
-      buff <- 0
-    }
+    # if (l$pad_top_bottom == TRUE){
+    #   # Set start depth to 5% less than first depth observation, and DO allow negative depths
+    #   depth_range <- diff(range(l$depth))
+    #   buff <- 0.05 * depth_range
+    # } else {
+    #   buff <- 0
+    # }
 
-    if (is.null(l$top_depth)) l$top_depth <- l$depth[1] - buff
+    if (is.null(l$top_depth)) l$top_depth <- l$depth[1] #- buff
 
-    if (is.null(l$bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) + buff
+    if (is.null(l$bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) #+ buff
 
     depth_range <- l$bottom_depth - l$top_depth
 
