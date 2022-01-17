@@ -43,5 +43,6 @@ Suggests:
     knitr,
     rmarkdown,
     rbacon (>= 2.5.2),
-    testthat
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
+Config/testthat/edition: 3
