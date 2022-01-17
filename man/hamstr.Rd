@@ -13,7 +13,8 @@ hamstr(
   top_depth = NULL,
   bottom_depth = NULL,
   acc_mean_prior = NULL,
-  acc_shape = 1.5,
+  acc_shape_mean = 4.5,
+  acc_shape_shape = 1.5,
   mem_mean = 0.5,
   mem_strength = 10,
   model_bioturbation = FALSE,
@@ -79,9 +80,6 @@ overall mean accumulation rate is given a weak half-normal prior with mean
 = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 mean accumulation rate estimated by fitting a robust linear model using
 \link[MASS]{rlm}.}
-
-\item{acc_shape}{Hyperparameter for the shape of the priors on accumulation
-rates. Defaults to 1.5 - as for Bacon 2.2.}
 
 \item{mem_mean}{Hyperparameter: a parameter of the Beta prior distribution on
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
@@ -159,6 +157,9 @@ error model, (nu = 100 should do it).}
 \item{scale_shape}{Scale the shape parameter according to the number of
 hierarchical levels, to control the total variance of the alpha
 innovations. This defaults to TRUE as of Hamstr verion 0.5.}
+
+\item{acc_shape}{Hyperparameter for the shape of the priors on accumulation
+rates. Defaults to 1.5 - as for Bacon 2.2.}
 }
 \value{
 Returns an object of class "hamstr_fit", which is a list composed of

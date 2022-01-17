@@ -30,9 +30,10 @@ data{
   // prior for the oversall mean accumulation rate
   real<lower = 0> acc_mean_prior;
   
-  // shape of the gamma distributions
-  real<lower = 0> acc_shape;
-  
+  // shape of the prior on gamma acc_shape 
+  real<lower = 0> acc_shape_mean;
+  real<lower = 0> acc_shape_shape;
+
   // scale the shape parameter to control the total variance of the alpha
   // innovations for the number of hierarchical levels
   int<lower=0, upper=1> scale_shape;
@@ -94,7 +95,7 @@ transformed data{
   real D_rate;
   
   int<lower = 0, upper = 1> sample_L;
-  
+
   // transform mean and strength of memory beta distribution to alpha and beta
   // as used to parameterise beta dist in stan function
   real<lower=0> mem_alpha = mem_strength * mem_mean;
@@ -103,14 +104,7 @@ transformed data{
   // position of the first highest resolution innovation (alpha)
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
   
-  // scale shape
-  real<lower = 1> acc_shape_adj;
-  if (scale_shape == 1){
-    acc_shape_adj = acc_shape * n_lvls;
-  } else{
-    acc_shape_adj = acc_shape;
-  }
-  
+
   L_rate = L_prior_shape / L_prior_mean;
   
   // bioturbation depth can be fixed rather than sampled
@@ -151,10 +145,15 @@ parameters {
   
   real<lower = H_top, upper = H_bottom> H_depth[model_hiatus];
   real<lower = 0, upper = data_age_range> H_length[model_hiatus];
+  
+  // shape of the gamma distributions
+  real<lower = 0> acc_shape;
+  
 }
 
 transformed parameters{
   
+ 
   // the AR1 coefficient scaled for the thickness of the modelled sediment sections
   real<lower = 0, upper = 1> w;
   
@@ -182,6 +181,15 @@ transformed parameters{
   vector[model_bioturbation ? N : 0] age_het;
   
   vector<lower = 0>[model_displacement ? N : 0] disp_yrs;
+  
+  // scale shape
+  real<lower = 1> acc_shape_adj;
+  if (scale_shape == 1){
+    acc_shape_adj = acc_shape * n_lvls;
+  } else{
+    acc_shape_adj = acc_shape;
+  }
+  
   
   if (scale_R == 1){
     w = R^(delta_c);
@@ -293,6 +301,8 @@ model {
   // parameters that are zero length do not get sampled
   L ~ gamma(L_prior_shape, L_rate);
   D ~ normal(0, D_prior_scale);
+  
+  acc_shape ~ gamma(acc_shape_shape, acc_shape_shape / acc_shape_mean);
   
   // additional error in ages due to age-heterogeneity
   bt_error ~ gamma(n_ind, n_ind ./ age_het);

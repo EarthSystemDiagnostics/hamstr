@@ -236,7 +236,7 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars
                                                 #tau = tau, kern = kern,
                                                 ...),
          pars = summary(object$fit,
-                        par = c("alpha[1]", "R", "w", "L", "D")
+                        par = c("alpha[1]", "acc_shape", "R", "w", "L", "D")
                         )$summary %>% 
            dplyr::as_tibble(., rownames = "Parameter") %>% 
            dplyr::select(-se_mean)
