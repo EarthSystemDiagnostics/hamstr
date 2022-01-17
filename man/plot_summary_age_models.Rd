@@ -20,12 +20,7 @@ Plot Summary of Posterior Age Models
 fit <- hamstr(
   depth = MSB2K$depth,
   obs_age = MSB2K$age,
-  obs_err = MSB2K$error,
-  K = c(10, 10), nu = 6,
-  acc_mean_prior = 20,
-  mem_mean = 0.5, mem_strength = 10,
-  inflate_errors = 0,
-  iter = 2000, chains = 3)
+  obs_err = MSB2K$error)
 
 plot_summary_age_models(fit)
 }

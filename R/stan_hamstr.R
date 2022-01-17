@@ -85,16 +85,19 @@
 #' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
 #'   gamma prior on the shape of the distribution of the additional error terms.
 #'   Default to 1, 1.
-#' @param sample_posterior Defaults to TRUE, set to FALSE to return an empty 
-#' model which can be plotted to view the data and prior distributions
-#' @param model_hiatus Optionally model an hiatus. 
+#' @param model_hiatus Optionally model an hiatus.
 #' @param H_top,H_bottom Limits to the location of an hiatus. By default these
-#' are set to the top and bottom data points but can be set by the user 
-#' @param ... additional arguments to \link[rstan]{sampling}
-#' @inheritParams rstan::sampling
+#'   are set to the top and bottom data points but can be set by the user
+#' @param sample_posterior If set to FALSE, hamstr skips sampling the model and
+#'   returns only the data, model structure and prior parameters so that data
+#'   and prior distributions can be plotted and checked prior to running a
+#'   model. Defaults to TRUE
+#' @param stan_sampler_args Additional arguments to \link[rstan]{sampling} as a
+#' named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
+#' iterations instead of the default 4 chains of 2000 iterations. 
 #' @return Returns an object of class "hamstr_fit", which is a list composed of
-#'  the output from the stan sampler .$fit, and the list of data passed to the
-#'  sampler, .$data
+#'   the output from the stan sampler .$fit, and the list of data passed to the
+#'   sampler, .$data
 #' @export
 #'
 #' @examples
@@ -103,16 +106,9 @@
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
-#' print(fit$fit, par = c("record_acc_mean"))
-#'
-#' plot_hamstr(fit, 100, plot_diagnostics = TRUE)
+#' plot(fit)
 #'
 #' }
 hamstr <- function(depth, obs_age, obs_err,
@@ -137,14 +133,12 @@ hamstr <- function(depth, obs_age, obs_err,
                    model_displacement = FALSE,
                    D_prior_scale = 10,
                    smooth_s = FALSE,
-                   iter = 2000, chains = 3,
-                   seed = 0,
-                   sample_posterior = TRUE,
                    model_hiatus = FALSE,
                    H_top = NULL, H_bottom = NULL,
-                   ...){
-
-
+                   sample_posterior = TRUE,
+                   stan_sampler_args = list()){
+  
+  
   stan_dat <- make_stan_dat_hamstr(depth = depth,
                                    obs_age = obs_age, obs_err = obs_err,
                                    n_ind = n_ind,
@@ -173,15 +167,29 @@ hamstr <- function(depth, obs_age, obs_err,
                                    model_hiatus = model_hiatus,
                                    H_top = H_top, H_bottom = H_bottom,
                                    )
-
-  inits <- replicate(chains, list(get_inits_hamstr(stan_dat)))
+  
+  
+  used_sampler_args <- do.call(get_sampler_args, stan_sampler_args) 
+  
+  
+  # set the seed here and not inside get_inits_hamstr, so that the chains are 
+  # different
+  
+  set.seed(used_sampler_args$seed)
+  
+  inits <- replicate(used_sampler_args$chains, 
+                     list(get_inits_hamstr(stan_dat)))
 
   if (sample_posterior){
-    fit <- rstan::sampling(stanmodels$hamstr,
-                           data = stan_dat, init = inits, iter = iter, chains = chains,
-                           seed = seed,
-                           verbose = FALSE, ...)
-  } else if (sample_posterior == FALSE){
+    
+    args <- list(object = stanmodels$hamstr, data = stan_dat, 
+                 init = inits)
+    
+    args <- append(args, used_sampler_args)
+  
+    fit <- do.call(rstan::sampling, args)
+    
+    } else if (sample_posterior == FALSE){
     fit <- NA
   }
 
@@ -193,6 +201,38 @@ hamstr <- function(depth, obs_age, obs_err,
 
   return(out)
 
+}
+
+#' Default Parameters for Sampling Hamstr Models with Stan 
+#' @description Returns a list of parameters for the Stan sampler
+#' @inheritParams rstan::sampling
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' get_sampler_args()
+get_sampler_args <- function(chains = 4,
+                             cores = chains,
+                             iter = 2000,
+                             warmup = floor(iter / 2),
+                             thin = 1,
+                             seed = sample.int(.Machine$integer.max, 1),
+                             check_data = TRUE,
+                             sample_file = NULL,
+                             diagnostic_file = NULL,
+                             verbose = FALSE,
+                             algorithm = c("NUTS", "HMC", "Fixed_param"),
+                             control = NULL,
+                             include = TRUE,
+                             open_progress = interactive() &&
+                               !isatty(stdout()) &&
+                               !identical(Sys.getenv("RSTUDIO"), "1"),
+                             show_messages = TRUE,
+                             ...) {
+  l <- c(as.list(environment()), list(...))
+  
+  return(l)
 }
 
 

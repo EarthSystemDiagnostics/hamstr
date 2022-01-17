@@ -86,20 +86,15 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
 
 ### Fitting age-models with **hamstr**
 
-By default **hamstr** runs with three Markov chains and these can be run in parallel. This code will assign 3 processor cores as long as the machine has at least 3. The number of cores can also be set for specific calls of the `hamstr` function using the `cores` argument. 
-
-```{r}
-if (parallel::detectCores() >= 3) options(mc.cores = 3)
-```
-
 Age-depth (sediment accumulation) models are fit with the function `hamstr`. A vectors of depth, observed age and age uncertainty are passed as arguments to the function.
 
 ```{r}
-set.seed(20200827)
 hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
                        obs_age = MSB2K_cal$age.14C.cal,
                        obs_err = MSB2K_cal$age.14C.cal.se, 
-                       seed = 1)
+                       # the seed argument for the sampler is set here so that
+                       # this example always returns the same numerical result
+                       stan_sampler_args = list(seed = 1))
 ```
 
 The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.

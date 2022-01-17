@@ -1,7 +1,7 @@
 hamstr: Hierarchical Accumulation Modelling with Stan and R.
 ================
 Andrew M. Dolman
-2022-01-14
+2022-01-17
 
 ------------------------------------------------------------------------
 
@@ -84,25 +84,17 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
 
 ### Fitting age-models with **hamstr**
 
-By default **hamstr** runs with three Markov chains and these can be run
-in parallel. This code will assign 3 processor cores as long as the
-machine has at least 3. The number of cores can also be set for specific
-calls of the `hamstr` function using the `cores` argument.
-
-``` r
-if (parallel::detectCores() >= 3) options(mc.cores = 3)
-```
-
 Age-depth (sediment accumulation) models are fit with the function
 `hamstr`. A vectors of depth, observed age and age uncertainty are
 passed as arguments to the function.
 
 ``` r
-set.seed(20200827)
 hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
                        obs_age = MSB2K_cal$age.14C.cal,
                        obs_err = MSB2K_cal$age.14C.cal.se, 
-                       seed = 1)
+                       # the seed argument for the sampler is set here so that
+                       # this example always returns the same numerical result
+                       stan_sampler_args = list(seed = 1))
 ```
 
 The default plotting method shows the fitted age models together with
@@ -118,7 +110,7 @@ along the top of the age-model plot.
 plot(hamstr_fit_1)
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 A “spaghetti” plot can be created instead of shaded regions. This shows
 a random sample of iterations from the posterior distribution
@@ -130,7 +122,7 @@ Additionally, plotting of the diagnostic plots can be switched off.
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 #### Mean accumulation rate
 
@@ -155,7 +147,7 @@ distribution should be much narrower than the weakly informative prior.
 plot(hamstr_fit_1, type = "acc_mean_prior_post")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 #### Other hyperparameters
 
@@ -223,20 +215,20 @@ age model.
 
 ``` r
 predict(hamstr_fit_1)
-#> # A tibble: 243,000 x 3
+#> # A tibble: 324,000 x 3
 #>     iter depth   age
 #>    <int> <dbl> <dbl>
-#>  1     1  1.5  4447.
-#>  2     1  2.72 4474.
-#>  3     1  3.95 4486.
-#>  4     1  5.18 4502.
-#>  5     1  6.4  4525.
-#>  6     1  7.62 4538.
-#>  7     1  8.85 4549.
-#>  8     1 10.1  4578.
-#>  9     1 11.3  4609.
-#> 10     1 12.5  4653.
-#> # ... with 242,990 more rows
+#>  1     1  1.5  4583.
+#>  2     1  2.72 4585.
+#>  3     1  3.95 4590.
+#>  4     1  5.18 4599.
+#>  5     1  6.4  4606.
+#>  6     1  7.62 4613.
+#>  7     1  8.85 4625.
+#>  8     1 10.1  4639.
+#>  9     1 11.3  4651.
+#> 10     1 12.5  4665.
+#> # ... with 323,990 more rows
 ```
 
 `summary` returns the age model summarised over the realisations.
@@ -246,16 +238,16 @@ summary(hamstr_fit_1)
 #> # A tibble: 81 x 13
 #>    depth   idx par     mean se_mean    sd `2.5%` `25%` `50%` `75%` `97.5%` n_eff
 #>    <dbl> <dbl> <chr>  <dbl>   <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl> <dbl>
-#>  1  1.5      1 c_age~ 4508.   1.79   66.8  4363. 4466. 4513. 4556.   4625. 1391.
-#>  2  2.72     2 c_age~ 4524.   1.65   61.9  4390. 4485. 4528. 4569.   4633. 1401.
-#>  3  3.95     3 c_age~ 4541.   1.52   57.5  4421. 4504. 4544. 4582.   4644. 1429.
-#>  4  5.18     4 c_age~ 4558.   1.39   53.8  4448. 4524. 4560. 4596.   4653. 1489.
-#>  5  6.4      5 c_age~ 4575.   1.28   51.0  4471. 4543. 4577. 4610.   4666. 1595.
-#>  6  7.62     6 c_age~ 4592.   1.22   49.3  4492. 4561. 4594. 4626.   4681. 1639.
-#>  7  8.85     7 c_age~ 4610.   1.10   46.6  4516. 4579. 4611. 4642.   4695. 1780.
-#>  8 10.1      8 c_age~ 4628.   0.972  43.6  4541. 4598. 4628. 4657.   4707. 2014.
-#>  9 11.3      9 c_age~ 4646.   0.847  41.1  4564. 4618. 4646. 4675.   4722. 2356.
-#> 10 12.5     10 c_age~ 4664.   0.786  39.8  4585. 4638. 4664. 4692.   4741. 2570.
+#>  1  1.5      1 c_age~ 4510.   1.67   68.8  4355. 4470. 4514. 4557.   4632. 1693.
+#>  2  2.72     2 c_age~ 4526.   1.51   63.1  4391. 4488. 4529. 4569.   4641. 1742.
+#>  3  3.95     3 c_age~ 4543.   1.37   58.6  4420. 4507. 4546. 4583.   4652. 1828.
+#>  4  5.18     4 c_age~ 4560.   1.23   54.7  4445. 4526. 4562. 4597.   4663. 1966.
+#>  5  6.4      5 c_age~ 4577.   1.13   51.9  4468. 4543. 4579. 4611.   4675. 2115.
+#>  6  7.62     6 c_age~ 4594.   1.05   50.3  4489. 4561. 4595. 4627.   4689. 2279.
+#>  7  8.85     7 c_age~ 4611.   0.937  47.6  4514. 4580. 4612. 4643.   4702. 2577.
+#>  8 10.1      8 c_age~ 4629.   0.836  44.6  4539. 4600. 4629. 4658.   4716. 2850.
+#>  9 11.3      9 c_age~ 4647.   0.752  42.2  4563. 4619. 4647. 4675.   4729. 3143.
+#> 10 12.5     10 c_age~ 4665.   0.692  40.7  4585. 4638. 4665. 4691.   4747. 3458.
 #> # ... with 71 more rows, and 1 more variable: Rhat <dbl>
 ```
 
@@ -279,14 +271,14 @@ summary(age.mods.interp)
 #>    <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl>
 #>  1     0   NA   NA      NA    NA    NA    NA      NA 
 #>  2     1   NA   NA      NA    NA    NA    NA      NA 
-#>  3     2 4515.  64.6  4372. 4474. 4519. 4561.   4629.
-#>  4     3 4528.  60.8  4397. 4490. 4531. 4571.   4636.
-#>  5     4 4542.  57.3  4422. 4505. 4544. 4583.   4645.
-#>  6     5 4556.  54.2  4446. 4521. 4558. 4594.   4651.
-#>  7     6 4570.  51.7  4463. 4536. 4572. 4606.   4662.
-#>  8     7 4583.  49.9  4481. 4552. 4585. 4617.   4673.
-#>  9     8 4597.  48.3  4499. 4567. 4599. 4631.   4686.
-#> 10     9 4612.  46.1  4520. 4582. 4613. 4644.   4696.
+#>  3     2 4516.  66.3  4371. 4478. 4520. 4562.   4635.
+#>  4     3 4530.  62.0  4399. 4493. 4533. 4572.   4643.
+#>  5     4 4544.  58.4  4421. 4507. 4546. 4583.   4652.
+#>  6     5 4557.  55.2  4442. 4523. 4560. 4595.   4662.
+#>  7     6 4571.  52.6  4462. 4538. 4573. 4606.   4670.
+#>  8     7 4585.  50.9  4479. 4552. 4587. 4619.   4682.
+#>  9     8 4599.  49.3  4498. 4567. 4601. 4632.   4693.
+#> 10     9 4613.  47.1  4517. 4583. 4614. 4645.   4704.
 #> # ... with 91 more rows
 ```
 
@@ -304,7 +296,7 @@ plot(hamstr_fit_1, type = "acc_rates")
 #> Joining, by = "depth"
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ``` r
 summary(hamstr_fit_1, type = "acc_rates") 
@@ -312,16 +304,16 @@ summary(hamstr_fit_1, type = "acc_rates")
 #> # A tibble: 160 x 13
 #>    depth c_depth_top c_depth_bottom acc_rate_unit   idx   tau  mean    sd `2.5%`
 #>    <dbl>       <dbl>          <dbl> <chr>         <dbl> <dbl> <dbl> <dbl>  <dbl>
-#>  1  1.5         1.5            2.72 depth_per_ti~     1     0 118.  105.    27.9
-#>  2  2.72        2.72           3.95 depth_per_ti~     2     0 103.   73.8   29.9
-#>  3  3.95        3.95           5.18 depth_per_ti~     3     0  98.9  67.7   29.6
-#>  4  5.18        5.18           6.4  depth_per_ti~     4     0  98.1  65.4   30.2
-#>  5  6.4         6.4            7.62 depth_per_ti~     5     0  98.2  69.7   30.1
-#>  6  7.62        7.62           8.85 depth_per_ti~     6     0  85.9  44.5   32.9
-#>  7  8.85        8.85          10.1  depth_per_ti~     7     0  86.6  50.7   32.5
-#>  8 10.1        10.1           11.3  depth_per_ti~     8     0  88.2  59.4   30.9
-#>  9 11.3        11.3           12.5  depth_per_ti~     9     0  87.9  61.8   29.5
-#> 10 12.5        12.5           13.8  depth_per_ti~    10     0  89.5  66.5   29.5
+#>  1  1.5         1.5            2.72 depth_per_ti~     1     0 119.  106.    26.7
+#>  2  2.72        2.72           3.95 depth_per_ti~     2     0 103.   76.2   29.1
+#>  3  3.95        3.95           5.18 depth_per_ti~     3     0 101.   71.0   29.2
+#>  4  5.18        5.18           6.4  depth_per_ti~     4     0  99.6  67.2   29.6
+#>  5  6.4         6.4            7.62 depth_per_ti~     5     0  98.8  64.3   30.9
+#>  6  7.62        7.62           8.85 depth_per_ti~     6     0  86.5  45.4   34.6
+#>  7  8.85        8.85          10.1  depth_per_ti~     7     0  86.4  49.0   31.3
+#>  8 10.1        10.1           11.3  depth_per_ti~     8     0  87.6  53.3   31.3
+#>  9 11.3        11.3           12.5  depth_per_ti~     9     0  88.6  58.8   30.7
+#> 10 12.5        12.5           13.8  depth_per_ti~    10     0  89.1  58.4   30.3
 #> # ... with 150 more rows, and 4 more variables: 25% <dbl>, 50% <dbl>,
 #> #   75% <dbl>, 97.5% <dbl>
 ```
@@ -337,7 +329,7 @@ options.
 plot(hamstr_fit_1, type = "hier_acc")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 #### Plot memory prior and posterior
 
@@ -348,7 +340,7 @@ cm thick, there is not much difference between R and w.
 plot(hamstr_fit_1, type = "mem")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ### Other `rstan` functions
 
@@ -359,13 +351,13 @@ For example:
 
 ``` r
 rstan::check_divergences(hamstr_fit_1$fit)
-#> 0 of 3000 iterations ended with a divergence.
+#> 0 of 4000 iterations ended with a divergence.
 
 rstan::stan_rhat(hamstr_fit_1$fit)
 #> `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 The first `alpha` parameter is the overall mean accumulation rate.
 
@@ -374,7 +366,7 @@ rstan::traceplot(hamstr_fit_1$fit, par = c("alpha[1]"),
                  inc_warmup = TRUE)
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+![](readme_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
 
 ### References
 

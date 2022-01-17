@@ -32,14 +32,11 @@ hamstr(
   model_displacement = FALSE,
   D_prior_scale = 10,
   smooth_s = FALSE,
-  iter = 2000,
-  chains = 3,
-  seed = 0,
-  sample_posterior = TRUE,
   model_hiatus = FALSE,
   H_top = NULL,
   H_bottom = NULL,
-  ...
+  sample_posterior = TRUE,
+  stan_sampler_args = list()
 )
 }
 \arguments{
@@ -151,35 +148,24 @@ in a sample, for example due to incomplete mixing. The mean and standard
 deviation of a half-normal are equal to the scale. Units are those of the
 depth variable, e.g. cm.}
 
-\item{iter}{A positive integer specifying the number of iterations for each 
-    chain (including warmup). The default is 2000.}
-
-\item{chains}{A positive integer specifying the number of Markov chains. 
-    The default is 4.}
-
-\item{seed}{The seed for random number generation. The default is generated 
-    from 1 to the maximum integer supported by \R on the machine. Even if 
-    multiple chains are used, only one seed is needed, with other chains having 
-    seeds derived from that of the first chain to avoid dependent samples.
-    When a seed is specified by a number, \code{as.integer} will be applied to it. 
-    If \code{as.integer} produces \code{NA}, the seed is generated randomly. 
-    The seed can also be specified as a character string of digits, such as
-    \code{"12345"}, which is converted to integer.}
-
-\item{sample_posterior}{Defaults to TRUE, set to FALSE to return an empty 
-model which can be plotted to view the data and prior distributions}
-
 \item{model_hiatus}{Optionally model an hiatus.}
 
 \item{H_top, H_bottom}{Limits to the location of an hiatus. By default these
 are set to the top and bottom data points but can be set by the user}
 
-\item{...}{additional arguments to \link[rstan]{sampling}}
+\item{sample_posterior}{If set to FALSE, hamstr skips sampling the model and
+returns only the data, model structure and prior parameters so that data
+and prior distributions can be plotted and checked prior to running a
+model. Defaults to TRUE}
+
+\item{stan_sampler_args}{Additional arguments to \link[rstan]{sampling} as a
+named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
+iterations instead of the default 4 chains of 2000 iterations.}
 }
 \value{
 Returns an object of class "hamstr_fit", which is a list composed of
- the output from the stan sampler .$fit, and the list of data passed to the
- sampler, .$data
+  the output from the stan sampler .$fit, and the list of data passed to the
+  sampler, .$data
 }
 \description{
 hamstr
@@ -190,16 +176,9 @@ hamstr
 fit <- hamstr(
   depth = MSB2K$depth,
   obs_age = MSB2K$age,
-  obs_err = MSB2K$error,
-  K = c(10, 10), nu = 6,
-  acc_mean_prior = 20,
-  mem_mean = 0.5, mem_strength = 10,
-  inflate_errors = 0,
-  iter = 2000, chains = 3)
+  obs_err = MSB2K$error)
 
-print(fit$fit, par = c("record_acc_mean"))
-
-plot_hamstr(fit, 100, plot_diagnostics = TRUE)
+plot(fit)
 
 }
 }

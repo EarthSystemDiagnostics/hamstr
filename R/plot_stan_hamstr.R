@@ -83,12 +83,7 @@ plot.hamstr_fit <- function(object,
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength= 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
 #' # With age models summarised as a ribbon. Faster than spaghetti plots.
 #' plot_hamstr(fit)
@@ -199,12 +194,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
 #' plot_summary_age_models(fit)
 #' }
@@ -299,12 +289,7 @@ add_datapoints <- function(gg, dat){
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
 #' plot_age_models(fit)
 #' }
@@ -529,12 +514,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
 #' plot_hierarchical_acc_rate(fit)
 #' }
@@ -641,12 +621,8 @@ plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength= 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error,   
+#'   inflate_errors = 1)
 #'
 #' plot_infl_prior_posterior(fit)
 #' }
@@ -700,9 +676,10 @@ plot_infl_prior_posterior <- function(hamstr_fit){
   infl_priors <- dplyr::bind_rows(infl_prior_mean, infl_prior_shape)
 
   infl_mean_shape_post_long <- infl_mean_shape_post %>%
-    tidyr::gather(.data$par, .data$x, -.data$iter)
+    tidyr::pivot_longer(cols = c("infl_mean", "infl_shape"), names_to = "par", values_to = "x")
 
-  p.pars <- plot_prior_posterior_hist(infl_priors, infl_mean_shape_post_long)
+  p.pars <- plot_prior_posterior_hist(infl_priors, infl_mean_shape_post_long, bins = 1000) +
+    facet_wrap(~par, scales = "free")
 
 
   infl_mean_shape_post <- infl_mean_shape_post %>%
@@ -711,7 +688,7 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 
 
   infl_pars_prior_dist <- infl_mean_shape_post %>%
-    stats::filter(iter %in% sample.int(dplyr::n(), 10)) %>%
+    dplyr::filter(iter %in% sample.int(dplyr::n(), 10)) %>%
     tidyr::crossing(., tibble::tibble(x = exp(seq(log(0.01), log(stats::quantile(infl_mean_shape_post$q99, prob = 0.95)), length.out = 100)))) %>%
     dplyr::mutate(d = stats::dgamma(x, shape = .data$infl_shape, rate = .data$infl_shape / .data$infl_mean),
            #d = dgamma(x, shape = infl_shape, rate = infl_shape / 1),
@@ -727,7 +704,7 @@ plot_infl_prior_posterior <- function(hamstr_fit){
     ggplot2::labs(y = "Density", x = "Value")
 
   p <- ggpubr::ggarrange(plotlist = list(p.pars, p.priors,
-                                   p.infl.fac), ncol = 2)
+                                   p.infl.fac))
 
   return(p)
 
@@ -750,8 +727,7 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 #'   K = c(10, 10), nu = 6,
 #'   acc_mean_prior = 20,
 #'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   inflate_errors = 0)
 #'
 #' plot_acc_mean_prior_posterior(fit)
 #' }
@@ -806,12 +782,7 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #' fit <- hamstr(
 #'   depth = MSB2K$depth,
 #'   obs_age = MSB2K$age,
-#'   obs_err = MSB2K$error,
-#'   K = c(10, 10), nu = 6,
-#'   acc_mean_prior = 20,
-#'   mem_mean = 0.5, mem_strength = 10,
-#'   inflate_errors = 0,
-#'   iter = 2000, chains = 3)
+#'   obs_err = MSB2K$error)
 #'
 #' plot_memory_prior_posterior(fit)
 #' }
