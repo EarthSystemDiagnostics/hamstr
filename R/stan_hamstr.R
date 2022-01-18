@@ -65,35 +65,18 @@
 #' @param D_prior_scale Scale of the half-normal prior on additional error on
 #'   observed ages. The mean and standard deviation of a half-normal are equal 
 #'   to the scale. Units are those of the depth variable, e.g. cm.
-#' @param model_hiatus Optionally model an hiatus.
-#' @param H_top,H_bottom Limits to the location of an hiatus. By default these
+#' @param model_hiatus Optionally model a hiatus.
+#' @param H_top,H_bottom Limits to the location of a hiatus. By default these
 #'   are set to the top and bottom data points but can be set by the user
 #' @param sample_posterior If set to FALSE, hamstr skips sampling the model and
 #'   returns only the data, model structure and prior parameters so that data
 #'   and prior distributions can be plotted and checked prior to running a
 #'   model. Defaults to TRUE
+#' @param hamstr_control Additional arguments to hamstr useful for debugging or 
+#' development. See \link[hamstr]{hamstr_control} for details.
 #' @param stan_sampler_args Additional arguments to \link[rstan]{sampling} as a
 #' named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
 #' iterations instead of the default 4 chains of 2000 iterations. 
-#' @param scale_shape Scale the shape parameter according to the number of
-#'   hierarchical levels, to control the total variance of the alpha
-#'   innovations. This defaults to TRUE as of Hamstr verion 0.5.
-#' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
-#'   not. Defaults to TRUE.
-#' @param nu Degrees of freedom for the Student-t distributed error model.
-#'   Defaults to 6, which is equivalent to the default parameterisation of
-#'   t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
-#'   error model, (nu = 100 should do it).
-#' @param inflate_errors logical: If set to TRUE, observation errors are
-#'   inflated so that data are consistent with a "Bacon-style" monotonic
-#'   age-depth model. This is an experimental feature under active development.
-#'   Defaults to FALSE.
-#' @param infl_sigma_sd Hyperparameter: sets the standard deviation of the
-#'   half-normal prior on the mean of the additional error terms. Defaults to 10
-#'   times the mean observation error in obs_err.
-#' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
-#'   gamma prior on the shape of the distribution of the additional error terms.
-#'   Default to 1, 1.
 #' @return Returns an object of class "hamstr_fit", which is a list composed of
 #'   the output from the stan sampler .$fit, and the list of data passed to the
 #'   sampler, .$data
@@ -128,50 +111,16 @@ hamstr <- function(depth, obs_age, obs_err,
                    model_hiatus = FALSE,
                    H_top = NULL, H_bottom = NULL,
                    sample_posterior = TRUE,
-                   stan_sampler_args = list(),
-                   # pars to move to hamstr_control
-                   smooth_s = FALSE,
-                   inflate_errors = FALSE,
-                   infl_sigma_sd = NULL,
-                   infl_shape_shape = 1,
-                   infl_shape_mean = 1,
-                   scale_R = TRUE,
-                   nu = 6,
-                   scale_shape = TRUE){
+                   hamstr_control = list(),
+                   stan_sampler_args = list()
+                   ){
   
   
-  stan_dat <- make_stan_dat_hamstr(
-    # depth = depth,
-    #                                obs_age = obs_age, obs_err = obs_err,
-    #                                n_ind = n_ind,
-    #                                min_age = min_age,
-    #                                K=K,
-    #                                top_depth = top_depth,
-    #                                bottom_depth = bottom_depth,
-    #                                #pad_top_bottom = pad_top_bottom,
-    #                                acc_mean_prior = acc_mean_prior,
-    #                                acc_shape = acc_shape,
-    #                                scale_shape = scale_shape,
-    #                                mem_mean=mem_mean, mem_strength=mem_strength,
-    #                                scale_R = as.numeric(scale_R),
-    #                                nu=nu,
-    #                                inflate_errors = as.numeric(inflate_errors),
-    #                                infl_sigma_sd = infl_sigma_sd,
-    #                                infl_shape_shape = infl_shape_shape,
-    #                                infl_shape_mean = infl_shape_mean,
-    #                                model_bioturbation = model_bioturbation,
-    #                                L_prior_mean = L_prior_mean,
-    #                                L_prior_shape = L_prior_shape,
-    #                                L_prior_sigma = L_prior_sigma,
-    #                                model_displacement = model_displacement,
-    #                                D_prior_scale = D_prior_scale,
-    #                                smooth_s = smooth_s, 
-    #                                model_hiatus = model_hiatus,
-    #                                H_top = H_top, H_bottom = H_bottom,
-                                   )
+  
+  stan_dat <- make_stan_dat_hamstr()
   
   
-  used_sampler_args <- do.call(get_sampler_args, stan_sampler_args) 
+  used_sampler_args <- do.call(stan_sampler_args, stan_sampler_args) 
   
   
   # set the seed here and not inside get_inits_hamstr, so that the chains are 
@@ -205,6 +154,51 @@ hamstr <- function(depth, obs_age, obs_err,
 
 }
 
+
+#' Additional Arguments to hamstr useful for debugging or development
+#'
+#' @param scale_shape Scale the shape parameter according to the number of
+#'   hierarchical levels, to control the total variance of the alpha
+#'   innovations. This defaults to TRUE as of Hamstr verion 0.5.
+#' @param scale_R logical: Scale AR1 coefficient by delta_c (as in Bacon) or
+#'   not. Defaults to TRUE.
+#' @param nu Degrees of freedom for the Student-t distributed error model.
+#'   Defaults to 6, which is equivalent to the default parameterisation of
+#'   t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
+#'   error model, (nu = 100 should do it).
+#' @param smooth_s Smooth the sedimentation rate used to calculate additional
+#' error from bioturbation by taking a mean across nearby sections
+#' @param inflate_errors logical: If set to TRUE, observation errors are
+#'   inflated so that data are consistent with a gamma AR1 age-depth model. 
+#'   This is an experimental feature under active development. Defaults to FALSE.
+#' @param infl_sigma_sd Hyperparameter: sets the standard deviation of the
+#'   half-normal prior on the mean of the additional error terms. Defaults to 10
+#'   times the mean observation error in obs_err.
+#' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
+#'   gamma prior on the shape of the distribution of the additional error terms.
+#'   Default to 1, 1.
+#'
+#' @return
+#' @export
+#'
+hamstr_control <- function(scale_R = TRUE,
+                           nu = 6,
+                           scale_shape = TRUE,
+                           smooth_s = FALSE,
+                           inflate_errors = FALSE,
+                           infl_sigma_sd = NULL,
+                           infl_shape_shape = 1,
+                           infl_shape_mean = 1
+                           ){
+  
+  l <- c(as.list(environment()))
+  
+  return(l)
+
+  }
+
+
+
 #' Default Parameters for Sampling Hamstr Models with Stan 
 #' @description Returns a list of parameters for the Stan sampler
 #' @inheritParams rstan::sampling
@@ -213,8 +207,8 @@ hamstr <- function(depth, obs_age, obs_err,
 #' @export
 #'
 #' @examples
-#' get_sampler_args()
-get_sampler_args <- function(chains = 4,
+#' stan_sampler_args()
+stan_sampler_args <- function(chains = 4,
                              cores = chains,
                              iter = 2000,
                              warmup = floor(iter / 2),

@@ -221,7 +221,23 @@ make_stan_dat_hamstr <- function(...) {
   default.args[names(l)] <- l
 
   l <- default.args
+  
+  
+  # expand hamstr_control
+  hc.default.args <- formals(hamstr_control)
+  hc.default.arg.nms <- names(hc.default.args)
 
+  hc <- l$hamstr_control
+  hc <- hc[lapply(hc, is.null) == FALSE]
+
+  hc.default.args[names(hc)] <- hc
+  
+  hc <- hc.default.args
+  
+  l <- append(l, hc)
+  
+  l <- l[names(l)!= "hamstr.control"]
+  
 
  if (is.null(l$acc_mean_prior)){
 

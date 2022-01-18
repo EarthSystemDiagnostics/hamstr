@@ -27,15 +27,8 @@ hamstr(
   H_top = NULL,
   H_bottom = NULL,
   sample_posterior = TRUE,
-  stan_sampler_args = list(),
-  smooth_s = FALSE,
-  inflate_errors = FALSE,
-  infl_sigma_sd = NULL,
-  infl_shape_shape = 1,
-  infl_shape_mean = 1,
-  scale_R = TRUE,
-  nu = 6,
-  scale_shape = TRUE
+  hamstr_control = list(),
+  stan_sampler_args = list()
 )
 }
 \arguments{
@@ -121,9 +114,9 @@ due to incomplete mixing.}
 observed ages. The mean and standard deviation of a half-normal are equal 
 to the scale. Units are those of the depth variable, e.g. cm.}
 
-\item{model_hiatus}{Optionally model an hiatus.}
+\item{model_hiatus}{Optionally model a hiatus.}
 
-\item{H_top, H_bottom}{Limits to the location of an hiatus. By default these
+\item{H_top, H_bottom}{Limits to the location of a hiatus. By default these
 are set to the top and bottom data points but can be set by the user}
 
 \item{sample_posterior}{If set to FALSE, hamstr skips sampling the model and
@@ -131,34 +124,12 @@ returns only the data, model structure and prior parameters so that data
 and prior distributions can be plotted and checked prior to running a
 model. Defaults to TRUE}
 
+\item{hamstr_control}{Additional arguments to hamstr useful for debugging or 
+development. See \link[hamstr]{hamstr_control} for details.}
+
 \item{stan_sampler_args}{Additional arguments to \link[rstan]{sampling} as a
 named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
 iterations instead of the default 4 chains of 2000 iterations.}
-
-\item{inflate_errors}{logical: If set to TRUE, observation errors are
-inflated so that data are consistent with a "Bacon-style" monotonic
-age-depth model. This is an experimental feature under active development.
-Defaults to FALSE.}
-
-\item{infl_sigma_sd}{Hyperparameter: sets the standard deviation of the
-half-normal prior on the mean of the additional error terms. Defaults to 10
-times the mean observation error in obs_err.}
-
-\item{infl_shape_shape, infl_shape_mean}{Hyperparameters: parametrises the
-gamma prior on the shape of the distribution of the additional error terms.
-Default to 1, 1.}
-
-\item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or
-not. Defaults to TRUE.}
-
-\item{nu}{Degrees of freedom for the Student-t distributed error model.
-Defaults to 6, which is equivalent to the default parameterisation of
-t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
-error model, (nu = 100 should do it).}
-
-\item{scale_shape}{Scale the shape parameter according to the number of
-hierarchical levels, to control the total variance of the alpha
-innovations. This defaults to TRUE as of Hamstr verion 0.5.}
 }
 \value{
 Returns an object of class "hamstr_fit", which is a list composed of
