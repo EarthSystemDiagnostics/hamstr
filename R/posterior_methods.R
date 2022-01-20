@@ -158,6 +158,23 @@ summarise_age_models <- function(hamstr_fit){
   return(age_summary)
 }
 
+#' Summarise Hamstr Parameters
+#'
+#' @param object A hamstr_fit object
+#' @param par Character vector of parameters to include
+#'
+#' @return
+#' @keywords internal
+summarise_hamstr_parameters <- function(object,
+                                        pars = c("alpha[1]", "R", "w", "L", "D",
+                                                 "H_depth", "H_length")) {
+  rstan::summary(object$fit,
+                 pars = pars)$summary %>%
+    dplyr::as_tibble(., rownames = "Parameter") %>%
+    dplyr::select(-se_mean)
+}
+
+
 # Methods --------
 
 #' Interpolate Age Models at Given Depths
@@ -235,14 +252,11 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars
          acc_rates = summarise_hamstr_acc_rates(object,
                                                 #tau = tau, kern = kern,
                                                 ...),
-         pars = summary(object$fit,
-                        par = c("alpha[1]", "R", "w", "L", "D")
-                        )$summary %>% 
-           dplyr::as_tibble(., rownames = "Parameter") %>% 
-           dplyr::select(-se_mean)
+         pars = summarise_hamstr_parameters(object, ...)
          
   )
 }
+
 
 
 #' Title

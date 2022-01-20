@@ -52,7 +52,8 @@
 #'   for details.
 #' @param n_ind The number of individual particles (e.g. Foraminifera) in each
 #'   sample that was dated by e.g. radiocarbon dating. This can be a single
-#'   value or a vector the same length as obs_age.
+#'   value or a vector the same length as obs_age. Only used if 
+#'   model_bioturbation = TRUE.
 #' @param L_prior_mean Mean of the gamma prior on mixing depth, defaults to 10.
 #' @param L_prior_shape,L_prior_sigma Shape and standard deviation of the gamma
 #'   prior on the mixing depth. Set only one of these, the other will be
@@ -97,7 +98,6 @@ hamstr <- function(depth, obs_age, obs_err,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
                    K = NULL,
                    top_depth = NULL, bottom_depth = NULL,
-                   #pad_top_bottom = FALSE,
                    acc_mean_prior = NULL,
                    acc_shape = 1.5,
                    mem_mean = 0.5, mem_strength = 10,
@@ -120,7 +120,7 @@ hamstr <- function(depth, obs_age, obs_err,
   stan_dat <- make_stan_dat_hamstr()
   
   
-  used_sampler_args <- do.call(stan_sampler_args, stan_sampler_args) 
+  used_sampler_args <- do.call(get_stan_sampler_args, stan_sampler_args) 
   
   
   # set the seed here and not inside get_inits_hamstr, so that the chains are 
@@ -177,7 +177,8 @@ hamstr <- function(depth, obs_age, obs_err,
 #' @param infl_shape_shape,infl_shape_mean Hyperparameters: parametrises the
 #'   gamma prior on the shape of the distribution of the additional error terms.
 #'   Default to 1, 1.
-#'
+#' @examples 
+#' hamstr_control()
 #' @return
 #' @export
 #'
@@ -208,7 +209,7 @@ hamstr_control <- function(scale_R = TRUE,
 #'
 #' @examples
 #' stan_sampler_args()
-stan_sampler_args <- function(chains = 4,
+get_stan_sampler_args <- function(chains = 4,
                              cores = chains,
                              iter = 2000,
                              warmup = floor(iter / 2),

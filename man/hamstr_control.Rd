@@ -49,3 +49,6 @@ Default to 1, 1.}
 \description{
 Additional Arguments to hamstr useful for debugging or development
 }
+\examples{
+hamstr_control()
+}

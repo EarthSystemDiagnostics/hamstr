@@ -96,7 +96,8 @@ for details.}
 
 \item{n_ind}{The number of individual particles (e.g. Foraminifera) in each
 sample that was dated by e.g. radiocarbon dating. This can be a single
-value or a vector the same length as obs_age.}
+value or a vector the same length as obs_age. Only used if 
+model_bioturbation = TRUE.}
 
 \item{L_prior_mean}{Mean of the gamma prior on mixing depth, defaults to 10.}
 

@@ -319,7 +319,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
     
   }
   
-  posterior_ages <- get_posterior_ages(hamstr_fit)
+  posterior_ages <- get_posterior_ages(hamstr_fit) 
 
  
   infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
@@ -327,12 +327,14 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
     dplyr::mutate(dat_idx = readr::parse_number(.data$par))
 
   p.fit <- posterior_ages %>%
+    
     dplyr::filter(.data$iter %in% sample(unique(.data$iter), n.iter, replace = FALSE)) %>%
     ggplot2::ggplot(ggplot2::aes(x = depth, y = age, group = iter))
 
 
   p.fit <- p.fit +
     ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter), aes(colour = "grey0"))
+    
   
   if (hamstr_fit$data$inflate_errors == 1){
     obs_ages <- obs_ages %>%
@@ -364,12 +366,16 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 }
 
+
+
 ## Accumulation rates ----
 
 add_colour_scale <- function(gg){
 
-  clrs <- c("DarkBlue", "Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey", "grey0")
-  lbls <- c("Age point", "Obs age", "Latent age", "Median", "Mean", "95%", "50%", "Age models")
+  clrs <- c("DarkBlue", "Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
+            "1", "2", "3", "4")
+  lbls <- c("Age point", "Obs age", "Latent age", "Median", "Mean", "95%", "50%", "Age models",
+            "Chain 1","Chain 2","Chain 3","Chain 4")
 
   gg +
     ggplot2::scale_fill_identity(name = "Interval",
