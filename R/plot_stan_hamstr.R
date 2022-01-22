@@ -112,7 +112,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
       dplyr::as_tibble() %>%
       dplyr::mutate(iter = 1:nrow(.)) %>%
       tidyr::pivot_longer(cols = -iter) %>%
-      dplyr::mutate(dpt = readr::parse_number(name))
+      dplyr::mutate(dpt = get_par_idx(name))
 
     tmp <- dplyr::tibble(depth = hamstr_fit$data$depth,
                   dpt = 1:hamstr_fit$data$N) %>%
@@ -188,7 +188,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
 #'
 #' @return A ggplot2 object
 #' @keywords internal
-#' @importFrom readr parse_number
+
 #' @examples
 #' \dontrun{
 #' fit <- hamstr(
@@ -235,7 +235,7 @@ plot_summary_age_models <- function(hamstr_fit){
    
    infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
     tibble::as_tibble(., rownames = "par") %>%
-    dplyr::mutate(dat_idx = readr::parse_number(par))
+    dplyr::mutate(dat_idx = get_par_idx(par))
    
    obs_ages <- obs_ages %>%
       dplyr::mutate(infl_err = infl_errs$mean,
@@ -283,7 +283,7 @@ add_datapoints <- function(gg, dat){
 #' @keywords internal
 #' @import ggplot2
 #' @importFrom rlang .data
-#' @importFrom readr parse_number
+
 #' @examples
 #' \dontrun{
 #' fit <- hamstr(
@@ -324,7 +324,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
  
   infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
     tibble::as_tibble(., rownames = "par") %>%
-    dplyr::mutate(dat_idx = readr::parse_number(.data$par))
+    dplyr::mutate(dat_idx = get_par_idx(.data$par))
 
   p.fit <- posterior_ages %>%
     
@@ -513,7 +513,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 #' @return ggplot2 object
 #' @keywords internal
 #' @import ggplot2
-#' @importFrom readr parse_number
+
 #' @importFrom rlang .data
 #' @examples
 #' \dontrun{
@@ -532,7 +532,7 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
   a3 <- rstan::summary(hamstr_fit$fit, pars = "alpha")$summary
 
   alph <- tibble::as_tibble(a3, rownames = "par") %>%
-    dplyr::mutate(alpha_idx = readr::parse_number(par)) %>%
+    dplyr::mutate(alpha_idx = get_par_idx(par)) %>%
     dplyr::left_join(idx, ., by = "alpha_idx") %>%
     dplyr::mutate(lvl = factor(lvl))
 
@@ -618,7 +618,7 @@ plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
 #' @return A ggplot2 object
 #' @import rstan
 #' @import ggplot2
-#' @importFrom readr parse_number
+
 #' @importFrom rlang .data
 #' @inheritParams plot_hamstr
 #' @keywords internal
@@ -659,7 +659,7 @@ plot_infl_prior_posterior <- function(hamstr_fit){
   infl_fac <- rstan::extract(hamstr_fit$fit, "infl")[[1]] %>%
     tibble::as_tibble() %>%
     tidyr::gather() %>%
-    dplyr::mutate(key = readr::parse_number(.data$key))
+    dplyr::mutate(key = get_par_idx(.data$key))
 
 
   p.infl.fac <- rstan::stan_plot(hamstr_fit$fit, pars = "infl")
@@ -839,7 +839,7 @@ plot_L_prior_posterior <- function(hamstr_fit){
     post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
     dplyr::as_tibble() %>%
     tidyr::pivot_longer(cols = dplyr::everything(), names_to = "par", values_to = "x") %>%
-    dplyr::mutate(dpt = readr::parse_number(par),
+    dplyr::mutate(dpt = get_par_idx(par),
            par = "L")
 
 

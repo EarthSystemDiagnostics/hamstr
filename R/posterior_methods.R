@@ -3,7 +3,7 @@
 #' Get Posterior Age Models
 #' @inheritParams plot_hamstr
 #' @return a dataframe/tibble with posterior ages for all iterations after warmup
-#' @importFrom readr parse_number
+
 #' @importFrom rstan extract
 #' @keywords internal
 #' @examples 
@@ -24,7 +24,7 @@ get_posterior_ages <- function(hamstr_fit){
     tibble::as_tibble() %>%
     dplyr::mutate(iter = 1:nrow(.)) %>%
     tidyr::gather(par, age, -iter) %>%
-    dplyr::mutate(idx = readr::parse_number(par),
+    dplyr::mutate(idx = get_par_idx(par),
            par = "c_ages") %>%
     dplyr::left_join(depths, .data$., by = "idx") %>%
     dplyr::select(.data$iter,.data$depth, .data$age) %>%
@@ -143,7 +143,7 @@ summarise_new_ages <- function(new_ages, probs){
 #' @inheritParams plot_hamstr
 #' @description Extracts the summary statistics of posterior age models and attaches the depths
 #' @return data.frame / tibble
-#' @importFrom readr parse_number
+
 #' @keywords internal
 #' @examples
 #' \dontrun{
@@ -165,7 +165,7 @@ summarise_age_models <- function(hamstr_fit, probs){
     depths <- tibble::tibble(depth = hamstr_fit$data$modelled_depths,
                      idx = 1:length(hamstr_fit$data$modelled_depths))
     age_summary <- age_summary %>%
-      dplyr::mutate(idx = readr::parse_number(par)) %>%
+      dplyr::mutate(idx = get_par_idx(par)) %>%
       dplyr::left_join(depths, ., by = "idx")
 
   }
@@ -298,7 +298,7 @@ summary.hamstr_interpolated_ages <- function(object, probs){
 #'
 #' @return a dataframe/tibble with posterior ages for all iterations after warmup
 #' @keywords internal
-#' @importFrom readr parse_number
+
 #' @importFrom rstan extract
 #' @examples
 #' \dontrun{
@@ -321,7 +321,7 @@ get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH"
     tibble::as_tibble() %>%
     dplyr::mutate(iter = 1:nrow(.)) %>%
     tidyr::gather(par, time_per_depth, -iter) %>%
-    dplyr::mutate(idx = readr::parse_number(par),
+    dplyr::mutate(idx = get_par_idx(par),
                   par = "x") %>%
     dplyr::left_join(depths, .data$.) %>%
     dplyr::mutate(depth_per_time = 1000/time_per_depth) %>%
