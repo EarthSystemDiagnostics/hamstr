@@ -9,7 +9,8 @@ plot_hamstr_acc_rates(
   axis = c("depth", "age"),
   units = c("depth_per_time", "time_per_depth"),
   tau = 0,
-  kern = c("U", "G", "BH")
+  kern = c("U", "G", "BH"),
+  ...
 )
 }
 \arguments{

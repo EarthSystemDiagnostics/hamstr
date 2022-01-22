@@ -4,12 +4,7 @@
 \alias{summary.hamstr_fit}
 \title{Summarise hamstr models}
 \usage{
-\method{summary}{hamstr_fit}(
-  object,
-  type = c("age_models", "acc_rates", "pars"),
-  probs = c(0.025, 0.25, 0.5, 0.75, 0.975),
-  ...
-)
+\method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates", "pars"), ...)
 }
 \arguments{
 \item{object}{hamstr_fit object}

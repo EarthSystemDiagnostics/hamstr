@@ -41,8 +41,7 @@ plot.hamstr_fit <- function(object,
          default = plot_hamstr(object, summarise = summarise, ...),
          age_models = plot_hamstr(object, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
-         acc_rates = plot_hamstr_acc_rates(object,
-                                           ...),
+         acc_rates = plot_hamstr_acc_rates(object, ...),
          hier_acc_rates = plot_hierarchical_acc_rate(object),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
          mem_prior_post = plot_memory_prior_posterior(object),
@@ -424,8 +423,7 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
 plot_hamstr_acc_rates <- function(hamstr_fit,
                                   axis = c("depth", "age"),
                                   units = c("depth_per_time", "time_per_depth"),
-                                  tau = 0, kern = c("U", "G", "BH")
-){
+                                  tau = 0, kern = c("U", "G", "BH"), ...){
   
   units <- match.arg(units,
                      #choices = c("depth_per_time", "time_per_depth"),
@@ -437,7 +435,8 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
   
   kern <- match.arg(kern)
   
-  acc_rates <- summarise_hamstr_acc_rates(hamstr_fit, tau = tau, kern=kern)
+  acc_rates <- summarise_hamstr_acc_rates(hamstr_fit, tau = tau, kern=kern,
+                                          probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
   
   if ("depth" %in% axis){
     acc_rates_long <- acc_rates %>%
