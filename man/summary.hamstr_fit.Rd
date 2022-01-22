@@ -2,9 +2,14 @@
 % Please edit documentation in R/posterior_methods.R
 \name{summary.hamstr_fit}
 \alias{summary.hamstr_fit}
-\title{Title}
+\title{Summarise hamstr models}
 \usage{
-\method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates", "pars"), ...)
+\method{summary}{hamstr_fit}(
+  object,
+  type = c("age_models", "acc_rates", "pars"),
+  probs = c(0.025, 0.25, 0.5, 0.75, 0.975),
+  ...
+)
 }
 \arguments{
 \item{object}{hamstr_fit object}
@@ -15,7 +20,7 @@
 
 }
 \description{
-Title
+Summarise hamstr models
 }
 \examples{
 \dontrun{

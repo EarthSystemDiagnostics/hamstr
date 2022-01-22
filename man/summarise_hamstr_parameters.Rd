@@ -6,7 +6,8 @@
 \usage{
 summarise_hamstr_parameters(
   object,
-  pars = c("alpha[1]", "R", "w", "L", "D", "H_depth", "H_length")
+  pars = c("alpha[1]", "R", "w", "L", "D", "H_depth", "H_length"),
+  probs
 )
 }
 \arguments{

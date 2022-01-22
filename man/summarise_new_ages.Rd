@@ -4,7 +4,7 @@
 \alias{summarise_new_ages}
 \title{Summarise Interpolated Posterior Age Models}
 \usage{
-summarise_new_ages(new_ages)
+summarise_new_ages(new_ages, probs)
 }
 \arguments{
 \item{new_ages}{Object of class "hamstr_interpolated_ages"}

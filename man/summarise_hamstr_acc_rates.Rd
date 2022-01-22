@@ -4,7 +4,12 @@
 \alias{summarise_hamstr_acc_rates}
 \title{Summarise accumulation rates}
 \usage{
-summarise_hamstr_acc_rates(hamstr_fit, tau = 0, kern = c("U", "G", "BH"))
+summarise_hamstr_acc_rates(
+  hamstr_fit,
+  tau = 0,
+  kern = c("U", "G", "BH"),
+  probs
+)
 }
 \arguments{
 \item{hamstr_fit}{A hamstr_fit object}
