@@ -131,19 +131,21 @@ hamstr <- function(depth, obs_age, obs_err,
   inits <- replicate(used_sampler_args$chains, 
                      list(get_inits_hamstr(stan_dat)))
 
-  if (sample_posterior){
+ 
     
     args <- list(object = stanmodels$hamstr, data = stan_dat, 
                  init = inits)
     
     args <- append(args, used_sampler_args)
   
+    if (sample_posterior){
     fit <- do.call(rstan::sampling, args)
     
     } else if (sample_posterior == FALSE){
     fit <- NA
   }
 
+  stan_dat <- append(stan_dat, used_sampler_args)
 
   out <- list(fit=fit, data=stan_dat)
 

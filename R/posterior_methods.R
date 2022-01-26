@@ -127,7 +127,7 @@ summarise_q <- function(dat,
 #'
 #' @return data.frame / tibble
 #' @keywords internal
-summarise_new_ages <- function(new_ages, probs){
+summarise_new_ages <- function(new_ages, probs = c(0.025, 0.25, 0.5, 0.75, 0.975)){
 
   new_ages_sum <- new_ages %>%
     dplyr::group_by(depth) %>%
@@ -154,7 +154,7 @@ summarise_new_ages <- function(new_ages, probs){
 #'
 #' summarise_age_models(fit)
 #' }
-summarise_age_models <- function(hamstr_fit, probs){
+summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0.975)){
 
   if (is_hamstr_interpolated_ages(hamstr_fit)){
     age_summary <- summarise_new_ages(hamstr_fit, probs = probs)
@@ -182,7 +182,7 @@ summarise_age_models <- function(hamstr_fit, probs){
 summarise_hamstr_parameters <- function(object,
                                         pars = c("alpha[1]", "R", "w", "L", "D",
                                                  "H_depth", "H_length"),
-                                        probs) {
+                                        probs = c(0.025, 0.25, 0.5, 0.75, 0.975)) {
   rstan::summary(object$fit,
                  pars = pars, probs = probs)$summary %>%
     dplyr::as_tibble(., rownames = "Parameter") %>%
@@ -283,8 +283,8 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars
 #'
 #' @export
 #' @method summary hamstr_interpolated_ages
-summary.hamstr_interpolated_ages <- function(object, probs){
-    summarise_new_ages(object, probs = probs)
+summary.hamstr_interpolated_ages <- function(object, ...){
+    summarise_new_ages(object, ...)
   }
 
 

@@ -63,4 +63,22 @@ test_that("posterior and plotting functions work", {
   testthat::expect_equal(nrow(p1), 360)
   
   
+  
+  s1 <- summary(hamstr_fit_1, probs = c(0.23))
+  
+  spars <- summary(hamstr_fit_1, "pars")
+  
+  p1 <- predict(hamstr_fit_1, depth = c(3.4, 5.7))
+  
+  testthat::expect_equal(unique(p1$depth), c(3.4, 5.7))
+  
+  testthat::expect_equal(names(s1),
+                         c("depth", "idx", "par", "mean",
+                           "se_mean", "sd", "23%", "n_eff", "Rhat"))
+  
+  
+  testthat::expect_equal(spars$Parameter, c("alpha[1]", "R", "w"))
+  
+  
+  
 })

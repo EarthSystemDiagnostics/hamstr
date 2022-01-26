@@ -321,9 +321,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
   posterior_ages <- get_posterior_ages(hamstr_fit) 
 
  
-  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
-    tibble::as_tibble(., rownames = "par") %>%
-    dplyr::mutate(dat_idx = get_par_idx(.data$par))
+  
 
   p.fit <- posterior_ages %>%
     
@@ -336,6 +334,12 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
     
   
   if (hamstr_fit$data$inflate_errors == 1){
+    
+    infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
+      tibble::as_tibble(., rownames = "par") %>%
+      dplyr::mutate(dat_idx = get_par_idx(.data$par))
+    
+    
     obs_ages <- obs_ages %>%
       dplyr::mutate(infl_err = infl_errs$mean,
                     age_lwr_infl = .data$age + 2*.data$infl_err,

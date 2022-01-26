@@ -4,7 +4,7 @@
 \alias{summarise_age_models}
 \title{Summarise Posterior Age Models}
 \usage{
-summarise_age_models(hamstr_fit, probs)
+summarise_age_models(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 }
 \arguments{
 \item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
