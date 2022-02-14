@@ -43,6 +43,7 @@
 calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               age.14C.se = "age.14C.se",
                               cal_curve = "intcal20",
+                              allowOutside = FALSE,
                               return.type = "dat", offset = NULL){
   
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
@@ -63,6 +64,7 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
       ages = dat[[age.14C]][x] + dat[["offset"]][x],
       ageSds = dat[[age.14C.se]][x],
       calCurves = cal_curve,
+      allowOutside = allowOutside,
       ids = x),
       error = function(i){
         cat(strsplit(as.character(i), " : ", fixed = TRUE)[[1]][2])
