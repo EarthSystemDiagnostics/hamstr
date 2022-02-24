@@ -83,7 +83,9 @@ default_K <- function(K_fine){
     abs(y - x^x)
   }
 
-  base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
+  #base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
+  
+  base <- 2
 
   AdjustK(K_fine, base)
 
@@ -322,7 +324,7 @@ make_stan_dat_hamstr <- function(...) {
       # set resolution so that there are only 10
       # sections between the median spaced 2 data points
       min.d.depth <- median(diff(sort(unique(l$depth))))
-      K_fine_2 <- round(10 * K_fine_1 / min.d.depth )
+      K_fine_2 <- round(16 * K_fine_1 / min.d.depth )
 
       K_fine <- min(c(K_fine_1, K_fine_2))
 
