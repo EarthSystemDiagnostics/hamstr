@@ -230,7 +230,7 @@ plot_summary_age_models <- function(hamstr_fit){
     plot_downcore_summary(.)
   
  
- if (hamstr_fit$data$inflate_errors == 1){
+ if (hamstr_fit$data$inflate_errors == 1 | hamstr_fit$data$model_displacement == 1){
    
    infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
     tibble::as_tibble(., rownames = "par") %>%
@@ -375,9 +375,9 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 add_colour_scale <- function(gg){
 
-  clrs <- c("DarkBlue", "Blue", "Orange", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
+  clrs <- c("DarkBlue", "Blue", "Orange", "Red", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
             "1", "2", "3", "4")
-  lbls <- c("Age point", "Obs age", "Latent age", "Median", "Mean", "95%", "50%", "Age models",
+  lbls <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "50%", "Age models",
             "Chain 1","Chain 2","Chain 3","Chain 4")
 
   gg +

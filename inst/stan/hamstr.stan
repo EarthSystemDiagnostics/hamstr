@@ -91,7 +91,7 @@ transformed data{
   
   // inverse scale of the prior on L
   real L_rate;
-  real D_rate;
+  //real D_rate;
   
   int<lower = 0, upper = 1> sample_L;
   
@@ -121,7 +121,7 @@ transformed data{
   }
   
   
-  D_rate = 1/D_prior_scale;
+  //D_rate = 1/D_prior_scale;
   
   
 }
