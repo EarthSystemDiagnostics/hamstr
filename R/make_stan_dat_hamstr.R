@@ -382,16 +382,29 @@ hierarchical_depths <- function(stan_dat){
 #' @keywords internal
 get_inits_hamstr <- function(stan_dat){
 
+  # robust lm to get age0
+  d <- data.frame(depth = stan_dat$depth, obs_age = stan_dat$obs_age)
+  rlm1 <- MASS::rlm(obs_age~depth, data = d)
+  sigma <- summary(rlm1)$sigma
+  
+  
   l <- list(
     R = stats::runif(1, 0.1, 0.9),
-
+    
     # create starting alpha values +- 3 SD from the overal prior mean (but always +ve)
     alpha = with(stan_dat, abs(stats::rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
     #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
-
-    age0 = stats::rnorm(1, min(stan_dat$obs_age), 2)
+    
+    age0 = as.numeric(
+      stats::predict(rlm1,
+                     newdata = data.frame(depth = stan_dat$top_depth))
+    ) + stats::rnorm(1, 0, sigma)
+    
   )
-
+  
+  
+  if (l$age0 < stan_dat$min_age) l$age0 <- stan_dat$min_age + abs(stats::rnorm(1, 0, 2))
+  
   # need to make this conditional and make sure initial values are arrays!
   if (stan_dat$inflate_errors == 1){
     l$infl_mean = as.array(abs(stats::rnorm(1, 0, 0.1)))
@@ -402,7 +415,7 @@ get_inits_hamstr <- function(stan_dat){
     l$infl_sd = numeric(0)
     l$infl = numeric(0)
   }
-
+  
   return(l)
 }
 
