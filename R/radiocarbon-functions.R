@@ -117,7 +117,7 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
 #' deviation of the empirical PDF
 #' @keywords internal
 #' @examples
-#' \dontrun{#'
+#' \dontrun{
 #' df <- data.frame(x = 1:10)
 #' df$p <- dnorm(df$x, 5, 2)
 #' hamstr:::SummariseEmpiricalPDF(df$x, df$p)
@@ -227,7 +227,8 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
   cal.ages <- calib$cal.ages
 
   cal.ages.df <- dplyr::tibble(cal = cal.ages) %>%
-    mutate(.id = 1:n())
+
+    dplyr::mutate(.id = 1:dplyr::n())
 
   cali.pdf.dat <- cal.ages.df %>%
     dplyr::group_by(.id) %>%

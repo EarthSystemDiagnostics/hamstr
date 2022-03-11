@@ -74,9 +74,10 @@ AdjustK <- function(K_fine, base){
 #' @return a vector
 #' @keywords internal
 #' @examples
+#' \dontrun{
 #' default_K(100)
-#' default_K(500)
-
+#' default_K(500)  
+#' }
 default_K <- function(K_fine){
 
   bar <- function(x, y){
@@ -101,7 +102,9 @@ default_K <- function(K_fine){
 #' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' hierarchy_efficiency(10, 3)
+#' }
 hierarchy_efficiency <- function(base, n){
 
   nTot <- (base^1 - base^(n+1)) / (1-base)
@@ -160,7 +163,9 @@ alpha_indices <- function(K){
 #' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' gamma_sigma_shape(mean = 10, sigma = 2)
+#' }
 gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
   
   if (is.null(mean) & is.null(mode)) stop("One of either the mean or mode must be specified")

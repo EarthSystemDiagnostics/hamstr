@@ -18,6 +18,8 @@ hierarchy_efficiency(base, n)
 Calculate number of parameters being estimated for a given hierarchical structure
 }
 \examples{
+\dontrun{
 hierarchy_efficiency(10, 3)
+}
 }
 \keyword{internal}

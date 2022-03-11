@@ -210,7 +210,7 @@ hamstr_control <- function(scale_R = TRUE,
 #' @export
 #'
 #' @examples
-#' stan_sampler_args()
+#' get_stan_sampler_args()
 get_stan_sampler_args <- function(chains = 4,
                              cores = chains,
                              iter = 2000,

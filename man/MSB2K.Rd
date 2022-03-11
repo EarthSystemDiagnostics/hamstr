@@ -17,10 +17,10 @@ A data frame with 40 rows and 4 variables:
 MSB2K
 }
 \description{
-Dataset for core MSB2K provided in package \link[rbacon]{}
+Dataset for core MSB2K as provided in the package \link[rbacon]{rbacon}
 }
 \details{
-The example dataset MSB2K as provided by the \link[rbacon]{} package.
+The example dataset MSB2K as provided by the \link[rbacon]{rbacon} package.
 }
 \references{
 Blaauw, Maarten, and J. Andrés Christen. 2011. Flexible

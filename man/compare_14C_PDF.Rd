@@ -20,7 +20,7 @@ compare_14C_PDF(
 
 \item{cal_curve}{calibration curve}
 
-\item{nu}{degrees of freedom of the t-distribution approximation, default in 
+\item{nu}{degrees of freedom of the t-distribution approximation, default in
 hamstr is 6}
 
 \item{return.type}{return a ggplot object or a list containing the ggplot
