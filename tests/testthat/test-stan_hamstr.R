@@ -7,14 +7,14 @@ test_that("set seed works", {
                          obs_err = rep(1, 10), 
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result
-                         stan_sampler_args = list(seed = 1, iter = 20))
+                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
   
   hamstr_fit_2 <- hamstr(depth = 1:10,
                          obs_age = 1:10,
                          obs_err = rep(1, 10), 
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result
-                         stan_sampler_args = list(seed = 1, iter = 20))
+                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
   
   
   testthat::expect_equal(summary(hamstr_fit_1)$n_eff, summary(hamstr_fit_2)$n_eff)
@@ -35,7 +35,7 @@ test_that("posterior and plotting functions work", {
                          model_bioturbation = TRUE,
                          L_prior_shape = 0,
                          n_ind = rep(10, 10),
-                         stan_sampler_args = list(seed = 1, iter = 20))
+                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
   
   p1 <- plot(hamstr_fit_1)
   p2 <- plot(hamstr_fit_1, "age")

@@ -1,5 +1,5 @@
 #' @title MSB2K
-#' @description Dataset for core MSB2K provided in package \link[rbacon]{}
+#' @description Dataset for core MSB2K as provided in the package \link[rbacon]{rbacon}
 #' @format A data frame with 40 rows and 4 variables:
 #' \describe{
 #'   \item{\code{labID}}{factor Sample ID number from the lab.}
@@ -7,7 +7,7 @@
 #'   \item{\code{error}}{integer Age uncertainty in years.}
 #'   \item{\code{depth}}{double Depth in core in cm.} 
 #'}
-#' @details The example dataset MSB2K as provided by the \link[rbacon]{} package.
+#' @details The example dataset MSB2K as provided by the \link[rbacon]{rbacon} package.
 #' @references 
 #' 
 #' Blaauw, Maarten, and J. Andrés Christen. 2011. Flexible

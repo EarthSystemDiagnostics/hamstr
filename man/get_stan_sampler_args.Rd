@@ -115,5 +115,5 @@ get_stan_sampler_args(
 Returns a list of parameters for the Stan sampler
 }
 \examples{
-stan_sampler_args()
+get_stan_sampler_args()
 }
