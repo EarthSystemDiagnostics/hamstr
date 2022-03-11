@@ -7,7 +7,7 @@
 get_posterior_ages(hamstr_fit)
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
 a dataframe/tibble with posterior ages for all iterations after warmup

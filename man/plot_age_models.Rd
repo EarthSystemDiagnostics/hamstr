@@ -7,9 +7,9 @@
 plot_age_models(hamstr_fit, n.iter = 1000)
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
-\item{n.iter}{The number of iterations of the model to plot, defaults to
+\item{n.iter}{the number of iterations of the model to plot, defaults to
 1000.}
 }
 \value{

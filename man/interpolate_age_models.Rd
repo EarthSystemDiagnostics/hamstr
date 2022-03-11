@@ -7,7 +7,7 @@
 interpolate_age_models(hamstr_fit, depth)
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
 \item{depth}{a vector of depths at which to interpolate the age models.
 If left NULL, the depths of the age control points are used.}

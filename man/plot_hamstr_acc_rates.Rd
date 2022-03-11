@@ -14,19 +14,19 @@ plot_hamstr_acc_rates(
 )
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
 \item{axis}{Plot accumulation rate against depth or age}
 
 \item{units}{Plot accumulation rate in depth per time, or time per depth
 (or both)}
 
-\item{tau}{Scale of the smoothing kernel in depth units. If tau > 0,
+\item{tau}{scale of the smoothing kernel in depth units. If tau > 0,
 accumulation rates are smoothed (filtered) before summary statistics are 
 calculated, so that the accumulation rate at a given depth corresponds to the
 average rate over the depth interval tau. Default to 0.}
 
-\item{kern}{Choice of smoothin kernal. U for uniform (moving average), G for
+\item{kern}{choice of smoothin kernal. U for uniform (moving average), G for
 Gaussian, BH for Berger and Heath (exponential). Defaults to U}
 }
 \value{

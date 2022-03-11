@@ -7,11 +7,11 @@
 summarise_q(dat, var, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 }
 \arguments{
-\item{dat}{A dataframe or tibble}
+\item{dat}{a dataframe or tibble}
 
-\item{var}{The variable to summarise (unquoted)}
+\item{var}{the variable to summarise (unquoted)}
 
-\item{probs}{The quantiles at which to summarise}
+\item{probs}{the quantiles at which to summarise}
 }
 \value{
 

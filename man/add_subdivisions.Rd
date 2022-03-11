@@ -9,7 +9,7 @@ add_subdivisions(gg, hamstr_fit)
 \arguments{
 \item{gg}{A ggplot2 object}
 
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
 A ggplot2 object

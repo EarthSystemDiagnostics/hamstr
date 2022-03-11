@@ -7,7 +7,7 @@
 plot_D_prior_posterior(hamstr_fit)
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
 A ggplot2 object

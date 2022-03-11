@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{hamstr_interpolated_ages object}
+
+\item{...}{additional arguments to hamstr summary methods}
 }
 \value{
 

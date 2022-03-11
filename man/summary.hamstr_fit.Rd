@@ -10,6 +10,8 @@
 \item{object}{hamstr_fit object}
 
 \item{type}{age models "age_models" or accumulation rates "acc_rates"}
+
+\item{...}{additional arguments to hamstr summary methods}
 }
 \value{
 

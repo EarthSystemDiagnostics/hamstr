@@ -7,7 +7,7 @@
 plot_infl_prior_posterior(hamstr_fit)
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
 A ggplot2 object
@@ -20,7 +20,7 @@ Plot the Prior and Posterior Distributions of the Inflation Factor Parameters
 fit <- hamstr(
   depth = MSB2K$depth,
   obs_age = MSB2K$age,
-  obs_err = MSB2K$error,   
+  obs_err = MSB2K$error,
   inflate_errors = 1)
 
 plot_infl_prior_posterior(fit)

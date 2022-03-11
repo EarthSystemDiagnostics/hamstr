@@ -7,7 +7,7 @@
 plot_hierarchical_acc_rate(hamstr_fit)
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
 ggplot2 object

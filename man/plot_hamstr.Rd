@@ -12,13 +12,13 @@ plot_hamstr(
 )
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
 \item{summarise}{logical TRUE or FALSE. Plot the realisations as a summarised
 "ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot
 showing individual realisations. Defaults to TRUE (ribbon).}
 
-\item{n.iter}{The number of iterations of the model to plot, defaults to
+\item{n.iter}{the number of iterations of the model to plot, defaults to
 1000.}
 
 \item{plot_diagnostics}{logical, include diagnostic plots: traceplot of

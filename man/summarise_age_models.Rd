@@ -7,7 +7,7 @@
 summarise_age_models(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
 data.frame / tibble

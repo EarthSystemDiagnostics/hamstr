@@ -2,10 +2,10 @@
 
 #' Title
 #'
-#' @param object a hamstr_fit object
-#' @param type One of "default", "age_models", "hier_acc_rates",
-#'                               "acc_mean_prior_post", "mem_prior_post",
-#'                               "L_prior_post", "PDF_14C"
+#' @param x a hamstr_fit object
+#' @param type one of "default", "age_models","acc_rates", "hier_acc_rates",
+#' "acc_mean_prior_post", "mem_prior_post", "L_prior_post", "D_prior_post", "PDF_14C"
+#' @param ... additional arguments to hamstr plotting methods
 #' @inheritParams plot_hamstr
 #' @return A ggplot object
 #'
@@ -21,7 +21,7 @@
 #' }
 #' @export
 #' @method plot hamstr_fit
-plot.hamstr_fit <- function(object,
+plot.hamstr_fit <- function(x,
                             type = c("default",
                               "age_models",
                               "acc_rates",
@@ -38,16 +38,16 @@ plot.hamstr_fit <- function(object,
   type <- match.arg(type)
 
   switch(type,
-         default = plot_hamstr(object, summarise = summarise, ...),
-         age_models = plot_hamstr(object, summarise = summarise,
+         default = plot_hamstr(x, summarise = summarise, ...),
+         age_models = plot_hamstr(x, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
-         acc_rates = plot_hamstr_acc_rates(object, ...),
-         hier_acc_rates = plot_hierarchical_acc_rate(object),
-         acc_mean_prior_post = plot_acc_mean_prior_posterior(object),
-         mem_prior_post = plot_memory_prior_posterior(object),
-         L_prior_post = plot_L_prior_posterior(object),
-         D_prior_post = plot_D_prior_posterior(object),
-         PDF_14C = plot_14C_PDF(object, ...)
+         acc_rates = plot_hamstr_acc_rates(x, ...),
+         hier_acc_rates = plot_hierarchical_acc_rate(x),
+         acc_mean_prior_post = plot_acc_mean_prior_posterior(x),
+         mem_prior_post = plot_memory_prior_posterior(x),
+         L_prior_post = plot_L_prior_posterior(x),
+         D_prior_post = plot_D_prior_posterior(x),
+         PDF_14C = plot_14C_PDF(x, ...)
   )
   }
 
@@ -56,9 +56,9 @@ plot.hamstr_fit <- function(object,
 
 #' Plot an hamstr_fit object
 #'
-#' @param hamstr_fit The object returned from \code{stan_hamstr}.
+#' @param hamstr_fit the object returned from \code{stan_hamstr}.
 #'
-#' @param n.iter The number of iterations of the model to plot, defaults to
+#' @param n.iter the number of iterations of the model to plot, defaults to
 #'   1000.
 #' @param summarise logical TRUE or FALSE. Plot the realisations as a summarised
 #'  "ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot
@@ -226,7 +226,7 @@ plot_summary_age_models <- function(hamstr_fit){
   age_summary <- summarise_age_models(hamstr_fit)
 
   p.age.sum <- age_summary %>%
-    plot_downcore_summary2(.)
+    plot_downcore_summary(.)
 
 
   if (hamstr_fit$data$inflate_errors == 1 | hamstr_fit$data$model_displacement == 1){
@@ -422,8 +422,8 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
 
 #' Plot accumulation rates
 #' @inheritParams plot_hamstr
-#' @param axis Plot accumulation rate against depth or age
-#' @param units Plot accumulation rate in depth per time, or time per depth
+#' @param axis plot accumulation rate against depth or age
+#' @param units plot accumulation rate in depth per time, or time per depth
 #' (or both)
 #' @inheritParams filter_hamstr_acc_rates
 #' @return

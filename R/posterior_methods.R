@@ -101,9 +101,9 @@ interpolate_age_models <- function(hamstr_fit, depth) {
 
 #' Summarise to Quantiles and Moments
 #'
-#' @param dat A dataframe or tibble
-#' @param var The variable to summarise (unquoted)
-#' @param probs The quantiles at which to summarise
+#' @param dat a dataframe or tibble
+#' @param var the variable to summarise (unquoted)
+#' @param probs the quantiles at which to summarise
 #'
 #' @return
 #' @keywords internal
@@ -197,10 +197,11 @@ summarise_hamstr_parameters <- function(object,
 #' models interpolated to new depths given in depth.
 #' @param object hamstr_fit object
 #' @param type age models "age_models" or accumulation rates "acc_rates"
-#' @param depth Defaults to "modelled", which returns the modelled depths.
+#' @param depth defaults to "modelled", which returns the modelled depths.
 #' "data" returns age models at the depths of the observations, or a numerical
 #'  vector to specify depths. Accumulation rates are only returned at the 
 #'  modelled depths.
+#' @param ... Additional arguments to hamstr predict methods
 #' @return
 #'
 #' @examples
@@ -239,7 +240,7 @@ predict.hamstr_fit <- function(object,
 #'
 #' @param object hamstr_fit object
 #' @param type age models "age_models" or accumulation rates "acc_rates"
-#'
+#' @param ... additional arguments to hamstr summary methods
 #' @return
 #' @examples 
 #' \dontrun{
@@ -279,6 +280,7 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars
 #' Title
 #'
 #' @param object hamstr_interpolated_ages object
+#' @param ... additional arguments to hamstr summary methods
 #' @return
 #'
 #' @export
@@ -340,12 +342,12 @@ get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH"
 
 #' Smooth accumulation rates
 #'
-#' @param hamstr_acc_rates Accumulation rates from get_posterior_acc_rates
-#' @param tau Scale of the smoothing kernel in depth units. If tau > 0,
+#' @param hamstr_acc_rates accumulation rates from get_posterior_acc_rates
+#' @param tau scale of the smoothing kernel in depth units. If tau > 0,
 #'  accumulation rates are smoothed (filtered) before summary statistics are 
 #'  calculated, so that the accumulation rate at a given depth corresponds to the
 #'  average rate over the depth interval tau. Default to 0. 
-#' @param kern Choice of smoothin kernal. U for uniform (moving average), G for
+#' @param kern choice of smoothin kernal. U for uniform (moving average), G for
 #'  Gaussian, BH for Berger and Heath (exponential). Defaults to U
 #' @return
 #' @keywords internal
@@ -405,7 +407,7 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G"
 
 #' Summarise accumulation rates
 #'
-#' @param hamstr_fit A hamstr_fit object
+#' @param hamstr_fit a hamstr_fit object
 #' @inheritParams filter_hamstr_acc_rates
 #' @return
 #' @keywords internal
