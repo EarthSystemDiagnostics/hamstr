@@ -22,7 +22,7 @@ plot_hamstr_acc_rates(
 (or both)}
 
 \item{tau}{scale of the smoothing kernel in depth units. If tau > 0,
-accumulation rates are smoothed (filtered) before summary statistics are 
+accumulation rates are smoothed (filtered) before summary statistics are
 calculated, so that the accumulation rate at a given depth corresponds to the
 average rate over the depth interval tau. Default to 0.}
 

@@ -193,17 +193,17 @@ summarise_hamstr_parameters <- function(object,
 
 # Methods --------
 
-#' Interpolate Age Models at Given Depths
-#' @description Method for generic function predict. Returns the posterior age
-#' models interpolated to new depths given in depth.
+#' Interpolate Age Models at Arbitrary Depths
+#' @description predict method for class "hamstr_fit". Returns the posterior age
+#' models interpolated to arbitrary depths.
 #' @param object hamstr_fit object
 #' @param type age models "age_models" or accumulation rates "acc_rates"
 #' @param depth defaults to "modelled", which returns the modelled depths.
 #' "data" returns age models at the depths of the observations, or a numerical
 #'  vector to specify depths. Accumulation rates are only returned at the 
 #'  modelled depths.
-#' @param ... Additional arguments to hamstr predict methods
-#' @return a tibble of hamstr age-depth model realisations/iterations
+#' @param ... additional arguments to hamstr predict methods
+#' @return a tibble of hamstr age-depth model realisations
 #'
 #' @examples
 #' \dontrun{
@@ -237,8 +237,8 @@ predict.hamstr_fit <- function(object,
 
 
 
-#' Summarise hamstr models
-#'
+#' Summarise hamstr Models
+#' @description summary method for class "hamstr_fit"
 #' @param object hamstr_fit object
 #' @param type age models "age_models" or accumulation rates "acc_rates"
 #' @param ... additional arguments to hamstr summary methods
@@ -278,8 +278,8 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars
 
 
 
-#' Title
-#'
+#' Summarise Age Models That Have Been Interpolated
+#' @description summary method for class "hamstr_interpolated_ages"
 #' @param object hamstr_interpolated_ages object
 #' @param ... additional arguments to hamstr summary methods
 #' @return a tibble containing the summarised posterior

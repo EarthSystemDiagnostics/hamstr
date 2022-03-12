@@ -15,7 +15,7 @@ plot_hamstr(
 \item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
 \item{summarise}{logical TRUE or FALSE. Plot the realisations as a summarised
-"ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot
+"ribbon" showing 50\% and 95\% intervals (faster), or as a spaghetti plot
 showing individual realisations. Defaults to TRUE (ribbon).}
 
 \item{n.iter}{the number of iterations of the model to plot, defaults to
@@ -30,10 +30,10 @@ A ggplot2 object
 }
 \description{
 Plots the HAMStR modelled age ~ depth relationship together with
-  the depths, ages, and age uncertainties in the observed data. A random
-  sample of size \code{n.iter} of the iterations of the posterior
-  distribution are plotted as grey lines. The observed data are plotted as
-  points with +- 2*se error bars.
+the depths, ages, and age uncertainties in the observed data. A random
+sample of size \code{n.iter} of the iterations of the posterior
+distribution are plotted as grey lines. The observed data are plotted as
+points with +- 2*se error bars.
 }
 \examples{
 \dontrun{

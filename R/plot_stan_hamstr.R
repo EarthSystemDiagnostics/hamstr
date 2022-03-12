@@ -1,13 +1,15 @@
 # Methods -------
 
-#' Title
+#' Plot hamstr Objects
+#' 
+#' @description plot method for class "hamstr_fit".
 #'
 #' @param x a hamstr_fit object
 #' @param type one of "default", "age_models","acc_rates", "hier_acc_rates",
 #' "acc_mean_prior_post", "mem_prior_post", "L_prior_post", "D_prior_post", "PDF_14C"
 #' @param ... additional arguments to hamstr plotting methods
 #' @inheritParams plot_hamstr
-#' @return A ggplot object
+#' @return a ggplot object
 #'
 #' @examples
 #' \dontrun{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/stan_hamstr.R
 \name{hamstr_control}
 \alias{hamstr_control}
-\title{Additional Arguments to hamstr useful for debugging or development}
+\title{Return a List of hamstr Control Arguments}
 \usage{
 hamstr_control(
   scale_R = TRUE,
@@ -19,27 +19,27 @@ hamstr_control(
 \item{scale_R}{logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 not. Defaults to TRUE.}
 
-\item{nu}{Degrees of freedom for the Student-t distributed error model.
-Defaults to 6, which is equivalent to the default parameterisation of
+\item{nu}{degrees of freedom for the Student-t distributed error model.
+Defaults to 6, which is equivalent to the default parametrisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).}
 
-\item{scale_shape}{Scale the shape parameter according to the number of
+\item{scale_shape}{scale the shape parameter according to the number of
 hierarchical levels, to control the total variance of the alpha
-innovations. This defaults to TRUE as of Hamstr verion 0.5.}
+innovations. This defaults to TRUE as of hamstr verion 0.5.}
 
-\item{smooth_s}{Smooth the sedimentation rate used to calculate additional
+\item{smooth_s}{smooth the sedimentation rate used to calculate additional
 error from bioturbation by taking a mean across nearby sections}
 
 \item{inflate_errors}{logical: If set to TRUE, observation errors are
-inflated so that data are consistent with a gamma AR1 age-depth model. 
+inflated so that data are consistent with a gamma AR1 age-depth model.
 This is an experimental feature under active development. Defaults to FALSE.}
 
-\item{infl_sigma_sd}{Hyperparameter: sets the standard deviation of the
+\item{infl_sigma_sd}{hyperparameter: sets the standard deviation of the
 half-normal prior on the mean of the additional error terms. Defaults to 10
 times the mean observation error in obs_err.}
 
-\item{infl_shape_shape, infl_shape_mean}{Hyperparameters: parametrises the
+\item{infl_shape_shape, infl_shape_mean}{hyperparameters: parametrises the
 gamma prior on the shape of the distribution of the additional error terms.
 Default to 1, 1.}
 }
@@ -47,7 +47,8 @@ Default to 1, 1.}
 a named list
 }
 \description{
-Additional Arguments to hamstr useful for debugging or development
+Returns a list arguments to pass to hamstr_control which may be
+useful for debugging or development
 }
 \examples{
 hamstr_control()

@@ -2,7 +2,7 @@
 % Please edit documentation in R/posterior_methods.R
 \name{summary.hamstr_interpolated_ages}
 \alias{summary.hamstr_interpolated_ages}
-\title{Title}
+\title{Summarise Age Models That Have Been Interpolated}
 \usage{
 \method{summary}{hamstr_interpolated_ages}(object, ...)
 }
@@ -15,5 +15,5 @@
 a tibble containing the summarised posterior
 }
 \description{
-Title
+summary method for class "hamstr_interpolated_ages"
 }

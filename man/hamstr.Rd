@@ -46,20 +46,20 @@ by convention). The default value is the current year in calendar age BP
 (currently -71 for 2021).}
 
 \item{K}{K controls the number and structure of the hierarchically modelled
-  down-core sections. It is specified as a vector, where each value indicates
-  the number of new child sections for each parent section, e.g., c(10, 10,
-  10) would specify 10 sections at the coarsest level, with 10 new sections
-  at next finer level, giving a total of 1000 sections at the finest
-  resolution.
+down-core sections. It is specified as a vector, where each value indicates
+the number of new child sections for each parent section, e.g., c(10, 10,
+10) would specify 10 sections at the coarsest level, with 10 new sections
+at next finer level, giving a total of 1000 sections at the finest
+resolution.
 
-  By default, the total number of sections at the finest level is set so that
-  the resolution is approximately 1 cm per section, up to a total length of
-  900 cm, above which the default remains 900 sections and a coarser
-  resolution is used.
+By default, the total number of sections at the finest level is set so that
+the resolution is approximately 1 cm per section, up to a total length of
+900 cm, above which the default remains 900 sections and a coarser
+resolution is used.
 
-  The default hierarchical structure is chosen so that the number of
-  hierarchical levels, and the number of new child sections per level, are
-  approximately equal, e.g. c(5, 5, 5) for a total of 125 sections.}
+The default hierarchical structure is chosen so that the number of
+hierarchical levels, and the number of new child sections per level, are
+approximately equal, e.g. c(5, 5, 5) for a total of 125 sections.}
 
 \item{top_depth, bottom_depth}{The top and bottom depths of the desired
 age-depth model. Must encompass the range of the data. Defaults to the
@@ -80,9 +80,9 @@ rates. Defaults to 1.5 - as for Bacon 2.2.}
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 The prior on the correlation between layers is scaled according to the
 thickness of the sediment sections in the highest resolution hierarchical
-layer, *delta_c*, which is determined by the total length age-models and
-the parameter vector *K*. mem_mean sets the mean value for *R* (defaults to
-0.5), while *w* = R^(delta_c)}
+layer, \emph{delta_c}, which is determined by the total length age-models and
+the parameter vector \emph{K}. mem_mean sets the mean value for \emph{R} (defaults to
+0.5), while \emph{w} = R^(delta_c)}
 
 \item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
 defaults to 10 as in Bacon >= 2.5.1}
@@ -96,7 +96,7 @@ for details.}
 
 \item{n_ind}{The number of individual particles (e.g. Foraminifera) in each
 sample that was dated by e.g. radiocarbon dating. This can be a single
-value or a vector the same length as obs_age. Only used if 
+value or a vector the same length as obs_age. Only used if
 model_bioturbation = TRUE.}
 
 \item{L_prior_mean}{Mean of the gamma prior on mixing depth, defaults to 10.}
@@ -107,12 +107,12 @@ calculated. Defaults to shape = 2. If either the shape or sigma parameter
 is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 rather than being sampled with a gamma prior.}
 
-\item{model_displacement}{Model additional error on observed ages that does 
-not scale with the number of individual particles in a sample, for example 
+\item{model_displacement}{Model additional error on observed ages that does
+not scale with the number of individual particles in a sample, for example
 due to incomplete mixing.}
 
 \item{D_prior_scale}{Scale of the half-normal prior on additional error on
-observed ages. The mean and standard deviation of a half-normal are equal 
+observed ages. The mean and standard deviation of a half-normal are equal
 to the scale. Units are those of the depth variable, e.g. cm.}
 
 \item{model_hiatus}{Optionally model a hiatus.}
@@ -125,17 +125,17 @@ returns only the data, model structure and prior parameters so that data
 and prior distributions can be plotted and checked prior to running a
 model. Defaults to TRUE}
 
-\item{hamstr_control}{Additional arguments to hamstr useful for debugging or 
+\item{hamstr_control}{Additional arguments to hamstr useful for debugging or
 development. See \link[hamstr]{hamstr_control} for details.}
 
 \item{stan_sampler_args}{Additional arguments to \link[rstan]{sampling} as a
-named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
+named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000
 iterations instead of the default 4 chains of 2000 iterations.}
 }
 \value{
 Returns an object of class "hamstr_fit", which is a list composed of
-  the output from the stan sampler .$fit, and the list of data passed to the
-  sampler, .$data
+the output from the stan sampler .$fit, and the list of data passed to the
+sampler, .$data
 }
 \description{
 hamstr

@@ -10,7 +10,7 @@ filter_hamstr_acc_rates(hamstr_acc_rates, tau = 0, kern = c("U", "G", "BH"))
 \item{hamstr_acc_rates}{accumulation rates from get_posterior_acc_rates}
 
 \item{tau}{scale of the smoothing kernel in depth units. If tau > 0,
-accumulation rates are smoothed (filtered) before summary statistics are 
+accumulation rates are smoothed (filtered) before summary statistics are
 calculated, so that the accumulation rate at a given depth corresponds to the
 average rate over the depth interval tau. Default to 0.}
 

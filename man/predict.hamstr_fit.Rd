@@ -2,7 +2,7 @@
 % Please edit documentation in R/posterior_methods.R
 \name{predict.hamstr_fit}
 \alias{predict.hamstr_fit}
-\title{Interpolate Age Models at Given Depths}
+\title{Interpolate Age Models at Arbitrary Depths}
 \usage{
 \method{predict}{hamstr_fit}(
   object,
@@ -18,17 +18,17 @@
 
 \item{depth}{defaults to "modelled", which returns the modelled depths.
 "data" returns age models at the depths of the observations, or a numerical
- vector to specify depths. Accumulation rates are only returned at the 
- modelled depths.}
+vector to specify depths. Accumulation rates are only returned at the
+modelled depths.}
 
-\item{...}{Additional arguments to hamstr predict methods}
+\item{...}{additional arguments to hamstr predict methods}
 }
 \value{
-a tibble of hamstr age-depth model realisations/iterations
+a tibble of hamstr age-depth model realisations
 }
 \description{
-Method for generic function predict. Returns the posterior age
-models interpolated to new depths given in depth.
+predict method for class "hamstr_fit". Returns the posterior age
+models interpolated to arbitrary depths.
 }
 \examples{
 \dontrun{

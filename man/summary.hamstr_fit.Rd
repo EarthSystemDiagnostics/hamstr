@@ -2,7 +2,7 @@
 % Please edit documentation in R/posterior_methods.R
 \name{summary.hamstr_fit}
 \alias{summary.hamstr_fit}
-\title{Summarise hamstr models}
+\title{Summarise hamstr Models}
 \usage{
 \method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates", "pars"), ...)
 }
@@ -17,7 +17,7 @@
 a tibble
 }
 \description{
-Summarise hamstr models
+summary method for class "hamstr_fit"
 }
 \examples{
 \dontrun{
