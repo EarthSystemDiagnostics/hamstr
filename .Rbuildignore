@@ -6,3 +6,6 @@
 ^Bacon_runs$
 ^Docker$
 ^data-raw$
+^hamstr\.Rproj$
+^readme\.Rmd$
+^readme_files$

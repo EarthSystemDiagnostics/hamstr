@@ -16,7 +16,7 @@ summarise_hamstr_parameters(
 \item{par}{Character vector of parameters to include}
 }
 \value{
-
+a tibble of summarised posterior of hamstr parameters
 }
 \description{
 Summarise Hamstr Parameters

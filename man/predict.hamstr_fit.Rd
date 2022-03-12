@@ -24,7 +24,7 @@
 \item{...}{Additional arguments to hamstr predict methods}
 }
 \value{
-
+a tibble of hamstr age-depth model realisations/iterations
 }
 \description{
 Method for generic function predict. Returns the posterior age

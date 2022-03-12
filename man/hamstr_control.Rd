@@ -44,7 +44,7 @@ gamma prior on the shape of the distribution of the additional error terms.
 Default to 1, 1.}
 }
 \value{
-
+a named list
 }
 \description{
 Additional Arguments to hamstr useful for debugging or development

@@ -10,7 +10,7 @@ plot_infl_prior_posterior(hamstr_fit)
 \item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
-A ggplot2 object
+a ggplot2 object
 }
 \description{
 Plot the Prior and Posterior Distributions of the Inflation Factor Parameters

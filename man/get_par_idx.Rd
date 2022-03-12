@@ -10,7 +10,7 @@ get_par_idx(x)
 \item{x}{vector of stan parameter names}
 }
 \value{
-
+a vector
 }
 \description{
 Extract Stan Parameter Index

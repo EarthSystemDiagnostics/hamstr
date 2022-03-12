@@ -16,15 +16,15 @@
 #' get_posterior_ages(fit)
 #' }
 get_posterior_ages <- function(hamstr_fit){
-
   depths <- tibble::tibble(depth = hamstr_fit$data$modelled_depths,
                    idx = 1:length(hamstr_fit$data$modelled_depths))
 
   posterior_ages <- as.data.frame(hamstr_fit$fit, pars = "c_ages") %>%
     tibble::as_tibble() %>%
-    dplyr::mutate(iter = 1:nrow(.)) %>%
-    tidyr::gather(par, age, -iter) %>%
-    dplyr::mutate(idx = get_par_idx(par),
+    dplyr::mutate(iter = 1:dplyr::n()) %>%
+    tidyr::pivot_longer(tidyr::starts_with("c_ages"),
+                        names_to = "par", values_to = "age") %>% 
+    dplyr::mutate(idx = get_par_idx(.data$par),
            par = "c_ages") %>%
     dplyr::left_join(depths, .data$., by = "idx") %>%
     dplyr::select(.data$iter,.data$depth, .data$age) %>%
@@ -105,7 +105,7 @@ interpolate_age_models <- function(hamstr_fit, depth) {
 #' @param var the variable to summarise (unquoted)
 #' @param probs the quantiles at which to summarise
 #'
-#' @return
+#' @return a tibble containing the summarised posterior
 #' @keywords internal
 summarise_q <- function(dat,
                         var,
@@ -115,7 +115,7 @@ summarise_q <- function(dat,
               sd = stats::sd({{ var }}, na.rm = TRUE),
               x = stats::quantile({{ var }}, probs, na.rm = TRUE),
               q = paste0(round(100*probs, 1), "%")) %>% 
-    tidyr::pivot_wider(names_from = q, values_from = x) %>% 
+    tidyr::pivot_wider(names_from = .data$q, values_from = .data$x) %>% 
     dplyr::as_tibble()
 }
 
@@ -130,8 +130,8 @@ summarise_q <- function(dat,
 summarise_new_ages <- function(new_ages, probs = c(0.025, 0.25, 0.5, 0.75, 0.975)){
 
   new_ages_sum <- new_ages %>%
-    dplyr::group_by(depth) %>%
-    summarise_q(., var = age, probs = probs)
+    dplyr::group_by(.data$depth) %>%
+    summarise_q(var = .data$age, probs = probs)
 
   return(new_ages_sum)
 
@@ -160,13 +160,14 @@ summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0
     age_summary <- summarise_new_ages(hamstr_fit, probs = probs)
   } else {
     age_summary <- rstan::summary(hamstr_fit$fit, par = "c_ages", probs = probs)[["summary"]] %>%
-      tibble::as_tibble(., rownames = "par")
+      tibble::as_tibble(rownames = "par")
 
     depths <- tibble::tibble(depth = hamstr_fit$data$modelled_depths,
                      idx = 1:length(hamstr_fit$data$modelled_depths))
     age_summary <- age_summary %>%
-      dplyr::mutate(idx = get_par_idx(par)) %>%
-      dplyr::left_join(depths, ., by = "idx")
+      dplyr::mutate(idx = get_par_idx(.data$par)) %>%
+      dplyr::left_join(depths, .data$., by = "idx") %>% 
+      dplyr::select(.data$depth, .data$idx, tidyr::everything())
 
   }
   return(age_summary)
@@ -177,7 +178,7 @@ summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0
 #' @param object A hamstr_fit object
 #' @param par Character vector of parameters to include
 #'
-#' @return
+#' @return a tibble of summarised posterior of hamstr parameters
 #' @keywords internal
 summarise_hamstr_parameters <- function(object,
                                         pars = c("alpha[1]", "R", "w", "L", "D",
@@ -185,8 +186,8 @@ summarise_hamstr_parameters <- function(object,
                                         probs = c(0.025, 0.25, 0.5, 0.75, 0.975)) {
   rstan::summary(object$fit,
                  pars = pars, probs = probs)$summary %>%
-    dplyr::as_tibble(., rownames = "Parameter") %>%
-    dplyr::select(-se_mean)
+    dplyr::as_tibble(rownames = "Parameter") %>%
+    dplyr::select(-.data$se_mean)
 }
 
 
@@ -202,7 +203,7 @@ summarise_hamstr_parameters <- function(object,
 #'  vector to specify depths. Accumulation rates are only returned at the 
 #'  modelled depths.
 #' @param ... Additional arguments to hamstr predict methods
-#' @return
+#' @return a tibble of hamstr age-depth model realisations/iterations
 #'
 #' @examples
 #' \dontrun{
@@ -241,7 +242,7 @@ predict.hamstr_fit <- function(object,
 #' @param object hamstr_fit object
 #' @param type age models "age_models" or accumulation rates "acc_rates"
 #' @param ... additional arguments to hamstr summary methods
-#' @return
+#' @return a tibble
 #' @examples 
 #' \dontrun{
 #' fit <- hamstr(
@@ -281,7 +282,8 @@ summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars
 #'
 #' @param object hamstr_interpolated_ages object
 #' @param ... additional arguments to hamstr summary methods
-#' @return
+#' @return a tibble containing the summarised posterior
+
 #'
 #' @export
 #' @method summary hamstr_interpolated_ages
@@ -316,26 +318,27 @@ get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH"
   depths <- tibble::as_tibble(
     hamstr_fit$data[c("c", "c_depth_top", "c_depth_bottom")]
     ) %>%
-    dplyr::mutate(depth = c_depth_top) %>%
-    dplyr::rename(idx = c)
+    dplyr::mutate(depth = .data$c_depth_top) %>%
+    dplyr::rename(idx = .data$c)
 
   out <- as.data.frame(hamstr_fit$fit, pars = "x") %>%
     tibble::as_tibble() %>%
-    dplyr::mutate(iter = 1:nrow(.)) %>%
-    tidyr::gather(par, time_per_depth, -iter) %>%
-    dplyr::mutate(idx = get_par_idx(par),
+    dplyr::mutate(iter = 1:dplyr::n()) %>%
+    tidyr::pivot_longer(cols = -tidyr::contains("iter"),
+                        names_to = "par", values_to = "time_per_depth") %>% 
+    dplyr::mutate(idx = get_par_idx(.data$par),
                   par = "x") %>%
     dplyr::left_join(depths, .data$.) %>%
-    dplyr::mutate(depth_per_time = 1000/time_per_depth) %>%
+    dplyr::mutate(depth_per_time = 1000/.data$time_per_depth) %>%
     dplyr::arrange(.data$par, .data$iter, .data$idx, .data$depth) %>%
-    dplyr::select(iter, idx, depth, c_depth_top, c_depth_bottom, time_per_depth, depth_per_time)
+    dplyr::select(.data$iter, .data$idx, .data$depth,
+                  .data$c_depth_top, .data$c_depth_bottom, 
+                  .data$time_per_depth, .data$depth_per_time)
   
   class(out) <- append("hamstr_acc_rates", class(out))
-
-  #if (tau > 0){
-    out <- filter_hamstr_acc_rates(out, tau = tau, kern = kern)
-  #}
-
+  
+  out <- filter_hamstr_acc_rates(out, tau = tau, kern = kern)
+  
   return(out)
 
 }
@@ -349,7 +352,7 @@ get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH"
 #'  average rate over the depth interval tau. Default to 0. 
 #' @param kern choice of smoothin kernal. U for uniform (moving average), G for
 #'  Gaussian, BH for Berger and Heath (exponential). Defaults to U
-#' @return
+#' @return a tibble
 #' @keywords internal
 filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G", "BH")){
   
@@ -365,7 +368,7 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G"
       
       fl <- ceiling(2*tau_scl)+1
       z <- (-fl):fl
-      f <- dnorm(z, 0, tau_scl)
+      f <- stats::dnorm(z, 0, tau_scl)
       f <- f / sum(f)  
       
     } else if (kern == "BH"){
@@ -374,14 +377,14 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G"
       z  <- (-3*tau_scl):(3*tau_scl)
       
       # PDF of Berger and Heath
-      f  <- dexp(z+tau_scl, 1/tau_scl)
+      f  <- stats::dexp(z+tau_scl, 1/tau_scl)
       f <- f / sum(f)
     }  else if (kern == "U"){
       
       fl <- ceiling(tau_scl/2)
       z  <- (-tau_scl/2):(tau_scl/2)
       
-      f <- dunif(z, (-tau_scl/2), tau_scl/2)
+      f <- stats::dunif(z, (-tau_scl/2), tau_scl/2)
       f <- f / sum(f)
     }
     
@@ -390,15 +393,15 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G"
   }
   
   x_sum <- hamstr_acc_rates %>% 
-    dplyr::group_by(iter) %>% 
-    dplyr::mutate(time_per_depth = if (tau_scl == 0) {time_per_depth} else {
+    dplyr::group_by(.data$iter) %>% 
+    dplyr::mutate(time_per_depth = if (tau_scl == 0) {.data$time_per_depth} else {
       # pad the vector with reversed head and tail
       # fl is half the filter length
       stats::filter(
-        c(rev(head(time_per_depth, fl)), time_per_depth, rev(tail(time_per_depth, fl))),
+        c(rev(utils::head(.data$time_per_depth, fl)), .data$time_per_depth, rev(utils::tail(.data$time_per_depth, fl))),
         filter = f)[(fl+1):(dplyr::n()+fl)]
     }) %>% 
-    dplyr::mutate(depth_per_time = 1000 * 1/time_per_depth, 
+    dplyr::mutate(depth_per_time = 1000 * 1/.data$time_per_depth, 
                   tau = tau)
   
   x_sum
@@ -409,7 +412,7 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G"
 #'
 #' @param hamstr_fit a hamstr_fit object
 #' @inheritParams filter_hamstr_acc_rates
-#' @return
+#' @return a tibble containing the summarised posterior accumulation rates
 #' @keywords internal
 summarise_hamstr_acc_rates <- function(hamstr_fit,
                                        tau = 0,
@@ -419,15 +422,17 @@ summarise_hamstr_acc_rates <- function(hamstr_fit,
 
   kern <- match.arg(kern)
   
-  x <- predict(hamstr_fit, type = "acc_rates", tau = tau, kern = kern) %>%
-    tidyr::pivot_longer(cols = c(time_per_depth, depth_per_time),
+  x <- stats::predict(hamstr_fit, type = "acc_rates", tau = tau, kern = kern) %>%
+    tidyr::pivot_longer(cols = c(.data$time_per_depth, .data$depth_per_time),
                         names_to = "acc_rate_unit") 
   
   x_sum <- x %>%
-    dplyr::group_by(depth, c_depth_top, c_depth_bottom, acc_rate_unit, idx, tau) %>%
-    summarise_q(., var = value, probs = probs) %>% 
+    dplyr::group_by(.data$depth, 
+                    .data$c_depth_top, .data$c_depth_bottom,
+                    .data$acc_rate_unit, .data$idx, .data$tau) %>%
+    summarise_q(var = .data$value, probs = probs) %>% 
     dplyr::ungroup() %>%
-    dplyr::arrange(acc_rate_unit, depth)
+    dplyr::arrange(.data$acc_rate_unit, .data$depth)
   
   return(x_sum)
 

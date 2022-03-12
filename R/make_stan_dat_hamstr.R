@@ -1,45 +1,7 @@
-#' Create K structure from K_tot and target_K_per_lvl
-#'
-#' @param K_tot total number of required sections at highest resolution
-#' @param target_K_per_lvl approximate number of sections per level
-#'
-#' @return
-#' @keywords internal
-GetK <- function(K_tot, target_K_per_lvl = 10){
-
-  K_per_lvl <- seq(floor(target_K_per_lvl/2), 2*target_K_per_lvl, by = 1)
-
-  K_per_lvl <- K_per_lvl[K_per_lvl>1]
-
-  n_lvls <- unlist(
-    lapply(K_per_lvl,
-           function(x) seq(floor(log(K_tot, base = x)/2),
-                           ceiling(2*log(K_tot, base = x)))
-    )
-  )
-
-  df <- expand.grid(K_per_lvl = unique(K_per_lvl), n_lvls = unique(n_lvls))
-
-  df$K_fine <- with(df, K_per_lvl^n_lvls)
-
-  idx <- which.min(abs(df$K_fine - K_tot))
-
-  n_lvls <- df[idx, "n_lvls"]
-  K_per_lvl <- df[idx, "K_per_lvl"]
-
-  K <- rep(K_per_lvl, n_lvls)
-
-  message(cat(cumprod(K)))
-
-  return(K)
-}
-
-
 #' Adjust numbers of splits per level
 #'
 #' @param K_fine total number of required sections at highest resolution
-#'
-#' @return
+#' @return K structure
 #' @keywords internal
 AdjustK <- function(K_fine, base){
 
@@ -98,7 +60,7 @@ default_K <- function(K_fine){
 #' @param base Number of new sections per per section
 #' @param n Number of hierarchical levels
 #'
-#' @return
+#' @return named vector
 #' @keywords internal
 #'
 #' @examples
@@ -328,7 +290,7 @@ make_stan_dat_hamstr <- function(...) {
 
       # set resolution so that there are only 10
       # sections between the median spaced 2 data points
-      min.d.depth <- median(diff(sort(unique(l$depth))))
+      min.d.depth <- stats::median(diff(sort(unique(l$depth))))
       K_fine_2 <- round(16 * K_fine_1 / min.d.depth )
 
       K_fine <- min(c(K_fine_1, K_fine_2))
@@ -412,7 +374,7 @@ get_smooth_i <- function(d, w){
 #'
 #' @param stan_dat
 #'
-#' @return
+#' @return a list of boundaries for the modelled sections
 #' @keywords internal
 hierarchical_depths <- function(stan_dat){
   d_range <- diff(range(stan_dat$modelled_depths))
@@ -471,4 +433,40 @@ get_inits_hamstr <- function(stan_dat){
   
   return(l)
 }
+
+#' #' Create K structure from K_tot and target_K_per_lvl
+#' #'
+#' #' @param K_tot total number of required sections at highest resolution
+#' #' @param target_K_per_lvl approximate number of sections per level
+#' #'
+#' #' @return
+#' #' @keywords internal
+#' GetK <- function(K_tot, target_K_per_lvl = 10){
+#' 
+#'   K_per_lvl <- seq(floor(target_K_per_lvl/2), 2*target_K_per_lvl, by = 1)
+#' 
+#'   K_per_lvl <- K_per_lvl[K_per_lvl>1]
+#' 
+#'   n_lvls <- unlist(
+#'     lapply(K_per_lvl,
+#'            function(x) seq(floor(log(K_tot, base = x)/2),
+#'                            ceiling(2*log(K_tot, base = x)))
+#'     )
+#'   )
+#' 
+#'   df <- expand.grid(K_per_lvl = unique(K_per_lvl), n_lvls = unique(n_lvls))
+#' 
+#'   df$K_fine <- with(df, K_per_lvl^n_lvls)
+#' 
+#'   idx <- which.min(abs(df$K_fine - K_tot))
+#' 
+#'   n_lvls <- df[idx, "n_lvls"]
+#'   K_per_lvl <- df[idx, "K_per_lvl"]
+#' 
+#'   K <- rep(K_per_lvl, n_lvls)
+#' 
+#'   message(cat(cumprod(K)))
+#' 
+#'   return(K)
+#' }
 

@@ -144,7 +144,7 @@ SummariseEmpiricalPDF <- function(x, p){
   # Allow for changes in resolution of x
   dx <- diff(x)
 
-  if (max(abs(dx - mean(dx))) > median(dx) / 100){
+  if (max(abs(dx - mean(dx))) > stats::median(dx) / 100){
     warning("Empirical PDF has variable resolution - this is accounted for but the results may be less reliable.")
 
   }
@@ -201,11 +201,14 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
                             cal_curve = "intcal20", nu = 6,
                             return.type = c("plot", "list")){
 
-  dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * stats::dt((x - mu)/sigma, dat)
+  dt_ls <- function(x, dat=1, mu=0, sigma=1) {
+    1/sigma * stats::dt((x - mu)/sigma, dat)
+    }
 
   stopifnot(length(age.14C) == length(age.14C.se))
 
-  cal.dat <- data.frame(age.14C = round(age.14C), age.14C.se = round(age.14C.se))
+  cal.dat <- data.frame(age.14C = round(age.14C),
+                        age.14C.se = round(age.14C.se))
 
   return.type <- match.arg(return.type, choices = c("plot", "list"))
 
@@ -221,43 +224,43 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
 
   # The summarised calendar ages are appended to the input data
   C14 <- calib$dat
-  C14$.id <- 1:nrow(cal.dat)
+  C14$id <- 1:nrow(cal.dat)
 
   # These are the full PDFs
   cal.ages <- calib$cal.ages
 
   cal.ages.df <- dplyr::tibble(cal = cal.ages) %>%
 
-    dplyr::mutate(.id = 1:dplyr::n())
+  dplyr::mutate(id = 1:length(cal.ages))
 
   cali.pdf.dat <- cal.ages.df %>%
-    dplyr::group_by(.id) %>%
+    dplyr::group_by(.data$id) %>%
     dplyr::summarise(
-      age = if(is.na(cal[[1]]) == FALSE)  cal[[1]][[1]]$ageGrid else 0,
-      density = if(is.na(cal[[1]]) == FALSE) cal[[1]][[1]]$densities else 0
+      age = if(is.na(.data$cal[[1]]) == FALSE)  .data$cal[[1]][[1]]$ageGrid else 0,
+      density = if(is.na(.data$cal[[1]]) == FALSE) .data$cal[[1]][[1]]$densities else 0
     )
 
 
   nu <- C14 %>%
-    dplyr::filter(is.na(age.14C.cal) == FALSE) %>%
-    dplyr::group_by(.data$.id) %>%
+    dplyr::filter(is.na(.data$age.14C.cal) == FALSE) %>%
+    dplyr::group_by(.data$id) %>%
     dplyr::do({
-      rng <- .$age.14C.cal.se * 5
-      age = seq(.$age.14C.cal - rng, .$age.14C.cal + rng, length.out = 100)
+      rng <- .data$age.14C.cal.se * 5
+      age <- seq(.data$age.14C.cal - rng, .data$age.14C.cal + rng, length.out = 100)
       data.frame(
         age = age,
         density = dt_ls(age, dat = nu,
-                        mu = .$age.14C.cal,
-                        sigma = .$age.14C.cal.se)
+                        mu = .data$age.14C.cal,
+                        sigma = .data$age.14C.cal.se)
       )
     })
 
   gg <- cali.pdf.dat %>%
-    ggplot2::ggplot(ggplot2::aes(x = age/1000, y = density, group = .id)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data$age/1000, y = .data$density, group = .data$id)) +
     ggplot2::geom_line(ggplot2::aes(colour = cal_curve)) +
-    ggplot2::geom_line(data = nu, ggplot2::aes(y = density, colour = "t-distribution")) +
+    ggplot2::geom_line(data = nu, ggplot2::aes(y = .data$density, colour = "t-distribution")) +
     ggplot2::labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
-    ggplot2::facet_wrap(~.id, scales = "free") +
+    ggplot2::facet_wrap(~.data$id, scales = "free") +
     ggplot2::theme_bw()
 
   if (return.type == "list"){

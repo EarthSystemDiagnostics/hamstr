@@ -12,7 +12,7 @@ plot_prior_posterior_hist(prior, posterior, bins = 50)
 \item{posterior}{Sample from posterior distribution}
 }
 \value{
-A ggplot2 object
+a ggplot2 object
 }
 \description{
 Plot a Prior and Posterior

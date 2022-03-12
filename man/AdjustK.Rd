@@ -10,7 +10,7 @@ AdjustK(K_fine, base)
 \item{K_fine}{total number of required sections at highest resolution}
 }
 \value{
-
+K structure
 }
 \description{
 Adjust numbers of splits per level

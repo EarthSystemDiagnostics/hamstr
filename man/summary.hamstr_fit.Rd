@@ -14,7 +14,7 @@
 \item{...}{additional arguments to hamstr summary methods}
 }
 \value{
-
+a tibble
 }
 \description{
 Summarise hamstr models

@@ -109,17 +109,18 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
 
     post <- as.data.frame(hamstr_fit$fit, pars = c("bt_age")) %>%
       dplyr::as_tibble() %>%
-      dplyr::mutate(iter = 1:nrow(.)) %>%
-      tidyr::pivot_longer(cols = -iter) %>%
-      dplyr::mutate(dpt = get_par_idx(name))
+      dplyr::mutate(iter = 1:dplyr::n()) %>%
+      tidyr::pivot_longer(cols = -.data$iter) %>%
+      dplyr::mutate(dpt = get_par_idx(.data$name))
 
     tmp <- dplyr::tibble(depth = hamstr_fit$data$depth,
                   dpt = 1:hamstr_fit$data$N) %>%
-    dplyr::left_join(., post, by = "dpt")
+    dplyr::left_join(post, by = "dpt")
 
     p.fit <- p.fit +
       ggplot2::geom_violin(data = tmp,
-                           ggplot2::aes(x = depth, y = value, group = as.factor(dpt),
+                           ggplot2::aes(x = .data$depth, y = .data$value,
+                                        group = as.factor(.data$dpt),
                       colour = "Latent age"), fill = NA,
                   scale = "area",
                   position = ggplot2::position_identity(), alpha = 0.5,
@@ -205,13 +206,13 @@ plot_summary_age_models <- function(hamstr_fit){
     err = hamstr_fit$data$obs_err)
 
   obs_ages <- dplyr::mutate(obs_ages,
-                            age_upr = age + 2*err,
-                            age_lwr = age - 2*err)
+                            age_upr = .data$age + 2*.data$err,
+                            age_lwr = .data$age - 2*.data$err)
 
 
   if (hamstr_fit$data$sample_posterior == FALSE){
 
-    gg <- ggplot2::ggplot(obs_ages, aes(x = depth, y = age)) +
+    gg <- ggplot2::ggplot(obs_ages, aes(x = .data$depth, y = .data$age)) +
       geom_blank() +
       theme_bw()
 
@@ -225,25 +226,24 @@ plot_summary_age_models <- function(hamstr_fit){
 
   age_summary <- summarise_age_models(hamstr_fit)
 
-  p.age.sum <- age_summary %>%
-    plot_downcore_summary(.)
+  p.age.sum <- plot_downcore_summary(age_summary)
 
 
   if (hamstr_fit$data$inflate_errors == 1 | hamstr_fit$data$model_displacement == 1){
 
     infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
-      tibble::as_tibble(., rownames = "par") %>%
-      dplyr::mutate(dat_idx = get_par_idx(par))
+      tibble::as_tibble(rownames = "par") %>%
+      dplyr::mutate(dat_idx = get_par_idx(.data$par))
 
     obs_ages <- obs_ages %>%
       dplyr::mutate(infl_err = infl_errs$mean,
-                    age_lwr_infl = age + 2*infl_err,
-                    age_upr_infl = age - 2*infl_err)
+                    age_lwr_infl = .data$age + 2*.data$infl_err,
+                    age_upr_infl = .data$age - 2*.data$infl_err)
 
     p.age.sum <- p.age.sum +
       ggplot2::geom_linerange(
         data = obs_ages,
-        ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl,
+        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
                      colour = "Infl err"), show.legend = FALSE,
         group = NA,
         alpha = 0.5, inherit.aes = F)
@@ -259,18 +259,25 @@ plot_summary_age_models <- function(hamstr_fit){
 }
 
 
+#' Add Age Control Points to Plot
+#'
+#' @param gg a ggplot2 object 
+#' @param dat a dataframe containing the datapoints to add
+#'
+#' @return modifies a ggplot2 object
+#' @keywords internal
 add_datapoints <- function(gg, dat){
   gg +
     ggplot2::geom_linerange(data = dat,
-                            ggplot2::aes(x = depth,
-                                         ymax = age_upr, ymin = age_lwr,
+                            ggplot2::aes(x = .data$depth,
+                                         ymax = .data$age_upr, ymin = .data$age_lwr,
                                          colour = "Obs age"),
                             show.legend = FALSE,
                             group = NA,
                             inherit.aes = FALSE, size = 1.25) +
-    ggplot2::geom_point(data = dat, ggplot2::aes(y = age,
+    ggplot2::geom_point(data = dat, ggplot2::aes(y = .data$age,
                                                  group = NA,
-                                                 colour = "Obs age")#, show.legend = FALSE
+                                                 colour = "Obs age")
     ) +
     ggplot2::labs(x = "Depth", y = "Age")
 }
@@ -307,7 +314,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
   if (hamstr_fit$data$sample_posterior == FALSE){
 
-    gg <- ggplot2::ggplot(obs_ages, aes(x = depth, y = age)) +
+    gg <- ggplot2::ggplot(obs_ages, aes(x = .data$depth, y = .data$age)) +
       geom_blank() +
       theme_bw()
 
@@ -327,7 +334,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
   p.fit <- posterior_ages %>%
 
     dplyr::filter(.data$iter %in% sample(unique(.data$iter), n.iter, replace = FALSE)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = age, group = iter))
+    ggplot2::ggplot(ggplot2::aes(x = .data$depth, y = .data$age, group = .data$iter))
 
 
   p.fit <- p.fit +
@@ -337,7 +344,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
   if (hamstr_fit$data$inflate_errors == 1){
 
     infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
-      tibble::as_tibble(., rownames = "par") %>%
+      tibble::as_tibble(.data$., rownames = "par") %>%
       dplyr::mutate(dat_idx = get_par_idx(.data$par))
 
 
@@ -349,7 +356,7 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
     p.fit <- p.fit +
       ggplot2::geom_linerange(
         data = obs_ages,
-        ggplot2::aes(x = depth, ymax = age_upr_infl, ymin = age_lwr_infl,
+        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
                      colour = "Infl err"),
         group = NA,
         colour = "Infl err",
@@ -399,7 +406,7 @@ add_colour_scale <- function(gg){
 #' Plot Downcore Summary
 #' @param ds a downcore summary of age or accumulation rate
 #' @param axis units for the x axis, depth or age
-#' @return
+#' @return a ggplot2 object
 #' @keywords internal
 plot_downcore_summary <- function(ds, axis = c("depth", "age")){
 
@@ -407,10 +414,10 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
 
   p <- ds %>%
     ggplot2::ggplot(ggplot2::aes_string(x = axis, y = "mean")) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `2.5%`, ymin = `97.5%`, fill = "95%")) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = `75%`, ymin = `25%`, fill = "50%")) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`, fill = "95%")) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`75%`, ymin = .data$`25%`, fill = "50%")) +
     ggplot2::geom_line(aes(colour = "Mean")) +
-    ggplot2::geom_line(ggplot2::aes(y = `50%`, colour = "Median")) +
+    ggplot2::geom_line(ggplot2::aes(y = .data$`50%`, colour = "Median")) +
     ggplot2::theme_bw() +
     ggplot2::theme(panel.grid = ggplot2::element_blank())
 
@@ -426,7 +433,7 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
 #' @param units plot accumulation rate in depth per time, or time per depth
 #' (or both)
 #' @inheritParams filter_hamstr_acc_rates
-#' @return
+#' @return a ggplot2 object
 #' @keywords internal
 plot_hamstr_acc_rates <- function(hamstr_fit,
                                   axis = c("depth", "age"),
@@ -448,20 +455,18 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
   if ("depth" %in% axis){
     acc_rates_long <- acc_rates %>%
-      dplyr::select(-depth) %>%
+      dplyr::select(-.data$depth) %>%
       tidyr::pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
                           names_to = "depth_type", values_to = "depth")
 
     rug_dat <- data.frame(d = hamstr_fit$data$depth)
 
     p.depth <- acc_rates_long %>%
-      dplyr::filter(acc_rate_unit %in% units) %>%
-      plot_downcore_summary(.) +
+      dplyr::filter(.data$acc_rate_unit %in% units) %>%
+      plot_downcore_summary() +
       ggplot2::labs(x = "Depth", y = "Accumulation rate") +
-      ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") +
-      #ggplot2::scale_y_log10() +
-      #ggplot2::annotation_logticks(sides = "l") +
-      ggplot2::geom_rug(data = rug_dat, aes(x = d, colour = "Age point"),
+      ggplot2::facet_wrap(~.data$acc_rate_unit, scales = "free_y") +
+      ggplot2::geom_rug(data = rug_dat, aes(x = .data$d, colour = "Age point"),
                         inherit.aes = FALSE)
 
     if ("hamstr_fit" %in% class(hamstr_fit)){
@@ -475,26 +480,24 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
     median_age <- summary(hamstr_fit) %>%
       #mutate(unit = "age") %>%
-      dplyr::rename(age = `50%`) %>%
-      dplyr::select(depth, age)
+      dplyr::rename(age = .data$`50%`) %>%
+      dplyr::select(.data$depth, .data$age)
 
     jnt <- dplyr::left_join(median_age, acc_rates) %>%
-      dplyr::filter(complete.cases(mean))
+      dplyr::filter(stats::complete.cases(.data$mean))
 
 
 
     p.age <- jnt %>%
-      dplyr::filter(acc_rate_unit %in% units) %>%
-      plot_downcore_summary(., axis = "age") +
+      dplyr::filter(.data$acc_rate_unit %in% units) %>%
+      plot_downcore_summary(axis = "age") +
       ggplot2::labs(x = "Age", y = "Accumulation rate") +
-      ggplot2::facet_wrap(~acc_rate_unit, scales = "free_y") #+
-      #ggplot2::scale_y_log10() +
-      #ggplot2::annotation_logticks(sides = "l")
-
+      ggplot2::facet_wrap(~.data$acc_rate_unit, scales = "free_y") #+
+    
     if ("hamstr_fit" %in% class(hamstr_fit)){
       rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
       p.age <- p.age +
-        ggplot2::geom_rug(data = rug_dat, aes(x = a, colour = "Age point"),
+        ggplot2::geom_rug(data = rug_dat, aes(x = .data$a, colour = "Age point"),
                           inherit.aes = FALSE)
     }
   }
@@ -533,15 +536,15 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 #' }
 plot_hierarchical_acc_rate <- function(hamstr_fit){
 
-  idx <- tibble::as_tibble(alpha_indices(hamstr_fit$data$K)[1:3]) %>%
-    dplyr::mutate(alpha_idx = (alpha_idx))
+  idx <- tibble::as_tibble(alpha_indices(hamstr_fit$data$K)[1:3]) #%>%
+    #dplyr::mutate(alpha_idx = (alpha_idx))
 
   a3 <- rstan::summary(hamstr_fit$fit, pars = "alpha")$summary
 
   alph <- tibble::as_tibble(a3, rownames = "par") %>%
-    dplyr::mutate(alpha_idx = get_par_idx(par)) %>%
-    dplyr::left_join(idx, ., by = "alpha_idx") %>%
-    dplyr::mutate(lvl = factor(lvl))
+    dplyr::mutate(alpha_idx = get_par_idx(.data$par)) %>%
+    dplyr::right_join(idx, by = "alpha_idx") %>%
+    dplyr::mutate(lvl = factor(.data$lvl))
 
   # for each unit at each level in hierarchy get max and min depth
   alph$depth1 <- c(min(hamstr_fit$data$modelled_depths),
@@ -561,15 +564,18 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
                    })))
 
   alph2 <- alph %>%
-    dplyr::select(lvl, alpha_idx, depth1, depth2, mean) %>%
-    dplyr::group_by(lvl) %>%
-    tidyr::gather(type, depth, -mean, -lvl, -alpha_idx) %>%
-    dplyr::select(lvl, alpha_idx, depth, mean) %>%
-    dplyr::arrange(lvl, alpha_idx, depth, mean)
+    dplyr::select(.data$lvl, .data$alpha_idx,
+                  .data$depth1, .data$depth2, .data$mean) %>%
+    dplyr::group_by(.data$lvl) %>%
+    tidyr::pivot_longer(cols = tidyr::starts_with("depth"),
+                        names_to = "type", values_to = "depth") %>% 
+    #tidyr::gather(type, depth, -mean, -lvl, -alpha_idx) %>%
+    dplyr::select(.data$lvl, .data$alpha_idx, .data$depth, .data$mean) %>%
+    dplyr::arrange(.data$lvl, .data$alpha_idx, .data$depth, .data$mean)
 
 
   gg <- alph2 %>%
-    ggplot2::ggplot(ggplot2::aes(x = depth, y = mean, colour = lvl)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data$depth, y = .data$mean, colour = .data$lvl)) +
     ggplot2::geom_path() +
     ggplot2::expand_limits(y = 0) +
     ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
@@ -586,9 +592,10 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
 #'
 #' @param prior Numerical PDF of prior
 #' @param posterior Sample from posterior distribution
-#' @return A ggplot2 object
+#' @return a ggplot2 object
 #' @keywords internal
 #' @import ggplot2
+#' @importFrom stats density
 plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
 
@@ -596,17 +603,18 @@ plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
 
   if (is.null(posterior) == FALSE){
 
-    bw <- sd(posterior$x) / 2
+    bw <- stats::sd(posterior$x) / 2
 
     gg <- gg + ggplot2::geom_histogram(data = posterior,
-                   ggplot2::aes(x = x, ggplot2::after_stat(density),
+                   ggplot2::aes(x = .data$x, ggplot2::after_stat(density),
                    fill = "Posterior"),
                    colour = NA,
                    alpha = 0.5, binwidth = bw)
   }
     gg +
-    ggplot2::geom_line(data = prior, ggplot2::aes(x = x, y = d, colour = "Prior")) +
-    ggplot2::facet_wrap(~par, scales = "free_y", ncol = 1) +
+    ggplot2::geom_line(data = prior, ggplot2::aes(x = .data$x, y = .data$d,
+                                                  colour = "Prior")) +
+    ggplot2::facet_wrap(~.data$par, scales = "free_y", ncol = 1) +
     ggplot2::scale_colour_manual("", values = clrs[2], aesthetics = c("colour")) +
     ggplot2::scale_fill_manual("", values = clrs[1], aesthetics = c("fill")) +
     ggplot2::labs(
@@ -622,7 +630,7 @@ plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
 
 #' Plot the Prior and Posterior Distributions of the Inflation Factor Parameters
 #'
-#' @return A ggplot2 object
+#' @return a ggplot2 object
 #' @import rstan
 #' @import ggplot2
 
@@ -639,22 +647,27 @@ plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
 #'
 #' plot_infl_prior_posterior(fit)
 #' }
-plot_infl_prior_posterior <- function(hamstr_fit){
-
+plot_infl_prior_posterior <- function(hamstr_fit) {
   clrs <- c("Posterior" = "Blue", "Prior" = "Red")
 
   hamstr_dat <- hamstr_fit$data
 
   infl_mean_shape_post <-
-    tibble::tibble(infl_mean = as.vector(rstan::extract(hamstr_fit$fit, "infl_mean")[[1]]),
-           infl_shape = as.vector(rstan::extract(hamstr_fit$fit, "infl_shape")[[1]])) %>%
-    dplyr::mutate(iter = 1:dplyr::n())
+    tibble::tibble(
+      infl_mean = as.vector(rstan::extract(hamstr_fit$fit, "infl_mean")[[1]]),
+      infl_shape = as.vector(rstan::extract(hamstr_fit$fit, "infl_shape")[[1]])
+    ) 
+  
+  infl_mean_shape_post <- infl_mean_shape_post %>%
+    dplyr::mutate(iter = 1:nrow(infl_mean_shape_post))
 
 
   max_x_shape <- with(hamstr_dat, {
-    infl_shape_prior_upr <- stats::qgamma(c(0.99), shape = infl_shape_shape, rate =  infl_shape_shape / infl_shape_mean)
+    infl_shape_prior_upr <- stats::qgamma(c(0.99),
+                                          shape = infl_shape_shape,
+                                          rate = infl_shape_shape / infl_shape_mean)
 
-     max(c(infl_shape_prior_upr, infl_mean_shape_post$infl_shape))
+    max(c(infl_shape_prior_upr, infl_mean_shape_post$infl_shape))
   })
 
   max_x_mean <- with(hamstr_dat, {
@@ -676,15 +689,18 @@ plot_infl_prior_posterior <- function(hamstr_fit){
   infl_prior_shape <-
     tibble::tibble(x = seq(0, max_x_shape, length.out = 1000)) %>%
     dplyr::mutate(
-      #infl_mean = 2*dnorm(x, 0,  sd = hamstr_dat$infl_sigma_sd),
-      d = stats::dgamma(x-1, hamstr_dat$infl_shape_shape,  rate = hamstr_dat$infl_shape_shape / hamstr_dat$infl_shape_mean),
-      par = "infl_shape")
+      d = stats::dgamma(.data$x - 1,
+                        hamstr_dat$infl_shape_shape,
+                        rate = hamstr_dat$infl_shape_shape / hamstr_dat$infl_shape_mean),
+      par = "infl_shape"
+    )
 
   infl_prior_mean <-
     tibble::tibble(x = seq(0, max_x_mean, length.out = 1000)) %>%
     dplyr::mutate(
-      d = 2*stats::dnorm(.data$x, 0,  sd = hamstr_dat$infl_sigma_sd),
-      par = "infl_mean")
+      d = 2 * stats::dnorm(.data$x, 0, sd = hamstr_dat$infl_sigma_sd),
+      par = "infl_mean"
+    )
 
   infl_priors <- dplyr::bind_rows(infl_prior_mean, infl_prior_shape)
 
@@ -692,35 +708,42 @@ plot_infl_prior_posterior <- function(hamstr_fit){
     tidyr::pivot_longer(cols = c("infl_mean", "infl_shape"), names_to = "par", values_to = "x")
 
   p.pars <- plot_prior_posterior_hist(infl_priors, infl_mean_shape_post_long, bins = 1000) +
-    facet_wrap(~par, scales = "free")
+    facet_wrap(~.data$par, scales = "free")
 
 
   infl_mean_shape_post <- infl_mean_shape_post %>%
     dplyr::mutate(q99 = stats::qgamma(0.75, .data$infl_shape,
-                                      rate = .data$infl_shape/.data$infl_mean))
+      rate = .data$infl_shape / .data$infl_mean
+    ))
 
 
   infl_pars_prior_dist <- infl_mean_shape_post %>%
-    dplyr::filter(iter %in% sample.int(dplyr::n(), 10)) %>%
-    tidyr::crossing(., tibble::tibble(x = exp(seq(log(0.01), log(stats::quantile(infl_mean_shape_post$q99, prob = 0.95)), length.out = 100)))) %>%
-    dplyr::mutate(d = stats::dgamma(x, shape = .data$infl_shape, rate = .data$infl_shape / .data$infl_mean),
-           #d = dgamma(x, shape = infl_shape, rate = infl_shape / 1),
-           par = "Modelled prior for infl_fac")
+    dplyr::filter(.data$iter %in% sample.int(dplyr::n(), 10)) %>%
+    tidyr::crossing(tibble::tibble(x = exp(seq(
+      log(0.01), log(stats::quantile(infl_mean_shape_post$q99, prob = 0.95)),  length.out = 100
+    )))) %>%
+    dplyr::mutate(
+      d = stats::dgamma(.data$x, shape = .data$infl_shape, rate = .data$infl_shape / .data$infl_mean),
+      par = "Modelled prior for infl_fac"
+    )
 
 
-  p.priors <- infl_pars_prior_dist  %>%
-    ggplot2::ggplot(ggplot2::aes(x = x, y = d, group = iter)) +
-    ggplot2::geom_line(alpha = 1,#/sqrt(100),
-              aes(colour = "Infl err")) +
+  p.priors <- infl_pars_prior_dist %>%
+    ggplot2::ggplot(ggplot2::aes(x = .data$x, y = .data$d,
+                                 group = .data$iter)) +
+    ggplot2::geom_line(
+      alpha = 1, # /sqrt(100),
+      aes(colour = "Infl err")
+    ) +
     ggplot2::theme_bw() +
-    #facet_wrap(~par+iter, scales = "free") +
     ggplot2::labs(y = "Density", x = "Value")
 
-  p <- ggpubr::ggarrange(plotlist = list(p.pars, p.priors,
-                                   p.infl.fac))
+  p <- ggpubr::ggarrange(plotlist = list(
+    p.pars, p.priors,
+    p.infl.fac
+  ))
 
   return(p)
-
 }
 
 
@@ -729,7 +752,7 @@ plot_infl_prior_posterior <- function(hamstr_fit){
 #'
 #' @import ggplot2
 #' @importFrom rlang .data
-#' @return A ggplot2 object
+#' @return a ggplot2 object
 #' @keywords internal
 #' @examples
 #' \dontrun{
@@ -786,7 +809,7 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 #'
 #' @inheritParams plot_hamstr
 #'
-#' @return A ggplot2 object
+#' @return a ggplot2 object
 #' @import ggplot2
 #' @importFrom rlang .data
 #' @keywords internal
@@ -802,8 +825,9 @@ plot_acc_mean_prior_posterior <- function(hamstr_fit) {
 plot_memory_prior_posterior <- function(hamstr_fit){
   # memory prior
   mem.prior <- tibble::tibble(x = seq(0, 1, length.out = 1000)) %>%
-    dplyr::mutate(d = stats::dbeta(.data$x, shape1 = hamstr_fit$data$mem_alpha,
-                            shape2 = hamstr_fit$data$mem_beta),
+    dplyr::mutate(d = stats::dbeta(.data$x,
+                                   shape1 = hamstr_fit$data$mem_alpha,
+                                   shape2 = hamstr_fit$data$mem_beta),
                   par = "Memory at 1 depth unit")
 
 
@@ -811,13 +835,15 @@ plot_memory_prior_posterior <- function(hamstr_fit){
 
     w <- rstan::extract(hamstr_fit$fit, "w")$w
 
-    ifelse(is.matrix(w), w <- apply(w, 1, median),  w <- as.vector(w))
+    ifelse(is.matrix(w), w <- apply(w, 1, stats::median),  w <- as.vector(w))
 
-     mem.post <- tibble::tibble(w = w,
-                     R = as.vector(rstan::extract(hamstr_fit$fit, "R")$R)) %>%
-    dplyr::rename(`Memory between sections` = w,
-                  `Memory at 1 depth unit` = R) %>%
-    tidyr::pivot_longer(cols = c(`Memory between sections`, `Memory at 1 depth unit`),
+     mem.post <- tibble::tibble(
+       w = w,
+       R = as.vector(rstan::extract(hamstr_fit$fit, "R")$R)
+       ) %>%
+    dplyr::rename(`Memory between sections` = .data$w,
+                  `Memory at 1 depth unit` = .data$R) %>%
+    tidyr::pivot_longer(cols = c("Memory between sections", "Memory at 1 depth unit"),
                         names_to = "par", values_to = "x")
   } else {
     mem.post <- NULL
@@ -845,8 +871,9 @@ plot_L_prior_posterior <- function(hamstr_fit){
   if (hamstr_fit$data$L_prior_shape > 0){
     post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
     dplyr::as_tibble() %>%
-    tidyr::pivot_longer(cols = dplyr::everything(), names_to = "par", values_to = "x") %>%
-    dplyr::mutate(dpt = get_par_idx(par),
+    tidyr::pivot_longer(cols = dplyr::everything(),
+                        names_to = "par", values_to = "x") %>%
+    dplyr::mutate(dpt = get_par_idx(.data$par),
            par = "L")
 
 
@@ -880,7 +907,7 @@ plot_L_prior_posterior <- function(hamstr_fit){
   } else {
 
     ggplot2::ggplot(data = tibble::tibble(x = hamstr_fit$data$L_prior_mean * c(1, 1), y = c(0, 1))) +
-      ggplot2::geom_line( aes(x = x , y = y, colour = "Fixed")) +
+      ggplot2::geom_line( aes(x = .data$x , y = .data$y, colour = "Fixed")) +
       ggplot2::expand_limits(x = c(0, 2*hamstr_fit$data$L_prior_mean))+
       ggplot2::labs(x = "Mixing depth [L]", y = "Density") +
       ggplot2::theme_bw() +

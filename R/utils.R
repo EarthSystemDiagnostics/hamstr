@@ -2,7 +2,7 @@
 #'
 #' @param x vector of stan parameter names 
 #'
-#' @return
+#' @return a vector
 #' @keywords internal
 get_par_idx <- function(x) {
   

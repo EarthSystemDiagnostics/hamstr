@@ -12,7 +12,7 @@ plot_downcore_summary(ds, axis = c("depth", "age"))
 \item{axis}{units for the x axis, depth or age}
 }
 \value{
-
+a ggplot2 object
 }
 \description{
 Plot Downcore Summary

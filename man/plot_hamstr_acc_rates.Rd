@@ -16,9 +16,9 @@ plot_hamstr_acc_rates(
 \arguments{
 \item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
-\item{axis}{Plot accumulation rate against depth or age}
+\item{axis}{plot accumulation rate against depth or age}
 
-\item{units}{Plot accumulation rate in depth per time, or time per depth
+\item{units}{plot accumulation rate in depth per time, or time per depth
 (or both)}
 
 \item{tau}{scale of the smoothing kernel in depth units. If tau > 0,
@@ -30,7 +30,7 @@ average rate over the depth interval tau. Default to 0.}
 Gaussian, BH for Berger and Heath (exponential). Defaults to U}
 }
 \value{
-
+a ggplot2 object
 }
 \description{
 Plot accumulation rates

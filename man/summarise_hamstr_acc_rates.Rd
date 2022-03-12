@@ -23,7 +23,7 @@ average rate over the depth interval tau. Default to 0.}
 Gaussian, BH for Berger and Heath (exponential). Defaults to U}
 }
 \value{
-
+a tibble containing the summarised posterior accumulation rates
 }
 \description{
 Summarise accumulation rates

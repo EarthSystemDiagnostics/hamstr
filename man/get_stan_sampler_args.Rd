@@ -109,7 +109,7 @@ get_stan_sampler_args(
     \code{enable_random_init}. See the documentation in \code{\link[rstan]{stan}}.}
 }
 \value{
-
+a named list
 }
 \description{
 Returns a list of parameters for the Stan sampler

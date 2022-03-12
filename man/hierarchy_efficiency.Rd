@@ -12,7 +12,7 @@ hierarchy_efficiency(base, n)
 \item{n}{Number of hierarchical levels}
 }
 \value{
-
+named vector
 }
 \description{
 Calculate number of parameters being estimated for a given hierarchical structure

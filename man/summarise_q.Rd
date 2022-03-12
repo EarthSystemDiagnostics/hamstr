@@ -14,7 +14,7 @@ summarise_q(dat, var, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 \item{probs}{the quantiles at which to summarise}
 }
 \value{
-
+a tibble containing the summarised posterior
 }
 \description{
 Summarise to Quantiles and Moments

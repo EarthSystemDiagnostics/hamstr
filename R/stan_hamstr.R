@@ -181,7 +181,7 @@ hamstr <- function(depth, obs_age, obs_err,
 #'   Default to 1, 1.
 #' @examples 
 #' hamstr_control()
-#' @return
+#' @return a named list
 #' @export
 #'
 hamstr_control <- function(scale_R = TRUE,
@@ -206,7 +206,7 @@ hamstr_control <- function(scale_R = TRUE,
 #' @description Returns a list of parameters for the Stan sampler
 #' @inheritParams rstan::sampling
 #'
-#' @return
+#' @return a named list
 #' @export
 #'
 #' @examples
