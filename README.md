@@ -1,9 +1,14 @@
 hamstr: Hierarchical Accumulation Modelling with Stan and R.
 ================
 Andrew M. Dolman
-2022-02-28
+2022-03-12
 
 ------------------------------------------------------------------------
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/EarthSystemDiagnostics/hamstr/workflows/R-CMD-check/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions)
+<!-- badges: end -->
 
 **hamstr** implements a *Bacon-like* (Blaauw and Christen, 2011)
 sediment accumulation or age-depth model with hierarchically structured

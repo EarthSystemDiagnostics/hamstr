@@ -8,7 +8,9 @@ output:
 ---
 
 -------------------------------
-
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/EarthSystemDiagnostics/hamstr/workflows/R-CMD-check/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions)
+  <!-- badges: end -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
