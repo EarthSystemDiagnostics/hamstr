@@ -328,7 +328,7 @@ get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH"
                         names_to = "par", values_to = "time_per_depth") %>% 
     dplyr::mutate(idx = get_par_idx(.data$par),
                   par = "x") %>%
-    dplyr::left_join(depths, .data$.) %>%
+    dplyr::right_join(depths) %>%
     dplyr::mutate(depth_per_time = 1000/.data$time_per_depth) %>%
     dplyr::arrange(.data$par, .data$iter, .data$idx, .data$depth) %>%
     dplyr::select(.data$iter, .data$idx, .data$depth,
