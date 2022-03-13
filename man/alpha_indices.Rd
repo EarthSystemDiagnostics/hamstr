@@ -7,7 +7,7 @@
 alpha_indices(K)
 }
 \arguments{
-\item{K}{K controls the number and structure of the hierarchically modelled
+\item{K}{controls the number and structure of the hierarchically modelled
 down-core sections. It is specified as a vector, where each value indicates
 the number of new child sections for each parent section, e.g., c(10, 10,
 10) would specify 10 sections at the coarsest level, with 10 new sections
@@ -15,13 +15,11 @@ at next finer level, giving a total of 1000 sections at the finest
 resolution.
 
 By default, the total number of sections at the finest level is set so that
-the resolution is approximately 1 cm per section, up to a total length of
-900 cm, above which the default remains 900 sections and a coarser
-resolution is used.
+for the median distance between age control points there are 16 sections.
 
-The default hierarchical structure is chosen so that the number of
-hierarchical levels, and the number of new child sections per level, are
-approximately equal, e.g. c(5, 5, 5) for a total of 125 sections.}
+By default a "powers of 2" hierarchical structure is chosen and then
+adjusted to get close to the desired number of sections, e.g. for a desired
+100 sections the result is c(2, 2, 2, 2, 2, 3), giving 96 sections.}
 }
 \value{
 a list

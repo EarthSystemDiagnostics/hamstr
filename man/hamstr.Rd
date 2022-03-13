@@ -2,7 +2,7 @@
 % Please edit documentation in R/stan_hamstr.R
 \name{hamstr}
 \alias{hamstr}
-\title{hamstr}
+\title{Fit an Age-Depth Model}
 \usage{
 hamstr(
   depth,
@@ -32,20 +32,20 @@ hamstr(
 )
 }
 \arguments{
-\item{depth}{Depths of observed ages (age control points)}
+\item{depth}{depths of observed ages (age control points)}
 
-\item{obs_age}{Observed age at each depth (age control points)}
+\item{obs_age}{observed age at each depth (age control points)}
 
-\item{obs_err}{Error associated with each observed age (1 standard error)}
+\item{obs_err}{error associated with each observed age (1 standard error)}
 
-\item{min_age}{The minimum age that the first modelled depth can be. Useful
+\item{min_age}{the minimum age that the first modelled depth can be. Useful
 if extrapolating above the shallowest age control point to e.g. the
 surface. So set min_age to the year the core was collected. E.g. for a core
 collected in 1990, with ages in years BP this would be -40 (present = 1950
 by convention). The default value is the current year in calendar age BP
-(currently -71 for 2021).}
+(e.g. -71 for 2021).}
 
-\item{K}{K controls the number and structure of the hierarchically modelled
+\item{K}{controls the number and structure of the hierarchically modelled
 down-core sections. It is specified as a vector, where each value indicates
 the number of new child sections for each parent section, e.g., c(10, 10,
 10) would specify 10 sections at the coarsest level, with 10 new sections
@@ -53,19 +53,17 @@ at next finer level, giving a total of 1000 sections at the finest
 resolution.
 
 By default, the total number of sections at the finest level is set so that
-the resolution is approximately 1 cm per section, up to a total length of
-900 cm, above which the default remains 900 sections and a coarser
-resolution is used.
+for the median distance between age control points there are 16 sections.
 
-The default hierarchical structure is chosen so that the number of
-hierarchical levels, and the number of new child sections per level, are
-approximately equal, e.g. c(5, 5, 5) for a total of 125 sections.}
+By default a "powers of 2" hierarchical structure is chosen and then
+adjusted to get close to the desired number of sections, e.g. for a desired
+100 sections the result is c(2, 2, 2, 2, 2, 3), giving 96 sections.}
 
-\item{top_depth, bottom_depth}{The top and bottom depths of the desired
+\item{top_depth, bottom_depth}{the top and bottom depths of the desired
 age-depth model. Must encompass the range of the data. Defaults to the
 shallowest and deepest data points.}
 
-\item{acc_mean_prior}{Hyperparameter for the prior on the overall mean
+\item{acc_mean_prior}{hyperparameter for the prior on the overall mean
 accumulation rate for the record. Units are obs_age / depth. E.g. if depth
 is in cm and age in years then the accumulation rate is in years/cm. The
 overall mean accumulation rate is given a weak half-normal prior with mean
@@ -73,10 +71,10 @@ overall mean accumulation rate is given a weak half-normal prior with mean
 mean accumulation rate estimated by fitting a robust linear model using
 \link[MASS]{rlm}.}
 
-\item{acc_shape}{Hyperparameter for the shape of the priors on accumulation
+\item{acc_shape}{hyperparameter for the shape of the priors on accumulation
 rates. Defaults to 1.5 - as for Bacon 2.2.}
 
-\item{mem_mean}{Hyperparameter: a parameter of the Beta prior distribution on
+\item{mem_mean}{hyperparameter; a parameter of the Beta prior distribution on
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 The prior on the correlation between layers is scaled according to the
 thickness of the sediment sections in the highest resolution hierarchical
@@ -84,51 +82,51 @@ layer, \emph{delta_c}, which is determined by the total length age-models and
 the parameter vector \emph{K}. mem_mean sets the mean value for \emph{R} (defaults to
 0.5), while \emph{w} = R^(delta_c)}
 
-\item{mem_strength}{Hyperparameter: sets the strength of the memory prior,
+\item{mem_strength}{hyperparameter: sets the strength of the memory prior,
 defaults to 10 as in Bacon >= 2.5.1}
 
-\item{model_bioturbation}{Defaults to FALSE. If TRUE, additional uncertainty
+\item{model_bioturbation}{defaults to FALSE. If TRUE, additional uncertainty
 in the observed ages due to sediment mixing (bioturbation) is modelled via
 a latent variable process. The amount of additional uncertainty is a
 function of the mixing depth L, the sedimentation rate, and the number of
 particles (e.g. individual foraminifera) per measured date. See description
 for details.}
 
-\item{n_ind}{The number of individual particles (e.g. Foraminifera) in each
+\item{n_ind}{the number of individual particles (e.g. foraminifera) in each
 sample that was dated by e.g. radiocarbon dating. This can be a single
 value or a vector the same length as obs_age. Only used if
 model_bioturbation = TRUE.}
 
-\item{L_prior_mean}{Mean of the gamma prior on mixing depth, defaults to 10.}
+\item{L_prior_mean}{mean of the gamma prior on mixing depth, defaults to 10.}
 
-\item{L_prior_shape, L_prior_sigma}{Shape and standard deviation of the gamma
+\item{L_prior_shape, L_prior_sigma}{shape and standard deviation of the gamma
 prior on the mixing depth. Set only one of these, the other will be
 calculated. Defaults to shape = 2. If either the shape or sigma parameter
 is set to zero, the mixing depth is fixed at the value of L_prior_mean,
-rather than being sampled with a gamma prior.}
+rather than being sampled.}
 
-\item{model_displacement}{Model additional error on observed ages that does
+\item{model_displacement}{model additional error on observed ages that does
 not scale with the number of individual particles in a sample, for example
 due to incomplete mixing.}
 
-\item{D_prior_scale}{Scale of the half-normal prior on additional error on
+\item{D_prior_scale}{scale of the half-normal prior on additional error on
 observed ages. The mean and standard deviation of a half-normal are equal
 to the scale. Units are those of the depth variable, e.g. cm.}
 
-\item{model_hiatus}{Optionally model a hiatus.}
+\item{model_hiatus}{optionally model a hiatus.}
 
-\item{H_top, H_bottom}{Limits to the location of a hiatus. By default these
+\item{H_top, H_bottom}{limits to the location of a hiatus. By default these
 are set to the top and bottom data points but can be set by the user}
 
-\item{sample_posterior}{If set to FALSE, hamstr skips sampling the model and
+\item{sample_posterior}{if set to FALSE, hamstr skips sampling the model and
 returns only the data, model structure and prior parameters so that data
 and prior distributions can be plotted and checked prior to running a
 model. Defaults to TRUE}
 
-\item{hamstr_control}{Additional arguments to hamstr useful for debugging or
+\item{hamstr_control}{additional arguments to hamstr useful for debugging or
 development. See \link[hamstr]{hamstr_control} for details.}
 
-\item{stan_sampler_args}{Additional arguments to \link[rstan]{sampling} as a
+\item{stan_sampler_args}{additional arguments to \link[rstan]{sampling} passed as a
 named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000
 iterations instead of the default 4 chains of 2000 iterations.}
 }
@@ -138,7 +136,7 @@ the output from the stan sampler .$fit, and the list of data passed to the
 sampler, .$data
 }
 \description{
-hamstr
+Fit an Age-Depth Model
 }
 \examples{
 \dontrun{

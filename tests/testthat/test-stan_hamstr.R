@@ -22,6 +22,24 @@ test_that("set seed works", {
 })
 
 
+test_that("sample_posterior = FALSE works", {
+  
+  library(hamstr)
+  
+  hamstr_fit_1 <- hamstr(depth = 1:10,
+                         obs_age = 1:10,
+                         obs_err = rep(1, 10),
+                         sample_posterior = FALSE)
+  
+  testthat::expect_true(is.na(hamstr_fit_1$fit))
+  
+  p1 <- plot(hamstr_fit_1, plot_diagnostics = FALSE)
+  
+  testthat::expect_equal(class(p1), c("gg", "ggplot"))
+  
+})
+
+
 
 test_that("posterior and plotting functions work", {
   
@@ -33,25 +51,33 @@ test_that("posterior and plotting functions work", {
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result,
                          model_bioturbation = TRUE,
-                         L_prior_shape = 0,
+                         L_prior_shape = 2,
                          n_ind = rep(10, 10),
                          stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
   
+  
+  # plotting age models
   p1 <- plot(hamstr_fit_1)
   p2 <- plot(hamstr_fit_1, "age")
-  
-  p_acc <- plot(hamstr_fit_1, "acc_rates")
-  p_h_acc <- plot(hamstr_fit_1, "hier_acc_rates")
-  
-  p_L <- plot(hamstr_fit_1, "L")
-  
+  p3 <- plot(hamstr_fit_1, summarise = FALSE, n.iter = 5,
+             plot_diagnostics = FALSE)
   
   testthat::expect_equal(class(p1), c("gg", "ggplot", "ggarrange"))
   testthat::expect_equal(class(p2), c("gg", "ggplot"))
+  testthat::expect_equal(class(p3), c("gg", "ggplot"))
+  
+  # plotting accumulation rates
+  p_acc <- plot(hamstr_fit_1, "acc_rates", tau = 2)
+  p_h_acc <- plot(hamstr_fit_1, "hier_acc_rates")
   
   testthat::expect_equal(class(p_acc),  c("gg", "ggplot", "ggarrange"))
-  
   testthat::expect_equal(class(p_h_acc),  c("gg", "ggplot"))
+ 
+  # plotting priors and posteriors
+  p_acc_pr <- plot(hamstr_fit_1, "acc_mean_pr")
+  p_L <- plot(hamstr_fit_1, "L")
+  
+  testthat::expect_equal(class(p_acc_pr),  c("gg", "ggplot"))
   testthat::expect_equal(class(p_L),  c("gg", "ggplot"))
   
   
@@ -82,13 +108,33 @@ test_that("posterior and plotting functions work", {
                            "se_mean", "sd", "23%", "n_eff", "Rhat"))
   
   
-  testthat::expect_equal(spars$Parameter, c("alpha[1]", "R", "w"))
+  testthat::expect_equal(spars$Parameter, c("alpha[1]", "R", "w",  "L[1]"))
   
   
   p_comp <- plot(hamstr_fit_1, type = "PDF", cal_curve = "marine20")
   
   
 })
+
+test_that("inflate_errors", {
+  
+  hamstr_fit_1 <- hamstr(depth = 1:10,
+                         obs_age = seq(1000, 10000, length.out = 10),
+                         obs_err = rep(100, 10), 
+                         # the seed argument for the sampler is set here so that
+                         # this example always returns the same numerical result,
+                        hamstr_control = hamstr_control(inflate_errors = TRUE),
+                        stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
+  
+  p1 <- plot(hamstr_fit_1, plot_diagnostics = FALSE)
+  
+  p2 <- hamstr:::plot_infl_prior_posterior(hamstr_fit_1)
+  
+  testthat::expect_equal(class(p1), c("gg", "ggplot"))
+  testthat::expect_equal(class(p2), c("gg", "ggplot", "ggarrange"))
+  
+})
+
 
 test_that("displacement modelling works", {
   
