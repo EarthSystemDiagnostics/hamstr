@@ -38,3 +38,4 @@ inst/doc
 
 Bacon_runs/
 package-dev-scipts/cached-runs/
+*.gcno
