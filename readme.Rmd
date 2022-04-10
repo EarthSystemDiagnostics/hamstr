@@ -8,7 +8,11 @@ output:
 ---
 
 -------------------------------
-
+<!-- badges: start -->
+  [![R-CMD-check](https://github.com/EarthSystemDiagnostics/hamstr/workflows/R-CMD-check/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions)
+  [![codecov](https://codecov.io/gh/EarthSystemDiagnostics/hamstr/branch/dev/graph/badge.svg?token=gFBWomcqwc)](https://codecov.io/gh/EarthSystemDiagnostics/hamstr)
+  [![test-coverage](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/test-coverage.yaml)
+<!-- badges: end -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -86,25 +90,20 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
 
 ### Fitting age-models with **hamstr**
 
-By default **hamstr** runs with three Markov chains and these can be run in parallel. This code will assign 3 processor cores as long as the machine has at least 3. The number of cores can also be set for specific calls of the `hamstr` function using the `cores` argument. 
-
-```{r}
-if (parallel::detectCores() >= 3) options(mc.cores = 3)
-```
-
 Age-depth (sediment accumulation) models are fit with the function `hamstr`. A vectors of depth, observed age and age uncertainty are passed as arguments to the function.
 
 ```{r}
-set.seed(20200827)
 hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
                        obs_age = MSB2K_cal$age.14C.cal,
                        obs_err = MSB2K_cal$age.14C.cal.se, 
-                       seed = 1)
+                       # the seed argument for the sampler is set here so that
+                       # this example always returns the same numerical result
+                       stan_sampler_args = list(seed = 1))
 ```
 
 The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.
 
-```{r}
+```{r, fig.height=7}
 plot(hamstr_fit_1)
 ```
 
@@ -142,7 +141,7 @@ The key structural difference between **Bacon** and **hamstr** models is that wi
 
 The parameter `K` controls the number and structure of the hierarchical sections. It is specified as a vector, where each value indicates the number of new child sections for each parent section at each finer hierarchical level. E.g. `c(10, 10)` would specify 10 sections at the coarsest level, with 10 new sections at the next finer level for each coarse section, giving a total of 100 sections at the highest / finest resolution level. `c(10, 10, 10)` would specify 1000 sections at the finest level and 3 hierarchical levels of 10, 100 and 1000 sections.
 
-The structure is hierarchical in the sense that the modelled accumulation rates for the parent sections act as priors for their child sections; specifically, the mean accumulation rate for a given parent is the mean of the gamma prior for it's child sections. In turn, the overall mean accumulation rate for the whole core is itself a parameter estimated by the fitting process. The hierarchical structure of increasing resolution allows the model to adapt to low-frequency changes in the accumulation rate, that is changes between "regimes" of high or low accumulation that persist for long periods. 
+The structure is hierarchical in the sense that the modelled accumulation rates for the parent sections act as priors for their child sections; specifically, the mean accumulation rate for a given parent is the mean of the gamma prior for its child sections. In turn, the overall mean accumulation rate for the whole core is itself a parameter estimated by the fitting process. The hierarchical structure of increasing resolution allows the model to adapt to low-frequency changes in the accumulation rate, that is changes between "regimes" of high or low accumulation that persist for long periods. 
 
 By default `K` is chosen so that the number of hierarchical levels, and the number of new child sections per level, are approximately equal, e.g. c(4, 4, 4, 4). The total number of sections at the finest level is set so that the resolution is 1 cm per section, up to a total length of 900 cm, above which the default remains 900 sections and a coarser resolution is used. This can be changed from the default via the parameter `K`.
 

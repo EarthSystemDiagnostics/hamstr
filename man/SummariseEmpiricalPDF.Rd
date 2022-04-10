@@ -21,10 +21,10 @@ Summarise an Empirical Probability Distribution Function.
 \details{
 Calculation of the mode is naive. For a multimodal distribution only
 the highest is returned, in the case of 2 or more modes with exactly the same
- probability, the first is returned.
+probability, the first is returned.
 }
 \examples{
-\dontrun{#'
+\dontrun{
 df <- data.frame(x = 1:10)
 df$p <- dnorm(df$x, 5, 2)
 hamstr:::SummariseEmpiricalPDF(df$x, df$p)

@@ -12,13 +12,13 @@ plot_hamstr(
 )
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
 \item{summarise}{logical TRUE or FALSE. Plot the realisations as a summarised
-"ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot
+"ribbon" showing 50\% and 95\% intervals (faster), or as a spaghetti plot
 showing individual realisations. Defaults to TRUE (ribbon).}
 
-\item{n.iter}{The number of iterations of the model to plot, defaults to
+\item{n.iter}{the number of iterations of the model to plot, defaults to
 1000.}
 
 \item{plot_diagnostics}{logical, include diagnostic plots: traceplot of
@@ -30,22 +30,17 @@ A ggplot2 object
 }
 \description{
 Plots the HAMStR modelled age ~ depth relationship together with
-  the depths, ages, and age uncertainties in the observed data. A random
-  sample of size \code{n.iter} of the iterations of the posterior
-  distribution are plotted as grey lines. The observed data are plotted as
-  points with +- 2*se error bars.
+the depths, ages, and age uncertainties in the observed data. A random
+sample of size \code{n.iter} of the iterations of the posterior
+distribution are plotted as grey lines. The observed data are plotted as
+points with +- 2*se error bars.
 }
 \examples{
 \dontrun{
 fit <- hamstr(
   depth = MSB2K$depth,
   obs_age = MSB2K$age,
-  obs_err = MSB2K$error,
-  K = c(10, 10), nu = 6,
-  acc_mean_prior = 20,
-  mem_mean = 0.5, mem_strength= 10,
-  inflate_errors = 0,
-  iter = 2000, chains = 3)
+  obs_err = MSB2K$error)
 
 # With age models summarised as a ribbon. Faster than spaghetti plots.
 plot_hamstr(fit)
@@ -54,3 +49,4 @@ plot_hamstr(fit)
 plot_hamstr(fit, summarise = FALSE)
 }
 }
+\keyword{internal}

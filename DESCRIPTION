@@ -1,10 +1,15 @@
 Package: hamstr
 Type: Package
 Title: Hierarchical Accumulation Modelling with Stan and R
-Version: 0.6.1
+Version: 0.7.0
 Encoding: UTF-8
 Authors@R: c(person("Andrew", "Dolman", email = "andrew.dolman@awi.de", role = c("aut", "cre")))
-Description: hamstr implements a "Bacon-like" Bayesian sediment accumulation or age-depth model with hierarchically structured multi-resolution discrete sediment sections. The Bayesian model is implemented in the Stan probabilistic programming language (https://mc-stan.org/). "Blaauw, Maarten, and J. Andrés Christen. 2011. 'Flexible Paleoclimate   Age-Depth Models Using an Autoregressive Gamma Process.'  Bayesian Analysis 6 (3): 457-74. doi:10.1214/ba/1339616472"
+Description: Age-depth sediment accumulation modelling for sediment cores. hamstr
+  implements a Bacon-like sediment accumulation or age-depth model,
+  similar to that of Blaauw and Christen (2011) <doi:10.1214/ba/1339616472>, but 
+  with hierarchically structured multi-resolution discrete sediment sections.
+  The Bayesian model is implemented in the Stan probabilistic programming 
+  language <https://mc-stan.org/>.
 License: GPL-3
 LazyData: true
 Biarch: true
@@ -16,11 +21,9 @@ Imports:
     utils,
     ggplot2,
     tibble,
-    plyr,
     rlang,
     dplyr,
     tidyr,
-    readr,
     ggpubr,
     magrittr,
     methods,
@@ -37,10 +40,14 @@ LinkingTo:
     rstan (>= 2.18.1),
     StanHeaders (>= 2.18.0)
 SystemRequirements: GNU make
-RoxygenNote: 7.1.1
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
 Suggests: 
     knitr,
     rmarkdown,
     rbacon (>= 2.5.2),
-    testthat
+    testthat (>= 3.0.0),
+    covr
 VignetteBuilder: knitr
+Config/testthat/edition: 3
+URL: https://earthsystemdiagnostics.github.io/hamstr/

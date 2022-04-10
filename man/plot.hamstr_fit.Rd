@@ -2,32 +2,33 @@
 % Please edit documentation in R/plot_stan_hamstr.R
 \name{plot.hamstr_fit}
 \alias{plot.hamstr_fit}
-\title{Title}
+\title{Plot hamstr Objects}
 \usage{
 \method{plot}{hamstr_fit}(
-  object,
+  x,
   type = c("default", "age_models", "acc_rates", "hier_acc_rates",
-    "acc_mean_prior_post", "mem_prior_post", "L_prior_post", "PDF_14C"),
+    "acc_mean_prior_post", "mem_prior_post", "L_prior_post", "D_prior_post", "PDF_14C"),
   summarise = TRUE,
   ...
 )
 }
 \arguments{
-\item{object}{a hamstr_fit object}
+\item{x}{a hamstr_fit object}
 
-\item{type}{One of "default", "age_models", "hier_acc_rates",
-"acc_mean_prior_post", "mem_prior_post",
-"L_prior_post", "PDF_14C"}
+\item{type}{one of "default", "age_models","acc_rates", "hier_acc_rates",
+"acc_mean_prior_post", "mem_prior_post", "L_prior_post", "D_prior_post", "PDF_14C"}
 
 \item{summarise}{logical TRUE or FALSE. Plot the realisations as a summarised
-"ribbon" showing 50% and 95% intervals (faster), or as a spaghetti plot
+"ribbon" showing 50\% and 95\% intervals (faster), or as a spaghetti plot
 showing individual realisations. Defaults to TRUE (ribbon).}
+
+\item{...}{additional arguments to hamstr plotting methods}
 }
 \value{
-A ggplot object
+a ggplot object
 }
 \description{
-Title
+plot method for class "hamstr_fit".
 }
 \examples{
 \dontrun{

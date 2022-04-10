@@ -2,7 +2,7 @@
 % Please edit documentation in R/posterior_methods.R
 \name{summary.hamstr_fit}
 \alias{summary.hamstr_fit}
-\title{Title}
+\title{Summarise hamstr Models}
 \usage{
 \method{summary}{hamstr_fit}(object, type = c("age_models", "acc_rates", "pars"), ...)
 }
@@ -10,8 +10,16 @@
 \item{object}{hamstr_fit object}
 
 \item{type}{age models "age_models" or accumulation rates "acc_rates"}
+
+\item{...}{additional arguments to hamstr summary methods}
 }
 \value{
+a tibble
+}
+\description{
+summary method for class "hamstr_fit"
+}
+\examples{
 \dontrun{
 fit <- hamstr(
   depth = MSB2K$depth,
@@ -22,7 +30,4 @@ fit <- hamstr(
 summary(fit)
 summary(fit, type = c("acc_rates"))
 }
-}
-\description{
-Title
 }

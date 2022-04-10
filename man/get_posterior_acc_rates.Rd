@@ -7,14 +7,14 @@
 get_posterior_acc_rates(hamstr_fit, tau = 0, kern = c("U", "G", "BH"))
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
-\item{tau}{Scale of the smoothing kernel in depth units. If tau > 0,
-accumulation rates are smoothed (filtered) before summary statistics are 
+\item{tau}{scale of the smoothing kernel in depth units. If tau > 0,
+accumulation rates are smoothed (filtered) before summary statistics are
 calculated, so that the accumulation rate at a given depth corresponds to the
 average rate over the depth interval tau. Default to 0.}
 
-\item{kern}{Choice of smoothin kernal. U for uniform (moving average), G for
+\item{kern}{choice of smoothin kernal. U for uniform (moving average), G for
 Gaussian, BH for Berger and Heath (exponential). Defaults to U}
 }
 \value{
@@ -28,13 +28,9 @@ Get Posterior Accumulation Rates
 fit <- hamstr(
   depth = MSB2K$depth,
   obs_age = MSB2K$age,
-  obs_err = MSB2K$error,
-  K = c(10, 10), nu = 6,
-  acc_mean_prior = 20,
-  mem_mean = 0.5, mem_strength = 10,
-  inflate_errors = 0,
-  iter = 2000, chains = 3)
+  obs_err = MSB2K$error)
 
 get_posterior_acc_rates(fit)
 }
 }
+\keyword{internal}

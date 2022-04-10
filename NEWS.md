@@ -1,3 +1,13 @@
+
+# hamstr 0.7.0
+
+* some little used arguments moved to hamstr_control and stan_sampler_args to simplify main function 
+* default K structure changed to powers of 2
+
+# hamstr 0.6.2
+
+* ability to model hiatuses reimplemented 
+
 # hamstr 0.6.1
 
 * Smoothing of accumulation rates in plots and output

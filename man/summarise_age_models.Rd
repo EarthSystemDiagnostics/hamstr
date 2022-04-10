@@ -4,10 +4,10 @@
 \alias{summarise_age_models}
 \title{Summarise Posterior Age Models}
 \usage{
-summarise_age_models(hamstr_fit)
+summarise_age_models(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 }
 \value{
 data.frame / tibble
@@ -20,12 +20,7 @@ Extracts the summary statistics of posterior age models and attaches the depths
 fit <- hamstr(
   depth = MSB2K$depth,
   obs_age = MSB2K$age,
-  obs_err = MSB2K$error,
-  K = c(10, 10), nu = 6,
-  acc_mean_prior = 20,
-  mem_mean = 0.5, mem_strength = 10,
-  inflate_errors = 0,
-  iter = 2000, chains = 3)
+  obs_err = MSB2K$error)
 
 summarise_age_models(fit)
 }

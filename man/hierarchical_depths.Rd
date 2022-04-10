@@ -10,7 +10,7 @@ hierarchical_depths(stan_dat)
 \item{stan_dat}{}
 }
 \value{
-
+a list of boundaries for the modelled sections
 }
 \description{
 Calculated depth of section boundary at all hierarchical levels

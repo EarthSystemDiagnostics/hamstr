@@ -1,45 +1,7 @@
-#' Create K structure from K_tot and target_K_per_lvl
-#'
-#' @param K_tot total number of required sections at highest resolution
-#' @param target_K_per_lvl approximate number of sections per level
-#'
-#' @return
-#' @keywords internal
-GetK <- function(K_tot, target_K_per_lvl = 10){
-
-  K_per_lvl <- seq(floor(target_K_per_lvl/2), 2*target_K_per_lvl, by = 1)
-
-  K_per_lvl <- K_per_lvl[K_per_lvl>1]
-
-  n_lvls <- unlist(
-    lapply(K_per_lvl,
-           function(x) seq(floor(log(K_tot, base = x)/2),
-                           ceiling(2*log(K_tot, base = x)))
-    )
-  )
-
-  df <- expand.grid(K_per_lvl = unique(K_per_lvl), n_lvls = unique(n_lvls))
-
-  df$K_fine <- with(df, K_per_lvl^n_lvls)
-
-  idx <- which.min(abs(df$K_fine - K_tot))
-
-  n_lvls <- df[idx, "n_lvls"]
-  K_per_lvl <- df[idx, "K_per_lvl"]
-
-  K <- rep(K_per_lvl, n_lvls)
-
-  message(cat(cumprod(K)))
-
-  return(K)
-}
-
-
 #' Adjust numbers of splits per level
 #'
 #' @param K_fine total number of required sections at highest resolution
-#'
-#' @return
+#' @return K structure
 #' @keywords internal
 AdjustK <- function(K_fine, base){
 
@@ -72,18 +34,21 @@ AdjustK <- function(K_fine, base){
 #' @param K_fine total number of sections at the finest resolution
 #'
 #' @return a vector
-#' @export
+#' @keywords internal
 #' @examples
+#' \dontrun{
 #' default_K(100)
-#' default_K(500)
-
+#' default_K(500)  
+#' }
 default_K <- function(K_fine){
 
   bar <- function(x, y){
     abs(y - x^x)
   }
 
-  base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
+  #base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
+  
+  base <- 2
 
   AdjustK(K_fine, base)
 
@@ -95,11 +60,13 @@ default_K <- function(K_fine){
 #' @param base Number of new sections per per section
 #' @param n Number of hierarchical levels
 #'
-#' @return
-#' @export
+#' @return named vector
+#' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' hierarchy_efficiency(10, 3)
+#' }
 hierarchy_efficiency <- function(base, n){
 
   nTot <- (base^1 - base^(n+1)) / (1-base)
@@ -158,7 +125,9 @@ alpha_indices <- function(K){
 #' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' gamma_sigma_shape(mean = 10, sigma = 2)
+#' }
 gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
   
   if (is.null(mean) & is.null(mode)) stop("One of either the mean or mode must be specified")
@@ -198,9 +167,9 @@ gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
 }
 
 
-#' Make the data object required by the Stan program
+#' Make the data object required by the Stan sampler
 #'
-#' @inheritParams hamstr
+#' @param ... Arguments passed from \code{\link{hamstr}}
 #'
 #' @return a list of data and parameters to be passed as data to the Stan sampler
 #' @keywords internal
@@ -221,7 +190,23 @@ make_stan_dat_hamstr <- function(...) {
   default.args[names(l)] <- l
 
   l <- default.args
+  
+  
+  # expand hamstr_control
+  hc.default.args <- formals(hamstr_control)
+  hc.default.arg.nms <- names(hc.default.args)
 
+  hc <- l$hamstr_control
+  hc <- hc[lapply(hc, is.null) == FALSE]
+
+  hc.default.args[names(hc)] <- hc
+  
+  hc <- hc.default.args
+  
+  l <- append(l, hc)
+  
+  l <- l[names(l)!= "hamstr.control"]
+  
 
  if (is.null(l$acc_mean_prior)){
 
@@ -282,17 +267,17 @@ make_stan_dat_hamstr <- function(...) {
       warning("min_age is older than minimum obs_age")
     }
 
-    if (l$pad_top_bottom == TRUE){
-      # Set start depth to 5% less than first depth observation, and DO allow negative depths
-      depth_range <- diff(range(l$depth))
-      buff <- 0.05 * depth_range
-    } else {
-      buff <- 0
-    }
+    # if (l$pad_top_bottom == TRUE){
+    #   # Set start depth to 5% less than first depth observation, and DO allow negative depths
+    #   depth_range <- diff(range(l$depth))
+    #   buff <- 0.05 * depth_range
+    # } else {
+    #   buff <- 0
+    # }
 
-    if (is.null(l$top_depth)) l$top_depth <- l$depth[1] - buff
+    if (is.null(l$top_depth)) l$top_depth <- l$depth[1] #- buff
 
-    if (is.null(l$bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) + buff
+    if (is.null(l$bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) #+ buff
 
     depth_range <- l$bottom_depth - l$top_depth
 
@@ -303,10 +288,10 @@ make_stan_dat_hamstr <- function(...) {
     if (is.null(l$K)){
       K_fine_1 <- l$bottom_depth - l$top_depth
 
-      # set resolution so that there are only 10
+      # set resolution so that there are only 16
       # sections between the median spaced 2 data points
-      min.d.depth <- median(diff(sort(unique(l$depth))))
-      K_fine_2 <- round(10 * K_fine_1 / min.d.depth )
+      min.d.depth <- stats::median(diff(sort(unique(l$depth))))
+      K_fine_2 <- round(16 * K_fine_1 / min.d.depth )
 
       K_fine <- min(c(K_fine_1, K_fine_2))
 
@@ -348,18 +333,48 @@ make_stan_dat_hamstr <- function(...) {
     l$n_lvls <- length(l$K)
     l$scale_shape = as.numeric(l$scale_shape)
     l$model_bioturbation = as.numeric(l$model_bioturbation)
+    l$model_displacement = as.numeric(l$model_displacement)
+    l$smooth_s = as.numeric(l$smooth_s)
+    l$model_hiatus = as.numeric(l$model_hiatus)
+    if (is.null(l$H_top)) l$H_top = l$top_depth
+    if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
+    
     #l$K_idx <- l$lvl - 1
 
+    l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
+    l$I <- nrow(l$smooth_i)
 
   return(l)
 }
 
 
+get_smooth_i <- function(d, w){
+  
+  w <- (w / d$delta_c )
+  
+  ri <- (-floor(w/2):floor(w/2))
+  
+  mi <- sapply(d$which_c, function(x) x + ri)
+  
+  mi[mi <= 0] <- abs(mi[mi <= 0]) +1  
+  
+  #mi[mi > d$K_fine] <- mi[mi > d$K_fine]-(2*(mi[mi > d$K_fine] - d$K_fine)-1)
+  mi[mi > d$K_fine] <- 2*d$K_fine - mi[mi > d$K_fine] +1
+  
+  if (any(mi > d$K_fine)) stop("Acc rate smoothing index > K_fine")
+  if (any(mi < 1)) stop("Acc rate smoothing index < 1")
+  
+  if (is.matrix(mi) == FALSE) mi <- rbind(mi)
+  
+  mi
+  
+}
+
 #' Calculated depth of section boundary at all hierarchical levels
 #'
 #' @param stan_dat
 #'
-#' @return
+#' @return a list of boundaries for the modelled sections
 #' @keywords internal
 hierarchical_depths <- function(stan_dat){
   d_range <- diff(range(stan_dat$modelled_depths))
@@ -418,4 +433,40 @@ get_inits_hamstr <- function(stan_dat){
   
   return(l)
 }
+
+#' #' Create K structure from K_tot and target_K_per_lvl
+#' #'
+#' #' @param K_tot total number of required sections at highest resolution
+#' #' @param target_K_per_lvl approximate number of sections per level
+#' #'
+#' #' @return
+#' #' @keywords internal
+#' GetK <- function(K_tot, target_K_per_lvl = 10){
+#' 
+#'   K_per_lvl <- seq(floor(target_K_per_lvl/2), 2*target_K_per_lvl, by = 1)
+#' 
+#'   K_per_lvl <- K_per_lvl[K_per_lvl>1]
+#' 
+#'   n_lvls <- unlist(
+#'     lapply(K_per_lvl,
+#'            function(x) seq(floor(log(K_tot, base = x)/2),
+#'                            ceiling(2*log(K_tot, base = x)))
+#'     )
+#'   )
+#' 
+#'   df <- expand.grid(K_per_lvl = unique(K_per_lvl), n_lvls = unique(n_lvls))
+#' 
+#'   df$K_fine <- with(df, K_per_lvl^n_lvls)
+#' 
+#'   idx <- which.min(abs(df$K_fine - K_tot))
+#' 
+#'   n_lvls <- df[idx, "n_lvls"]
+#'   K_per_lvl <- df[idx, "K_per_lvl"]
+#' 
+#'   K <- rep(K_per_lvl, n_lvls)
+#' 
+#'   message(cat(cumprod(K)))
+#' 
+#'   return(K)
+#' }
 

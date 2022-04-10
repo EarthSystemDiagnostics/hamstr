@@ -16,6 +16,9 @@ a vector
 Default K structure
 }
 \examples{
+\dontrun{
 default_K(100)
-default_K(500)
+default_K(500)  
 }
+}
+\keyword{internal}

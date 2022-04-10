@@ -5,3 +5,12 @@
 ^package-dev-scripts$
 ^Bacon_runs$
 ^Docker$
+^data-raw$
+^hamstr\.Rproj$
+^readme\.Rmd$
+^readme_files$
+^\.github$
+^codecov\.yml$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

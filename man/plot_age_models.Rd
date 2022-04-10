@@ -7,9 +7,9 @@
 plot_age_models(hamstr_fit, n.iter = 1000)
 }
 \arguments{
-\item{hamstr_fit}{The object returned from \code{stan_hamstr}.}
+\item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
 
-\item{n.iter}{The number of iterations of the model to plot, defaults to
+\item{n.iter}{the number of iterations of the model to plot, defaults to
 1000.}
 }
 \value{
@@ -23,12 +23,7 @@ Plot Age Models as Spaghetti Plot
 fit <- hamstr(
   depth = MSB2K$depth,
   obs_age = MSB2K$age,
-  obs_err = MSB2K$error,
-  K = c(10, 10), nu = 6,
-  acc_mean_prior = 20,
-  mem_mean = 0.5, mem_strength = 10,
-  inflate_errors = 0,
-  iter = 2000, chains = 3)
+  obs_err = MSB2K$error)
 
 plot_age_models(fit)
 }

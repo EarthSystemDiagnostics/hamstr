@@ -4,21 +4,26 @@
 \alias{summarise_hamstr_acc_rates}
 \title{Summarise accumulation rates}
 \usage{
-summarise_hamstr_acc_rates(hamstr_fit, tau = 0, kern = c("U", "G", "BH"))
+summarise_hamstr_acc_rates(
+  hamstr_fit,
+  tau = 0,
+  kern = c("U", "G", "BH"),
+  probs = c(0.025, 0.25, 0.5, 0.75, 0.975)
+)
 }
 \arguments{
-\item{hamstr_fit}{A hamstr_fit object}
+\item{hamstr_fit}{a hamstr_fit object}
 
-\item{tau}{Scale of the smoothing kernel in depth units. If tau > 0,
-accumulation rates are smoothed (filtered) before summary statistics are 
+\item{tau}{scale of the smoothing kernel in depth units. If tau > 0,
+accumulation rates are smoothed (filtered) before summary statistics are
 calculated, so that the accumulation rate at a given depth corresponds to the
 average rate over the depth interval tau. Default to 0.}
 
-\item{kern}{Choice of smoothin kernal. U for uniform (moving average), G for
+\item{kern}{choice of smoothin kernal. U for uniform (moving average), G for
 Gaussian, BH for Berger and Heath (exponential). Defaults to U}
 }
 \value{
-
+a tibble containing the summarised posterior accumulation rates
 }
 \description{
 Summarise accumulation rates

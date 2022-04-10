@@ -35,8 +35,8 @@ A dataframe or list
 }
 \description{
 Calibrates a set of 14C ages using BchronCalibrate and
-  optionally summarises the empirical PDFs of calendar age to mean and
-  standard deviation and appends these to the input dataframe
+optionally summarises the empirical PDFs of calendar age to mean and
+standard deviation and appends these to the input dataframe
 }
 \details{
 A wrapper for Bchron::Bchroncalibrate

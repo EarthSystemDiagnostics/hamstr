@@ -43,6 +43,7 @@
 calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               age.14C.se = "age.14C.se",
                               cal_curve = "intcal20",
+                              #allowOutside = FALSE,
                               return.type = "dat", offset = NULL){
 
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
@@ -63,6 +64,7 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
       ages = dat[[age.14C]][x] + dat[["offset"]][x],
       ageSds = dat[[age.14C.se]][x],
       calCurves = cal_curve,
+      #allowOutside = allowOutside,
       ids = x),
       error = function(i){
         cat(strsplit(as.character(i), " : ", fixed = TRUE)[[1]][2])
@@ -115,20 +117,20 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
 #' deviation of the empirical PDF
 #' @keywords internal
 #' @examples
-#' \dontrun{#'
+#' \dontrun{
 #' df <- data.frame(x = 1:10)
 #' df$p <- dnorm(df$x, 5, 2)
 #' hamstr:::SummariseEmpiricalPDF(df$x, df$p)
-#' 
+#'
 #' x <- 1:100
 #' y <- dnorm(x, 50, 10)
 #' plot(x, y)
 #' SummariseEmpiricalPDF(x, y)
-#' 
-#' 
+#'
+#'
 #' x2 <- x[c(1:50, seq(51, 70, 3), seq(71, 100, 1))]
 #' y2 <- y[x2]
-#' 
+#'
 #' plot(x2, y2)
 #' SummariseEmpiricalPDF(x2, y2)
 #' }
@@ -137,18 +139,18 @@ SummariseEmpiricalPDF <- function(x, p){
   # Ensure x and p are sorted
   p <- p[order(x)]
   x <- sort(x)
-  
-  
+
+
   # Allow for changes in resolution of x
   dx <- diff(x)
-  
-  if (max(abs(dx - mean(dx))) > median(dx) / 100){
-      warning("Empirical PDF has variable resolution - this is accounted for but the results may be less reliable.")
-  
-  } 
-  
+
+  if (max(abs(dx - mean(dx))) > stats::median(dx) / 100){
+    warning("Empirical PDF has variable resolution - this is accounted for but the results may be less reliable.")
+
+  }
+
   dx <- c(dx[1], dx)
-  
+
   p <- p * dx
 
   # Ensure p sum to 1
@@ -179,14 +181,14 @@ SummariseEmpiricalPDF <- function(x, p){
 
 
 
-#' Compare the Full Empirical Calendar Age PDF of a Radiocarbon Date with a
-#' t-distribution Approximation
-#'
+#' Compare Empirical and t-distribution Approximated Calendar Age PDFs
+#' @description Compare the full empirical calendar age PDFs of calibrated
+#'   radiocarbon dates with the t-distribution approximations use by hamstr
 #' @param age.14C vector of radiocarbon dates in years BP
 #' @param age.14C.se vector of radiocarbon date uncertainties
 #' @param cal_curve calibration curve
-#' @param nu degrees of freedom of the t-distribution approximation, default in 
-#' hamstr is 6
+#' @param nu degrees of freedom of the t-distribution approximation, default in
+#'   hamstr is 6
 #' @param return.type return a ggplot object or a list containing the ggplot
 #'   object and two data frames with the empirical and t-distributions
 #' @return A ggplot2 object or list with data and ggplot2 object
@@ -194,16 +196,19 @@ SummariseEmpiricalPDF <- function(x, p){
 #' @importFrom rlang .data
 #' @examples
 #' compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),
-#'  cal_curve = "intcal13", return.type = "plot")
+#'  cal_curve = "intcal20", return.type = "plot")
 compare_14C_PDF <- function(age.14C, age.14C.se,
                             cal_curve = "intcal20", nu = 6,
                             return.type = c("plot", "list")){
 
-  dt_ls <- function(x, dat=1, mu=0, sigma=1) 1/sigma * stats::dt((x - mu)/sigma, dat)
+  dt_ls <- function(x, dat=1, mu=0, sigma=1) {
+    1/sigma * stats::dt((x - mu)/sigma, dat)
+    }
 
   stopifnot(length(age.14C) == length(age.14C.se))
 
-  cal.dat <- data.frame(age.14C = round(age.14C), age.14C.se = round(age.14C.se))
+  cal.dat <- data.frame(age.14C = round(age.14C),
+                        age.14C.se = round(age.14C.se))
 
   return.type <- match.arg(return.type, choices = c("plot", "list"))
 
@@ -219,39 +224,43 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
 
   # The summarised calendar ages are appended to the input data
   C14 <- calib$dat
-  C14$.id <- 1:nrow(cal.dat)
+  C14$id <- 1:nrow(cal.dat)
 
   # These are the full PDFs
   cal.ages <- calib$cal.ages
 
-  cali.pdf.dat <- plyr::ldply(1:length(cal.ages), function(i){
-    x <- cal.ages[[i]]
-    if (is.na(x)==FALSE){
-      data.frame(age = x[[1]]$ageGrid, density = x[[1]]$densities, .id = i)
-    }else{
-      data.frame(age = 0, density = 0, .id = i)
-    }
-  })
+  cal.ages.df <- dplyr::tibble(cal = cal.ages) %>%
+
+  dplyr::mutate(id = 1:length(cal.ages))
+
+  cali.pdf.dat <- cal.ages.df %>%
+    dplyr::group_by(.data$id) %>%
+    dplyr::summarise(
+      age = if(is.na(.data$cal[[1]]) == FALSE)  .data$cal[[1]][[1]]$ageGrid else 0,
+      density = if(is.na(.data$cal[[1]]) == FALSE) .data$cal[[1]][[1]]$densities else 0
+    )
+
 
   nu <- C14 %>%
-    dplyr::group_by(.data$.id) %>%
+    dplyr::filter(is.na(.data$age.14C.cal) == FALSE) %>%
+    dplyr::group_by(.data$id) %>%
     dplyr::do({
-      rng <- .$age.14C.cal.se * 5
-      age = seq(.$age.14C.cal - rng, .$age.14C.cal + rng, length.out = 100)
+      rng <- .data$age.14C.cal.se * 5
+      age <- seq(.data$age.14C.cal - rng, .data$age.14C.cal + rng, length.out = 100)
       data.frame(
         age = age,
         density = dt_ls(age, dat = nu,
-                        mu = .$age.14C.cal,
-                        sigma = .$age.14C.cal.se)
+                        mu = .data$age.14C.cal,
+                        sigma = .data$age.14C.cal.se)
       )
     })
 
   gg <- cali.pdf.dat %>%
-    ggplot2::ggplot(ggplot2::aes(x = age/1000, y = density, group = .id)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data$age/1000, y = .data$density, group = .data$id)) +
     ggplot2::geom_line(ggplot2::aes(colour = cal_curve)) +
-    ggplot2::geom_line(data = nu, ggplot2::aes(y = density, colour = "t-distribution")) +
+    ggplot2::geom_line(data = nu, ggplot2::aes(y = .data$density, colour = "t-distribution")) +
     ggplot2::labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
-    ggplot2::facet_wrap(~.id, scales = "free") +
+    ggplot2::facet_wrap(~.data$id, scales = "free") +
     ggplot2::theme_bw()
 
   if (return.type == "list"){

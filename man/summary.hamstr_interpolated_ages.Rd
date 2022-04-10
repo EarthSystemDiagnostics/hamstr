@@ -2,16 +2,18 @@
 % Please edit documentation in R/posterior_methods.R
 \name{summary.hamstr_interpolated_ages}
 \alias{summary.hamstr_interpolated_ages}
-\title{Title}
+\title{Summarise Age Models That Have Been Interpolated}
 \usage{
-\method{summary}{hamstr_interpolated_ages}(object)
+\method{summary}{hamstr_interpolated_ages}(object, ...)
 }
 \arguments{
 \item{object}{hamstr_interpolated_ages object}
+
+\item{...}{additional arguments to hamstr summary methods}
 }
 \value{
-
+a tibble containing the summarised posterior
 }
 \description{
-Title
+summary method for class "hamstr_interpolated_ages"
 }
