@@ -66,7 +66,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="hamstr-hierarchical-accumulation-modelling-with-stan-and-r">hamstr: Hierarchical Accumulation Modelling with Stan and R.<a class="anchor" aria-label="anchor" href="#hamstr-hierarchical-accumulation-modelling-with-stan-and-r"></a>
 </h1></div>
-<p>Andrew M. Dolman 2022-03-14</p>
+<p>Andrew M. Dolman 2022-04-10</p>
 <hr>
 <!-- badges: start -->
 <p><strong>hamstr</strong> implements a <em>Bacon-like</em> (Blaauw and Christen, 2011) sediment accumulation or age-depth model with hierarchically structured multi-resolution sediment sections. The Bayesian model is implemented in the Stan probabilistic programming language (<a href="https://mc-stan.org/" class="external-link uri">https://mc-stan.org/</a>).</p>
@@ -106,11 +106,11 @@
 <code class="sourceCode R"><span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">40</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fl">40</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span>
 <span class="fu"><a href="reference/compare_14C_PDF.html">compare_14C_PDF</a></span><span class="op">(</span><span class="va">MSB2K</span><span class="op">$</span><span class="va">age</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="va">MSB2K</span><span class="op">$</span><span class="va">error</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, cal_curve <span class="op">=</span> <span class="st">"intcal20"</span><span class="op">)</span><span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Intcal20"</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-4-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-4-1.svg" width="100%"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="reference/compare_14C_PDF.html">compare_14C_PDF</a></span><span class="op">(</span><span class="va">MSB2K</span><span class="op">$</span><span class="va">age</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="va">MSB2K</span><span class="op">$</span><span class="va">error</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, cal_curve <span class="op">=</span> <span class="st">"marine20"</span><span class="op">)</span> <span class="op">+</span>
   <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Marine20"</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-5-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-5-1.svg" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="fitting-age-models-with-hamstr">Fitting age-models with <strong>hamstr</strong>
@@ -127,11 +127,11 @@
 <p>The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-7-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-7-1.svg" width="100%"></p>
 <p>A “spaghetti” plot can be created instead of shaded regions. This shows a random sample of iterations from the posterior distribution (realisation of the age-depth model). This can be slow if lots of iterations are plotted, the default is to plot 1000 iterations. Additionally, plotting of the diagnostic plots can be switched off.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, summarise <span class="op">=</span> <span class="cn">FALSE</span>, plot_diagnostics <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-8-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-8-1.svg" width="100%"></p>
 <div class="section level4">
 <h4 id="mean-accumulation-rate">Mean accumulation rate<a class="anchor" aria-label="anchor" href="#mean-accumulation-rate"></a>
 </h4>
@@ -140,7 +140,7 @@
 <p>This prior can be checked visually against the posterior. The posterior distribution should be much narrower than the weakly informative prior.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"acc_mean_prior_post"</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-9-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-9-1.svg" width="100%"></p>
 </div>
 <div class="section level4">
 <h4 id="other-hyperparameters">Other hyperparameters<a class="anchor" aria-label="anchor" href="#other-hyperparameters"></a>
@@ -224,7 +224,7 @@
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"acc_rates"</span><span class="op">)</span>
 <span class="co">#&gt; Joining, by = "idx"</span>
 <span class="co">#&gt; Joining, by = "depth"</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-14-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-14-1.svg" width="100%"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"acc_rates"</span><span class="op">)</span> 
 <span class="co">#&gt; Joining, by = "idx"</span>
@@ -241,8 +241,8 @@
 <span class="co">#&gt;  8  8.65        8.65           9.67 depth_per_ti~     8     0  97.0  51.7   36.3</span>
 <span class="co">#&gt;  9  9.67        9.67          10.7  depth_per_ti~     9     0  98.4  55.6   35.0</span>
 <span class="co">#&gt; 10 10.7        10.7           11.7  depth_per_ti~    10     0  94.9  51.3   35.5</span>
-<span class="co">#&gt; # ... with 182 more rows, and 4 more variables: 25% &lt;dbl&gt;, 50% &lt;dbl&gt;,</span>
-<span class="co">#&gt; #   75% &lt;dbl&gt;, 97.5% &lt;dbl&gt;</span></code></pre></div>
+<span class="co">#&gt; # ... with 182 more rows, and 4 more variables: `25%` &lt;dbl&gt;, `50%` &lt;dbl&gt;,</span>
+<span class="co">#&gt; #   `75%` &lt;dbl&gt;, `97.5%` &lt;dbl&gt;</span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="diagnostic-plots">Diagnostic plots<a class="anchor" aria-label="anchor" href="#diagnostic-plots"></a>
@@ -253,7 +253,7 @@
 </h4>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"hier_acc"</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-16-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-16-1.svg" width="100%"></p>
 </div>
 <div class="section level4">
 <h4 id="plot-memory-prior-and-posterior">Plot memory prior and posterior<a class="anchor" aria-label="anchor" href="#plot-memory-prior-and-posterior"></a>
@@ -261,7 +261,7 @@
 <p>As for this example the highest resolution sections are approximately 1 cm thick, there is not much difference between R and w.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"mem"</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-17-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-17-1.svg" width="100%"></p>
 </div>
 </div>
 <div class="section level3">
@@ -275,12 +275,12 @@
 
 <span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stan_plot_diagnostics.html" class="external-link">stan_rhat</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span>
 <span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-18-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-18-1.svg" width="100%"></p>
 <p>The first <code>alpha</code> parameter is the overall mean accumulation rate.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stanfit-method-traceplot.html" class="external-link">traceplot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span><span class="op">$</span><span class="va">fit</span>, par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha[1]"</span><span class="op">)</span>,
                  inc_warmup <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="readme_files/figure-gfm/unnamed-chunk-19-1.png"><!-- --></p>
+<p><img src="reference/figures/README-unnamed-chunk-19-1.svg" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
