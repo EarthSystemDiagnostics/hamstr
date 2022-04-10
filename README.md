@@ -1,7 +1,7 @@
 hamstr: Hierarchical Accumulation Modelling with Stan and R.
 ================
 Andrew M. Dolman
-2022-03-14
+2022-04-10
 
 ------------------------------------------------------------------------
 
@@ -80,14 +80,14 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
   labs(title = "Intcal20")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-4-1.svg" width="100%" />
 
 ``` r
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
   labs(title = "Marine20")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-5-1.svg" width="100%" />
 
 ### Fitting age-models with **hamstr**
 
@@ -117,7 +117,7 @@ along the top of the age-model plot.
 plot(hamstr_fit_1)
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-7-1.svg" width="100%" />
 
 A “spaghetti” plot can be created instead of shaded regions. This shows
 a random sample of iterations from the posterior distribution
@@ -129,7 +129,7 @@ Additionally, plotting of the diagnostic plots can be switched off.
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-8-1.svg" width="100%" />
 
 #### Mean accumulation rate
 
@@ -154,7 +154,7 @@ distribution should be much narrower than the weakly informative prior.
 plot(hamstr_fit_1, type = "acc_mean_prior_post")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-9-1.svg" width="100%" />
 
 #### Other hyperparameters
 
@@ -303,7 +303,7 @@ plot(hamstr_fit_1, type = "acc_rates")
 #> Joining, by = "depth"
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-14-1.svg" width="100%" />
 
 ``` r
 summary(hamstr_fit_1, type = "acc_rates") 
@@ -321,8 +321,8 @@ summary(hamstr_fit_1, type = "acc_rates")
 #>  8  8.65        8.65           9.67 depth_per_ti~     8     0  97.0  51.7   36.3
 #>  9  9.67        9.67          10.7  depth_per_ti~     9     0  98.4  55.6   35.0
 #> 10 10.7        10.7           11.7  depth_per_ti~    10     0  94.9  51.3   35.5
-#> # ... with 182 more rows, and 4 more variables: 25% <dbl>, 50% <dbl>,
-#> #   75% <dbl>, 97.5% <dbl>
+#> # ... with 182 more rows, and 4 more variables: `25%` <dbl>, `50%` <dbl>,
+#> #   `75%` <dbl>, `97.5%` <dbl>
 ```
 
 ### Diagnostic plots
@@ -336,7 +336,7 @@ options.
 plot(hamstr_fit_1, type = "hier_acc")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-16-1.svg" width="100%" />
 
 #### Plot memory prior and posterior
 
@@ -347,7 +347,7 @@ cm thick, there is not much difference between R and w.
 plot(hamstr_fit_1, type = "mem")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-17-1.svg" width="100%" />
 
 ### Other `rstan` functions
 
@@ -364,7 +364,7 @@ rstan::stan_rhat(hamstr_fit_1$fit)
 #> `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-18-1.svg" width="100%" />
 
 The first `alpha` parameter is the overall mean accumulation rate.
 
@@ -373,7 +373,7 @@ rstan::traceplot(hamstr_fit_1$fit, par = c("alpha[1]"),
                  inc_warmup = TRUE)
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+<img src="man/figures/README-unnamed-chunk-19-1.svg" width="100%" />
 
 ### References
 
