@@ -2,7 +2,7 @@
 % Please edit documentation in R/stan_hamstr.R
 \name{hamstr}
 \alias{hamstr}
-\title{Fit an Age-Depth Model}
+\title{Fit a hamstr Age-Depth Model}
 \usage{
 hamstr(
   depth,
@@ -124,11 +124,12 @@ and prior distributions can be plotted and checked prior to running a
 model. Defaults to TRUE}
 
 \item{hamstr_control}{additional arguments to hamstr useful for debugging or
-development. See \link[hamstr]{hamstr_control} for details.}
+development. See \code{\link{hamstr_control}} for details.}
 
 \item{stan_sampler_args}{additional arguments to \link[rstan]{sampling} passed as a
 named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000
-iterations instead of the default 4 chains of 2000 iterations.}
+iterations instead of the default 4 chains of 2000 iterations.
+See \code{\link{get_stan_sampler_args}} for details.}
 }
 \value{
 Returns an object of class "hamstr_fit", which is a list composed of
@@ -136,7 +137,11 @@ the output from the stan sampler .$fit, and the list of data passed to the
 sampler, .$data
 }
 \description{
-Fit an Age-Depth Model
+\code{hamstr} is used to fit an age-depth model to a set of
+age-control points. Ages should already be on the desired scale, e.g.
+calendar ages, and will not be calibrated. The function
+\code{\link{calibrate_14C_age}} can be used to calibrate radiocarbon dates prior
+to fitting a hamstr model.
 }
 \examples{
 \dontrun{

@@ -181,14 +181,14 @@ SummariseEmpiricalPDF <- function(x, p){
 
 
 
-#' Compare the Full Empirical Calendar Age PDF of a Radiocarbon Date with a
-#' t-distribution Approximation
-#'
+#' Compare Empirical and t-distribution Approximated Calendar Age PDFs
+#' @description Compare the full empirical calendar age PDFs of calibrated
+#'   radiocarbon dates with the t-distribution approximations use by hamstr
 #' @param age.14C vector of radiocarbon dates in years BP
 #' @param age.14C.se vector of radiocarbon date uncertainties
 #' @param cal_curve calibration curve
 #' @param nu degrees of freedom of the t-distribution approximation, default in
-#' hamstr is 6
+#'   hamstr is 6
 #' @param return.type return a ggplot object or a list containing the ggplot
 #'   object and two data frames with the empirical and t-distributions
 #' @return A ggplot2 object or list with data and ggplot2 object
@@ -196,7 +196,7 @@ SummariseEmpiricalPDF <- function(x, p){
 #' @importFrom rlang .data
 #' @examples
 #' compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),
-#'  cal_curve = "intcal13", return.type = "plot")
+#'  cal_curve = "intcal20", return.type = "plot")
 compare_14C_PDF <- function(age.14C, age.14C.se,
                             cal_curve = "intcal20", nu = 6,
                             return.type = c("plot", "list")){

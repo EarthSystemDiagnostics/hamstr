@@ -1,4 +1,9 @@
-#' @title Fit an Age-Depth Model
+#' @title Fit a hamstr Age-Depth Model
+#' @description \code{hamstr} is used to fit an age-depth model to a set of
+#'   age-control points. Ages should already be on the desired scale, e.g.
+#'   calendar ages, and will not be calibrated. The function
+#'   \code{\link{calibrate_14C_age}} can be used to calibrate radiocarbon dates prior
+#'   to fitting a hamstr model.
 #' @param depth depths of observed ages (age control points)
 #' @param obs_age observed age at each depth (age control points)
 #' @param obs_err error associated with each observed age (1 standard error)
@@ -73,10 +78,11 @@
 #'   and prior distributions can be plotted and checked prior to running a
 #'   model. Defaults to TRUE
 #' @param hamstr_control additional arguments to hamstr useful for debugging or 
-#' development. See \link[hamstr]{hamstr_control} for details.
+#' development. See \code{\link{hamstr_control}} for details.
 #' @param stan_sampler_args additional arguments to \link[rstan]{sampling} passed as a
 #' named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
 #' iterations instead of the default 4 chains of 2000 iterations. 
+#' See \code{\link{get_stan_sampler_args}} for details. 
 #' @return Returns an object of class "hamstr_fit", which is a list composed of
 #'   the output from the stan sampler .$fit, and the list of data passed to the
 #'   sampler, .$data
