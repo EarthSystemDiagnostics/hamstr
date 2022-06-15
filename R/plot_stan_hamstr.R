@@ -149,36 +149,35 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
       ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top") +
       ggplot2::labs(x = "Iteration")
-
+    
+    diag.list <- list(t.lp, p.acc, p.mem)
+    
+    diag.nest <- t.lp | p.acc | p.mem
     } else {
 
-      p.acc <- NULL
-      t.lp <- NULL
+      diag.nest <- patchwork::plot_spacer() | p.mem | patchwork::plot_spacer()
+
     }
 
-    diag.list <- list(t.lp, p.acc, p.mem)
-
+   
 
     if (hamstr_fit$data$model_bioturbation == 1){
       p.L <- plot_L_prior_posterior(hamstr_fit) +
         theme(legend.position = "top")
 
-      diag.list <- append(diag.list, list(p.L))
+        diag.nest <- diag.nest | p.L
+      
     }
 
     if (hamstr_fit$data$model_displacement == 1){
       p.D <- plot_D_prior_posterior(hamstr_fit) +
         theme(legend.position = "top")
+       
+      diag.nest <- diag.nest | p.D
+    } 
 
-      diag.list <- append(diag.list, list(p.D))
-    }
-
-
-    p.fit <- ggpubr::ggarrange(
-      p.fit,
-      ggpubr::ggarrange(plotlist = diag.list, ncol = length(diag.list)),
-      nrow = 2, heights = c(2, 1))
-
+    p.fit <- p.fit / (diag.nest) + patchwork::plot_layout(heights = c(3, 1))
+    
     return(p.fit)
 
   }
@@ -254,8 +253,6 @@ plot_summary_age_models <- function(hamstr_fit){
   p.age.sum <- add_datapoints(p.age.sum, obs_ages)
 
   p.age.sum <- add_subdivisions(p.age.sum, hamstr_fit)
-
-  #p.age.sum <- add_colour_scale(p.age.sum)
 
   p.age.sum
 }
