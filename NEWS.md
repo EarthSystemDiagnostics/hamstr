@@ -1,3 +1,6 @@
+# hamstr 0.7.1
+
+* patchwork used instead of ggpubr to reduce dependencies
 
 # hamstr 0.7.0
 
