@@ -1,7 +1,7 @@
 hamstr: Hierarchical Accumulation Modelling with Stan and R.
 ================
 Andrew M. Dolman
-2022-03-14
+2022-06-16
 
 ------------------------------------------------------------------------
 
@@ -321,8 +321,8 @@ summary(hamstr_fit_1, type = "acc_rates")
 #>  8  8.65        8.65           9.67 depth_per_ti~     8     0  97.0  51.7   36.3
 #>  9  9.67        9.67          10.7  depth_per_ti~     9     0  98.4  55.6   35.0
 #> 10 10.7        10.7           11.7  depth_per_ti~    10     0  94.9  51.3   35.5
-#> # ... with 182 more rows, and 4 more variables: 25% <dbl>, 50% <dbl>,
-#> #   75% <dbl>, 97.5% <dbl>
+#> # ... with 182 more rows, and 4 more variables: `25%` <dbl>, `50%` <dbl>,
+#> #   `75%` <dbl>, `97.5%` <dbl>
 ```
 
 ### Diagnostic plots
