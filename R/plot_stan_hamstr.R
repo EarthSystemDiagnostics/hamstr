@@ -76,7 +76,7 @@ plot.hamstr_fit <- function(x,
 #'
 #' @return A ggplot2 object
 #' @keywords internal
-#' @importFrom ggpubr ggarrange
+#' @import patchwork
 #' @importFrom rstan extract
 #' @importFrom magrittr %>%
 #' @examples
@@ -502,7 +502,8 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
   }
 
   if (length(axis) == 2){
-    p <- ggpubr::ggarrange(p.depth, p.age, nrow = 2)
+    #p <- ggpubr::ggarrange(p.depth, p.age, nrow = 2)
+    p <- p.depth / p.age
   } else if (axis == "depth"){
     p <- p.depth
   } else {
@@ -737,10 +738,8 @@ plot_infl_prior_posterior <- function(hamstr_fit) {
     ggplot2::theme_bw() +
     ggplot2::labs(y = "Density", x = "Value")
 
-  p <- ggpubr::ggarrange(plotlist = list(
-    p.pars, p.priors,
-    p.infl.fac
-  ))
+ 
+  p <- p.pars / (p.priors | p.infl.fac)
 
   return(p)
 }

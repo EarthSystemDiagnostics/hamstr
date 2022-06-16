@@ -24,7 +24,7 @@ Imports:
     rlang,
     dplyr,
     tidyr,
-    ggpubr,
+    patchwork,
     magrittr,
     methods,
     Rcpp (>= 0.12.0),
