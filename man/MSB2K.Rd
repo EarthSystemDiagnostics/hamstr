@@ -25,7 +25,7 @@ The example dataset MSB2K as provided by the \link[rbacon]{rbacon} package.
 \references{
 Blaauw, Maarten, and J. Andrés Christen. 2011. Flexible
 Paleoclimate Age-Depth Models Using an Autoregressive Gamma Process.
-Bayesian Analysis 6 (3): 457-74. \url{doi:10.1214/ba/1339616472}
+Bayesian Analysis 6 (3): 457-74. \doi{10.1214/ba/1339616472}
 
 Maarten Blaauw, J. Andres Christen and Marco A. Aquino L. (2020). rbacon:
 Age-Depth Modelling using Bayesian Statistics. R package version 2.4.3.

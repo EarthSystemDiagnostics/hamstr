@@ -29,7 +29,7 @@
 #'   By default a "powers of 2" hierarchical structure is chosen and then
 #'   adjusted to get close to the desired number of sections, e.g. for a desired
 #'   100 sections the result is c(2, 2, 2, 2, 2, 3), giving 96 sections.
-#'   
+#'
 #' @param acc_mean_prior hyperparameter for the prior on the overall mean
 #'   accumulation rate for the record. Units are obs_age / depth. E.g. if depth
 #'   is in cm and age in years then the accumulation rate is in years/cm. The
@@ -56,7 +56,7 @@
 #'   for details.
 #' @param n_ind the number of individual particles (e.g. foraminifera) in each
 #'   sample that was dated by e.g. radiocarbon dating. This can be a single
-#'   value or a vector the same length as obs_age. Only used if 
+#'   value or a vector the same length as obs_age. Only used if
 #'   model_bioturbation = TRUE.
 #' @param L_prior_mean mean of the gamma prior on mixing depth, defaults to 10.
 #' @param L_prior_shape,L_prior_sigma shape and standard deviation of the gamma
@@ -64,11 +64,11 @@
 #'   calculated. Defaults to shape = 2. If either the shape or sigma parameter
 #'   is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 #'   rather than being sampled.
-#' @param model_displacement model additional error on observed ages that does 
-#' not scale with the number of individual particles in a sample, for example 
+#' @param model_displacement model additional error on observed ages that does
+#' not scale with the number of individual particles in a sample, for example
 #' due to incomplete mixing.
 #' @param D_prior_scale scale of the half-normal prior on additional error on
-#'   observed ages. The mean and standard deviation of a half-normal are equal 
+#'   observed ages. The mean and standard deviation of a half-normal are equal
 #'   to the scale. Units are those of the depth variable, e.g. cm.
 #' @param model_hiatus optionally model a hiatus.
 #' @param H_top,H_bottom limits to the location of a hiatus. By default these
@@ -77,12 +77,12 @@
 #'   returns only the data, model structure and prior parameters so that data
 #'   and prior distributions can be plotted and checked prior to running a
 #'   model. Defaults to TRUE
-#' @param hamstr_control additional arguments to hamstr useful for debugging or 
+#' @param hamstr_control additional arguments to hamstr useful for debugging or
 #' development. See \code{\link{hamstr_control}} for details.
 #' @param stan_sampler_args additional arguments to \link[rstan]{sampling} passed as a
-#' named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000 
-#' iterations instead of the default 4 chains of 2000 iterations. 
-#' See \code{\link{get_stan_sampler_args}} for details. 
+#' named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000
+#' iterations instead of the default 4 chains of 2000 iterations.
+#' See \code{\link{get_stan_sampler_args}} for details.
 #' @return Returns an object of class "hamstr_fit", which is a list composed of
 #'   the output from the stan sampler .$fit, and the list of data passed to the
 #'   sampler, .$data
@@ -119,40 +119,40 @@ hamstr <- function(depth, obs_age, obs_err,
                    hamstr_control = list(),
                    stan_sampler_args = list()
                    ){
-  
-  
-  
+
+
+
   stan_dat <- make_stan_dat_hamstr()
-  
-  
-  used_sampler_args <- do.call(get_stan_sampler_args, stan_sampler_args) 
-  
-  
-  # set the seed here and not inside get_inits_hamstr, so that the chains are 
+
+
+  used_sampler_args <- do.call(get_stan_sampler_args, stan_sampler_args)
+
+
+  # set the seed here and not inside get_inits_hamstr, so that the chains are
   # different
-  
+
   set.seed(used_sampler_args$seed)
-  
-  inits <- replicate(used_sampler_args$chains, 
+
+  inits <- replicate(used_sampler_args$chains,
                      list(get_inits_hamstr(stan_dat)))
 
- 
-    
-    args <- list(object = stanmodels$hamstr, data = stan_dat, 
+
+
+    args <- list(object = stanmodels$hamstr, data = stan_dat,
                  init = inits)
-    
+
     args <- append(args, used_sampler_args)
-  
+
     if (sample_posterior){
     fit <- do.call(rstan::sampling, args)
-    
+
     } else if (sample_posterior == FALSE){
     fit <- NA
   }
 
   stan_dat <- append(stan_dat, used_sampler_args)
-  
-  info <- list(version = packageVersion("hamstr"),
+
+  info <- list(version = utils::packageVersion("hamstr"),
                time = Sys.time())
 
   out <- list(fit=fit, data=stan_dat, info = info)
@@ -167,7 +167,7 @@ hamstr <- function(depth, obs_age, obs_err,
 
 #' Return a List of hamstr Control Arguments
 #'
-#' @description Returns a list arguments to pass to hamstr_control which may be 
+#' @description Returns a list arguments to pass to hamstr_control which may be
 #' useful for debugging or development
 #'
 #' @param scale_shape scale the shape parameter according to the number of
@@ -182,7 +182,7 @@ hamstr <- function(depth, obs_age, obs_err,
 #' @param smooth_s smooth the sedimentation rate used to calculate additional
 #' error from bioturbation by taking a mean across nearby sections
 #' @param inflate_errors logical: If set to TRUE, observation errors are
-#'   inflated so that data are consistent with a gamma AR1 age-depth model. 
+#'   inflated so that data are consistent with a gamma AR1 age-depth model.
 #'   This is an experimental feature under active development. Defaults to FALSE.
 #' @param infl_sigma_sd hyperparameter: sets the standard deviation of the
 #'   half-normal prior on the mean of the additional error terms. Defaults to 10
@@ -190,7 +190,7 @@ hamstr <- function(depth, obs_age, obs_err,
 #' @param infl_shape_shape,infl_shape_mean hyperparameters: parametrises the
 #'   gamma prior on the shape of the distribution of the additional error terms.
 #'   Default to 1, 1.
-#' @examples 
+#' @examples
 #' hamstr_control()
 #' @return a named list
 #' @export
@@ -204,16 +204,16 @@ hamstr_control <- function(scale_R = TRUE,
                            infl_shape_shape = 1,
                            infl_shape_mean = 1
                            ){
-  
+
   l <- c(as.list(environment()))
-  
+
   return(l)
 
   }
 
 
 
-#' Default Parameters for Sampling Hamstr Models with Stan 
+#' Default Parameters for Sampling Hamstr Models with Stan
 #' @description Returns a list of parameters for the Stan sampler
 #' @inheritParams rstan::sampling
 #'
@@ -241,7 +241,7 @@ get_stan_sampler_args <- function(chains = 4,
                              show_messages = TRUE,
                              ...) {
   l <- c(as.list(environment()), list(...))
-  
+
   return(l)
 }
 

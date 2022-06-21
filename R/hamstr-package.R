@@ -6,15 +6,15 @@
 #'   probabilistic programming language <https://mc-stan.org/>. "Blaauw,
 #'   Maarten, and J. Andrés Christen. 2011. 'Flexible Paleoclimate Age-Depth
 #'   Models Using an Autoregressive Gamma Process.'  Bayesian Analysis 6 (3):
-#'   457-74. <doi:10.1214/ba/1339616472>
-#'      
+#'   457-74. \doi{doi:10.1214/ba/1339616472}
+#'
 #' @docType package
 #' @name hamstr-package
 #' @useDynLib hamstr, .registration = TRUE
 #' @import methods
 #' @import Rcpp
 #' @importFrom rstan sampling
-#' @import rstantools 
+#' @import rstantools
 #' @importFrom RcppParallel RcppParallelLibs CxxFlags
 #'
 #' @references
