@@ -38,7 +38,7 @@ AdjustK <- function(K_fine, base){
 #' @examples
 #' \dontrun{
 #' default_K(100)
-#' default_K(500)  
+#' default_K(500)
 #' }
 default_K <- function(K_fine){
 
@@ -47,7 +47,7 @@ default_K <- function(K_fine){
   }
 
   #base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
-  
+
   base <- 2
 
   AdjustK(K_fine, base)
@@ -125,44 +125,45 @@ alpha_indices <- function(K){
 #' @keywords internal
 #'
 #' @examples
-#' \dontrun{
 #' gamma_sigma_shape(mean = 10, sigma = 2)
-#' }
 gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
-  
+
   if (is.null(mean) & is.null(mode)) stop("One of either the mean or mode must be specified")
   if (is.null(shape) & is.null(sigma)) stop("One of either the shape or sigma must be specified")
-  
+
   if (is.null(mean)==FALSE & is.null(mode)==FALSE) stop("Only one of the mean and mode can be specified")
   if (is.null(shape)==FALSE & is.null(sigma)==FALSE) stop("Only one of the shape and sigma can be specified")
-  
+
   if (is.null(mean)){
     if (is.null(shape) == FALSE){
       if (shape <= 1) stop("Gamma cannot be defined by mode and shape if shape <= 1")
       mean <- (shape * mode) / (shape -1)
     } else if (is.null(shape)){
-      
+
       # from mode and sigma
       rate = (mode + sqrt(mode^2 + 4*sigma^2)) / (2 * sigma^2)
       shape = 1 + mode * rate
-      
+
       if (shape <= 1) stop("No solution for Gamma with this mode and sigma")
       mean <- (shape * mode) / (shape -1)
     }
   }
-  
+
   if (is.null(sigma)){
+    # from mean and shape
     rate <- shape / mean
     sigma <- sqrt(shape/(rate^2))
   } else if (is.null(shape)){
+    # from mean and sigma
     rate <- mean / sigma^2
     shape <- mean^2 / sigma^2
   }
-  
+
   if (is.null(mode)){
-   mode <- (shape - 1) / rate 
+   mode <- (shape - 1) / rate
+   if (mode < 0) mode <- 0
   }
-  
+
   return(list(mean = mean, mode = mode, rate = rate, shape = shape, sigma = sigma))
 }
 
@@ -190,8 +191,8 @@ make_stan_dat_hamstr <- function(...) {
   default.args[names(l)] <- l
 
   l <- default.args
-  
-  
+
+
   # expand hamstr_control
   hc.default.args <- formals(hamstr_control)
   hc.default.arg.nms <- names(hc.default.args)
@@ -200,13 +201,13 @@ make_stan_dat_hamstr <- function(...) {
   hc <- hc[lapply(hc, is.null) == FALSE]
 
   hc.default.args[names(hc)] <- hc
-  
+
   hc <- hc.default.args
-  
+
   l <- append(l, hc)
-  
+
   l <- l[names(l)!= "hamstr.control"]
-  
+
 
  if (is.null(l$acc_mean_prior)){
 
@@ -214,7 +215,7 @@ make_stan_dat_hamstr <- function(...) {
     acc_mean <- stats::coef(MASS::rlm(obs_age~depth, data = d))[2]
 
     acc_mean <- signif(acc_mean, 2)
-    
+
     # if negative replace with 20
     if (acc_mean <= 0) {
       warning("Estimated mean accumulation rate is negative - using value = 20")
@@ -338,7 +339,7 @@ make_stan_dat_hamstr <- function(...) {
     l$model_hiatus = as.numeric(l$model_hiatus)
     if (is.null(l$H_top)) l$H_top = l$top_depth
     if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
-    
+
     #l$K_idx <- l$lvl - 1
 
     l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
@@ -349,25 +350,25 @@ make_stan_dat_hamstr <- function(...) {
 
 
 get_smooth_i <- function(d, w){
-  
+
   w <- (w / d$delta_c )
-  
+
   ri <- (-floor(w/2):floor(w/2))
-  
+
   mi <- sapply(d$which_c, function(x) x + ri)
-  
-  mi[mi <= 0] <- abs(mi[mi <= 0]) +1  
-  
+
+  mi[mi <= 0] <- abs(mi[mi <= 0]) +1
+
   #mi[mi > d$K_fine] <- mi[mi > d$K_fine]-(2*(mi[mi > d$K_fine] - d$K_fine)-1)
   mi[mi > d$K_fine] <- 2*d$K_fine - mi[mi > d$K_fine] +1
-  
+
   if (any(mi > d$K_fine)) stop("Acc rate smoothing index > K_fine")
   if (any(mi < 1)) stop("Acc rate smoothing index < 1")
-  
+
   if (is.matrix(mi) == FALSE) mi <- rbind(mi)
-  
+
   mi
-  
+
 }
 
 #' Calculated depth of section boundary at all hierarchical levels
@@ -401,25 +402,25 @@ get_inits_hamstr <- function(stan_dat){
   d <- data.frame(depth = stan_dat$depth, obs_age = stan_dat$obs_age)
   rlm1 <- MASS::rlm(obs_age~depth, data = d)
   sigma <- summary(rlm1)$sigma
-  
-  
+
+
   l <- list(
     R = stats::runif(1, 0.1, 0.9),
-    
+
     # create starting alpha values +- 3 SD from the overal prior mean (but always +ve)
     alpha = with(stan_dat, abs(stats::rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
     #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
-    
+
     age0 = as.numeric(
       stats::predict(rlm1,
                      newdata = data.frame(depth = stan_dat$top_depth))
     ) + stats::rnorm(1, 0, sigma)
-    
+
   )
-  
-  
+
+
   if (l$age0 < stan_dat$min_age) l$age0 <- stan_dat$min_age + abs(stats::rnorm(1, 0, 2))
-  
+
   # need to make this conditional and make sure initial values are arrays!
   if (stan_dat$inflate_errors == 1){
     l$infl_mean = as.array(abs(stats::rnorm(1, 0, 0.1)))
@@ -430,7 +431,7 @@ get_inits_hamstr <- function(stan_dat){
     l$infl_sd = numeric(0)
     l$infl = numeric(0)
   }
-  
+
   return(l)
 }
 
@@ -442,31 +443,31 @@ get_inits_hamstr <- function(stan_dat){
 #' #' @return
 #' #' @keywords internal
 #' GetK <- function(K_tot, target_K_per_lvl = 10){
-#' 
+#'
 #'   K_per_lvl <- seq(floor(target_K_per_lvl/2), 2*target_K_per_lvl, by = 1)
-#' 
+#'
 #'   K_per_lvl <- K_per_lvl[K_per_lvl>1]
-#' 
+#'
 #'   n_lvls <- unlist(
 #'     lapply(K_per_lvl,
 #'            function(x) seq(floor(log(K_tot, base = x)/2),
 #'                            ceiling(2*log(K_tot, base = x)))
 #'     )
 #'   )
-#' 
+#'
 #'   df <- expand.grid(K_per_lvl = unique(K_per_lvl), n_lvls = unique(n_lvls))
-#' 
+#'
 #'   df$K_fine <- with(df, K_per_lvl^n_lvls)
-#' 
+#'
 #'   idx <- which.min(abs(df$K_fine - K_tot))
-#' 
+#'
 #'   n_lvls <- df[idx, "n_lvls"]
 #'   K_per_lvl <- df[idx, "K_per_lvl"]
-#' 
+#'
 #'   K <- rep(K_per_lvl, n_lvls)
-#' 
+#'
 #'   message(cat(cumprod(K)))
-#' 
+#'
 #'   return(K)
 #' }
 
