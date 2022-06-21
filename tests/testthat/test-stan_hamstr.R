@@ -62,7 +62,7 @@ test_that("posterior and plotting functions work", {
   p3 <- plot(hamstr_fit_1, summarise = FALSE, n.iter = 5,
              plot_diagnostics = FALSE)
   
-  testthat::expect_equal(class(p1), c("gg", "ggplot", "ggarrange"))
+  testthat::expect_equal(class(p1), c("patchwork", "plot_filler", "gg", "ggplot"))
   testthat::expect_equal(class(p2), c("gg", "ggplot"))
   testthat::expect_equal(class(p3), c("gg", "ggplot"))
   
@@ -70,7 +70,7 @@ test_that("posterior and plotting functions work", {
   p_acc <- plot(hamstr_fit_1, "acc_rates", tau = 2)
   p_h_acc <- plot(hamstr_fit_1, "hier_acc_rates")
   
-  testthat::expect_equal(class(p_acc),  c("gg", "ggplot", "ggarrange"))
+  testthat::expect_equal(class(p_acc),  c("patchwork", "gg", "ggplot"))
   testthat::expect_equal(class(p_h_acc),  c("gg", "ggplot"))
  
   # plotting priors and posteriors
@@ -131,7 +131,7 @@ test_that("inflate_errors", {
   p2 <- hamstr:::plot_infl_prior_posterior(hamstr_fit_1)
   
   testthat::expect_equal(class(p1), c("gg", "ggplot"))
-  testthat::expect_equal(class(p2), c("gg", "ggplot", "ggarrange"))
+  testthat::expect_equal(class(p2), c("patchwork", "plot_filler", "gg", "ggplot"))
   
 })
 
@@ -157,10 +157,10 @@ test_that("displacement modelling works", {
   p_D <- plot(hamstr_fit_1, "D")
   
   
-  testthat::expect_equal(class(p1), c("gg", "ggplot", "ggarrange"))
+  testthat::expect_equal(class(p1), c("patchwork", "plot_filler", "gg", "ggplot"))
   testthat::expect_equal(class(p2), c("gg", "ggplot"))
   
-  testthat::expect_equal(class(p_acc),  c("gg", "ggplot", "ggarrange"))
+  testthat::expect_equal(class(p_acc),  c("patchwork", "gg", "ggplot"))
   
   testthat::expect_equal(class(p_h_acc),  c("gg", "ggplot"))
   testthat::expect_equal(class(p_D),  c("gg", "ggplot"))

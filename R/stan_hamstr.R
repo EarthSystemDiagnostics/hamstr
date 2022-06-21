@@ -151,8 +151,11 @@ hamstr <- function(depth, obs_age, obs_err,
   }
 
   stan_dat <- append(stan_dat, used_sampler_args)
+  
+  info <- list(version = packageVersion("hamstr"),
+               time = Sys.time())
 
-  out <- list(fit=fit, data=stan_dat)
+  out <- list(fit=fit, data=stan_dat, info = info)
 
   class(out) <- append("hamstr_fit", class(out))
 
