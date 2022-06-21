@@ -18,7 +18,7 @@ to fitting a hamstr model."><!-- mathjax --><script src="https://cdnjs.cloudflar
     
     <a class="navbar-brand me-2" href="../index.html">hamstr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,10 +89,16 @@ to fitting a hamstr model.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>depth</dt>
 <dd><p>depths of observed ages (age control points)</p></dd>
+
+
 <dt>obs_age</dt>
 <dd><p>observed age at each depth (age control points)</p></dd>
+
+
 <dt>obs_err</dt>
 <dd><p>error associated with each observed age (1 standard error)</p></dd>
+
+
 <dt>min_age</dt>
 <dd><p>the minimum age that the first modelled depth can be. Useful
 if extrapolating above the shallowest age control point to e.g. the
@@ -100,6 +106,8 @@ surface. So set min_age to the year the core was collected. E.g. for a core
 collected in 1990, with ages in years BP this would be -40 (present = 1950
 by convention). The default value is the current year in calendar age BP
 (e.g. -71 for 2021).</p></dd>
+
+
 <dt>K</dt>
 <dd><p>controls the number and structure of the hierarchically modelled
 down-core sections. It is specified as a vector, where each value indicates
@@ -112,10 +120,14 @@ for the median distance between age control points there are 16 sections.</p>
 <p>By default a "powers of 2" hierarchical structure is chosen and then
 adjusted to get close to the desired number of sections, e.g. for a desired
 100 sections the result is c(2, 2, 2, 2, 2, 3), giving 96 sections.</p></dd>
+
+
 <dt>top_depth, bottom_depth</dt>
 <dd><p>the top and bottom depths of the desired
 age-depth model. Must encompass the range of the data. Defaults to the
 shallowest and deepest data points.</p></dd>
+
+
 <dt>acc_mean_prior</dt>
 <dd><p>hyperparameter for the prior on the overall mean
 accumulation rate for the record. Units are obs_age / depth. E.g. if depth
@@ -124,9 +136,13 @@ overall mean accumulation rate is given a weak half-normal prior with mean
 = 0, SD = 10 * acc_mean_prior. If left blank, acc_mean_prior is set to the
 mean accumulation rate estimated by fitting a robust linear model using
 <a href="https://rdrr.io/pkg/MASS/man/rlm.html" class="external-link">rlm</a>.</p></dd>
+
+
 <dt>acc_shape</dt>
 <dd><p>hyperparameter for the shape of the priors on accumulation
 rates. Defaults to 1.5 - as for Bacon 2.2.</p></dd>
+
+
 <dt>mem_mean</dt>
 <dd><p>hyperparameter; a parameter of the Beta prior distribution on
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
@@ -135,9 +151,13 @@ thickness of the sediment sections in the highest resolution hierarchical
 layer, <em>delta_c</em>, which is determined by the total length age-models and
 the parameter vector <em>K</em>. mem_mean sets the mean value for <em>R</em> (defaults to
 0.5), while <em>w</em> = R^(delta_c)</p></dd>
+
+
 <dt>mem_strength</dt>
 <dd><p>hyperparameter: sets the strength of the memory prior,
 defaults to 10 as in Bacon &gt;= 2.5.1</p></dd>
+
+
 <dt>model_bioturbation</dt>
 <dd><p>defaults to FALSE. If TRUE, additional uncertainty
 in the observed ages due to sediment mixing (bioturbation) is modelled via
@@ -145,49 +165,72 @@ a latent variable process. The amount of additional uncertainty is a
 function of the mixing depth L, the sedimentation rate, and the number of
 particles (e.g. individual foraminifera) per measured date. See description
 for details.</p></dd>
+
+
 <dt>n_ind</dt>
 <dd><p>the number of individual particles (e.g. foraminifera) in each
 sample that was dated by e.g. radiocarbon dating. This can be a single
 value or a vector the same length as obs_age. Only used if
 model_bioturbation = TRUE.</p></dd>
+
+
 <dt>L_prior_mean</dt>
 <dd><p>mean of the gamma prior on mixing depth, defaults to 10.</p></dd>
+
+
 <dt>L_prior_shape, L_prior_sigma</dt>
 <dd><p>shape and standard deviation of the gamma
 prior on the mixing depth. Set only one of these, the other will be
 calculated. Defaults to shape = 2. If either the shape or sigma parameter
 is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 rather than being sampled.</p></dd>
+
+
 <dt>model_displacement</dt>
 <dd><p>model additional error on observed ages that does
 not scale with the number of individual particles in a sample, for example
 due to incomplete mixing.</p></dd>
+
+
 <dt>D_prior_scale</dt>
 <dd><p>scale of the half-normal prior on additional error on
 observed ages. The mean and standard deviation of a half-normal are equal
 to the scale. Units are those of the depth variable, e.g. cm.</p></dd>
+
+
 <dt>model_hiatus</dt>
 <dd><p>optionally model a hiatus.</p></dd>
+
+
 <dt>H_top, H_bottom</dt>
 <dd><p>limits to the location of a hiatus. By default these
 are set to the top and bottom data points but can be set by the user</p></dd>
+
+
 <dt>sample_posterior</dt>
 <dd><p>if set to FALSE, hamstr skips sampling the model and
 returns only the data, model structure and prior parameters so that data
 and prior distributions can be plotted and checked prior to running a
 model. Defaults to TRUE</p></dd>
+
+
 <dt>hamstr_control</dt>
 <dd><p>additional arguments to hamstr useful for debugging or
 development. See <code><a href="hamstr_control.html">hamstr_control</a></code> for details.</p></dd>
+
+
 <dt>stan_sampler_args</dt>
 <dd><p>additional arguments to <a href="https://mc-stan.org/rstan/reference/stanmodel-method-sampling.html" class="external-link">sampling</a> passed as a
 named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000
 iterations instead of the default 4 chains of 2000 iterations.
 See <code><a href="get_stan_sampler_args.html">get_stan_sampler_args</a></code> for details.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Returns an object of class "hamstr_fit", which is a list composed of
+    
+
+<p>Returns an object of class "hamstr_fit", which is a list composed of
 the output from the stan sampler .$fit, and the list of data passed to the
 sampler, .$data</p>
     </div>
@@ -215,7 +258,7 @@ sampler, .$data</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>

@@ -12,7 +12,7 @@ useful for debugging or development"><!-- mathjax --><script src="https://cdnjs.
     
     <a class="navbar-brand me-2" href="../index.html">hamstr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,34 +65,49 @@ useful for debugging or development</p>
     <dl><dt>scale_R</dt>
 <dd><p>logical: Scale AR1 coefficient by delta_c (as in Bacon) or
 not. Defaults to TRUE.</p></dd>
+
+
 <dt>nu</dt>
 <dd><p>degrees of freedom for the Student-t distributed error model.
 Defaults to 6, which is equivalent to the default parametrisation of
 t.a=3, t.b=4 in Bacon 2.2. Set to a high number to approximate a Gaussian
 error model, (nu = 100 should do it).</p></dd>
+
+
 <dt>scale_shape</dt>
 <dd><p>scale the shape parameter according to the number of
 hierarchical levels, to control the total variance of the alpha
 innovations. This defaults to TRUE as of hamstr verion 0.5.</p></dd>
+
+
 <dt>smooth_s</dt>
 <dd><p>smooth the sedimentation rate used to calculate additional
 error from bioturbation by taking a mean across nearby sections</p></dd>
+
+
 <dt>inflate_errors</dt>
 <dd><p>logical: If set to TRUE, observation errors are
 inflated so that data are consistent with a gamma AR1 age-depth model.
 This is an experimental feature under active development. Defaults to FALSE.</p></dd>
+
+
 <dt>infl_sigma_sd</dt>
 <dd><p>hyperparameter: sets the standard deviation of the
 half-normal prior on the mean of the additional error terms. Defaults to 10
 times the mean observation error in obs_err.</p></dd>
+
+
 <dt>infl_shape_shape, infl_shape_mean</dt>
 <dd><p>hyperparameters: parametrises the
 gamma prior on the shape of the distribution of the additional error terms.
 Default to 1, 1.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a named list</p>
+    
+
+<p>a named list</p>
     </div>
 
     <div class="section level2">
@@ -133,7 +148,7 @@ Default to 1, 1.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>

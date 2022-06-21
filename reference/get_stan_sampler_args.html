@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">hamstr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,14 +71,20 @@
     <dl><dt>chains</dt>
 <dd><p>A positive integer specifying the number of Markov chains. 
     The default is 4.</p></dd>
+
+
 <dt>cores</dt>
 <dd><p>Number of cores to use when executing the chains in parallel,
     which defaults to 1 but we recommend setting the <code>mc.cores</code> option 
     to be as many processors as the hardware and RAM allow (up to the 
     number of chains).</p></dd>
+
+
 <dt>iter</dt>
 <dd><p>A positive integer specifying the number of iterations for each 
     chain (including warmup). The default is 2000.</p></dd>
+
+
 <dt>warmup</dt>
 <dd><p>A positive integer specifying the number of warmup (aka burnin)
     iterations per chain. If step-size adaptation is on (which it is by default), 
@@ -86,9 +92,13 @@
     hence these warmup samples should not be used for inference). The number of 
     warmup iterations should be smaller than <code>iter</code> and the default is
     <code>iter/2</code>.</p></dd>
+
+
 <dt>thin</dt>
 <dd><p>A positive integer specifying the period for saving samples. 
     The default is 1, which is usually the recommended value.</p></dd>
+
+
 <dt>seed</dt>
 <dd><p>The seed for random number generation. The default is generated 
     from 1 to the maximum integer supported by <span style="R">R</span> on the machine. Even if 
@@ -98,10 +108,14 @@
     If <code>as.integer</code> produces <code>NA</code>, the seed is generated randomly. 
     The seed can also be specified as a character string of digits, such as
     <code>"12345"</code>, which is converted to integer.</p></dd>
+
+
 <dt>check_data</dt>
 <dd><p>Logical, defaulting to <code>TRUE</code>. If <code>TRUE</code> 
     the data will be preprocessed; otherwise not.
     See the <strong>Passing data to Stan</strong> section in <code><a href="https://mc-stan.org/rstan/reference/stan.html" class="external-link">stan</a></code>.</p></dd>
+
+
 <dt>sample_file</dt>
 <dd><p>An optional character string providing the name of a file.
     If specified the draws for <em>all</em> parameters and other saved quantities
@@ -109,6 +123,8 @@
     When the folder specified is not writable, <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> is used. 
     When there are multiple chains, an underscore and chain number are appended
     to the file name prior to the <code>.csv</code> extension.</p></dd>
+
+
 <dt>diagnostic_file</dt>
 <dd><p>An optional character string providing the name of a file.
     If specified the diagnostics data for <em>all</em> parameters will be written
@@ -116,30 +132,42 @@
     is not writable, <code><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir()</a></code> is used. When there are multiple chains, 
     an underscore and chain number are appended to the file name prior to the
     <code>.csv</code> extension.</p></dd>
+
+
 <dt>verbose</dt>
 <dd><p><code>TRUE</code> or <code>FALSE</code>: flag indicating whether 
     to print intermediate output from Stan on the console, which might
     be helpful for model debugging.</p></dd>
+
+
 <dt>algorithm</dt>
 <dd><p>One of sampling algorithms that are implemented in Stan. 
     Current options are <code>"NUTS"</code> (No-U-Turn sampler, Hoffman and Gelman 2011, Betancourt 2017), 
     <code>"HMC"</code> (static HMC), or <code>"Fixed_param"</code>. The default and 
     preferred algorithm is <code>"NUTS"</code>.</p></dd>
+
+
 <dt>control</dt>
 <dd><p>A named <code>list</code> of parameters to control the sampler's
     behavior. See the details in the documentation for the <code>control</code> argument
     in <code><a href="https://mc-stan.org/rstan/reference/stan.html" class="external-link">stan</a></code>.</p></dd>
+
+
 <dt>include</dt>
 <dd><p>Logical scalar defaulting to <code>TRUE</code> indicating
     whether to include or exclude the parameters given by the 
     <code>pars</code> argument. If <code>FALSE</code>, only entire multidimensional
     parameters can be excluded, rather than particular elements of them.</p></dd>
+
+
 <dt>open_progress</dt>
 <dd><p>Logical scalar that only takes effect if 
     <code>cores &gt; 1</code> but is recommended to be <code>TRUE</code> in interactive
     use so that the progress of the chains will be redirected to a file
     that is automatically opened for inspection. For very short runs, the
     user might prefer <code>FALSE</code>.</p></dd>
+
+
 <dt>show_messages</dt>
 <dd><p>Either a logical scalar (defaulting to <code>TRUE</code>)
     indicating whether to print the summary of Informational Messages to
@@ -147,14 +175,19 @@
     where the summary is stored. Setting to <code>FALSE</code> is not recommended
     unless you are very sure that the model is correct up to numerical 
     error.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Additional arguments can be <code>chain_id</code>, <code>init_r</code>, 
     <code>test_grad</code>, <code>append_samples</code>, <code>refresh</code>,
     <code>enable_random_init</code>. See the documentation in <code><a href="https://mc-stan.org/rstan/reference/stan.html" class="external-link">stan</a></code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a named list</p>
+    
+
+<p>a named list</p>
     </div>
 
     <div class="section level2">
@@ -176,7 +209,7 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $seed</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 450598855</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 515227940</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $check_data</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
@@ -216,7 +249,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>
