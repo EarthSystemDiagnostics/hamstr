@@ -125,7 +125,9 @@ alpha_indices <- function(K){
 #' @keywords internal
 #'
 #' @examples
+#' \dontrun{
 #' gamma_sigma_shape(mean = 10, sigma = 2)
+#' }
 gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
 
   if (is.null(mean) & is.null(mode)) stop("One of either the mean or mode must be specified")

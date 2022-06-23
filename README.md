@@ -38,7 +38,6 @@ package.
 ``` r
 library(hamstr)
 library(rstan)
-library(tidyverse)
 
 set.seed(20200827)
 ```
@@ -129,7 +128,7 @@ Additionally, plotting of the diagnostic plots can be switched off.
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.svg" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 #### Mean accumulation rate
 

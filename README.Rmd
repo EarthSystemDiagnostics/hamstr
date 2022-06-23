@@ -51,7 +51,6 @@ Examples using the example core "MSB2K" from the [rbacon](https://cran.r-project
 ```{r setup, message=FALSE}
 library(hamstr)
 library(rstan)
-library(tidyverse)
 
 set.seed(20200827)
 ```
@@ -109,7 +108,7 @@ plot(hamstr_fit_1)
 
 A "spaghetti" plot can be created instead of shaded regions. This shows a random sample of iterations from the posterior distribution (realisation of the age-depth model). This can be slow if lots of iterations are plotted, the default is to plot 1000 iterations. Additionally, plotting of the diagnostic plots can be switched off.
 
-```{r}
+```{r, dev = "png"}
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
 ```
 
