@@ -89,7 +89,6 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://earthsystemdiagnostics.github.io/hamstr/">hamstr</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://mc-stan.org/rstan/" class="external-link">rstan</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span>
 
 <span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">20200827</span><span class="op">)</span></code></pre></div>
 <div class="section level3">
@@ -131,7 +130,7 @@
 <p>A “spaghetti” plot can be created instead of shaded regions. This shows a random sample of iterations from the posterior distribution (realisation of the age-depth model). This can be slow if lots of iterations are plotted, the default is to plot 1000 iterations. Additionally, plotting of the diagnostic plots can be switched off.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, summarise <span class="op">=</span> <span class="cn">FALSE</span>, plot_diagnostics <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-8-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-unnamed-chunk-8-1.png" width="100%"></p>
 <div class="section level4">
 <h4 id="mean-accumulation-rate">Mean accumulation rate<a class="anchor" aria-label="anchor" href="#mean-accumulation-rate"></a>
 </h4>
