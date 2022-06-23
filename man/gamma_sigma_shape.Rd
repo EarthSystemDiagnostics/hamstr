@@ -22,8 +22,6 @@ a list
 Convert between parametrisations of the gamma distribution
 }
 \examples{
-\dontrun{
 gamma_sigma_shape(mean = 10, sigma = 2)
-}
 }
 \keyword{internal}
