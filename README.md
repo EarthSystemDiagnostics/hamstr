@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# hamstr: Hierarchical Accumulation Modelling with Stan and R <img src="man/figures/hex-hamstr.svg" align="right" width = 120px/>
+# hamstr: Hierarchical Accumulation Modelling with Stan and R <img src="man/figures/hex-hamstr.png" align="right" width = 120px/>
 
 <!-- badges: start -->
 

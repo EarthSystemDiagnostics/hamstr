@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# hamstr: Hierarchical Accumulation Modelling with Stan and R <img src="man/figures/hex-hamstr.svg" align="right" width = 120px/>
+# hamstr: Hierarchical Accumulation Modelling with Stan and R <img src="man/figures/hex-hamstr.png" align="right" width = 120px/>
 
 <!-- badges: start -->
   [![codecov](https://codecov.io/gh/EarthSystemDiagnostics/hamstr/branch/dev/graph/badge.svg?token=gFBWomcqwc)](https://codecov.io/gh/EarthSystemDiagnostics/hamstr)
