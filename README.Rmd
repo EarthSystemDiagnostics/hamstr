@@ -1,18 +1,9 @@
 ---
-title: "hamstr: Hierarchical Accumulation Modelling with Stan and R."
-author: Andrew M. Dolman
-date: "`r Sys.Date()`"
-output:
-  github_document:
-    html_preview: true
+output: github_document
 ---
 
--------------------------------
-<!-- badges: start -->
-  [![codecov](https://codecov.io/gh/EarthSystemDiagnostics/hamstr/branch/dev/graph/badge.svg?token=gFBWomcqwc)](https://codecov.io/gh/EarthSystemDiagnostics/hamstr)
-  [![test-coverage](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/test-coverage.yaml)
-[![R-CMD-check](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/R-CMD-check.yaml)
-<!-- badges: end -->
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -25,6 +16,14 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
+
+# hamstr: Hierarchical Accumulation Modelling with Stan and R <img src="man/figures/hex-hamstr.svg" align="right" width = 120px/>
+
+<!-- badges: start -->
+  [![codecov](https://codecov.io/gh/EarthSystemDiagnostics/hamstr/branch/dev/graph/badge.svg?token=gFBWomcqwc)](https://codecov.io/gh/EarthSystemDiagnostics/hamstr)
+  [![test-coverage](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/test-coverage.yaml)
+[![R-CMD-check](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EarthSystemDiagnostics/hamstr/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
 
 
 **hamstr** implements a *Bacon-like* (Blaauw and Christen, 2011) sediment accumulation or age-depth model with hierarchically structured multi-resolution sediment sections. The Bayesian model is implemented in the Stan probabilistic programming language (https://mc-stan.org/). 
