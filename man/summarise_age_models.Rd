@@ -4,7 +4,10 @@
 \alias{summarise_age_models}
 \title{Summarise Posterior Age Models}
 \usage{
-summarise_age_models(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+summarise_age_models(
+  hamstr_fit,
+  probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)
+)
 }
 \arguments{
 \item{hamstr_fit}{the object returned from \code{stan_hamstr}.}
@@ -23,6 +26,6 @@ fit <- hamstr(
   obs_err = MSB2K$error)
 
 summarise_age_models(fit)
-}
+}  
 }
 \keyword{internal}

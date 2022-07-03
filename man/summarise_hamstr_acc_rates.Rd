@@ -8,7 +8,7 @@ summarise_hamstr_acc_rates(
   hamstr_fit,
   tau = 0,
   kern = c("U", "G", "BH"),
-  probs = c(0.025, 0.25, 0.5, 0.75, 0.975)
+  probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)
 )
 }
 \arguments{

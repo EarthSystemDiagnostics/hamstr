@@ -4,7 +4,7 @@
 \alias{summarise_q}
 \title{Summarise to Quantiles and Moments}
 \usage{
-summarise_q(dat, var, probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+summarise_q(dat, var, probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975))
 }
 \arguments{
 \item{dat}{a dataframe or tibble}
