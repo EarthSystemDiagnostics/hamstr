@@ -109,7 +109,7 @@ interpolate_age_models <- function(hamstr_fit, depth) {
 #' @keywords internal
 summarise_q <- function(dat,
                         var,
-                        probs = c(0.025, 0.25, 0.5, 0.75, 0.975)){
+                        probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)){
   dat %>% 
     dplyr::summarise(mean = mean({{ var }}, na.rm = TRUE),
               sd = stats::sd({{ var }}, na.rm = TRUE),
@@ -127,7 +127,7 @@ summarise_q <- function(dat,
 #'
 #' @return data.frame / tibble
 #' @keywords internal
-summarise_new_ages <- function(new_ages, probs = c(0.025, 0.25, 0.5, 0.75, 0.975)){
+summarise_new_ages <- function(new_ages, probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)){
 
   new_ages_sum <- new_ages %>%
     dplyr::group_by(.data$depth) %>%
@@ -153,8 +153,8 @@ summarise_new_ages <- function(new_ages, probs = c(0.025, 0.25, 0.5, 0.75, 0.975
 #'   obs_err = MSB2K$error)
 #'
 #' summarise_age_models(fit)
-#' }
-summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0.975)){
+#' }  
+summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)){
 
   if (is_hamstr_interpolated_ages(hamstr_fit)){
     age_summary <- summarise_new_ages(hamstr_fit, probs = probs)
@@ -183,7 +183,7 @@ summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.25, 0.5, 0.75, 0
 summarise_hamstr_parameters <- function(object,
                                         pars = c("alpha[1]", "R", "w", "L", "D",
                                                  "H_depth", "H_length"),
-                                        probs = c(0.025, 0.25, 0.5, 0.75, 0.975)) {
+                                        probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)) {
   rstan::summary(object$fit,
                  pars = pars, probs = probs)$summary %>%
     dplyr::as_tibble(rownames = "Parameter") %>%
@@ -257,7 +257,7 @@ predict.hamstr_fit <- function(object,
 #' @export
 #' @method summary hamstr_fit
 summary.hamstr_fit <- function(object, type = c("age_models", "acc_rates", "pars"),
-                               #probs = c(0.025, 0.25, 0.5, 0.75, 0.975), 
+                               #probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975), 
                                #tau = 0, kern = c("U", "G", "BH"),
                                ...){
 
@@ -417,7 +417,7 @@ filter_hamstr_acc_rates <- function(hamstr_acc_rates, tau = 0, kern = c("U", "G"
 summarise_hamstr_acc_rates <- function(hamstr_fit,
                                        tau = 0,
                                        kern =  c("U", "G", "BH"),
-                                       probs = c(0.025, 0.25, 0.5, 0.75, 0.975)
+                                       probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)
                                        ){
 
   kern <- match.arg(kern)
