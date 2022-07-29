@@ -47,6 +47,13 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+
+      - name: Build binary packages
+        run: |
+          bin1 <- pkgbuild::build(".", dest_path = tempdir(), vignettes = FALSE, manual = FALSE, binary = TRUE)
+          dir.create("build_bin")
+          file.copy(c(bin1), "build_bin")
+        shell: Rscript {0}
           
       - name: Upload binary packages
         uses: actions/upload-artifact@v2
