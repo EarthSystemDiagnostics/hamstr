@@ -47,3 +47,9 @@ jobs:
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
+          
+      - name: Upload binary packages
+        uses: actions/upload-artifact@v2
+        with:
+          name: R-${{ matrix.config.r }}_${{ matrix.config.os }}
+          path: build_bin
