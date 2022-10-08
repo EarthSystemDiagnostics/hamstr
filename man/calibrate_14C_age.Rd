@@ -9,8 +9,9 @@ calibrate_14C_age(
   age.14C = "age.14C",
   age.14C.se = "age.14C.se",
   cal_curve = "intcal20",
-  return.type = "dat",
-  offset = NULL
+  offset = "offset",
+  offset.se = "offset.se",
+  return.type = "dat"
 )
 }
 \arguments{
@@ -24,11 +25,14 @@ calibrate_14C_age(
 \item{cal_curve}{Calibration curve, Default: 'intcal13', see
 \code{\link[Bchron]{BchronCalibrate}}}
 
+\item{offset}{Name of offset column, e.g. reservoir age. If column does not
+exist, no offset is applied.}
+
+\item{offset.se}{Name of offset uncertainty column, e.g. sigmaDelatR. If
+column does not exist, no offset uncertainty is applied.}
+
 \item{return.type}{Return the ammended dataframe or additionally the list of
 PDFs, Default: 'dat'}
-
-\item{offset}{Name of offset, e.g. reservoir age, column. If null no offset
-applied}
 }
 \value{
 A dataframe or list

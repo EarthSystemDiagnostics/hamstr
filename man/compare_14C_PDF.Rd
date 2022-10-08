@@ -7,6 +7,8 @@
 compare_14C_PDF(
   age.14C,
   age.14C.se,
+  offset = 0,
+  offset.se = 0,
   cal_curve = "intcal20",
   nu = 6,
   return.type = c("plot", "list")
