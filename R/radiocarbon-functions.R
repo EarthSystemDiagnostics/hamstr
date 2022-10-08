@@ -10,8 +10,10 @@
 #'   \code{\link[Bchron]{BchronCalibrate}}
 #' @param return.type Return the ammended dataframe or additionally the list of
 #'   PDFs, Default: 'dat'
-#' @param offset Name of offset, e.g. reservoir age, column. If null no offset
-#' applied
+#' @param offset Name of offset column, e.g. reservoir age. If column does not 
+#' exist, no offset is applied. 
+#' @param offset.se Name of offset uncertainty column, e.g. sigmaDelatR. If
+#'  column does not exist, no offset uncertainty is applied.
 #' @return A dataframe or list
 #' @details A wrapper for Bchron::Bchroncalibrate
 #' @examples
@@ -43,8 +45,9 @@
 calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               age.14C.se = "age.14C.se",
                               cal_curve = "intcal20",
-                              #allowOutside = FALSE,
-                              return.type = "dat", offset = NULL){
+                              offset = "offset", offset.se = "offset.se",
+                              return.type = "dat"
+                              ){
 
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
   cal_curve <-
@@ -53,18 +56,28 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
                           "intcal13", "marine13", "shcal13",
                           "normal"))
 
-  if (is.null(offset)){
+  if (is.null(dat[[offset]])){
     dat$offset <- 0
   } else{
     dat$offset <- dat[[offset]]
   }
+  
+  if (is.null(dat[[offset.se]])){
+    dat$offset.se <- 0
+  } else{
+    dat$offset.se <- dat[[offset.se]]
+  }
+
 
   cal.ages <- lapply(1:nrow(dat), function(x) {
     tryCatch(Bchron::BchronCalibrate(
       ages = dat[[age.14C]][x] + dat[["offset"]][x],
-      ageSds = dat[[age.14C.se]][x],
+      
+      # add uncertainty in offeset (e.g sigmaDeltaR) to 14C uncertainty
+      ageSds = sqrt((dat[[age.14C.se]][x])^2 + (dat[["offset.se"]][x])^2),
+      #ageSds = dat[[age.14C.se]][x],
+      
       calCurves = cal_curve,
-      #allowOutside = allowOutside,
       ids = x),
       error = function(i){
         cat(strsplit(as.character(i), " : ", fixed = TRUE)[[1]][2])
@@ -198,6 +211,7 @@ SummariseEmpiricalPDF <- function(x, p){
 #' compare_14C_PDF(age.14C = c(1000, 4000), age.14C.se = c(100, 150),
 #'  cal_curve = "intcal20", return.type = "plot")
 compare_14C_PDF <- function(age.14C, age.14C.se,
+                            offset = 0, offset.se = 0,
                             cal_curve = "intcal20", nu = 6,
                             return.type = c("plot", "list")){
 
@@ -208,7 +222,9 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
   stopifnot(length(age.14C) == length(age.14C.se))
 
   cal.dat <- data.frame(age.14C = round(age.14C),
-                        age.14C.se = round(age.14C.se))
+                        age.14C.se = round(age.14C.se),
+                        offset = offset,
+                        offset.se = offset.se)
 
   return.type <- match.arg(return.type, choices = c("plot", "list"))
 
@@ -220,7 +236,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
 
   calib <- calibrate_14C_age(cal.dat,
                              return.type = "list",
-                             offset = NULL, cal_curve = cal_curve)
+                             cal_curve = cal_curve)
 
   # The summarised calendar ages are appended to the input data
   C14 <- calib$dat

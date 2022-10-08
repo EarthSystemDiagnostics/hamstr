@@ -178,10 +178,50 @@ test_that("displacement modelling works", {
   
 })
 
+## radiocarbon functions ------
+
+testthat::test_that("calibrate_14C_age", {
+  
+
+  dat <- data.frame(age.14C = c(2000, 20000),
+                    age.14C.se = c(100, 200))
+  
+  
+  cal_ages <- calibrate_14C_age(dat)
+  
+  testthat::expect_equal(class(cal_ages), c("data.frame"))
+  
+  cal_ages.lst <- calibrate_14C_age(dat, return.type = "list")
+  testthat::expect_equal(class(cal_ages.lst), c("list"))
+  
+  
+  dat2 <- data.frame(age.14C = c(2000, 20000),
+                    age.14C.se = c(100, 200),
+                    offset = c(100, 300))
+  
+  cal_ages_2 <- calibrate_14C_age(dat2)
+ 
+  testthat::expect_equal(cal_ages_2$age.14C.cal - cal_ages$age.14C.cal,
+                         c(133, 361))
+  
+  
+  dat3 <- data.frame(age.14C = c(2000, 20000),
+                     age.14C.se = c(100, 200),
+                     offset = c(100, 300), offset.se = c(100, 200))
+  
+  cal_ages_3 <- calibrate_14C_age(dat3)
+  
+  testthat::expect_true(all(cal_ages_3$age.14C.cal.se - cal_ages_2$age.14C.cal.se > 0))
+  
+})
+
 
 testthat::test_that("compare_14C_PDF", {
   
   p_14C_PDF <- compare_14C_PDF(c(1000, 10000), c(20, 50))
   testthat::expect_equal(class(p_14C_PDF), c("gg", "ggplot"))
+  
+  p_14C_PDF2 <- compare_14C_PDF(c(1000, 10000), c(20, 50), offset = c(50, 1000), offset.se = c(100, 600))
+  testthat::expect_equal(class(p_14C_PDF2), c("gg", "ggplot"))
   
 })
