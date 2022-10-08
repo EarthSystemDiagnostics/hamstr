@@ -199,6 +199,8 @@ SummariseEmpiricalPDF <- function(x, p){
 #'   radiocarbon dates with the t-distribution approximations use by hamstr
 #' @param age.14C vector of radiocarbon dates in years BP
 #' @param age.14C.se vector of radiocarbon date uncertainties
+#' @param offset vector of offsets, e.g. reservoir ages. 
+#' @param offset.se vector of offset uncertainties, e.g. sigmaDelatR.
 #' @param cal_curve calibration curve
 #' @param nu degrees of freedom of the t-distribution approximation, default in
 #'   hamstr is 6

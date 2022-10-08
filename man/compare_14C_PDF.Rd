@@ -19,6 +19,10 @@ compare_14C_PDF(
 
 \item{age.14C.se}{vector of radiocarbon date uncertainties}
 
+\item{offset}{vector of offsets, e.g. reservoir ages.}
+
+\item{offset.se}{vector of offset uncertainties, e.g. sigmaDelatR.}
+
 \item{cal_curve}{calibration curve}
 
 \item{nu}{degrees of freedom of the t-distribution approximation, default in
