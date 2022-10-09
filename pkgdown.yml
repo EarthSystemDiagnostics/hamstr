@@ -1,8 +1,8 @@
 pandoc: 2.14.2
-pkgdown: 2.0.4
+pkgdown: 2.0.6
 pkgdown_sha: ~
 articles: {}
-last_built: 2022-06-23T09:49Z
+last_built: 2022-10-09T15:36Z
 urls:
   reference: https://earthsystemdiagnostics.github.io/hamstr/reference
   article: https://earthsystemdiagnostics.github.io/hamstr/articles
