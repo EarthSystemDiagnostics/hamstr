@@ -1,3 +1,9 @@
+# hamstr 0.7.2
+
+* 1 sigma quantiles now included in summaries
+* calibration function can handle offset uncertainties (e.g. reservoir age uncertainty)
+* Hamstr logo added to Readme
+
 # hamstr 0.7.1
 
 * patchwork used instead of ggpubr to reduce dependencies
