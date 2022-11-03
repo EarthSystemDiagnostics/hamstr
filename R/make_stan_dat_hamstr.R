@@ -344,9 +344,16 @@ make_stan_dat_hamstr <- function(...) {
 
     #l$K_idx <- l$lvl - 1
 
-    l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
-    l$I <- nrow(l$smooth_i)
-
+    if (l$smooth_s == 1){
+      l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
+      l$I <- nrow(l$smooth_i)
+    } 
+    
+    else {
+      l$smooth_i <- rbind(rep(1, l$N))
+      l$I <- 1
+      }
+    
   return(l)
 }
 
