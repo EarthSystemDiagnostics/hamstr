@@ -293,8 +293,8 @@ make_stan_dat_hamstr <- function(...) {
 
       # set resolution so that there are only 16
       # sections between the median spaced 2 data points
-      min.d.depth <- stats::median(diff(sort(unique(l$depth))))
-      K_fine_2 <- round(16 * K_fine_1 / min.d.depth )
+      median.d.depth <- stats::median(diff(sort(unique(l$depth))))
+      K_fine_2 <- round(16 * K_fine_1 / median.d.depth )
 
       K_fine <- min(c(K_fine_1, K_fine_2))
 
