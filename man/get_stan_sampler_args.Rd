@@ -18,8 +18,8 @@ get_stan_sampler_args(
   algorithm = c("NUTS", "HMC", "Fixed_param"),
   control = NULL,
   include = TRUE,
-  open_progress = interactive() && !isatty(stdout()) &&
-    !identical(Sys.getenv("RSTUDIO"), "1"),
+  open_progress = interactive() && !isatty(stdout()) && !identical(Sys.getenv("RSTUDIO"),
+    "1"),
   show_messages = TRUE,
   ...
 )
