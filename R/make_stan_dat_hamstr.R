@@ -388,18 +388,37 @@ get_smooth_i <- function(d, w){
 #'
 #' @return a list of boundaries for the modelled sections
 #' @keywords internal
-hierarchical_depths <- function(stan_dat){
-  d_range <- diff(range(stan_dat$modelled_depths))
-  min_d <- min(stan_dat$modelled_depths)
+hierarchical_depths <- function(stan_dat) {
+  
+  # make backward compatible with branching hamstr
+  if (is.null(stan_dat$brks)) {
+    get_brks <- function(stan_dat) {
+      d_range <- diff(range(stan_dat$modelled_depths))
+      min_d <- min(stan_dat$modelled_depths)
 
-  delta_d <- d_range / stan_dat$nK
+      delta_d <- d_range / stan_dat$nK
 
-  lapply(stan_dat$nK[-1], function(x) {
-    delta_d <- d_range / x
-    c(min_d, delta_d * 1:x + min_d)
-  })
-}
+      lapply(stan_dat$nK[-1], function(x) {
+        delta_d <- d_range / x
 
+        c(min_d, delta_d * 1:x + min_d)
+      })
+    }
+
+    stan_dat$brks <- get_brks(stan_dat)
+    return(stan_dat$brks)
+  }
+
+  lapply(stan_dat$brks, function(x) {
+      rng <- stan_dat$bottom_depth - stan_dat$top_depth
+      
+      tcks <- x * rng + stan_dat$top_depth
+      
+      tcks[tcks <= stan_dat$bottom_depth &
+             tcks >= stan_dat$top_depth]
+      
+    })
+  }
 
 #' Create Random Initial Values for the hamstr Stan Model
 #'

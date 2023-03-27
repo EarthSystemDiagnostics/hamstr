@@ -2,7 +2,36 @@
 % Please edit documentation in R/hamstr_prime.R
 \name{make_stan_dat_hamstr_prime}
 \alias{make_stan_dat_hamstr_prime}
-\title{Make the data object required by the Stan sampler}
+\title{#' Get Nearest Primes to Geometric Series
+#'
+#' @param m Terminal number
+#' @param f Approximate ratio of series
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' GetNextMultiPrimes(100, 3)
+GetNextMultiPrimes <- function(m, f = 2){
+x <- 1
+np <- 1
+
+while(np < m){
+np <- as.numeric(gmp::nextprime(f*tail(x, 1)-1))
+x <- append(x, np)
+}
+
+x <- x\link{x <= m}
+
+if (max(x) < 0.5*m){
+x <- append(x, m)
+}else{
+x <- append(head(x, -1), m)
+}
+
+return(x)
+}
+Make the data object required by the Stan sampler}
 \usage{
 make_stan_dat_hamstr_prime(...)
 }
@@ -13,6 +42,35 @@ make_stan_dat_hamstr_prime(...)
 a list of data and parameters to be passed as data to the Stan sampler
 }
 \description{
+#' Get Nearest Primes to Geometric Series
+#'
+#' @param m Terminal number
+#' @param f Approximate ratio of series
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' GetNextMultiPrimes(100, 3)
+GetNextMultiPrimes <- function(m, f = 2){
+x <- 1
+np <- 1
+
+while(np < m){
+np <- as.numeric(gmp::nextprime(f*tail(x, 1)-1))
+x <- append(x, np)
+}
+
+x <- x\link{x <= m}
+
+if (max(x) < 0.5*m){
+x <- append(x, m)
+}else{
+x <- append(head(x, -1), m)
+}
+
+return(x)
+}
 Make the data object required by the Stan sampler
 }
 \keyword{internal}

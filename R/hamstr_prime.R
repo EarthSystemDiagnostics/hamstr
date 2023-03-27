@@ -2,6 +2,8 @@
 #library(tidyverse)
 
 
+
+
 GetWts <- function(a, b){
   
   intvls <- lapply(seq_along(b)[-1], function(i) {
@@ -23,10 +25,19 @@ GetWts <- function(a, b){
 }
 
 
-GetIndices <- function(nK) {
-  lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
-
-  brks <- (lapply(nK, function(x) seq(0, 1, length.out = x + 1)))
+GetIndices <- function(nK = NULL, brks = NULL) {
+  
+  if (is.null(brks)){
+    
+    lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
+    brks <- (lapply(nK, function(x) seq(0, 1, length.out = x + 1)))
+  
+  }
+  
+  if (is.null(nK)){
+    nK <- sapply(brks, length)-1
+    lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
+  }
   
 
   # get the left hand parent
@@ -72,6 +83,9 @@ GetIndices <- function(nK) {
   
  # collapse to single matrix
  parent <- do.call(cbind, parent)
+ 
+ multi_parent_adj <- mean(apply(parent, 2, function(x) abs(diff(x))+1))
+ 
  wts <- do.call(cbind, wts)
  
  # make weights add to 1
@@ -80,6 +94,7 @@ GetIndices <- function(nK) {
   list(nK = nK,
        alpha_idx = 1:sum(nK),
        lvl = lvl, brks = brks,
+       multi_parent_adj = multi_parent_adj,
        parent1 = as.numeric(parent[1,]),
        parent2 = as.numeric(parent[2,]),
        wts1 = as.numeric(wts[1,]),
@@ -87,53 +102,99 @@ GetIndices <- function(nK) {
        )
 }
 
+# GetBrks <- function(nK){
+#   
+#   
+#     brks <- lapply(nK, function(x) {
+#       seq(0, 1, length.out = x + 1)
+#     })
+# 
+#   return(brks)
+# }
+
+#p <- GetIndices(nK = c(1,3, 5))
+
+
+
+GetBrksHalfOffset <- function(K_fine, K_factor = 2){
+    
+    db <- 1 / K_fine
+    
+    brks <- list(
+      seq(0, 1, by = db)
+    )
+    
+    nb <- length(brks[[1]])
+    newbrks <- brks[[1]]
+    
+    while (nb > 3){
+      
+      strt <- min(brks[[length(brks)]])
+      end <- max(brks[[length(brks)]])
+      newbrks <- seq(strt-db/2, end+(db*K_factor), by = db*K_factor)
+      
+      newbrks <- unique(newbrks)
+      brks <- c(brks, list(newbrks))
+      
+      db <- K_factor * db
+      nb <- length(newbrks)
+    }
+    
+    brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
+    brks <- rev(brks)
+    
+    
+  return(brks)
+}
+
+#debugonce(GetIndices)
+
+#debugonce(GetBrks)
+
+#brks <- GetBrksHalfOffset(K_fine = c(5), K_factor = 2)
+#brks <- rev(brks)
+
+#GetIndices(brks = brks)
+#GetIndices(nK = c(2,3,5))
+
+
 # #debugonce(GetIndices)
 # nK <- c(1, 3,5)
 # GetIndices(nK)
 
 
-# hierarchical_depths <- function(stan_dat){
-#   d_range <- diff(range(stan_dat$modelled_depths))
-#   min_d <- min(stan_dat$modelled_depths)
-# 
-#   delta_d <- d_range / stan_dat$nK
-# 
-#   lapply(stan_dat$nK[-1], function(x) {
-#     delta_d <- d_range / x
-#     c(min_d, delta_d * 1:x + min_d)
-#   })
-# }
 
+#hierarchical_depths2(fit_HP2$data)
 
-#' Get Nearest Primes to Geometric Series
-#'
-#' @param m Terminal number
-#' @param f Approximate ratio of series
-#'
-#' @return
-#' @export
-#'
-#' @examples
-#' GetNextMultiPrimes(100, 3)
-GetNextMultiPrimes <- function(m, f = 2){
-  x <- 1
-  np <- 1
-  
-  while(np < m){
-    np <- as.numeric(gmp::nextprime(f*tail(x, 1)-1))
-    x <- append(x, np)
-  }
-  
-  x <- x[x <= m]
-  
-  if (max(x) < 0.5*m){
-   x <- append(x, m)
-  }else{
-    x <- append(head(x, -1), m)
-  }
-  
-  return(x)
-}
+#' #' Get Nearest Primes to Geometric Series
+#' #'
+#' #' @param m Terminal number
+#' #' @param f Approximate ratio of series
+#' #'
+#' #' @return
+#' #' @export
+#' #'
+#' #' @examples
+#' #' GetNextMultiPrimes(100, 3)
+#' GetNextMultiPrimes <- function(m, f = 2){
+#'   x <- 1
+#'   np <- 1
+#'   
+#'   while(np < m){
+#'     np <- as.numeric(gmp::nextprime(f*tail(x, 1)-1))
+#'     x <- append(x, np)
+#'   }
+#'   
+#'   x <- x[x <= m]
+#'   
+#'   if (max(x) < 0.5*m){
+#'    x <- append(x, m)
+#'   }else{
+#'     x <- append(head(x, -1), m)
+#'   }
+#'   
+#'   return(x)
+#' }
 
 
 #' Make the data object required by the Stan sampler
@@ -247,7 +308,7 @@ make_stan_dat_hamstr_prime <- function(...) {
   if(l$bottom_depth < max(l$depth)) stop("bottom_depth must be deeper or equal to the deepest data point")
   
   
-  if (is.null(l$nK)){
+  if (is.null(l$K_fine)){
     
     K_fine_1 <- l$bottom_depth - l$top_depth
     
@@ -261,8 +322,7 @@ make_stan_dat_hamstr_prime <- function(...) {
     # prevent default values higher than 900
     if (K_fine > 900) K_fine <- 900
     
-    nK <- GetNextMultiPrimes(K_fine, 3)
-    #l$K <- default_K(K_fine)
+    l$K_fine <- K_fine
   }
   
   
@@ -271,8 +331,9 @@ make_stan_dat_hamstr_prime <- function(...) {
   
   stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))#, l$N == length(l$n_ind))
   
+  brks <- GetBrksHalfOffset(K_fine = l$K_fine, K_factor = l$K_factor)
   
-  alpha_idx <- GetIndices(l$nK)
+  alpha_idx <- GetIndices(brks = brks)
   
   Shannon <- function(x){
     
@@ -323,8 +384,7 @@ make_stan_dat_hamstr_prime <- function(...) {
   if (is.null(l$H_top)) l$H_top = l$top_depth
   if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
   
-  #l$K_idx <- l$lvl - 1
-  
+
   if (l$smooth_s == 1){
     l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
     l$I <- nrow(l$smooth_i)
@@ -356,20 +416,9 @@ make_stan_dat_hamstr_prime <- function(...) {
 #' @param top_depth,bottom_depth the top and bottom depths of the desired
 #'   age-depth model. Must encompass the range of the data. Defaults to the
 #'   shallowest and deepest data points.
-#' @param K controls the number and structure of the hierarchically modelled
-#'   down-core sections. It is specified as a vector, where each value indicates
-#'   the number of new child sections for each parent section, e.g., c(10, 10,
-#'   10) would specify 10 sections at the coarsest level, with 10 new sections
-#'   at next finer level, giving a total of 1000 sections at the finest
-#'   resolution.
-#'
-#'   By default, the total number of sections at the finest level is set so that
-#'   for the median distance between age control points there are 16 sections.
-#'
-#'   By default a "powers of 2" hierarchical structure is chosen and then
-#'   adjusted to get close to the desired number of sections, e.g. for a desired
-#'   100 sections the result is c(2, 2, 2, 2, 2, 3), giving 96 sections.
-#'
+#' @param K_fine the number of sections at the highest resolution of the model.
+#' @param K_factor the rate at which the thickness of the sections grows between
+#' subsequent levels. Defaults to 2.
 #' @param acc_mean_prior hyperparameter for the prior on the overall mean
 #'   accumulation rate for the record. Units are obs_age / depth. E.g. if depth
 #'   is in cm and age in years then the accumulation rate is in years/cm. The
@@ -441,7 +490,7 @@ make_stan_dat_hamstr_prime <- function(...) {
 #' }
 hamstr_prime <- function(depth, obs_age, obs_err,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
-                   nK = NULL,
+                   K_fine = NULL, K_factor = 2,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
                    acc_shape = 1.5,
@@ -461,10 +510,14 @@ hamstr_prime <- function(depth, obs_age, obs_err,
 ){
   
   
-  
+  if (is.null(K_fine)== FALSE){
+     if (K_fine < 2) stop("A minimum of 2 sections are required")
+  } 
+  if (K_factor < 2) stop("K_factor must be 2 or greater")
+ 
   stan_dat <- make_stan_dat_hamstr_prime()
   
-  
+   
   used_sampler_args <- do.call(get_stan_sampler_args, stan_sampler_args)
   
   

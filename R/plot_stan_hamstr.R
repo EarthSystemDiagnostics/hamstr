@@ -991,11 +991,11 @@ add_subdivisions <- function(gg, hamstr_fit) {
 
   tick_dat <- hierarchical_depths(hamstr_fit$data)
 
-  for (x in seq_along(tick_dat)) {
+  for (i in seq_along(tick_dat)) {
 
-    df <- data.frame(x = tick_dat[[x]])
+    df <- data.frame(x = tick_dat[[i]])
 
-    lnth <- length(tick_dat) - (x - 1)
+    lnth <- length(tick_dat) - (i - 1) #i - 1/(i^2)
 
     gg <- gg + ggplot2::geom_rug(
       data = df,

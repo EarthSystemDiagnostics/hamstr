@@ -32,6 +32,7 @@ data{
   
   // shape of the gamma distributions
   real<lower = 0> acc_shape;
+  real<lower = 0> multi_parent_adj;
   
   // scale the shape parameter to control the total variance of the alpha
   // innovations for the number of hierarchical levels
@@ -106,7 +107,7 @@ transformed data{
   // scale shape
   real<lower = 1> acc_shape_adj;
   if (scale_shape == 1){
-    acc_shape_adj = acc_shape * n_lvls;
+    acc_shape_adj = acc_shape * n_lvls / multi_parent_adj;
   } else{
     acc_shape_adj = acc_shape;
   }
