@@ -184,14 +184,14 @@ transformed parameters{
   
   vector<lower = 0>[model_displacement ? N : 0] disp_yrs;
   
-  vector[K_tot-1] parent_mean1;
-  vector[K_tot-1] parent_mean2;
+  //vector[K_tot-1] parent_mean1;
+  //vector[K_tot-1] parent_mean2;
   vector[K_tot-1] parent_mean;
   
-  parent_mean1 = alpha[parent1] .* wts1;
-  parent_mean2 = alpha[parent2] .* wts2;
+  //parent_mean1 = alpha[parent1] .* wts1;
+ // parent_mean2 = alpha[parent2] .* wts2;
   
-  parent_mean = parent_mean1 + parent_mean2;
+  parent_mean = alpha[parent1] .* wts1 + alpha[parent2] .* wts2;
   
   if (scale_R == 1){
     w = R^(delta_c);
