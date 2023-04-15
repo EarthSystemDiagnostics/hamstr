@@ -92,6 +92,7 @@ GetIndices <- function(nK = NULL, brks = NULL) {
  wts <- apply(wts, MARGIN = 2, function(x) x / sum(x)) 
   
   list(nK = nK,
+       #K = sapply(brks, length),
        alpha_idx = 1:sum(nK),
        lvl = lvl, brks = brks,
        multi_parent_adj = multi_parent_adj,
@@ -131,8 +132,10 @@ GetBrksHalfOffset <- function(K_fine, K_factor = 2){
       
       strt <- min(brks[[length(brks)]])
       end <- max(brks[[length(brks)]])
-      newbrks <- seq(strt-db/2, end+(db*K_factor), by = db*K_factor)
       
+      newbrks <- seq(strt-db/2, end+(db*K_factor),
+                       by = db*K_factor)
+         
       newbrks <- unique(newbrks)
       brks <- c(brks, list(newbrks))
       
@@ -142,8 +145,7 @@ GetBrksHalfOffset <- function(K_fine, K_factor = 2){
     
     brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
     brks <- rev(brks)
-    
-    
+
   return(brks)
 }
 
@@ -151,7 +153,7 @@ GetBrksHalfOffset <- function(K_fine, K_factor = 2){
 
 #debugonce(GetBrks)
 
-#brks <- GetBrksHalfOffset(K_fine = c(5), K_factor = 2)
+#brks <- GetBrksHalfOffset(K_fine = c(100), K_factor = 2)
 #brks <- rev(brks)
 
 #GetIndices(brks = brks)
