@@ -103,57 +103,66 @@ GetIndices <- function(nK = NULL, brks = NULL) {
        )
 }
 
-# GetBrks <- function(nK){
-#   
-#   
-#     brks <- lapply(nK, function(x) {
-#       seq(0, 1, length.out = x + 1)
-#     })
-# 
-#   return(brks)
-# }
-
-#p <- GetIndices(nK = c(1,3, 5))
-
-
 
 GetBrksHalfOffset <- function(K_fine, K_factor = 2){
+  
+  db_fine <- 1 / K_fine
+  db <- db_fine
+  
+  brks <- list(
+    seq(0, 1, by = db)
+  )
+  
+  n_br <- length(brks[[1]])
+  n_sec <- n_br - 1
+  
+  newbrks <- brks[[1]]
+  
+  while (n_sec > 3){
     
-    db <- 1 / K_fine
+    strt <- min(brks[[length(brks)]])
+    end <- max(brks[[length(brks)]])
     
-    brks <- list(
-      seq(0, 1, by = db)
-    )
+    n_new <- ceiling((n_sec+1)/K_factor)
+     
+    # in units of old sections
+    l_new <- n_new * K_factor
+    l_old <- n_sec 
+   
+    d_new_old <- l_new - l_old
     
-    nb <- length(brks[[1]])
-    newbrks <- brks[[1]]
-    
-    while (nb > 3){
-      
-      strt <- min(brks[[length(brks)]])
-      end <- max(brks[[length(brks)]])
-      
-      newbrks <- seq(strt-db/2, end+(db*K_factor),
-                       by = db*K_factor)
-         
-      newbrks <- unique(newbrks)
-      brks <- c(brks, list(newbrks))
-      
-      db <- K_factor * db
-      nb <- length(newbrks)
+    if (d_new_old %% 2 == 0){
+      new_strt <- strt - db * (d_new_old-1)/ 2
+    } else {
+      new_strt <- strt - db * (d_new_old)/ 2
     }
     
-    brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
-    brks <- rev(brks)
-
+    
+    newbrks <- seq(new_strt, by = db*K_factor, length.out = n_new+1)
+    
+    #newbrks <- unique(newbrks)
+    brks <- c(brks, list(newbrks))
+    
+    db <- K_factor * db
+    n_br <- length(newbrks)
+    n_sec <- n_br -1
+   
+    #if (K_factor == n_sec){break} 
+   
+  }
+  
+  brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
+  brks <- rev(brks)
+  
   return(brks)
 }
 
-#debugonce(GetIndices)
-
-#debugonce(GetBrks)
-
-#brks <- GetBrksHalfOffset(K_fine = c(100), K_factor = 2)
+# #debugonce(GetIndices)
+# 
+# debugonce(GetBrksHalfOffset)
+# 
+#brks <- GetBrksHalfOffset(K_fine = c(99), K_factor = 2)
+#brks
 #brks <- rev(brks)
 
 #GetIndices(brks = brks)
@@ -328,30 +337,37 @@ make_stan_dat_hamstr_prime <- function(...) {
   }
   
   
+  if (is.null(l$K_factor)){
+    
+    l$K_factor <- get_K_factor(l$K_fine)
+    
+  }
+  
+  
   # Transformed arguments
   l$N <- length(l$depth)
   
-  stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))#, l$N == length(l$n_ind))
+  stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))
   
   brks <- GetBrksHalfOffset(K_fine = l$K_fine, K_factor = l$K_factor)
   
   alpha_idx <- GetIndices(brks = brks)
   
-  Shannon <- function(x){
-    
-    x <- x[x>0]
-    N = sum(x)
-    p = x/N
-    H = -sum(p*log(p))
-    H
-  }
-  
-  EffN <- function(x){
-    
-    exp(Shannon(x))
-    
-  }
-  
+  # Shannon <- function(x){
+  #   
+  #   x <- x[x>0]
+  #   N = sum(x)
+  #   p = x/N
+  #   H = -sum(p*log(p))
+  #   H
+  # }
+  # 
+  # EffN <- function(x){
+  #   
+  #   exp(Shannon(x))
+  #   
+  # }
+   
   
   #l$acc_shape <- l$acc_shape / shp_adj
   
@@ -420,7 +436,7 @@ make_stan_dat_hamstr_prime <- function(...) {
 #'   shallowest and deepest data points.
 #' @param K_fine the number of sections at the highest resolution of the model.
 #' @param K_factor the rate at which the thickness of the sections grows between
-#' subsequent levels. Defaults to 2.
+#' subsequent levels. 
 #' @param acc_mean_prior hyperparameter for the prior on the overall mean
 #'   accumulation rate for the record. Units are obs_age / depth. E.g. if depth
 #'   is in cm and age in years then the accumulation rate is in years/cm. The
@@ -492,7 +508,7 @@ make_stan_dat_hamstr_prime <- function(...) {
 #' }
 hamstr_prime <- function(depth, obs_age, obs_err,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
-                   K_fine = NULL, K_factor = 2,
+                   K_fine = NULL, K_factor = NULL,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
                    acc_shape = 1.5,
@@ -515,8 +531,12 @@ hamstr_prime <- function(depth, obs_age, obs_err,
   if (is.null(K_fine)== FALSE){
      if (K_fine < 2) stop("A minimum of 2 sections are required")
   } 
-  if (K_factor < 2) stop("K_factor must be 2 or greater")
- 
+  
+  if (is.null(K_factor)== FALSE){
+    if (K_factor < 2) stop("K_factor must be 2 or greater")
+    if (K_factor %% 1 > 1e-04) stop("K_factor must be an integer")
+  }
+  
   stan_dat <- make_stan_dat_hamstr_prime()
   
    

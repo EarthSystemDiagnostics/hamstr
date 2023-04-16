@@ -93,7 +93,7 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
 Age-depth (sediment accumulation) models are fit with the function `hamstr`. A vectors of depth, observed age and age uncertainty are passed as arguments to the function.
 
 ```{r}
-hamstr_fit_1 <- hamstr_prime(depth = MSB2K_cal$depth,
+hamstr_fit_1p <- hamstr_prime(depth = MSB2K_cal$depth,
                        obs_age = MSB2K_cal$age.14C.cal,
                        obs_err = MSB2K_cal$age.14C.cal.se, 
                        #sample_posterior = FALSE,
@@ -102,16 +102,17 @@ hamstr_fit_1 <- hamstr_prime(depth = MSB2K_cal$depth,
                        stan_sampler_args = list(seed = 1))
 ```
 
+
 The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.
 
 ```{r, fig.height=7}
-plot(hamstr_fit_1)
+plot(hamstr_fit_1p)
 ```
 
 A "spaghetti" plot can be created instead of shaded regions. This shows a random sample of iterations from the posterior distribution (realisation of the age-depth model). This can be slow if lots of iterations are plotted, the default is to plot 1000 iterations. Additionally, plotting of the diagnostic plots can be switched off.
 
 ```{r, dev = "png"}
-plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
+plot(hamstr_fit_1p, summarise = FALSE, plot_diagnostics = FALSE)
 ```
 
 
@@ -124,7 +125,7 @@ By default, **hamstr** uses robust linear regression (`MASS::rlm`) to estimate t
 This prior can be checked visually against the posterior. The posterior distribution should be much narrower than the weakly informative prior.
 
 ```{r}
-plot(hamstr_fit_1, type = "acc_mean_prior_post")
+plot(hamstr_fit_1p, type = "acc_mean_prior_post")
 ```
 
 
@@ -133,18 +134,17 @@ plot(hamstr_fit_1, type = "acc_mean_prior_post")
 Default parameter values for the shape of the gamma distributed accumulation rates `acc_shape = 1.5`, the memory mean `mem_mean = 0.5` and memory strength `mem_strength = 10`, are the same as for Bacon >= 2.5.1.
 
 
-
 ### Setting the thickness, number, and hierarchical structure of the discrete sections
 
 One of the more critical tuning parameters in the **Bacon** model is the parameter `thick`, which determines the thickness and number of discrete down-core sediment sections modelled. Finding a good or optimal value for a given core is often critical to getting a good age-depth model. Too few sections and the resulting age-model is very "blocky" and can miss changes in sedimentation rate; however, counter-intuitively, too many very thin sections can also often result in an age-model that "under-fits" the data - a straight line through the age-control points when a lower resolution model shows variation in accumulation rate. 
 
-The key structural difference between **Bacon** and **hamstr** models is that with **hamstr** the sediment core is modelled at multiple resolutions simultaneously with a hierarchical structure. This removes the need to trade-off smoothness and flexibility. 
+The key structural difference between **Bacon** and **hamstr** models is that with **hamstr** the sediment core is modelled at multiple resolutions simultaneously, with a hierarchical structure. This removes the need to trade-off smoothness and flexibility. The accumulation rates estimated for (parent) sections in low resolution levels act as priors for (child) sections in subsequent higher resolution levels. The hierarchical structure allows the model to adapt to low-frequency changes in the accumulation rate, that is changes between "regimes" of high or low accumulation that persist for long periods. 
 
-The parameter `K` controls the number and structure of the hierarchical sections. It is specified as a vector, where each value indicates the number of new child sections for each parent section at each finer hierarchical level. E.g. `c(10, 10)` would specify 10 sections at the coarsest level, with 10 new sections at the next finer level for each coarse section, giving a total of 100 sections at the highest / finest resolution level. `c(10, 10, 10)` would specify 1000 sections at the finest level and 3 hierarchical levels of 10, 100 and 1000 sections.
+As of **hamstr** version 0.8, subsequent hierarchical levels are offset from each other so that child sections can have priors from 2 parents, this smooths out the edge effects of the the breakpoints in the low resolution layers.
 
-The structure is hierarchical in the sense that the modelled accumulation rates for the parent sections act as priors for their child sections; specifically, the mean accumulation rate for a given parent is the mean of the gamma prior for its child sections. In turn, the overall mean accumulation rate for the whole core is itself a parameter estimated by the fitting process. The hierarchical structure of increasing resolution allows the model to adapt to low-frequency changes in the accumulation rate, that is changes between "regimes" of high or low accumulation that persist for long periods. 
+The parameter `K_fine` sets the number of sections in the final, highest resolution, age-depth model. `K_factor` controls how the number of sections changes between levels. A value of e.g. 2 for `K_factor` means that the number of sections approximately halves/doubles between hierarchical levels. 
 
-By default `K` is chosen so that the number of hierarchical levels, and the number of new child sections per level, are approximately equal, e.g. c(4, 4, 4, 4). The total number of sections at the finest level is set so that the resolution is 1 cm per section, up to a total length of 900 cm, above which the default remains 900 sections and a coarser resolution is used. This can be changed from the default via the parameter `K`.
+By default `K_factor` is chosen so that the number of hierarchical levels increases slowly with the value of `K_fine`. For example, with K_fine = 100, K_factor = 4 and the number of hierarchical levels is 5. With K_fine = 1000, K_factor = 5 and the number of hierarchical levels is 6. The number of hierarchical levels is approximately equal to the ratio between the number of sections in adjacent levels.
 
 For a given shape parameter `acc_shape`, increasing the number of modelled hierarchical levels increases the total variance in the accumulation rates at the highest / finest resolution level. From **hamstr** version 0.5.0 and onwards, the total variance is controlled by modifying the shape parameter according to the number of hierarchical levels. 
 
@@ -155,19 +155,19 @@ For a given shape parameter `acc_shape`, increasing the number of modelled hiera
 The fitted age models can be obtained with the `predict` and `summary` methods. *iter* is the iteration of the sampler, or "realisation" of the age model.
 
 ```{r}
-predict(hamstr_fit_1)
+predict(hamstr_fit_1p)
 ```
 
 `summary` returns the age model summarised over the realisations.
 
 ```{r}
-summary(hamstr_fit_1)
+summary(hamstr_fit_1p)
 ```
 
 The hierarchical structure of the sections makes it difficult to specify the exact depth resolution that you want for your resulting age-depth model. The `predict` method takes an additional argument `depth` to interpolate to a specific set of depths. The function returns NA for depths that are outside the modelled depths.
 
 ```{r}
-age.mods.interp <- predict(hamstr_fit_1, depth = seq(0, 100, by = 1))
+age.mods.interp <- predict(hamstr_fit_1p, depth = seq(0, 100, by = 1))
 ```
 
 These interpolated age models can summarised with the same function as the original fitted objects, but the n_eff and Rhat information is lost.
@@ -183,11 +183,11 @@ summary(age.mods.interp)
 The down-core accumulation rates are returned and plotted in both depth-per-time, and time-per-depth units. If the input data are in years and cm then the units will be cm/kyr and yrs/cm respectively. Note that the acc_mean parameter in both **hamstr** and Bacon is parametrised in terms of time per depth. 
 
 ```{r}
-plot(hamstr_fit_1, type = "acc_rates")
+plot(hamstr_fit_1p, type = "acc_rates")
 ```
 
 ```{r}
-summary(hamstr_fit_1, type = "acc_rates") 
+summary(hamstr_fit_1p, type = "acc_rates") 
 ```
 
 
@@ -201,7 +201,7 @@ Additional diagnostic plots are available. See ?plot.hamstr_fit for options.
 #### Plot modelled accumulation rates at each hierarchical level
 
 ```{r}
-plot(hamstr_fit_1, type = "hier_acc")
+plot(hamstr_fit_1p, type = "hier_acc")
 ```
 
 #### Plot memory prior and posterior
@@ -209,7 +209,7 @@ plot(hamstr_fit_1, type = "hier_acc")
 As for this example the highest resolution sections are approximately 1 cm thick, there is not much difference between R and w. 
 
 ```{r}
-plot(hamstr_fit_1, type = "mem")
+plot(hamstr_fit_1p, type = "mem")
 ```
 
 
@@ -224,15 +224,15 @@ Within the hamstr_fit object is an *rstan* object on which all the standard rsta
 For example:
 
 ```{r}
-rstan::check_divergences(hamstr_fit_1$fit)
+rstan::check_divergences(hamstr_fit_1p$fit)
 
-rstan::stan_rhat(hamstr_fit_1$fit)
+rstan::stan_rhat(hamstr_fit_1p$fit)
 ```
 
 The first `alpha` parameter is the overall mean accumulation rate.
 
 ```{r}
-rstan::traceplot(hamstr_fit_1$fit, par = c("alpha[1]"),
+rstan::traceplot(hamstr_fit_1p$fit, par = c("alpha[1]"),
                  inc_warmup = TRUE)
 ```
 

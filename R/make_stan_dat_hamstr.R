@@ -243,6 +243,23 @@ default_K <- function(K_fine){
 }
 
 
+get_K_factor <- function(K_fine){
+  
+  bar <- function(x, y){
+    abs(y - x^x)
+  }
+
+  ceiling(optimize(bar, c(1, 10), y = K_fine)$minimum)
+
+}
+
+# get_K_factor(10000)
+# 
+# sapply(GetBrksHalfOffset(1000, 5), length)
+# sapply(GetBrksHalfOffset(100000, 6), length)
+# sapply(GetBrksHalfOffset(100000, 5), length)
+
+
 #' Calculate number of parameters being estimated for a given hierarchical structure
 #'
 #' @param base Number of new sections per per section

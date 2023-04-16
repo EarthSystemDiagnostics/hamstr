@@ -44,7 +44,7 @@ plot.hamstr_fit <- function(x,
          age_models = plot_hamstr(x, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
          acc_rates = plot_hamstr_acc_rates(x, ...),
-         hier_acc_rates = plot_hierarchical_acc_rate(x),
+         hier_acc_rates = plot_hierarchical_acc_rate_prime(x),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(x),
          mem_prior_post = plot_memory_prior_posterior(x),
          L_prior_post = plot_L_prior_posterior(x),
@@ -143,7 +143,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
 
     # only plot if model has been sampled
     if (hamstr_fit$data$sample_posterior){
-     p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
+     p.acc <- plot_hierarchical_acc_rate_prime(hamstr_fit)
 
     t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
       ggplot2::theme_bw() +
@@ -514,8 +514,70 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
 }
 
+seg_lvls_2_brk_lvls <- function(seg_lvls){
+  
+  lvls <- unique(seg_lvls)
+  cnts <- table(seg_lvls)
+  
+  rep(lvls, times = cnts+1)
+
+}
+
+plot_hierarchical_acc_rate_prime <- function(hamstr_fit){
+  
+  if (is.null(hamstr_fit$data$brks)) {
+   
+   gg <- plot_hierarchical_acc_rate(hamstr_fit)
+  
+   return(gg)
+  } 
+  
+  brks <- hamstr_fit$data$brks
+  dpth_rng <- hamstr_fit$data$bottom_depth - hamstr_fit$data$top_depth
+  
+  idx <- dplyr::tibble(
+    brks = unlist(brks)
+    ) %>% 
+    dplyr::mutate(
+     depth = brks * dpth_rng + hamstr_fit$data$top_depth
+    )
+  
+  a3 <- rstan::summary(hamstr_fit$fit, pars = "alpha")$summary
+
+  alph <- tibble::as_tibble(a3, rownames = "par") %>%
+    dplyr::mutate(alpha_idx = get_par_idx(.data$par),
+                  lvl = hamstr_fit$data$lvl) %>%
+    dplyr::select(lvl, #alpha_idx, 
+                  mean) %>% 
+    dplyr::group_by(lvl) %>% 
+    dplyr::summarise(mean = c(mean, tail(mean, 1)))
+ 
+  out <- dplyr::bind_cols(idx, alph) %>% 
+    dplyr::group_by(lvl) %>% 
+    #filter(depth <= hamstr_fit$data$bottom_depth) %>% 
+    dplyr::mutate(depth = dplyr::case_when(depth < hamstr_fit$data$top_depth ~ hamstr_fit$data$top_depth,
+                                depth > hamstr_fit$data$bottom_depth ~ hamstr_fit$data$bottom_depth,
+                                TRUE ~ depth)) %>%
+    dplyr::ungroup()
+  
+  out <- out %>% 
+    ggplot2::ggplot(aes(x=depth, y=mean, colour = factor(lvl))) +
+    ggplot2::geom_step() +
+    ggplot2::expand_limits(y = 0) +
+    ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
+                  colour = "Hierarchical\nlevel") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
+  
+  
+  return(out)
+}
+
+#plot_hierarchical_acc_rate_prime(hamstr_fit = hamstr_fit_1) +
+#  facet_wrap(~lvl)
 
 
+ 
 #' Plot the hierarchical accumulation rate parameters
 #'
 #' @inheritParams plot_hamstr
