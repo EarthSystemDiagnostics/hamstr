@@ -77,11 +77,14 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
   labs(title = "Intcal20")
 #> Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
 #> dplyr 1.1.0.
-#> i Please use `reframe()` instead.
-#> i When switching from `summarise()` to `reframe()`, remember that `reframe()`
+#> ℹ Please use `reframe()` instead.
+#> ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
 #>   always returns an ungrouped data frame and adjust accordingly.
-#> i The deprecated feature was likely used in the hamstr package.
+#> ℹ The deprecated feature was likely used in the hamstr package.
 #>   Please report the issue to the authors.
+#> This warning is displayed once every 8 hours.
+#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+#> generated.
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.svg" width="100%" />
@@ -226,41 +229,41 @@ age model.
 
 ``` r
 predict(hamstr_fit_1)
-#> # A tibble: 388,000 x 3
+#> # A tibble: 396,000 × 3
 #>     iter depth   age
 #>    <int> <dbl> <dbl>
-#>  1     1  1.5  4575.
-#>  2     1  2.52 4602.
-#>  3     1  3.54 4626.
-#>  4     1  4.56 4644.
-#>  5     1  5.58 4661.
-#>  6     1  6.60 4674.
-#>  7     1  7.62 4684.
-#>  8     1  8.65 4691.
-#>  9     1  9.67 4706.
-#> 10     1 10.7  4719.
-#> # ... with 387,990 more rows
+#>  1     1   1.5 4531.
+#>  2     1   2.5 4537.
+#>  3     1   3.5 4546.
+#>  4     1   4.5 4554.
+#>  5     1   5.5 4562.
+#>  6     1   6.5 4568.
+#>  7     1   7.5 4575.
+#>  8     1   8.5 4582.
+#>  9     1   9.5 4588.
+#> 10     1  10.5 4601.
+#> # ℹ 395,990 more rows
 ```
 
 `summary` returns the age model summarised over the realisations.
 
 ``` r
 summary(hamstr_fit_1)
-#> # A tibble: 97 x 15
+#> # A tibble: 99 × 15
 #>    depth   idx par         mean se_mean    sd `2.5%` `15.9%` `25%` `50%` `75%`
 #>    <dbl> <dbl> <chr>      <dbl>   <dbl> <dbl>  <dbl>   <dbl> <dbl> <dbl> <dbl>
-#>  1  1.5      1 c_ages[1]  4516.   1.45   62.5  4381.   4452. 4478. 4522. 4560.
-#>  2  2.52     2 c_ages[2]  4529.   1.34   58.5  4404.   4469. 4492. 4533. 4569.
-#>  3  3.54     3 c_ages[3]  4541.   1.23   55.0  4425.   4485. 4505. 4544. 4579.
-#>  4  4.56     4 c_ages[4]  4554.   1.12   52.2  4445.   4500. 4520. 4557. 4589.
-#>  5  5.58     5 c_ages[5]  4566.   1.03   49.8  4463.   4515. 4534. 4569. 4600.
-#>  6  6.60     6 c_ages[6]  4579.   0.953  47.7  4482.   4531. 4548. 4581. 4611.
-#>  7  7.62     7 c_ages[7]  4592.   0.884  46.1  4499.   4545. 4562. 4593. 4622.
-#>  8  8.65     8 c_ages[8]  4604.   0.816  44.4  4516.   4560. 4575. 4606. 4634.
-#>  9  9.67     9 c_ages[9]  4617.   0.758  42.9  4533.   4575. 4589. 4618. 4646.
-#> 10 10.7     10 c_ages[10] 4631.   0.718  41.9  4548.   4590. 4604. 4631. 4658.
-#> # ... with 87 more rows, and 4 more variables: `84.1%` <dbl>, `97.5%` <dbl>,
-#> #   n_eff <dbl>, Rhat <dbl>
+#>  1   1.5     1 c_ages[1]  4511.   1.91   65.3  4363.   4450. 4473. 4517. 4556.
+#>  2   2.5     2 c_ages[2]  4522.   1.74   60.7  4386.   4464. 4486. 4528. 4564.
+#>  3   3.5     3 c_ages[3]  4533.   1.57   56.9  4406.   4480. 4498. 4538. 4572.
+#>  4   4.5     4 c_ages[4]  4545.   1.42   53.7  4428.   4494. 4512. 4548. 4581.
+#>  5   5.5     5 c_ages[5]  4556.   1.29   51.3  4448.   4507. 4525. 4559. 4591.
+#>  6   6.5     6 c_ages[6]  4568.   1.18   49.2  4464.   4519. 4537. 4570. 4601.
+#>  7   7.5     7 c_ages[7]  4579.   1.08   47.4  4483.   4533. 4549. 4581. 4611.
+#>  8   8.5     8 c_ages[8]  4590.   1.01   46.4  4498.   4545. 4560. 4591. 4622.
+#>  9   9.5     9 c_ages[9]  4603.   0.950  45.4  4513.   4559. 4573. 4603. 4634.
+#> 10  10.5    10 c_ages[10] 4617.   0.876  43.9  4530.   4574. 4588. 4617. 4647.
+#> # ℹ 89 more rows
+#> # ℹ 4 more variables: `84.1%` <dbl>, `97.5%` <dbl>, n_eff <dbl>, Rhat <dbl>
 ```
 
 The hierarchical structure of the sections makes it difficult to specify
@@ -278,27 +281,20 @@ the original fitted objects, but the n_eff and Rhat information is lost.
 
 ``` r
 summary(age.mods.interp)
-#> Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
-#> dplyr 1.1.0.
-#> i Please use `reframe()` instead.
-#> i When switching from `summarise()` to `reframe()`, remember that `reframe()`
-#>   always returns an ungrouped data frame and adjust accordingly.
-#> i The deprecated feature was likely used in the hamstr package.
-#>   Please report the issue to the authors.
-#> # A tibble: 101 x 10
+#> # A tibble: 101 × 10
 #>    depth  mean    sd `2.5%` `15.9%` `25%` `50%` `75%` `84.1%` `97.5%`
 #>    <dbl> <dbl> <dbl>  <dbl>   <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>
 #>  1     0  NaN   NA      NA      NA    NA    NA    NA      NA      NA 
 #>  2     1  NaN   NA      NA      NA    NA    NA    NA      NA      NA 
-#>  3     2 4522.  60.4  4393.   4460. 4485. 4527. 4564.   4582.   4630.
-#>  4     3 4535.  56.8  4414.   4477. 4498. 4538. 4574.   4591.   4636.
-#>  5     4 4547.  53.6  4434.   4492. 4512. 4550. 4584.   4600.   4643.
-#>  6     5 4559.  51.1  4454.   4507. 4526. 4562. 4594.   4611.   4652.
-#>  7     6 4571.  48.8  4472.   4521. 4540. 4574. 4604.   4620.   4661.
-#>  8     7 4584.  47.0  4490.   4537. 4553. 4586. 4615.   4631.   4671.
-#>  9     8 4596.  45.4  4506.   4550. 4567. 4598. 4627.   4641.   4683.
-#> 10     9 4609.  43.8  4522.   4566. 4580. 4610. 4638.   4652.   4693.
-#> # ... with 91 more rows
+#>  3     2 4516.  62.9  4373.   4457. 4479. 4522. 4559.   4575.   4626.
+#>  4     3 4528.  58.7  4395.   4472. 4492. 4533. 4568.   4584.   4630.
+#>  5     4 4539.  55.2  4417.   4486. 4505. 4543. 4576.   4592.   4638.
+#>  6     5 4551.  52.4  4439.   4500. 4519. 4554. 4586.   4601.   4645.
+#>  7     6 4562.  50.2  4456.   4513. 4531. 4565. 4597.   4610.   4653.
+#>  8     7 4573.  48.2  4474.   4526. 4543. 4575. 4606.   4621.   4662.
+#>  9     8 4584.  46.8  4490.   4539. 4554. 4586. 4616.   4630.   4672.
+#> 10     9 4596.  45.8  4506.   4552. 4566. 4597. 4627.   4640.   4685.
+#> # ℹ 91 more rows
 ```
 
 ### Getting and plotting the accumulation rate
@@ -320,22 +316,22 @@ plot(hamstr_fit_1, type = "acc_rates")
 ``` r
 summary(hamstr_fit_1, type = "acc_rates") 
 #> Joining with `by = join_by(idx)`
-#> # A tibble: 192 x 15
-#>    depth c_depth_~1 c_dep~2 acc_r~3   idx   tau  mean    sd `2.5%` `15.9%` `25%`
-#>    <dbl>      <dbl>   <dbl> <chr>   <dbl> <dbl> <dbl> <dbl>  <dbl>   <dbl> <dbl>
-#>  1  1.5        1.5     2.52 depth_~     1     0 122.   96.1   32.4    53.8  64.0
-#>  2  2.52       2.52    3.54 depth_~     2     0 115.   83.3   33.1    53.7  63.8
-#>  3  3.54       3.54    4.56 depth_~     3     0 113.   81.5   34.3    53.9  63.8
-#>  4  4.56       4.56    5.58 depth_~     4     0 106.   67.5   37.5    55.8  64.3
-#>  5  5.58       5.58    6.60 depth_~     5     0 106.   69.0   36.1    55.7  64.5
-#>  6  6.60       6.60    7.62 depth_~     6     0 108.   74.3   34.9    55.0  63.9
-#>  7  7.62       7.62    8.65 depth_~     7     0  97.0  50.5   38.6    56.4  64.3
-#>  8  8.65       8.65    9.67 depth_~     8     0  98.0  53.2   36.2    55.1  63.2
-#>  9  9.67       9.67   10.7  depth_~     9     0  99.4  57.4   36.6    54.3  61.9
-#> 10 10.7       10.7    11.7  depth_~    10     0  97.5  53.8   36.9    54.4  61.9
-#> # ... with 182 more rows, 4 more variables: `50%` <dbl>, `75%` <dbl>,
-#> #   `84.1%` <dbl>, `97.5%` <dbl>, and abbreviated variable names
-#> #   1: c_depth_top, 2: c_depth_bottom, 3: acc_rate_unit
+#> # A tibble: 196 × 15
+#>    depth c_depth_top c_depth_bottom acc_rate_unit   idx   tau  mean    sd `2.5%`
+#>    <dbl>       <dbl>          <dbl> <chr>         <dbl> <dbl> <dbl> <dbl>  <dbl>
+#>  1   1.5         1.5            2.5 depth_per_ti…     1     0 163.  193.    29.7
+#>  2   2.5         2.5            3.5 depth_per_ti…     2     0 144.  139.    31.7
+#>  3   3.5         3.5            4.5 depth_per_ti…     3     0 137.  122.    31.6
+#>  4   4.5         4.5            5.5 depth_per_ti…     4     0 125.   92.4   35.4
+#>  5   5.5         5.5            6.5 depth_per_ti…     5     0 121.   80.6   37.5
+#>  6   6.5         6.5            7.5 depth_per_ti…     6     0 124.   86.9   35.9
+#>  7   7.5         7.5            8.5 depth_per_ti…     7     0 126.   96.7   36.4
+#>  8   8.5         8.5            9.5 depth_per_ti…     8     0  99.7  52.7   37.0
+#>  9   9.5         9.5           10.5 depth_per_ti…     9     0  84.7  43.0   32.8
+#> 10  10.5        10.5           11.5 depth_per_ti…    10     0  80.5  43.1   30.3
+#> # ℹ 186 more rows
+#> # ℹ 6 more variables: `15.9%` <dbl>, `25%` <dbl>, `50%` <dbl>, `75%` <dbl>,
+#> #   `84.1%` <dbl>, `97.5%` <dbl>
 ```
 
 ### Diagnostic plots

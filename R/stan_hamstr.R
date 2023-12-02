@@ -16,20 +16,9 @@
 #' @param top_depth,bottom_depth the top and bottom depths of the desired
 #'   age-depth model. Must encompass the range of the data. Defaults to the
 #'   shallowest and deepest data points.
-#' @param K controls the number and structure of the hierarchically modelled
-#'   down-core sections. It is specified as a vector, where each value indicates
-#'   the number of new child sections for each parent section, e.g., c(10, 10,
-#'   10) would specify 10 sections at the coarsest level, with 10 new sections
-#'   at next finer level, giving a total of 1000 sections at the finest
-#'   resolution.
-#'
-#'   By default, the total number of sections at the finest level is set so that
-#'   for the median distance between age control points there are 16 sections.
-#'
-#'   By default a "powers of 2" hierarchical structure is chosen and then
-#'   adjusted to get close to the desired number of sections, e.g. for a desired
-#'   100 sections the result is c(2, 2, 2, 2, 2, 3), giving 96 sections.
-#'
+#' @param K_fine the number of sections at the highest resolution of the model.
+#' @param K_factor the rate at which the thickness of the sections grows between
+#' subsequent levels. 
 #' @param acc_mean_prior hyperparameter for the prior on the overall mean
 #'   accumulation rate for the record. Units are obs_age / depth. E.g. if depth
 #'   is in cm and age in years then the accumulation rate is in years/cm. The
@@ -101,7 +90,7 @@
 #' }
 hamstr <- function(depth, obs_age, obs_err,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
-                   K = NULL,
+                   K_fine = NULL, K_factor = NULL,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
                    acc_shape = 1.5,
@@ -118,52 +107,59 @@ hamstr <- function(depth, obs_age, obs_err,
                    sample_posterior = TRUE,
                    hamstr_control = list(),
                    stan_sampler_args = list()
-                   ){
-
-
-
+){
+  
+  
+  if (is.null(K_fine)== FALSE){
+    if (K_fine < 2) stop("A minimum of 2 sections are required")
+  } 
+  
+  if (is.null(K_factor)== FALSE){
+    if (K_factor < 2) stop("K_factor must be 2 or greater")
+    if (K_factor %% 1 > 1e-04) stop("K_factor must be an integer")
+  }
+  
   stan_dat <- make_stan_dat_hamstr()
-
-
+  
+  
   used_sampler_args <- do.call(get_stan_sampler_args, stan_sampler_args)
-
-
+  
+  
   # set the seed here and not inside get_inits_hamstr, so that the chains are
   # different
-
+  
   set.seed(used_sampler_args$seed)
-
+  
   inits <- replicate(used_sampler_args$chains,
                      list(get_inits_hamstr(stan_dat)))
-
-
-
-    args <- list(object = stanmodels$hamstr, data = stan_dat,
-                 init = inits)
-
-    args <- append(args, used_sampler_args)
-
-    if (sample_posterior){
+  
+  
+  
+  args <- list(object = stanmodels$hamstr, data = stan_dat,
+               init = inits)
+  
+  args <- append(args, used_sampler_args)
+  
+  if (sample_posterior){
     fit <- do.call(rstan::sampling, args)
-
-    } else if (sample_posterior == FALSE){
+    
+  } else if (sample_posterior == FALSE){
     fit <- NA
   }
-
+  
   stan_dat <- append(stan_dat, used_sampler_args)
-
+  
   info <- list(version = utils::packageVersion("hamstr"),
                time = Sys.time())
-
+  
   out <- list(fit=fit, data=stan_dat, info = info)
-
+  
   class(out) <- append("hamstr_fit", class(out))
-
-
+  
+  
   return(out)
-
+  
 }
-
 
 #' Return a List of hamstr Control Arguments
 #'

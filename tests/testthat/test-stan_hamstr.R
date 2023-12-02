@@ -88,8 +88,8 @@ test_that("posterior and plotting functions work", {
   testthat::expect_equal(class(s1), c("tbl_df", "tbl", "data.frame"))
   testthat::expect_equal(class(p1), c("tbl_df", "tbl", "data.frame"))
   
-  testthat::expect_equal(nrow(s1), 9)
-  testthat::expect_equal(nrow(p1), 360)
+  testthat::expect_equal(nrow(s1), 10)
+  testthat::expect_equal(nrow(p1), 400)
   
   
   
@@ -173,8 +173,8 @@ test_that("displacement modelling works", {
   testthat::expect_equal(class(s1), c("tbl_df", "tbl", "data.frame"))
   testthat::expect_equal(class(p1), c("tbl_df", "tbl", "data.frame"))
   
-  testthat::expect_equal(nrow(s1), 9)
-  testthat::expect_equal(nrow(p1), 360)
+  testthat::expect_equal(nrow(s1), 10)
+  testthat::expect_equal(nrow(p1), 400)
   
 })
 

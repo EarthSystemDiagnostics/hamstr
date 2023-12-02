@@ -98,13 +98,6 @@ make_stan_dat_hamstr <- function(...) {
     warning("min_age is older than minimum obs_age")
   }
   
-  # if (l$pad_top_bottom == TRUE){
-  #   # Set start depth to 5% less than first depth observation, and DO allow negative depths
-  #   depth_range <- diff(range(l$depth))
-  #   buff <- 0.05 * depth_range
-  # } else {
-  #   buff <- 0
-  # }
   
   if (is.null(l$top_depth)) l$top_depth <- l$depth[1] #- buff
   
@@ -116,7 +109,8 @@ make_stan_dat_hamstr <- function(...) {
   if(l$bottom_depth < max(l$depth)) stop("bottom_depth must be deeper or equal to the deepest data point")
   
   
-  if (is.null(l$K)){
+  if (is.null(l$K_fine)){
+    
     K_fine_1 <- l$bottom_depth - l$top_depth
     
     # set resolution so that there are only 16
@@ -129,16 +123,26 @@ make_stan_dat_hamstr <- function(...) {
     # prevent default values higher than 900
     if (K_fine > 900) K_fine <- 900
     
-    l$K <- default_K(K_fine)
+    l$K_fine <- K_fine
+  }
+  
+  
+  if (is.null(l$K_factor)){
+    
+    l$K_factor <- get_K_factor(l$K_fine)
+    
   }
   
   
   # Transformed arguments
   l$N <- length(l$depth)
   
-  stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))#, l$N == length(l$n_ind))
+  stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))
   
-  alpha_idx <- alpha_indices(l$K)
+  brks <- GetBrksHalfOffset(K_fine = l$K_fine, K_factor = l$K_factor)
+  
+  alpha_idx <- GetIndices(brks = brks)
+  
   
   l$K_tot <- sum(alpha_idx$nK)
   l$K_fine <- utils::tail(alpha_idx$nK, 1)
@@ -161,7 +165,7 @@ make_stan_dat_hamstr <- function(...) {
   
   l <- append(l, alpha_idx)
   
-  l$n_lvls <- length(l$K)
+  l$n_lvls <- length(l$nK) -1
   l$scale_shape = as.numeric(l$scale_shape)
   l$model_bioturbation = as.numeric(l$model_bioturbation)
   l$model_displacement = as.numeric(l$model_displacement)
@@ -170,7 +174,6 @@ make_stan_dat_hamstr <- function(...) {
   if (is.null(l$H_top)) l$H_top = l$top_depth
   if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
   
-  #l$K_idx <- l$lvl - 1
   
   if (l$smooth_s == 1){
     l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
@@ -185,64 +188,187 @@ make_stan_dat_hamstr <- function(...) {
   return(l)
 }
 
+# new K_fine and parent calculation -----
 
-#' Adjust numbers of splits per level
+#' Get Weights for Parent Sections
 #'
-#' @param K_fine total number of required sections at highest resolution
-#' @return K structure
+#' @param a 
+#' @param b 
 #' @keywords internal
-AdjustK <- function(K_fine, base){
-
-  a <- log(K_fine, base)
-  nLevels <- floor(a)
-
-  K <- rep(base, nLevels)
-
-  tot <- cumprod(K)[nLevels]
-
-  i <- 0
-  while(tot < K_fine){
-    K[nLevels - i] <- K[nLevels - i] +1
-    i <- i + 1
-    if (i >= nLevels) i <- 0
-    tot <- cumprod(K)[nLevels]
-  }
-
-  if (cumprod(K)[nLevels] > K_fine) {
-    if (i == 0) i <- nLevels
-    K[nLevels - i+1] <- K[nLevels - i+1] -1
-  }
-
-  K
-
+GetWts <- function(a, b){
+  
+  intvls <- lapply(seq_along(b)[-1], function(i) {
+    b[c(i-1, i)]
+  })
+  
+  gaps <- lapply(intvls, function(x) {
+    a[a >= x[1] & a <= x[2]]
+  })
+  
+  wts <- sapply(seq_along(intvls), function(i) {
+    
+    wts <- diff(unique(sort(c(gaps[[i]], intvls[[i]])))) / diff(range(sort(c(gaps[[i]], intvls[[i]]))))
+    
+    if (length(wts) == 1){rep(wts, 2)}else{wts}
+    
+  })
+  wts
 }
 
-#' Default K structure
+
+#' Get Indices Structure For Hamstr Model
 #'
-#' @param K_fine total number of sections at the finest resolution
-#'
-#' @return a vector
+#' @param nK 
+#' @param brks 
 #' @keywords internal
+GetIndices <- function(nK = NULL, brks = NULL) {
+  
+  if (is.null(brks)){
+    
+    lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
+    brks <- (lapply(nK, function(x) seq(0, 1, length.out = x + 1)))
+    
+  }
+  
+  if (is.null(nK)){
+    nK <- sapply(brks, length)-1
+    lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
+  }
+  
+  # get the left hand parent
+  parenta <- lapply(seq_along(brks)[-1], function(x) {
+    sapply(1:(length(brks[[x]]) - 1), function(i) {
+      cut(brks[[x]][c(i)], brks[[x - 1]],
+          include.lowest = TRUE,
+          right = FALSE, 
+          labels = FALSE
+      )
+    })
+  })
+  
+  # get the right hand parent
+  parentb <- lapply(seq_along(brks)[-1], function(x) {
+    sapply(1:(length(brks[[x]]) - 1), function(i) {
+      cut(brks[[x]][c(i+1)], brks[[x - 1]],
+          include.lowest = TRUE,
+          right = TRUE, 
+          labels = FALSE
+      )
+    })
+  })
+  
+  
+  parent1 <- lapply(seq_along(parenta), function(i){
+    rbind(parenta[[i]], parentb[[i]])
+  })
+  
+  parent <- append(list(rbind(0,0)), parent1)
+  
+  cumNcol <- cumsum(sapply(seq_along(parent)[-1], function(i) max(parent[[i-1]])))
+  
+  # shift the index to account for previous levels
+  parent <- lapply(seq_along(parent)[-1], function(x) {
+    parent[[x]] + cumNcol[[x-1]] 
+  })
+  
+  # get the left/right weights
+  wts <- lapply(seq_along(brks)[-1], function(i){
+    GetWts(brks[[i-1]], brks[[i]])
+  })
+  
+  # collapse to single matrix
+  parent <- do.call(cbind, parent)
+  
+  multi_parent_adj <- mean(apply(parent, 2, function(x) abs(diff(x))+1))
+  
+  wts <- do.call(cbind, wts)
+  
+  # make weights add to 1
+  wts <- apply(wts, MARGIN = 2, function(x) x / sum(x)) 
+  
+  list(nK = nK,
+       #K = sapply(brks, length),
+       alpha_idx = 1:sum(nK),
+       lvl = lvl, brks = brks,
+       multi_parent_adj = multi_parent_adj,
+       parent1 = as.numeric(parent[1,]),
+       parent2 = as.numeric(parent[2,]),
+       wts1 = as.numeric(wts[1,]),
+       wts2 = as.numeric(wts[2,])
+  )
+}
+
+
+#' Get Overlapping Breaks Structure
+#'
+#' @param K_fine 
+#' @param K_factor 
+#'
+#' @keywords internal
+GetBrksHalfOffset <- function(K_fine, K_factor){
+  
+  db_fine <- 1 / K_fine
+  db <- db_fine
+  
+  brks <- list(
+    seq(0, 1, by = db)
+  )
+  
+  n_br <- length(brks[[1]])
+  n_sec <- n_br - 1
+  
+  newbrks <- brks[[1]]
+  
+  while (n_sec > 3){
+    
+    strt <- min(brks[[length(brks)]])
+    end <- max(brks[[length(brks)]])
+    
+    n_new <- ceiling((n_sec+1)/K_factor)
+    
+    # in units of old sections
+    l_new <- n_new * K_factor
+    l_old <- n_sec 
+    
+    d_new_old <- l_new - l_old
+    
+    if (d_new_old %% 2 == 0){
+      new_strt <- strt - db * (d_new_old-1)/ 2
+    } else {
+      new_strt <- strt - db * (d_new_old)/ 2
+    }
+    
+    
+    newbrks <- seq(new_strt, by = db*K_factor, length.out = n_new+1)
+    
+    #newbrks <- unique(newbrks)
+    brks <- c(brks, list(newbrks))
+    
+    db <- K_factor * db
+    n_br <- length(newbrks)
+    n_sec <- n_br -1
+    
+    #if (K_factor == n_sec){break} 
+    
+  }
+  
+  brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
+  brks <- rev(brks)
+  
+  return(brks)
+}
+
+
+
+
+
+#' Get Default K_factor
+#'
+#' @param K_fine 
 #' @examples
-#' \dontrun{
-#' default_K(100)
-#' default_K(500)
-#' }
-default_K <- function(K_fine){
-
-  bar <- function(x, y){
-    abs(y - x^x)
-  }
-
-  #base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
-
-  base <- 2
-
-  AdjustK(K_fine, base)
-
-}
-
-
+#' get_K_factor(10000)
+#' 
+#' @keywords internal
 get_K_factor <- function(K_fine){
   
   bar <- function(x, y){
@@ -253,71 +379,65 @@ get_K_factor <- function(K_fine){
 
 }
 
-# get_K_factor(10000)
+
+# #' Calculate number of parameters being estimated for a given hierarchical structure
+# #' 
+# #' @param base Number of new sections per per section
+# #' @param n Number of hierarchical levels
+# #' 
+# #' @return named vector
+# #' @keywords internal
+# #' 
+# #' @examples
+# #' \dontrun{
+# #' hierarchy_efficiency(10, 3)
+# #' }
+# hierarchy_efficiency <- function(base, n){
 # 
-# sapply(GetBrksHalfOffset(1000, 5), length)
-# sapply(GetBrksHalfOffset(100000, 6), length)
-# sapply(GetBrksHalfOffset(100000, 5), length)
-
-
-#' Calculate number of parameters being estimated for a given hierarchical structure
-#'
-#' @param base Number of new sections per per section
-#' @param n Number of hierarchical levels
-#'
-#' @return named vector
-#' @keywords internal
-#'
-#' @examples
-#' \dontrun{
-#' hierarchy_efficiency(10, 3)
-#' }
-hierarchy_efficiency <- function(base, n){
-
-  nTot <- (base^1 - base^(n+1)) / (1-base)
-
-  nFine <- base^n
-
-  eff <- nTot / nFine
-
-  return(c(nFine = nFine, nTot = nTot, eff = eff))
-
-}
+#   nTot <- (base^1 - base^(n+1)) / (1-base)
+# 
+#   nFine <- base^n
+# 
+#   eff <- nTot / nFine
+# 
+#   return(c(nFine = nFine, nTot = nTot, eff = eff))
+# 
+# }
 
 
 # Make index creating functions for K levels
-#' Create alpha level indices
-#'
-#' @inheritParams hamstr
-#'
-#' @return a list
-#' @keywords internal
-alpha_indices <- function(K){
-
-  K <- eval(K)
-
-  # prepend 1 for the single overall mean alpha
-  K <- c(1, K)
-
-  # number of sections at each level
-  nK <- cumprod(K)
-
-
-  K <- c(0, K)
-  nK <- c(0, nK)
-
-  alpha_idx <- 1:sum(nK)
-
-  nLevels <- length(K)-1
-
-  # which level is each parameter
-  lvl <- unlist(lapply(seq_along(nK[-1]), function(i) rep(i, times = nK[i+1])))
-
-  # index the parent of each parameter
-  parent <- c(rep(0, K[2]), unlist(lapply(alpha_idx[1:sum(nK[1:nLevels])], function(i) rep(i, K[lvl[i]+2]))))
-
-  list(alpha_idx=alpha_idx, lvl=lvl, parent=parent, nK = nK[-1])
-}
+# #' Create alpha level indices
+# #'
+# #' @inheritParams hamstr
+# #'
+# #' @return a list
+# #' @keywords internal
+# alpha_indices <- function(K){
+# 
+#   K <- eval(K)
+# 
+#   # prepend 1 for the single overall mean alpha
+#   K <- c(1, K)
+# 
+#   # number of sections at each level
+#   nK <- cumprod(K)
+# 
+# 
+#   K <- c(0, K)
+#   nK <- c(0, nK)
+# 
+#   alpha_idx <- 1:sum(nK)
+# 
+#   nLevels <- length(K)-1
+# 
+#   # which level is each parameter
+#   lvl <- unlist(lapply(seq_along(nK[-1]), function(i) rep(i, times = nK[i+1])))
+# 
+#   # index the parent of each parameter
+#   parent <- c(rep(0, K[2]), unlist(lapply(alpha_idx[1:sum(nK[1:nLevels])], function(i) rep(i, K[lvl[i]+2]))))
+# 
+#   list(alpha_idx=alpha_idx, lvl=lvl, parent=parent, nK = nK[-1])
+# }
 
 #' Convert between parametrisations of the gamma distribution
 #'
@@ -377,6 +497,12 @@ gamma_sigma_shape <- function(mean = NULL, mode = NULL, sigma=NULL, shape=NULL){
 
 
 
+#' Get Indices For Smoothing Accumulation Rates When Estimating L
+#'
+#' @param d 
+#' @param w 
+#'
+#' @keywords internal
 get_smooth_i <- function(d, w){
 
   w <- (w / d$delta_c )
@@ -406,7 +532,7 @@ get_smooth_i <- function(d, w){
 #' @return a list of boundaries for the modelled sections
 #' @keywords internal
 hierarchical_depths <- function(stan_dat) {
-  
+
   # make backward compatible with branching hamstr
   if (is.null(stan_dat$brks)) {
     get_brks <- function(stan_dat) {
@@ -428,12 +554,12 @@ hierarchical_depths <- function(stan_dat) {
 
   lapply(stan_dat$brks, function(x) {
       rng <- stan_dat$bottom_depth - stan_dat$top_depth
-      
+
       tcks <- x * rng + stan_dat$top_depth
-      
+
       tcks[tcks <= stan_dat$bottom_depth &
              tcks >= stan_dat$top_depth]
-      
+
     })
   }
 
@@ -516,5 +642,62 @@ get_inits_hamstr <- function(stan_dat){
 #'   message(cat(cumprod(K)))
 #'
 #'   return(K)
+#' }
+
+
+#' #' Adjust numbers of splits per level
+#' #'
+#' #' @param K_fine total number of required sections at highest resolution
+#' #' @return K structure
+#' #' @keywords internal
+#' AdjustK <- function(K_fine, base){
+#' 
+#'   a <- log(K_fine, base)
+#'   nLevels <- floor(a)
+#' 
+#'   K <- rep(base, nLevels)
+#' 
+#'   tot <- cumprod(K)[nLevels]
+#' 
+#'   i <- 0
+#'   while(tot < K_fine){
+#'     K[nLevels - i] <- K[nLevels - i] +1
+#'     i <- i + 1
+#'     if (i >= nLevels) i <- 0
+#'     tot <- cumprod(K)[nLevels]
+#'   }
+#' 
+#'   if (cumprod(K)[nLevels] > K_fine) {
+#'     if (i == 0) i <- nLevels
+#'     K[nLevels - i+1] <- K[nLevels - i+1] -1
+#'   }
+#' 
+#'   K
+#' 
+#' }
+
+#' #' Default K structure
+#' #'
+#' #' @param K_fine total number of sections at the finest resolution
+#' #'
+#' #' @return a vector
+#' #' @keywords internal
+#' #' @examples
+#' #' \dontrun{
+#' #' default_K(100)
+#' #' default_K(500)
+#' #' }
+#' default_K <- function(K_fine){
+#' 
+#'   bar <- function(x, y){
+#'     abs(y - x^x)
+#'   }
+#' 
+#'   #base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
+#' 
+#'   base <- 2
+#' 
+#'   AdjustK(K_fine, base)
+#' 
 #' }
 

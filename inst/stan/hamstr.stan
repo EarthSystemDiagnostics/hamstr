@@ -1,9 +1,5 @@
-// Hamstr with additional error due to bioturbation
-// 11.10.2020 Andrew Dolman
-// Bioturbation modelling
-// Prior gamma distribution on L
-// vector of n_ind  = no. individual particles in a 14C measurement
-// latent variable approach - model bt_age,
+// Hamstr with arbitrary breaks at each level
+// 25.03.20203 Andrew Dolman
 data{
   // age control points
   int<lower=0> N;
@@ -17,7 +13,11 @@ data{
   int<lower=0> K_fine;  // number of highest resolution sections
   int<lower=0> K_tot;  // total no of gamma parameters
   
-  int parent[K_tot]; // index sections to their parent sections
+  int parent1[K_tot-1]; // index sections to their parent sections 2 row matrix
+  vector[K_tot-1] wts1; // weights of parents
+  
+  int parent2[K_tot-1]; // index sections to their parent sections 2 row matrix
+  vector[K_tot-1] wts2; // weights of parents
   
   // modelled depths
   vector[K_fine] c_depth_bottom;
@@ -32,6 +32,7 @@ data{
   
   // shape of the gamma distributions
   real<lower = 0> acc_shape;
+  real<lower = 0> multi_parent_adj;
   
   // scale the shape parameter to control the total variance of the alpha
   // innovations for the number of hierarchical levels
@@ -106,7 +107,7 @@ transformed data{
   // scale shape
   real<lower = 1> acc_shape_adj;
   if (scale_shape == 1){
-    acc_shape_adj = acc_shape * n_lvls;
+    acc_shape_adj = acc_shape * n_lvls / multi_parent_adj;
   } else{
     acc_shape_adj = acc_shape;
   }
@@ -183,6 +184,7 @@ transformed parameters{
   
   vector<lower = 0>[model_displacement ? N : 0] disp_yrs;
   
+ 
   if (scale_R == 1){
     w = R^(delta_c);
   } else {
@@ -274,8 +276,13 @@ model {
   
   // the gamma distributed innovations
   
+  {
+  vector[K_tot-1] parent_mean;
+  parent_mean = alpha[parent1] .* wts1 + alpha[parent2] .* wts2;
+  
   // prior parameterised by use set shape and the value of it's parent section
-  alpha[2:K_tot] ~ gamma(acc_shape_adj, acc_shape_adj ./ alpha[parent[2:K_tot]]);
+  alpha[2:K_tot] ~ gamma(acc_shape_adj, acc_shape_adj ./ parent_mean);
+  }
   
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);
