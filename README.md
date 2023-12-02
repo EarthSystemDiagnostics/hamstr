@@ -75,16 +75,6 @@ smoothed by mixing in the ocean.
 i <- seq(1, 40, by = floor(40/6))[1:6]
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
   labs(title = "Intcal20")
-#> Warning: Returning more (or less) than 1 row per `summarise()` group was deprecated in
-#> dplyr 1.1.0.
-#> ℹ Please use `reframe()` instead.
-#> ℹ When switching from `summarise()` to `reframe()`, remember that `reframe()`
-#>   always returns an ungrouped data frame and adjust accordingly.
-#> ℹ The deprecated feature was likely used in the hamstr package.
-#>   Please report the issue to the authors.
-#> This warning is displayed once every 8 hours.
-#> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-#> generated.
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.svg" width="100%" />

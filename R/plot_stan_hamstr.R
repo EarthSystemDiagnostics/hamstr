@@ -112,7 +112,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
     post <- as.data.frame(hamstr_fit$fit, pars = c("bt_age")) %>%
       dplyr::as_tibble() %>%
       dplyr::mutate(iter = 1:dplyr::n()) %>%
-      tidyr::pivot_longer(cols = -.data$iter) %>%
+      tidyr::pivot_longer(cols = -"iter") %>%
       dplyr::mutate(dpt = get_par_idx(.data$name))
 
     tmp <- dplyr::tibble(depth = hamstr_fit$data$depth,
@@ -273,7 +273,7 @@ add_datapoints <- function(gg, dat){
                                          colour = "Obs age"),
                             show.legend = FALSE,
                             group = NA,
-                            inherit.aes = FALSE, size = 1.25) +
+                            inherit.aes = FALSE, linewidth = 1.25) +
     ggplot2::geom_point(data = dat, ggplot2::aes(y = .data$age,
                                                  group = NA,
                                                  colour = "Obs age")
@@ -412,7 +412,7 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
   axis <- match.arg(axis)
 
   p <- ds %>%
-    ggplot2::ggplot(ggplot2::aes_string(x = axis, y = "mean")) +
+    ggplot2::ggplot(ggplot2::aes(x = .data[[axis]], y = .data[["mean"]])) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`, fill = "95%")) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`75%`, ymin = .data$`25%`, fill = "50%")) +
     ggplot2::geom_line(aes(colour = "Mean")) +
@@ -454,7 +454,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
   if ("depth" %in% axis){
     acc_rates_long <- acc_rates %>%
-      dplyr::select(-.data$depth) %>%
+      dplyr::select(-"depth") %>%
       tidyr::pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
                           names_to = "depth_type", values_to = "depth")
 
@@ -479,8 +479,8 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
     median_age <- summary(hamstr_fit) %>%
       #mutate(unit = "age") %>%
-      dplyr::rename(age = .data$`50%`) %>%
-      dplyr::select(.data$depth, .data$age)
+      dplyr::rename(age = "50%") %>%
+      dplyr::select("depth", "age")
 
     jnt <- dplyr::left_join(median_age, acc_rates) %>%
       dplyr::filter(stats::complete.cases(.data$mean))
@@ -550,7 +550,7 @@ plot_hierarchical_acc_rate_prime <- function(hamstr_fit){
     dplyr::select(lvl, #alpha_idx, 
                   mean) %>% 
     dplyr::group_by(lvl) %>% 
-    dplyr::summarise(mean = c(mean, tail(mean, 1)))
+    dplyr::reframe(mean = c(mean, tail(mean, 1)))
  
   out <- dplyr::bind_cols(idx, alph) %>% 
     dplyr::group_by(lvl) %>% 
@@ -626,13 +626,13 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
                    })))
 
   alph2 <- alph %>%
-    dplyr::select(.data$lvl, .data$alpha_idx,
-                  .data$depth1, .data$depth2, .data$mean) %>%
+    dplyr::select("lvl", "alpha_idx",
+                  "depth1", "depth2", "mean") %>%
     dplyr::group_by(.data$lvl) %>%
     tidyr::pivot_longer(cols = tidyr::starts_with("depth"),
                         names_to = "type", values_to = "depth") %>% 
     #tidyr::gather(type, depth, -mean, -lvl, -alpha_idx) %>%
-    dplyr::select(.data$lvl, .data$alpha_idx, .data$depth, .data$mean) %>%
+    dplyr::select("lvl", "alpha_idx", "depth", "mean") %>%
     dplyr::arrange(.data$lvl, .data$alpha_idx, .data$depth, .data$mean)
 
 
@@ -739,7 +739,7 @@ plot_infl_prior_posterior <- function(hamstr_fit) {
 
 
   infl_fac <- rstan::extract(hamstr_fit$fit, "infl")[[1]] %>%
-    tibble::as_tibble() %>%
+    tibble::as_tibble(., .name_repair = c("unique")) %>%
     tidyr::gather() %>%
     dplyr::mutate(key = get_par_idx(.data$key))
 
@@ -901,8 +901,8 @@ plot_memory_prior_posterior <- function(hamstr_fit){
        w = w,
        R = as.vector(rstan::extract(hamstr_fit$fit, "R")$R)
        ) %>%
-    dplyr::rename(`Memory between sections` = .data$w,
-                  `Memory at 1 depth unit` = .data$R) %>%
+    dplyr::rename(`Memory between sections` = "w",
+                  `Memory at 1 depth unit` = "R") %>%
     tidyr::pivot_longer(cols = c("Memory between sections", "Memory at 1 depth unit"),
                         names_to = "par", values_to = "x")
   } else {

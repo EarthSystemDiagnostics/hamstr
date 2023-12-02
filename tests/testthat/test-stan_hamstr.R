@@ -1,13 +1,15 @@
 test_that("set seed works", {
   
   library(hamstr)
-  
-  hamstr_fit_1 <- hamstr(depth = 1:10,
+  suppressWarnings({
+  hamstr_fit_1 <- 
+    hamstr(depth = 1:10,
                          obs_age = 1:10,
                          obs_err = rep(1, 10), 
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result
                          stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
+   
   
   hamstr_fit_2 <- hamstr(depth = 1:10,
                          obs_age = 1:10,
@@ -16,6 +18,7 @@ test_that("set seed works", {
                          # this example always returns the same numerical result
                          stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
   
+   })
   
   testthat::expect_equal(summary(hamstr_fit_1)$n_eff, summary(hamstr_fit_2)$n_eff)
   
@@ -26,10 +29,10 @@ test_that("sample_posterior = FALSE works", {
   
   library(hamstr)
   
-  hamstr_fit_1 <- hamstr(depth = 1:10,
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
                          obs_age = 1:10,
                          obs_err = rep(1, 10),
-                         sample_posterior = FALSE)
+                         sample_posterior = FALSE))
   
   testthat::expect_true(is.na(hamstr_fit_1$fit))
   
@@ -45,7 +48,7 @@ test_that("posterior and plotting functions work", {
   
   library(hamstr)
   
-  hamstr_fit_1 <- hamstr(depth = 1:10,
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
                          obs_age = seq(1000, 10000, length.out = 10),
                          obs_err = rep(100, 10), 
                          # the seed argument for the sampler is set here so that
@@ -53,7 +56,7 @@ test_that("posterior and plotting functions work", {
                          model_bioturbation = TRUE,
                          L_prior_shape = 2,
                          n_ind = rep(10, 10),
-                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
+                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1)))
   
   
   # plotting age models
@@ -118,13 +121,13 @@ test_that("posterior and plotting functions work", {
 
 test_that("inflate_errors", {
   
-  hamstr_fit_1 <- hamstr(depth = 1:10,
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
                          obs_age = seq(1000, 10000, length.out = 10),
                          obs_err = rep(100, 10), 
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result,
                         hamstr_control = hamstr_control(inflate_errors = TRUE),
-                        stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
+                        stan_sampler_args = list(seed = 1, iter = 20, cores = 1)))
   
   p1 <- plot(hamstr_fit_1, plot_diagnostics = FALSE)
   
@@ -140,13 +143,13 @@ test_that("displacement modelling works", {
   
   library(hamstr)
   
-  hamstr_fit_1 <- hamstr(depth = 1:10,
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
                          obs_age = seq(1000, 10000, length.out = 10),
                          obs_err = rep(100, 10), 
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result,
                          model_displacement = TRUE,
-                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1))
+                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1)))
   
   p1 <- plot(hamstr_fit_1)
   p2 <- plot(hamstr_fit_1, "age")
