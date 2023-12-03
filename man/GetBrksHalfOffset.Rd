@@ -7,11 +7,20 @@
 GetBrksHalfOffset(K_fine, K_factor)
 }
 \arguments{
-\item{K_fine}{}
+\item{K_fine}{the number of sections at the highest resolution of the model.}
 
-\item{K_factor}{}
+\item{K_factor}{the rate at which the thickness of the sections grows between
+subsequent levels.}
 }
 \description{
 Get Overlapping Breaks Structure
+}
+\examples{
+# example code
+K_fine <- seq(1, 1e05, length.out = 1000)
+K_factor <- sapply(K_fine, function(x) get_K_factor(x))
+plot(K_fine, K_factor, type = "l", log = "xy")
+GetBrksHalfOffset(100, 2)
+
 }
 \keyword{internal}

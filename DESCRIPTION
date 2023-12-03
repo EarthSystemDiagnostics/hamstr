@@ -1,7 +1,7 @@
 Package: hamstr
 Type: Package
 Title: Hierarchical Accumulation Modelling with Stan and R
-Version: 0.7.2.9000
+Version: 0.8.0
 Encoding: UTF-8
 Authors@R: c(person("Andrew", "Dolman", email = "andrew.dolman@awi.de", role = c("aut", "cre")))
 Description: Age-depth sediment accumulation modelling for sediment cores. hamstr
