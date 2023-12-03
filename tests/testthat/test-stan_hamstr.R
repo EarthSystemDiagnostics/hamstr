@@ -181,6 +181,24 @@ test_that("displacement modelling works", {
   
 })
 
+
+## deprecation / lifecycle warnings
+
+testthat::test_that("deprecated K", {
+  
+  suppressWarnings(expect_warning(
+    hamstr(depth = 1:10,
+           obs_age = seq(1000, 10000, length.out = 10),
+           obs_err = rep(100, 10),
+           K = c(3,3,3),
+           sample_posterior = FALSE), "argument K is deprecated; K_fine has been calculated from K but please use K_fine instead."
+  ))
+  
+})
+
+
+
+
 ## radiocarbon functions ------
 
 testthat::test_that("calibrate_14C_age", {
@@ -217,6 +235,7 @@ testthat::test_that("calibrate_14C_age", {
   testthat::expect_true(all(cal_ages_3$age.14C.cal.se - cal_ages_2$age.14C.cal.se > 0))
   
 })
+
 
 
 testthat::test_that("compare_14C_PDF", {

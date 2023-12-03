@@ -11,6 +11,7 @@ hamstr(
   min_age = 1950 - as.numeric(format(Sys.Date(), "\%Y")),
   K_fine = NULL,
   K_factor = NULL,
+  K,
   top_depth = NULL,
   bottom_depth = NULL,
   acc_mean_prior = NULL,
@@ -50,6 +51,8 @@ by convention). The default value is the current year in calendar age BP
 
 \item{K_factor}{the rate at which the thickness of the sections grows between
 subsequent levels.}
+
+\item{K}{deprecated, use K_fine and K_factor instead.}
 
 \item{top_depth, bottom_depth}{the top and bottom depths of the desired
 age-depth model. Must encompass the range of the data. Defaults to the

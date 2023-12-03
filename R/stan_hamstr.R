@@ -19,6 +19,7 @@
 #' @param K_fine the number of sections at the highest resolution of the model.
 #' @param K_factor the rate at which the thickness of the sections grows between
 #' subsequent levels. 
+#' @param K deprecated, use K_fine and K_factor instead.
 #' @param acc_mean_prior hyperparameter for the prior on the overall mean
 #'   accumulation rate for the record. Units are obs_age / depth. E.g. if depth
 #'   is in cm and age in years then the accumulation rate is in years/cm. The
@@ -90,7 +91,7 @@
 #' }
 hamstr <- function(depth, obs_age, obs_err,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
-                   K_fine = NULL, K_factor = NULL,
+                   K_fine = NULL, K_factor = NULL, K,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
                    acc_shape = 1.5,
@@ -109,6 +110,11 @@ hamstr <- function(depth, obs_age, obs_err,
                    stan_sampler_args = list()
 ){
   
+  if (!missing(K)) {
+    warning("argument K is deprecated; K_fine has been calculated from K but please use K_fine instead.", 
+            call. = FALSE)
+    K_fine <- tail(cumprod(K), 1)
+  }
   
   if (is.null(K_fine)== FALSE){
     if (K_fine < 2) stop("A minimum of 2 sections are required")
