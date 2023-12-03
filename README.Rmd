@@ -1,5 +1,7 @@
 ---
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -76,12 +78,12 @@ A sample of six dates are plotted here for the IntCal20 and Marine20 calibration
 ```{r}
 i <- seq(1, 40, by = floor(40/6))[1:6]
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
-  labs(title = "Intcal20")
+  ggplot2::labs(title = "Intcal20")
 ```
 
 ```{r}
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
-  labs(title = "Marine20")
+  ggplot2::labs(title = "Marine20")
 ```
 
 

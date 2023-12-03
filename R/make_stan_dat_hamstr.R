@@ -302,13 +302,6 @@ GetIndices <- function(nK = NULL, brks = NULL) {
 #' Get Overlapping Breaks Structure
 #'
 #' @inheritParams hamstr
-#' @examples
-#' # example code
-#' K_fine <- seq(1, 1e05, length.out = 1000)
-#' K_factor <- sapply(K_fine, function(x) get_K_factor(x))
-#' plot(K_fine, K_factor, type = "l", log = "xy")
-#' GetBrksHalfOffset(100, 2)
-#'
 #' @keywords internal
 GetBrksHalfOffset <- function(K_fine, K_factor){
   
@@ -370,12 +363,6 @@ GetBrksHalfOffset <- function(K_fine, K_factor){
 #' Get Default K_factor
 #'
 #' @param K_fine The number of sections at the highest resolution
-#' @examples
-#' 
-#' K <- seq(1, 1e05, length.out = 1000)
-#' K_factor <- sapply(K, function(x) get_K_factor(x))
-#' plot(K, K_factor, type = "l", log = "xy")
-#' 
 #' @keywords internal
 get_K_factor <- function(K_fine){
   
@@ -556,160 +543,4 @@ get_inits_hamstr <- function(stan_dat){
 
   return(l)
 }
-
-# Obsolete functions -----------
-
-#' #' Create K structure from K_tot and target_K_per_lvl
-#' #'
-#' #' @param K_tot total number of required sections at highest resolution
-#' #' @param target_K_per_lvl approximate number of sections per level
-#' #'
-#' #' @return
-#' #' @keywords internal
-#' GetK <- function(K_tot, target_K_per_lvl = 10){
-#'
-#'   K_per_lvl <- seq(floor(target_K_per_lvl/2), 2*target_K_per_lvl, by = 1)
-#'
-#'   K_per_lvl <- K_per_lvl[K_per_lvl>1]
-#'
-#'   n_lvls <- unlist(
-#'     lapply(K_per_lvl,
-#'            function(x) seq(floor(log(K_tot, base = x)/2),
-#'                            ceiling(2*log(K_tot, base = x)))
-#'     )
-#'   )
-#'
-#'   df <- expand.grid(K_per_lvl = unique(K_per_lvl), n_lvls = unique(n_lvls))
-#'
-#'   df$K_fine <- with(df, K_per_lvl^n_lvls)
-#'
-#'   idx <- which.min(abs(df$K_fine - K_tot))
-#'
-#'   n_lvls <- df[idx, "n_lvls"]
-#'   K_per_lvl <- df[idx, "K_per_lvl"]
-#'
-#'   K <- rep(K_per_lvl, n_lvls)
-#'
-#'   message(cat(cumprod(K)))
-#'
-#'   return(K)
-#' }
-
-
-#' #' Adjust numbers of splits per level
-#' #'
-#' #' @param K_fine total number of required sections at highest resolution
-#' #' @return K structure
-#' #' @keywords internal
-#' AdjustK <- function(K_fine, base){
-#' 
-#'   a <- log(K_fine, base)
-#'   nLevels <- floor(a)
-#' 
-#'   K <- rep(base, nLevels)
-#' 
-#'   tot <- cumprod(K)[nLevels]
-#' 
-#'   i <- 0
-#'   while(tot < K_fine){
-#'     K[nLevels - i] <- K[nLevels - i] +1
-#'     i <- i + 1
-#'     if (i >= nLevels) i <- 0
-#'     tot <- cumprod(K)[nLevels]
-#'   }
-#' 
-#'   if (cumprod(K)[nLevels] > K_fine) {
-#'     if (i == 0) i <- nLevels
-#'     K[nLevels - i+1] <- K[nLevels - i+1] -1
-#'   }
-#' 
-#'   K
-#' 
-#' }
-
-#' #' Default K structure
-#' #'
-#' #' @param K_fine total number of sections at the finest resolution
-#' #'
-#' #' @return a vector
-#' #' @keywords internal
-#' #' @examples
-#' #' \dontrun{
-#' #' default_K(100)
-#' #' default_K(500)
-#' #' }
-#' default_K <- function(K_fine){
-#' 
-#'   bar <- function(x, y){
-#'     abs(y - x^x)
-#'   }
-#' 
-#'   #base <- round(optimize(bar, c(1, 10), y = K_fine)$minimum)
-#' 
-#'   base <- 2
-#' 
-#'   AdjustK(K_fine, base)
-#' 
-#' }
-
-
-
-# #' Calculate number of parameters being estimated for a given hierarchical structure
-# #' 
-# #' @param base Number of new sections per per section
-# #' @param n Number of hierarchical levels
-# #' 
-# #' @return named vector
-# #' @keywords internal
-# #' 
-# #' @examples
-# #' \dontrun{
-# #' hierarchy_efficiency(10, 3)
-# #' }
-# hierarchy_efficiency <- function(base, n){
-# 
-#   nTot <- (base^1 - base^(n+1)) / (1-base)
-# 
-#   nFine <- base^n
-# 
-#   eff <- nTot / nFine
-# 
-#   return(c(nFine = nFine, nTot = nTot, eff = eff))
-# 
-# }
-
-
-# Make index creating functions for K levels
-# #' Create alpha level indices
-# #'
-# #' @inheritParams hamstr
-# #'
-# #' @return a list
-# #' @keywords internal
-# alpha_indices <- function(K){
-# 
-#   K <- eval(K)
-# 
-#   # prepend 1 for the single overall mean alpha
-#   K <- c(1, K)
-# 
-#   # number of sections at each level
-#   nK <- cumprod(K)
-# 
-# 
-#   K <- c(0, K)
-#   nK <- c(0, nK)
-# 
-#   alpha_idx <- 1:sum(nK)
-# 
-#   nLevels <- length(K)-1
-# 
-#   # which level is each parameter
-#   lvl <- unlist(lapply(seq_along(nK[-1]), function(i) rep(i, times = nK[i+1])))
-# 
-#   # index the parent of each parameter
-#   parent <- c(rep(0, K[2]), unlist(lapply(alpha_idx[1:sum(nK[1:nLevels])], function(i) rep(i, K[lvl[i]+2]))))
-# 
-#   list(alpha_idx=alpha_idx, lvl=lvl, parent=parent, nK = nK[-1])
-# }
 

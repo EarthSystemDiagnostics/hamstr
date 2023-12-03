@@ -12,11 +12,4 @@ get_K_factor(K_fine)
 \description{
 Get Default K_factor
 }
-\examples{
-
-K <- seq(1, 1e05, length.out = 1000)
-K_factor <- sapply(K, function(x) get_K_factor(x))
-plot(K, K_factor, type = "l", log = "xy")
-
-}
 \keyword{internal}

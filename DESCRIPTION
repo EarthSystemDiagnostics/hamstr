@@ -22,7 +22,7 @@ Imports:
     ggplot2,
     tibble,
     rlang,
-    dplyr,
+    dplyr (>= 1.1.0),
     tidyr,
     patchwork,
     magrittr,
