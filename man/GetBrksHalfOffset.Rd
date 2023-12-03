@@ -15,12 +15,4 @@ subsequent levels.}
 \description{
 Get Overlapping Breaks Structure
 }
-\examples{
-# example code
-K_fine <- seq(1, 1e05, length.out = 1000)
-K_factor <- sapply(K_fine, function(x) get_K_factor(x))
-plot(K_fine, K_factor, type = "l", log = "xy")
-GetBrksHalfOffset(100, 2)
-
-}
 \keyword{internal}
