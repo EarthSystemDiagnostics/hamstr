@@ -188,12 +188,14 @@ make_stan_dat_hamstr <- function(...) {
   return(l)
 }
 
+# Internal functions ---------
+
 # new K_fine and parent calculation -----
 
 #' Get Weights for Parent Sections
 #'
-#' @param a 
-#' @param b 
+#' @param a Parent breaks
+#' @param b Child breaks
 #' @keywords internal
 GetWts <- function(a, b){
   
@@ -216,10 +218,10 @@ GetWts <- function(a, b){
 }
 
 
-#' Get Indices Structure For Hamstr Model
+#' Get Indices Structure For Hamstr Model from a Set of Breaks
 #'
-#' @param nK 
-#' @param brks 
+#' @param nK List of number of breaks in each level
+#' @param brks List of breakpoints in each level
 #' @keywords internal
 GetIndices <- function(nK = NULL, brks = NULL) {
   
