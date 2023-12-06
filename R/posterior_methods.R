@@ -27,7 +27,7 @@ get_posterior_ages <- function(hamstr_fit){
     dplyr::mutate(idx = get_par_idx(.data$par),
            par = "c_ages") %>%
     dplyr::left_join(depths, .data$., by = "idx") %>%
-    dplyr::select(.data$iter,.data$depth, .data$age) %>%
+    dplyr::select("iter", "depth", "age") %>%
     dplyr::arrange(.data$iter, .data$depth, .data$age)
 
   return(posterior_ages)
@@ -111,11 +111,11 @@ summarise_q <- function(dat,
                         var,
                         probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975)){
   dat %>% 
-    dplyr::summarise(mean = mean({{ var }}, na.rm = TRUE),
+    dplyr::reframe(mean = mean({{ var }}, na.rm = TRUE),
               sd = stats::sd({{ var }}, na.rm = TRUE),
               x = stats::quantile({{ var }}, probs, na.rm = TRUE),
               q = paste0(round(100*probs, 1), "%")) %>% 
-    tidyr::pivot_wider(names_from = .data$q, values_from = .data$x) %>% 
+    tidyr::pivot_wider(names_from = "q", values_from = "x") %>% 
     dplyr::as_tibble()
 }
 
@@ -167,7 +167,7 @@ summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.159, 0.25, 0.5, 
     age_summary <- age_summary %>%
       dplyr::mutate(idx = get_par_idx(.data$par)) %>%
       dplyr::left_join(depths, .data$., by = "idx") %>% 
-      dplyr::select(.data$depth, .data$idx, tidyr::everything())
+      dplyr::select( "depth", "idx", tidyr::everything())
 
   }
   return(age_summary)
@@ -187,7 +187,7 @@ summarise_hamstr_parameters <- function(object,
   rstan::summary(object$fit,
                  pars = pars, probs = probs)$summary %>%
     dplyr::as_tibble(rownames = "Parameter") %>%
-    dplyr::select(-.data$se_mean)
+    dplyr::select(-"se_mean")
 }
 
 
@@ -319,7 +319,7 @@ get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH"
     hamstr_fit$data[c("c", "c_depth_top", "c_depth_bottom")]
     ) %>%
     dplyr::mutate(depth = .data$c_depth_top) %>%
-    dplyr::rename(idx = .data$c)
+    dplyr::rename(idx = "c")
 
   out <- as.data.frame(hamstr_fit$fit, pars = "x") %>%
     tibble::as_tibble() %>%
@@ -331,9 +331,9 @@ get_posterior_acc_rates <- function(hamstr_fit, tau = 0, kern = c("U", "G", "BH"
     dplyr::right_join(depths) %>%
     dplyr::mutate(depth_per_time = 1000/.data$time_per_depth) %>%
     dplyr::arrange(.data$par, .data$iter, .data$idx, .data$depth) %>%
-    dplyr::select(.data$iter, .data$idx, .data$depth,
-                  .data$c_depth_top, .data$c_depth_bottom, 
-                  .data$time_per_depth, .data$depth_per_time)
+    dplyr::select("iter", "idx",  "depth",
+                  "c_depth_top", "c_depth_bottom", 
+                  "time_per_depth", "depth_per_time")
   
   class(out) <- append("hamstr_acc_rates", class(out))
   
@@ -423,7 +423,7 @@ summarise_hamstr_acc_rates <- function(hamstr_fit,
   kern <- match.arg(kern)
   
   x <- stats::predict(hamstr_fit, type = "acc_rates", tau = tau, kern = kern) %>%
-    tidyr::pivot_longer(cols = c(.data$time_per_depth, .data$depth_per_time),
+    tidyr::pivot_longer(cols = c("time_per_depth", "depth_per_time"),
                         names_to = "acc_rate_unit") 
   
   x_sum <- x %>%

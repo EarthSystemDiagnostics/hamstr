@@ -9,7 +9,9 @@ hamstr(
   obs_age,
   obs_err,
   min_age = 1950 - as.numeric(format(Sys.Date(), "\%Y")),
-  K = NULL,
+  K_fine = NULL,
+  K_factor = NULL,
+  K,
   top_depth = NULL,
   bottom_depth = NULL,
   acc_mean_prior = NULL,
@@ -45,19 +47,12 @@ collected in 1990, with ages in years BP this would be -40 (present = 1950
 by convention). The default value is the current year in calendar age BP
 (e.g. -71 for 2021).}
 
-\item{K}{controls the number and structure of the hierarchically modelled
-down-core sections. It is specified as a vector, where each value indicates
-the number of new child sections for each parent section, e.g., c(10, 10,
-10) would specify 10 sections at the coarsest level, with 10 new sections
-at next finer level, giving a total of 1000 sections at the finest
-resolution.
+\item{K_fine}{the number of sections at the highest resolution of the model.}
 
-By default, the total number of sections at the finest level is set so that
-for the median distance between age control points there are 16 sections.
+\item{K_factor}{the rate at which the thickness of the sections grows between
+subsequent levels.}
 
-By default a "powers of 2" hierarchical structure is chosen and then
-adjusted to get close to the desired number of sections, e.g. for a desired
-100 sections the result is c(2, 2, 2, 2, 2, 3), giving 96 sections.}
+\item{K}{deprecated, use K_fine and K_factor instead.}
 
 \item{top_depth, bottom_depth}{the top and bottom depths of the desired
 age-depth model. Must encompass the range of the data. Defaults to the

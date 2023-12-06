@@ -1,3 +1,7 @@
+# hamstr 0.8.0
+
+* Hierarchical structure of sections changed so that child sections are offset from parents. This will eventually break backwards compatibility, for now if the old argument "K" is used, "K_fine" is calculated from "K". The change improves the age models by reducing the influence of the positions of the breaks in the low resolution layers.
+
 # hamstr 0.7.2
 
 * 1 sigma quantiles now included in summaries

@@ -253,7 +253,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
 
   cali.pdf.dat <- cal.ages.df %>%
     dplyr::group_by(.data$id) %>%
-    dplyr::summarise(
+    dplyr::reframe(
       age = if(is.na(.data$cal[[1]]) == FALSE)  .data$cal[[1]][[1]]$ageGrid else 0,
       density = if(is.na(.data$cal[[1]]) == FALSE) .data$cal[[1]][[1]]$densities else 0
     )

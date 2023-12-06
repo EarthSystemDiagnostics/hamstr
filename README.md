@@ -74,14 +74,14 @@ smoothed by mixing in the ocean.
 ``` r
 i <- seq(1, 40, by = floor(40/6))[1:6]
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
-  labs(title = "Intcal20")
+  ggplot2::labs(title = "Intcal20")
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.svg" width="100%" />
 
 ``` r
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
-  labs(title = "Marine20")
+  ggplot2::labs(title = "Marine20")
 ```
 
 <img src="man/figures/README-unnamed-chunk-5-1.svg" width="100%" />
@@ -160,7 +160,7 @@ accumulation rates `acc_shape = 1.5`, the memory mean `mem_mean = 0.5`
 and memory strength `mem_strength = 10`, are the same as for Bacon \>=
 2.5.1.
 
-### Setting the thickness, number, and hierarchical structure of the discrete sections
+### Setting the number and hierarchical structure of the discrete sections
 
 One of the more critical tuning parameters in the **Bacon** model is the
 parameter `thick`, which determines the thickness and number of discrete
@@ -174,35 +174,38 @@ when a lower resolution model shows variation in accumulation rate.
 
 The key structural difference between **Bacon** and **hamstr** models is
 that with **hamstr** the sediment core is modelled at multiple
-resolutions simultaneously with a hierarchical structure. This removes
-the need to trade-off smoothness and flexibility.
+resolutions simultaneously - removing the need to trade-off smoothness
+and flexibility. The resolutions have a hierarchical structure whereby
+coarse resolution “parent” sections act as priors for higher resolution
+“child” sections.
 
-The parameter `K` controls the number and structure of the hierarchical
-sections. It is specified as a vector, where each value indicates the
-number of new child sections for each parent section at each finer
-hierarchical level. E.g. `c(10, 10)` would specify 10 sections at the
-coarsest level, with 10 new sections at the next finer level for each
-coarse section, giving a total of 100 sections at the highest / finest
-resolution level. `c(10, 10, 10)` would specify 1000 sections at the
-finest level and 3 hierarchical levels of 10, 100 and 1000 sections.
+For **hamstr** version 0.8.0 and onwards, the parameter `K_fine`
+controls the number of discrete sections at the highest resolution
+level, while `K_factor` controls how much thicker the discrete sections
+are at each subsequent level. Sufficient levels are modelled so that the
+coarsest level has just one section - an overal mean accumulation rate.
 
 The structure is hierarchical in the sense that the modelled
 accumulation rates for the parent sections act as priors for their child
-sections; specifically, the mean accumulation rate for a given parent is
-the mean of the gamma prior for its child sections. In turn, the overall
-mean accumulation rate for the whole core is itself a parameter
-estimated by the fitting process. The hierarchical structure of
-increasing resolution allows the model to adapt to low-frequency changes
-in the accumulation rate, that is changes between “regimes” of high or
-low accumulation that persist for long periods.
+sections; specifically, the estimated accumulation rate for a coarse
+parent section acts as the mean of the gamma prior for its child
+sections. In turn, the overall mean accumulation rate for the whole core
+is itself a parameter estimated by the fitting process. The hierarchical
+structure of increasing resolution allows the model to adapt to
+low-frequency changes in the accumulation rate, that is changes between
+“regimes” of high or low accumulation that persist for long periods.
 
-By default `K` is chosen so that the number of hierarchical levels, and
-the number of new child sections per level, are approximately equal,
-e.g. c(4, 4, 4, 4). The total number of sections at the finest level is
-set so that the resolution is 1 cm per section, up to a total length of
-900 cm, above which the default remains 900 sections and a coarser
-resolution is used. This can be changed from the default via the
-parameter `K`.
+By default, the number of sections at the highest resolution (`K_fine`)
+is set so that the sections have approximately unit thickness, i.e. if
+the depths are in cm, the sections are 1 cm thick. This applies up to a
+maximum of 900 sections above which the default remains 900 sections and
+a coarser resolution is used. This can be changed from the default via
+the parameter `K_fine`.
+
+`K_factor` is set so that the total number of modelled sections is
+approximately 1.2 times `K_fine`, or
+
+`K_factor`^`K_factor` $\approx$ `K_tot` $\approx$ `1.2 * K_fine`
 
 For a given shape parameter `acc_shape`, increasing the number of
 modelled hierarchical levels increases the total variance in the
@@ -219,40 +222,41 @@ age model.
 
 ``` r
 predict(hamstr_fit_1)
-#> # A tibble: 388,000 × 3
+#> # A tibble: 396,000 × 3
 #>     iter depth   age
 #>    <int> <dbl> <dbl>
-#>  1     1  1.5  4463.
-#>  2     1  2.52 4485.
-#>  3     1  3.54 4512.
-#>  4     1  4.56 4530.
-#>  5     1  5.58 4541.
-#>  6     1  6.60 4550.
-#>  7     1  7.62 4559.
-#>  8     1  8.65 4578.
-#>  9     1  9.67 4598.
-#> 10     1 10.7  4616.
-#> # … with 387,990 more rows
+#>  1     1   1.5 4467.
+#>  2     1   2.5 4477.
+#>  3     1   3.5 4484.
+#>  4     1   4.5 4491.
+#>  5     1   5.5 4498.
+#>  6     1   6.5 4507.
+#>  7     1   7.5 4517.
+#>  8     1   8.5 4529.
+#>  9     1   9.5 4539.
+#> 10     1  10.5 4549.
+#> # ℹ 395,990 more rows
 ```
 
 `summary` returns the age model summarised over the realisations.
 
 ``` r
 summary(hamstr_fit_1)
-#> # A tibble: 97 × 13
-#>    depth   idx par     mean se_mean    sd `2.5%` `25%` `50%` `75%` `97.5%` n_eff
-#>    <dbl> <dbl> <chr>  <dbl>   <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl> <dbl>
-#>  1  1.5      1 c_age… 4520.   1.64   64.5  4382. 4481. 4524. 4564.   4636. 1539.
-#>  2  2.52     2 c_age… 4532.   1.52   60.4  4404. 4495. 4536. 4575.   4642. 1585.
-#>  3  3.54     3 c_age… 4545.   1.40   56.8  4423. 4509. 4547. 4584.   4650. 1656.
-#>  4  4.56     4 c_age… 4557.   1.28   53.7  4444. 4522. 4559. 4594.   4657. 1763.
-#>  5  5.58     5 c_age… 4570.   1.17   51.0  4463. 4537. 4572. 4605.   4666. 1905.
-#>  6  6.60     6 c_age… 4582.   1.07   48.8  4480. 4551. 4584. 4615.   4675. 2063.
-#>  7  7.62     7 c_age… 4594.   0.987  47.0  4496. 4564. 4595. 4626.   4684. 2272.
-#>  8  8.65     8 c_age… 4607.   0.906  45.0  4515. 4578. 4608. 4636.   4693. 2464.
-#>  9  9.67     9 c_age… 4620.   0.839  43.0  4533. 4592. 4620. 4648.   4703. 2630.
-#> 10 10.7     10 c_age… 4633.   0.790  41.7  4551. 4607. 4633. 4660.   4714. 2787.
-#> # … with 87 more rows, and 1 more variable: Rhat <dbl>
+#> # A tibble: 99 × 15
+#>    depth   idx par         mean se_mean    sd `2.5%` `15.9%` `25%` `50%` `75%`
+#>    <dbl> <dbl> <chr>      <dbl>   <dbl> <dbl>  <dbl>   <dbl> <dbl> <dbl> <dbl>
+#>  1   1.5     1 c_ages[1]  4513.   1.97   63.9  4366.   4453. 4476. 4518. 4556.
+#>  2   2.5     2 c_ages[2]  4524.   1.76   59.6  4392.   4468. 4488. 4528. 4563.
+#>  3   3.5     3 c_ages[3]  4535.   1.55   56.1  4413.   4483. 4500. 4538. 4573.
+#>  4   4.5     4 c_ages[4]  4546.   1.35   53.3  4432.   4494. 4513. 4548. 4582.
+#>  5   5.5     5 c_ages[5]  4557.   1.17   51.2  4448.   4507. 4525. 4559. 4592.
+#>  6   6.5     6 c_ages[6]  4568.   1.04   49.1  4465.   4520. 4537. 4570. 4602.
+#>  7   7.5     7 c_ages[7]  4579.   0.934  47.5  4480.   4533. 4549. 4581. 4611.
+#>  8   8.5     8 c_ages[8]  4590.   0.861  46.4  4495.   4544. 4560. 4592. 4622.
+#>  9   9.5     9 c_ages[9]  4603.   0.805  45.2  4511.   4559. 4574. 4604. 4634.
+#> 10  10.5    10 c_ages[10] 4617.   0.746  43.5  4529.   4574. 4589. 4618. 4647.
+#> # ℹ 89 more rows
+#> # ℹ 4 more variables: `84.1%` <dbl>, `97.5%` <dbl>, n_eff <dbl>, Rhat <dbl>
 ```
 
 The hierarchical structure of the sections makes it difficult to specify
@@ -270,20 +274,20 @@ the original fitted objects, but the n_eff and Rhat information is lost.
 
 ``` r
 summary(age.mods.interp)
-#> # A tibble: 101 × 8
-#>    depth  mean    sd `2.5%` `25%` `50%` `75%` `97.5%`
-#>    <dbl> <dbl> <dbl>  <dbl> <dbl> <dbl> <dbl>   <dbl>
-#>  1     0  NaN   NA      NA    NA    NA    NA      NA 
-#>  2     1  NaN   NA      NA    NA    NA    NA      NA 
-#>  3     2 4526.  62.4  4394. 4488. 4530. 4569.   4639.
-#>  4     3 4538.  58.6  4414. 4501. 4541. 4579.   4647.
-#>  5     4 4550.  55.4  4433. 4515. 4553. 4588.   4654.
-#>  6     5 4563.  52.5  4452. 4528. 4565. 4598.   4661.
-#>  7     6 4575.  50.0  4471. 4542. 4577. 4609.   4669.
-#>  8     7 4587.  48.0  4487. 4556. 4588. 4619.   4678.
-#>  9     8 4599.  46.2  4503. 4570. 4600. 4630.   4687.
-#> 10     9 4612.  44.2  4522. 4583. 4612. 4640.   4697.
-#> # … with 91 more rows
+#> # A tibble: 101 × 10
+#>    depth  mean    sd `2.5%` `15.9%` `25%` `50%` `75%` `84.1%` `97.5%`
+#>    <dbl> <dbl> <dbl>  <dbl>   <dbl> <dbl> <dbl> <dbl>   <dbl>   <dbl>
+#>  1     0  NaN   NA      NA      NA    NA    NA    NA      NA      NA 
+#>  2     1  NaN   NA      NA      NA    NA    NA    NA      NA      NA 
+#>  3     2 4518.  61.7  4380.   4460. 4482. 4522. 4560.   4577.   4624.
+#>  4     3 4529.  57.8  4401.   4476. 4494. 4533. 4568.   4585.   4630.
+#>  5     4 4540.  54.6  4424.   4489. 4506. 4543. 4578.   4593.   4636.
+#>  6     5 4551.  52.2  4440.   4501. 4519. 4554. 4587.   4602.   4644.
+#>  7     6 4562.  50.1  4457.   4514. 4531. 4565. 4597.   4612.   4652.
+#>  8     7 4574.  48.2  4473.   4527. 4543. 4575. 4607.   4621.   4660.
+#>  9     8 4585.  46.8  4488.   4539. 4555. 4587. 4617.   4630.   4670.
+#> 10     9 4597.  45.7  4504.   4552. 4567. 4598. 4628.   4642.   4681.
+#> # ℹ 91 more rows
 ```
 
 ### Getting and plotting the accumulation rate
@@ -296,30 +300,31 @@ terms of time per depth.
 
 ``` r
 plot(hamstr_fit_1, type = "acc_rates")
-#> Joining, by = "idx"
-#> Joining, by = "depth"
+#> Joining with `by = join_by(idx)`
+#> Joining with `by = join_by(depth)`
 ```
 
 <img src="man/figures/README-unnamed-chunk-14-1.svg" width="100%" />
 
 ``` r
 summary(hamstr_fit_1, type = "acc_rates") 
-#> Joining, by = "idx"
-#> # A tibble: 192 × 13
+#> Joining with `by = join_by(idx)`
+#> # A tibble: 196 × 15
 #>    depth c_depth_top c_depth_bottom acc_rate_unit   idx   tau  mean    sd `2.5%`
 #>    <dbl>       <dbl>          <dbl> <chr>         <dbl> <dbl> <dbl> <dbl>  <dbl>
-#>  1  1.5         1.5            2.52 depth_per_ti…     1     0 123.   90.5   32.4
-#>  2  2.52        2.52           3.54 depth_per_ti…     2     0 115.   78.5   34.2
-#>  3  3.54        3.54           4.56 depth_per_ti…     3     0 113.   75.4   34.2
-#>  4  4.56        4.56           5.58 depth_per_ti…     4     0 107.   64.9   36.6
-#>  5  5.58        5.58           6.60 depth_per_ti…     5     0 108.   68.0   36.5
-#>  6  6.60        6.60           7.62 depth_per_ti…     6     0 109.   69.5   36.6
-#>  7  7.62        7.62           8.65 depth_per_ti…     7     0  99.7  55.5   38.3
-#>  8  8.65        8.65           9.67 depth_per_ti…     8     0 101.   59.5   36.0
-#>  9  9.67        9.67          10.7  depth_per_ti…     9     0 103.   65.3   34.9
-#> 10 10.7        10.7           11.7  depth_per_ti…    10     0 100.   59.2   37.3
-#> # … with 182 more rows, and 4 more variables: `25%` <dbl>, `50%` <dbl>,
-#> #   `75%` <dbl>, `97.5%` <dbl>
+#>  1   1.5         1.5            2.5 depth_per_ti…     1     0 168.  195.    30.3
+#>  2   2.5         2.5            3.5 depth_per_ti…     2     0 150.  146.    31.9
+#>  3   3.5         3.5            4.5 depth_per_ti…     3     0 144.  133.    33.0
+#>  4   4.5         4.5            5.5 depth_per_ti…     4     0 130.  104.    35.8
+#>  5   5.5         5.5            6.5 depth_per_ti…     5     0 127.  104.    37.8
+#>  6   6.5         6.5            7.5 depth_per_ti…     6     0 128.  106.    37.8
+#>  7   7.5         7.5            8.5 depth_per_ti…     7     0 132.  112.    36.7
+#>  8   8.5         8.5            9.5 depth_per_ti…     8     0 101.   57.7   36.7
+#>  9   9.5         9.5           10.5 depth_per_ti…     9     0  84.3  42.9   32.4
+#> 10  10.5        10.5           11.5 depth_per_ti…    10     0  79.5  40.3   30.5
+#> # ℹ 186 more rows
+#> # ℹ 6 more variables: `15.9%` <dbl>, `25%` <dbl>, `50%` <dbl>, `75%` <dbl>,
+#> #   `84.1%` <dbl>, `97.5%` <dbl>
 ```
 
 ### Diagnostic plots
@@ -374,14 +379,14 @@ rstan::traceplot(hamstr_fit_1$fit, par = c("alpha[1]"),
 
 ### References
 
--   Blaauw, Maarten, and J. Andrés Christen. 2011. Flexible Paleoclimate
-    Age-Depth Models Using an Autoregressive Gamma Process. Bayesian
-    Analysis 6 (3): 457-74. <doi:10.1214/ba/1339616472>.
+- Blaauw, Maarten, and J. Andrés Christen. 2011. Flexible Paleoclimate
+  Age-Depth Models Using an Autoregressive Gamma Process. Bayesian
+  Analysis 6 (3): 457-74. <doi:10.1214/ba/1339616472>.
 
--   Parnell, Andrew. 2016. Bchron: Radiocarbon Dating, Age-Depth
-    Modelling, Relative Sea Level Rate Estimation, and Non-Parametric
-    Phase Modelling. R package version 4.2.6.
-    <https://CRAN.R-project.org/package=Bchron>
+- Parnell, Andrew. 2016. Bchron: Radiocarbon Dating, Age-Depth
+  Modelling, Relative Sea Level Rate Estimation, and Non-Parametric
+  Phase Modelling. R package version 4.2.6.
+  <https://CRAN.R-project.org/package=Bchron>
 
--   Stan Development Team (2020). RStan: the R interface to Stan. R
-    package version 2.21.2. <http://mc-stan.org/>.
+- Stan Development Team (2020). RStan: the R interface to Stan. R
+  package version 2.21.2. <http://mc-stan.org/>.

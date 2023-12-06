@@ -44,7 +44,7 @@ plot.hamstr_fit <- function(x,
          age_models = plot_hamstr(x, summarise = summarise,
                                   plot_diagnostics  = FALSE, ...),
          acc_rates = plot_hamstr_acc_rates(x, ...),
-         hier_acc_rates = plot_hierarchical_acc_rate(x),
+         hier_acc_rates = plot_hierarchical_acc_rate_prime(x),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(x),
          mem_prior_post = plot_memory_prior_posterior(x),
          L_prior_post = plot_L_prior_posterior(x),
@@ -112,7 +112,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
     post <- as.data.frame(hamstr_fit$fit, pars = c("bt_age")) %>%
       dplyr::as_tibble() %>%
       dplyr::mutate(iter = 1:dplyr::n()) %>%
-      tidyr::pivot_longer(cols = -.data$iter) %>%
+      tidyr::pivot_longer(cols = -"iter") %>%
       dplyr::mutate(dpt = get_par_idx(.data$name))
 
     tmp <- dplyr::tibble(depth = hamstr_fit$data$depth,
@@ -143,7 +143,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
 
     # only plot if model has been sampled
     if (hamstr_fit$data$sample_posterior){
-     p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
+     p.acc <- plot_hierarchical_acc_rate_prime(hamstr_fit)
 
     t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
       ggplot2::theme_bw() +
@@ -273,7 +273,7 @@ add_datapoints <- function(gg, dat){
                                          colour = "Obs age"),
                             show.legend = FALSE,
                             group = NA,
-                            inherit.aes = FALSE, size = 1.25) +
+                            inherit.aes = FALSE, linewidth = 1.25) +
     ggplot2::geom_point(data = dat, ggplot2::aes(y = .data$age,
                                                  group = NA,
                                                  colour = "Obs age")
@@ -412,7 +412,7 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
   axis <- match.arg(axis)
 
   p <- ds %>%
-    ggplot2::ggplot(ggplot2::aes_string(x = axis, y = "mean")) +
+    ggplot2::ggplot(ggplot2::aes(x = .data[[axis]], y = .data[["mean"]])) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`, fill = "95%")) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`75%`, ymin = .data$`25%`, fill = "50%")) +
     ggplot2::geom_line(aes(colour = "Mean")) +
@@ -454,7 +454,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
   if ("depth" %in% axis){
     acc_rates_long <- acc_rates %>%
-      dplyr::select(-.data$depth) %>%
+      dplyr::select(-"depth") %>%
       tidyr::pivot_longer(cols = c("c_depth_top", "c_depth_bottom"),
                           names_to = "depth_type", values_to = "depth")
 
@@ -479,8 +479,8 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
     median_age <- summary(hamstr_fit) %>%
       #mutate(unit = "age") %>%
-      dplyr::rename(age = .data$`50%`) %>%
-      dplyr::select(.data$depth, .data$age)
+      dplyr::rename(age = "50%") %>%
+      dplyr::select("depth", "age")
 
     jnt <- dplyr::left_join(median_age, acc_rates) %>%
       dplyr::filter(stats::complete.cases(.data$mean))
@@ -514,8 +514,70 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
 
 }
 
+seg_lvls_2_brk_lvls <- function(seg_lvls){
+  
+  lvls <- unique(seg_lvls)
+  cnts <- table(seg_lvls)
+  
+  rep(lvls, times = cnts+1)
+
+}
+
+plot_hierarchical_acc_rate_prime <- function(hamstr_fit){
+  
+  if (is.null(hamstr_fit$data$brks)) {
+   
+   gg <- plot_hierarchical_acc_rate(hamstr_fit)
+  
+   return(gg)
+  } 
+  
+  brks <- hamstr_fit$data$brks
+  dpth_rng <- hamstr_fit$data$bottom_depth - hamstr_fit$data$top_depth
+  
+  idx <- dplyr::tibble(
+    brks = unlist(brks)
+    ) %>% 
+    dplyr::mutate(
+     depth = brks * dpth_rng + hamstr_fit$data$top_depth
+    )
+  
+  a3 <- rstan::summary(hamstr_fit$fit, pars = "alpha")$summary
+
+  alph <- tibble::as_tibble(a3, rownames = "par") %>%
+    dplyr::mutate(alpha_idx = get_par_idx(.data$par),
+                  lvl = hamstr_fit$data$lvl) %>%
+    dplyr::select(lvl, #alpha_idx, 
+                  mean) %>% 
+    dplyr::group_by(lvl) %>% 
+    dplyr::reframe(mean = c(mean, tail(mean, 1)))
+ 
+  out <- dplyr::bind_cols(idx, alph) %>% 
+    dplyr::group_by(lvl) %>% 
+    #filter(depth <= hamstr_fit$data$bottom_depth) %>% 
+    dplyr::mutate(depth = dplyr::case_when(depth < hamstr_fit$data$top_depth ~ hamstr_fit$data$top_depth,
+                                depth > hamstr_fit$data$bottom_depth ~ hamstr_fit$data$bottom_depth,
+                                TRUE ~ depth)) %>%
+    dplyr::ungroup()
+  
+  out <- out %>% 
+    ggplot2::ggplot(aes(x=depth, y=mean, colour = factor(lvl))) +
+    ggplot2::geom_step() +
+    ggplot2::expand_limits(y = 0) +
+    ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
+                  colour = "Hierarchical\nlevel") +
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
+  
+  
+  return(out)
+}
+
+#plot_hierarchical_acc_rate_prime(hamstr_fit = hamstr_fit_1) +
+#  facet_wrap(~lvl)
 
 
+ 
 #' Plot the hierarchical accumulation rate parameters
 #'
 #' @inheritParams plot_hamstr
@@ -564,13 +626,13 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
                    })))
 
   alph2 <- alph %>%
-    dplyr::select(.data$lvl, .data$alpha_idx,
-                  .data$depth1, .data$depth2, .data$mean) %>%
+    dplyr::select("lvl", "alpha_idx",
+                  "depth1", "depth2", "mean") %>%
     dplyr::group_by(.data$lvl) %>%
     tidyr::pivot_longer(cols = tidyr::starts_with("depth"),
                         names_to = "type", values_to = "depth") %>% 
     #tidyr::gather(type, depth, -mean, -lvl, -alpha_idx) %>%
-    dplyr::select(.data$lvl, .data$alpha_idx, .data$depth, .data$mean) %>%
+    dplyr::select("lvl", "alpha_idx", "depth", "mean") %>%
     dplyr::arrange(.data$lvl, .data$alpha_idx, .data$depth, .data$mean)
 
 
@@ -677,7 +739,7 @@ plot_infl_prior_posterior <- function(hamstr_fit) {
 
 
   infl_fac <- rstan::extract(hamstr_fit$fit, "infl")[[1]] %>%
-    tibble::as_tibble() %>%
+    tibble::as_tibble(., .name_repair = c("unique")) %>%
     tidyr::gather() %>%
     dplyr::mutate(key = get_par_idx(.data$key))
 
@@ -839,8 +901,8 @@ plot_memory_prior_posterior <- function(hamstr_fit){
        w = w,
        R = as.vector(rstan::extract(hamstr_fit$fit, "R")$R)
        ) %>%
-    dplyr::rename(`Memory between sections` = .data$w,
-                  `Memory at 1 depth unit` = .data$R) %>%
+    dplyr::rename(`Memory between sections` = "w",
+                  `Memory at 1 depth unit` = "R") %>%
     tidyr::pivot_longer(cols = c("Memory between sections", "Memory at 1 depth unit"),
                         names_to = "par", values_to = "x")
   } else {
@@ -991,11 +1053,11 @@ add_subdivisions <- function(gg, hamstr_fit) {
 
   tick_dat <- hierarchical_depths(hamstr_fit$data)
 
-  for (x in seq_along(tick_dat)) {
+  for (i in seq_along(tick_dat)) {
 
-    df <- data.frame(x = tick_dat[[x]])
+    df <- data.frame(x = tick_dat[[i]])
 
-    lnth <- length(tick_dat) - (x - 1)
+    lnth <- length(tick_dat) - (i - 1) #i - 1/(i^2)
 
     gg <- gg + ggplot2::geom_rug(
       data = df,
