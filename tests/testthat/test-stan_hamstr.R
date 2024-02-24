@@ -197,6 +197,21 @@ testthat::test_that("deprecated K", {
 })
 
 
+testthat::test_that("Flat K structure", {
+  
+  
+   h1 <- suppressWarnings(hamstr(depth = 1:10,
+                obs_age = seq(1000, 10000, length.out = 10),
+                obs_err = rep(100, 10),
+                K_fine = 10, K_factor = 11,
+                sample_posterior = FALSE))
+   
+   expect_length(h1$data$brks, 2)
+  
+  
+})
+
+
 
 
 ## radiocarbon functions ------

@@ -355,6 +355,11 @@ GetBrksHalfOffset <- function(K_fine, K_factor){
   brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
   brks <- rev(brks)
   
+  # fixes behaviour when K_factor is very large and allows for a flat structure
+  if (all(brks[[1]] == brks[[2]])){
+    brks <- brks[2:length(brks)]
+  }
+  
   return(brks)
 }
 

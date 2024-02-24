@@ -2,16 +2,16 @@
 % Please edit documentation in R/make_stan_dat_hamstr.R
 \name{GetIndices}
 \alias{GetIndices}
-\title{Get Indices Structure For Hamstr Model}
+\title{Get Indices Structure For Hamstr Model from a Set of Breaks}
 \usage{
 GetIndices(nK = NULL, brks = NULL)
 }
 \arguments{
-\item{nK}{}
+\item{nK}{List of number of breaks in each level}
 
-\item{brks}{}
+\item{brks}{List of breakpoints in each level}
 }
 \description{
-Get Indices Structure For Hamstr Model
+Get Indices Structure For Hamstr Model from a Set of Breaks
 }
 \keyword{internal}

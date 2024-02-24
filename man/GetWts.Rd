@@ -7,9 +7,9 @@
 GetWts(a, b)
 }
 \arguments{
-\item{a}{}
+\item{a}{Parent breaks}
 
-\item{b}{}
+\item{b}{Child breaks}
 }
 \description{
 Get Weights for Parent Sections

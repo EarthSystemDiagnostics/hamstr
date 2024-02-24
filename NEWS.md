@@ -1,3 +1,7 @@
+# hamstr 0.8.1
+
+* Allow flat structure by setting K_factor > K_fine
+
 # hamstr 0.8.0
 
 * Hierarchical structure of sections changed so that child sections are offset from parents. This will eventually break backwards compatibility, for now if the old argument "K" is used, "K_fine" is calculated from "K". The change improves the age models by reducing the influence of the positions of the breaks in the low resolution layers.
