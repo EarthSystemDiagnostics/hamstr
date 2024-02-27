@@ -38,7 +38,7 @@ make_stan_dat_hamstr <- function(...) {
   
   l <- l[names(l)!= "hamstr.control"]
   
-  
+  # If prior for mean acc rate is provided, estimate one from the data
   if (is.null(l$acc_mean_prior)){
     
     d <- data.frame(depth = l$depth, obs_age = l$obs_age)
@@ -54,7 +54,7 @@ make_stan_dat_hamstr <- function(...) {
     l$acc_mean_prior <- acc_mean
   }
   
-  
+  # ensure the age control points are in depth order
   ord <- order(l$depth)
   
   l$depth <- l$depth[ord]
@@ -134,20 +134,19 @@ make_stan_dat_hamstr <- function(...) {
   }
   
   
-  # Transformed arguments
+  # Setup hierarchical structure for modelled sections
   l$N <- length(l$depth)
-  
   stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))
   
   brks <- GetBrksHalfOffset(K_fine = l$K_fine, K_factor = l$K_factor)
-  
   alpha_idx <- GetIndices(brks = brks)
-  
   
   l$K_tot <- sum(alpha_idx$nK)
   l$K_fine <- utils::tail(alpha_idx$nK, 1)
   l$c <- 1:l$K_fine
   
+  
+  # Transformed arguments
   l$mem_alpha = l$mem_strength * l$mem_mean
   l$mem_beta = l$mem_strength * (1-l$mem_mean)
   
@@ -155,12 +154,14 @@ make_stan_dat_hamstr <- function(...) {
   l$mem_strength = l$mem_strength
   
   l$delta_c = depth_range / l$K_fine
+  
+  # depth at top and bottom of each modelled section
   l$c_depth_bottom = l$delta_c * l$c + l$top_depth
   l$c_depth_top = c(l$top_depth, l$c_depth_bottom[1:(l$K_fine-1)])
   
   l$modelled_depths <- c(l$c_depth_top[1], l$c_depth_bottom)
   
-  # Index for which sections the target depth is in
+  # Index for which sections the age control points are in
   l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))
   
   l <- append(l, alpha_idx)
@@ -169,18 +170,19 @@ make_stan_dat_hamstr <- function(...) {
   l$scale_shape = as.numeric(l$scale_shape)
   l$model_bioturbation = as.numeric(l$model_bioturbation)
   l$model_displacement = as.numeric(l$model_displacement)
-  l$smooth_s = as.numeric(l$smooth_s)
+  
+  # Model hiatus? and set upper/lower limits for position of hiatus 
   l$model_hiatus = as.numeric(l$model_hiatus)
   if (is.null(l$H_top)) l$H_top = l$top_depth
   if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
   
+  # set scale of smoothing of acc_rates for bioturbation calculation
+  l$smooth_s = as.numeric(l$smooth_s)
   
   if (l$smooth_s == 1){
     l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
     l$I <- nrow(l$smooth_i)
-  } 
-  
-  else {
+  } else {
     l$smooth_i <- rbind(rep(1, l$N))
     l$I <- 1
   }
