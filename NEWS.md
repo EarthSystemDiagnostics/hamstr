@@ -1,6 +1,7 @@
 # hamstr 0.8.1
 
 * Allow flat structure by setting K_factor > K_fine
+* Update stan code to reflect new array syntax
 
 # hamstr 0.8.0
 
