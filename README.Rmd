@@ -77,7 +77,8 @@ A sample of six dates are plotted here for the IntCal20 and Marine20 calibration
 
 ```{r}
 i <- seq(1, 40, by = floor(40/6))[1:6]
-compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
+compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20", dfs = rep(100, 6)
+                )+
   ggplot2::labs(title = "Intcal20")
 ```
 

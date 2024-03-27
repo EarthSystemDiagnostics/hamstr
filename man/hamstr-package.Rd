@@ -16,3 +16,14 @@ Models Using an Autoregressive Gamma Process.'  Bayesian Analysis 6 (3):
 \references{
 Stan Development Team (2019). RStan: the R interface to Stan. R package version 2.19.2. \url{https://mc-stan.org}
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://earthsystemdiagnostics.github.io/hamstr/}
+}
+
+}
+\author{
+\strong{Maintainer}: Andrew Dolman \email{andrew.dolman@awi.de}
+
+}
