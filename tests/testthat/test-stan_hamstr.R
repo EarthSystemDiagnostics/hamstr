@@ -121,8 +121,9 @@ test_that("posterior and plotting functions work", {
 
 test_that("inflate_errors", {
   
-  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
-                         obs_age = seq(1000, 10000, length.out = 10),
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = rep(1:5, 2),
+                         obs_age = c(seq(1000, 10000, length.out = 5),
+                                     seq(1000, 10000, length.out = 5) + 1000),
                          obs_err = rep(100, 10), 
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result,
@@ -130,6 +131,9 @@ test_that("inflate_errors", {
                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1)))
   
   p1 <- plot(hamstr_fit_1, plot_diagnostics = FALSE)
+  
+  p1b <- plot(hamstr_fit_1, plot_diagnostics = FALSE,
+              summarise = FALSE, n = 4)
   
   p2 <- hamstr:::plot_infl_prior_posterior(hamstr_fit_1)
   

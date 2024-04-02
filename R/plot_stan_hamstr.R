@@ -232,22 +232,24 @@ plot_summary_age_models <- function(hamstr_fit){
 
   if (hamstr_fit$data$inflate_errors == 1 | hamstr_fit$data$model_displacement == 1){
 
-    infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
-      tibble::as_tibble(rownames = "par") %>%
-      dplyr::mutate(dat_idx = get_par_idx(.data$par))
-
-    obs_ages <- obs_ages %>%
-      dplyr::mutate(infl_err = infl_errs$mean,
-                    age_lwr_infl = .data$age + 2*.data$infl_err,
-                    age_upr_infl = .data$age - 2*.data$infl_err)
-
-    p.age.sum <- p.age.sum +
-      ggplot2::geom_linerange(
-        data = obs_ages,
-        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
-                     colour = "Infl err"), show.legend = FALSE,
-        group = NA,
-        alpha = 0.5, inherit.aes = F)
+    # infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
+    #   tibble::as_tibble(rownames = "par") %>%
+    #   dplyr::mutate(dat_idx = get_par_idx(.data$par))
+    # 
+    # obs_ages <- obs_ages %>%
+    #   dplyr::mutate(infl_err = infl_errs$mean,
+    #                 age_lwr_infl = .data$age + 2*.data$infl_err,
+    #                 age_upr_infl = .data$age - 2*.data$infl_err)
+    # 
+    # p.age.sum <- p.age.sum +
+    #   ggplot2::geom_linerange(
+    #     data = obs_ages,
+    #     ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
+    #                  colour = "Infl err"), show.legend = FALSE,
+    #     group = NA,
+    #     alpha = 0.5, inherit.aes = F)
+    
+    p.age.sum <- add_infl_err(p.age.sum, hamstr_fit$fit, obs_ages)
   }
 
   p.age.sum <- add_datapoints(p.age.sum, obs_ages)
@@ -280,6 +282,29 @@ add_datapoints <- function(gg, dat){
     ) +
     ggplot2::labs(x = "Depth", y = "Age")
 }
+
+add_infl_err <- function(gg, fit, obs_ages){
+  
+  infl_errs <- rstan::summary(fit, par = "obs_err_infl")$summary %>%
+      tibble::as_tibble(rownames = "par") %>%
+      dplyr::mutate(dat_idx = get_par_idx(.data$par))
+    
+  obs_ages <- obs_ages %>%
+      dplyr::mutate(infl_err = infl_errs$mean,
+                    age_lwr_infl = .data$age + 2*.data$infl_err,
+                    age_upr_infl = .data$age - 2*.data$infl_err)
+    
+  gg <- gg +
+      ggplot2::geom_linerange(
+        data = obs_ages,
+        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
+                     colour = "Infl err"), show.legend = TRUE,
+        group = NA,
+        alpha = 0.5, inherit.aes = F)
+ 
+  return(gg)
+}
+
 
 #' Plot Age Models as Spaghetti Plot
 #'
@@ -342,24 +367,25 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
   if (hamstr_fit$data$inflate_errors == 1){
 
-    infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
-      tibble::as_tibble(.data$., rownames = "par") %>%
-      dplyr::mutate(dat_idx = get_par_idx(.data$par))
-
-
-    obs_ages <- obs_ages %>%
-      dplyr::mutate(infl_err = infl_errs$mean,
-                    age_lwr_infl = .data$age + 2*.data$infl_err,
-                    age_upr_infl = .data$age - 2*.data$infl_err)
-
-    p.fit <- p.fit +
-      ggplot2::geom_linerange(
-        data = obs_ages,
-        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
-                     colour = "Infl err"),
-        group = NA,
-        colour = "Infl err",
-        alpha = 0.5, inherit.aes = F)
+    p.fit <- add_infl_err(p.fit, hamstr_fit$fit, obs_ages)
+    # infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
+    #   tibble::as_tibble(.data$., rownames = "par") %>%
+    #   dplyr::mutate(dat_idx = get_par_idx(.data$par))
+    # 
+    # 
+    # obs_ages <- obs_ages %>%
+    #   dplyr::mutate(infl_err = infl_errs$mean,
+    #                 age_lwr_infl = .data$age + 2*.data$infl_err,
+    #                 age_upr_infl = .data$age - 2*.data$infl_err)
+    # 
+    # p.fit <- p.fit +
+    #   ggplot2::geom_linerange(
+    #     data = obs_ages,
+    #     ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
+    #                  colour = "Infl err"),
+    #     group = NA,
+    #     #colour = "Infl err",
+    #     alpha = 0.5, inherit.aes = F)
   }
 
 
@@ -398,7 +424,9 @@ add_colour_scale <- function(gg){
                                  values = clrs,
                                  breaks = lbls,
                                  labels = lbls,
-                                 guide = "legend")
+                                 guide = "legend")+ 
+    guides(colour = guide_legend(override.aes = list(alpha = 1)))
+
 }
 
 
@@ -412,11 +440,11 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
   axis <- match.arg(axis)
 
   p <- ds %>%
-    ggplot2::ggplot(ggplot2::aes(x = .data[[axis]], y = .data[["mean"]])) +
+    ggplot2::ggplot(ggplot2::aes(x = .data[[axis]], y = .data[["mean"]]), show.legend = FALSE) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`, fill = "95%")) +
     ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`75%`, ymin = .data$`25%`, fill = "50%")) +
-    ggplot2::geom_line(aes(colour = "Mean")) +
-    ggplot2::geom_line(ggplot2::aes(y = .data$`50%`, colour = "Median")) +
+    ggplot2::geom_line(aes(colour = "Mean"), key_glyph = "abline") +
+    ggplot2::geom_line(ggplot2::aes(y = .data$`50%`, colour = "Median"), key_glyph = "abline") +
     ggplot2::theme_bw() +
     ggplot2::theme(panel.grid = ggplot2::element_blank())
 
