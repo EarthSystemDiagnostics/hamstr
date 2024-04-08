@@ -215,7 +215,7 @@ plot_summary_age_models <- function(hamstr_fit){
 
     gg <- ggplot2::ggplot(obs_ages, aes(x = .data$depth, y = .data$age)) +
       geom_blank() +
-      theme_bw()
+      theme_bw() 
 
     gg <- add_datapoints(gg, obs_ages)
     gg <- add_subdivisions(gg, hamstr_fit)
@@ -275,10 +275,13 @@ add_datapoints <- function(gg, dat){
                                          colour = "Obs age"),
                             show.legend = FALSE,
                             group = NA,
-                            inherit.aes = FALSE, linewidth = 1.25) +
-    ggplot2::geom_point(data = dat, ggplot2::aes(y = .data$age,
-                                                 group = NA,
-                                                 colour = "Obs age")
+                            inherit.aes = FALSE,
+                            linewidth = 1.25) +
+    ggplot2::geom_point(
+      data = dat, ggplot2::aes(
+        y = .data$age,
+        group = NA,
+        colour = "Obs age")
     ) +
     ggplot2::labs(x = "Depth", y = "Age")
 }
@@ -338,7 +341,9 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
   if (hamstr_fit$data$sample_posterior == FALSE){
 
-    gg <- ggplot2::ggplot(obs_ages, aes(x = .data$depth, y = .data$age)) +
+    gg <- ggplot2::ggplot(
+      obs_ages,
+      aes(x = .data$depth, y = .data$age)) +
       geom_blank() +
       theme_bw()
 
@@ -356,13 +361,18 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 
   p.fit <- posterior_ages %>%
-
     dplyr::filter(.data$iter %in% sample(unique(.data$iter), n.iter, replace = FALSE)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = .data$depth, y = .data$age, group = .data$iter))
-
+    ggplot2::ggplot(
+      ggplot2::aes(
+        x = .data$depth, y = .data$age, group = .data$iter
+        )
+      )
 
   p.fit <- p.fit +
-    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter), aes(colour = "Age models"))
+    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter),
+                       aes(colour = "Age models"),
+                       key_glyph = "abline"
+                       )
 
 
   if (hamstr_fit$data$inflate_errors == 1){
@@ -441,10 +451,16 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
 
   p <- ds %>%
     ggplot2::ggplot(ggplot2::aes(x = .data[[axis]], y = .data[["mean"]]), show.legend = FALSE) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`, fill = "95%")) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`75%`, ymin = .data$`25%`, fill = "50%")) +
-    ggplot2::geom_line(aes(colour = "Mean"), key_glyph = "abline") +
-    ggplot2::geom_line(ggplot2::aes(y = .data$`50%`, colour = "Median"), key_glyph = "abline") +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`,
+                   fill = "95%")) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymax = .data$`75%`, ymin = .data$`25%`,
+                   fill = "50%")) +
+    ggplot2::geom_line(aes(colour = "Mean"),
+                       key_glyph = "abline") +
+    ggplot2::geom_line(ggplot2::aes(y = .data$`50%`, colour = "Median"),
+                       key_glyph = "abline") +
     ggplot2::theme_bw() +
     ggplot2::theme(panel.grid = ggplot2::element_blank())
 
