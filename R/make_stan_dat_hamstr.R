@@ -98,6 +98,10 @@ make_stan_dat_hamstr <- function(...) {
     warning("min_age is older than minimum obs_age")
   }
   
+  if (is.null(l$min_age_sigma)) {
+    l$min_age_sigma <- 10 * l$acc_mean_prior
+  }
+  
   
   if (is.null(l$top_depth)) l$top_depth <- l$depth[1] #- buff
   

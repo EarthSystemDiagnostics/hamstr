@@ -6,7 +6,9 @@ data{
   vector[N] depth;
   vector[N] obs_age;
   vector[N] obs_err;
+  
   real min_age;
+  real min_age_sigma;
 
   // resolution of age-depth model
   int<lower=1> n_lvls; // number of hierarchical levels, not including overall mean
@@ -259,6 +261,9 @@ transformed parameters{
 }
 model {
 
+  // half-normal prior on age at first modelled depth
+  age0 ~ normal(min_age, min_age_sigma);
+  
   // the overall mean accumulation rate
   // weak half normal prior
   alpha[1] ~ normal(0, 10*acc_mean_prior);

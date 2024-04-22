@@ -13,6 +13,11 @@
 #'   collected in 1990, with ages in years BP this would be -40 (present = 1950
 #'   by convention). The default value is the current year in calendar age BP
 #'   (e.g. -71 for 2021).
+#' @param sigma_min_age uncertainty associated with the minimum age. The age at 
+#' the surface can be significantly older than the collection age due to mixing. 
+#' sigma_min_age is the standard deviation of a half normal prior, it defaults to
+#' the age of the mixed layer assuming a mixing depth of 10 cm and uses the mean
+#' accumulation rate estimated from a linear fit to the data
 #' @param top_depth,bottom_depth the top and bottom depths of the desired
 #'   age-depth model. Must encompass the range of the data. Defaults to the
 #'   shallowest and deepest data points.
@@ -91,6 +96,7 @@
 #' }
 hamstr <- function(depth, obs_age, obs_err,
                    min_age = 1950 - as.numeric(format(Sys.Date(), "%Y")),
+                   min_age_sigma = NULL,
                    K_fine = NULL, K_factor = NULL, K,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
