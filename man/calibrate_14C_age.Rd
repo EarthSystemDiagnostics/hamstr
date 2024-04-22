@@ -11,7 +11,8 @@ calibrate_14C_age(
   cal_curve = "intcal20",
   offset = "offset",
   offset.se = "offset.se",
-  return.type = "dat"
+  return.type = "dat",
+  dfs = rep(100, length(age.14C))
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ column does not exist, no offset uncertainty is applied.}
 
 \item{return.type}{Return the ammended dataframe or additionally the list of
 PDFs, Default: 'dat'}
+
+\item{dfs}{Degrees-of-freedom values for the t-distribution associated with the calibration calculation. A large value indicates Gaussian distributions assumed for the 14C ages}
 }
 \value{
 A dataframe or list
@@ -43,7 +46,7 @@ optionally summarises the empirical PDFs of calendar age to mean and
 standard deviation and appends these to the input dataframe
 }
 \details{
-A wrapper for Bchron::Bchroncalibrate
+A wrapper for Bchron::BchronCalibrate
 }
 \examples{
 # With defaults

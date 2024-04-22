@@ -14,8 +14,9 @@
 #' exist, no offset is applied. 
 #' @param offset.se Name of offset uncertainty column, e.g. sigmaDelatR. If
 #'  column does not exist, no offset uncertainty is applied.
+#' @inheritParams Bchron::BchronCalibrate
 #' @return A dataframe or list
-#' @details A wrapper for Bchron::Bchroncalibrate
+#' @details A wrapper for Bchron::BchronCalibrate
 #' @examples
 #' # With defaults
 #' dat <- data.frame(age.14C = c(2000, 20000),
@@ -46,7 +47,8 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
                               age.14C.se = "age.14C.se",
                               cal_curve = "intcal20",
                               offset = "offset", offset.se = "offset.se",
-                              return.type = "dat"
+                              return.type = "dat",
+                              dfs = NULL
                               ){
 
   return.type <- match.arg(return.type, choices = c("data.frame", "list"))
@@ -68,6 +70,11 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
     dat$offset.se <- dat[[offset.se]]
   }
 
+  if (is.null(dfs)){
+    dfs <- rep(100, nrow(dat))
+  } else if (length(dfs)==1){
+    dfs <- rep(dfs, nrow(dat))
+  }
 
   cal.ages <- lapply(1:nrow(dat), function(x) {
     tryCatch(Bchron::BchronCalibrate(
@@ -78,7 +85,8 @@ calibrate_14C_age <- function(dat, age.14C = "age.14C",
       #ageSds = dat[[age.14C.se]][x],
       
       calCurves = cal_curve,
-      ids = x),
+      ids = x,
+      dfs = dfs[x]),
       error = function(i){
         cat(strsplit(as.character(i), " : ", fixed = TRUE)[[1]][2])
 
@@ -206,6 +214,7 @@ SummariseEmpiricalPDF <- function(x, p){
 #'   hamstr is 6
 #' @param return.type return a ggplot object or a list containing the ggplot
 #'   object and two data frames with the empirical and t-distributions
+#' @inheritParams Bchron::BchronCalibrate
 #' @return A ggplot2 object or list with data and ggplot2 object
 #' @export
 #' @importFrom rlang .data
@@ -215,7 +224,9 @@ SummariseEmpiricalPDF <- function(x, p){
 compare_14C_PDF <- function(age.14C, age.14C.se,
                             offset = 0, offset.se = 0,
                             cal_curve = "intcal20", nu = 6,
-                            return.type = c("plot", "list")){
+                            return.type = c("plot", "list"),
+                            dfs = rep(100, length(age.14C))
+                            ){
 
   dt_ls <- function(x, dat=1, mu=0, sigma=1) {
     1/sigma * stats::dt((x - mu)/sigma, dat)
@@ -238,7 +249,8 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
 
   calib <- calibrate_14C_age(cal.dat,
                              return.type = "list",
-                             cal_curve = cal_curve)
+                             cal_curve = cal_curve,
+                             dfs = dfs)
 
   # The summarised calendar ages are appended to the input data
   C14 <- calib$dat
@@ -259,7 +271,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
     )
 
 
-  nu <- C14 %>%
+  tdist_df <- C14 %>%
     dplyr::filter(is.na(.data$age.14C.cal) == FALSE) %>%
     dplyr::group_by(.data$id) %>%
     dplyr::do({
@@ -276,13 +288,13 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
   gg <- cali.pdf.dat %>%
     ggplot2::ggplot(ggplot2::aes(x = .data$age/1000, y = .data$density, group = .data$id)) +
     ggplot2::geom_line(ggplot2::aes(colour = cal_curve)) +
-    ggplot2::geom_line(data = nu, ggplot2::aes(y = .data$density, colour = "t-distribution")) +
+    ggplot2::geom_line(data = tdist_df, ggplot2::aes(y = .data$density, colour = paste0("t-distribution: nu = ", nu))) +
     ggplot2::labs(colour = "", x = "Calendar age [ka BP]", y = "Density") +
     ggplot2::facet_wrap(~.data$id, scales = "free") +
     ggplot2::theme_bw()
 
   if (return.type == "list"){
-    return(list(plot = gg, cal.age.pdf = cali.pdf.dat, t.dist.age = nu))
+    return(list(plot = gg, cal.age.pdf = cali.pdf.dat, t.dist.age = tdist_df))
   } else if (return.type == "plot") {
     return(gg)
   }
