@@ -12,7 +12,7 @@ calibrate_14C_age(
   offset = "offset",
   offset.se = "offset.se",
   return.type = "dat",
-  dfs = rep(100, length(age.14C))
+  dfs = NULL
 )
 }
 \arguments{

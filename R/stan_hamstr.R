@@ -113,7 +113,7 @@ hamstr <- function(depth, obs_age, obs_err,
   if (!missing(K)) {
     warning("argument K is deprecated; K_fine has been calculated from K but please use K_fine instead.", 
             call. = FALSE)
-    K_fine <- tail(cumprod(K), 1)
+    K_fine <- utils::tail(cumprod(K), 1)
   }
   
   if (is.null(K_fine)== FALSE){

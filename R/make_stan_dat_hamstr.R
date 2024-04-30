@@ -354,7 +354,7 @@ GetBrksHalfOffset <- function(K_fine, K_factor){
     
   }
   
-  brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
+  brks <- c(brks, list(c(newbrks[1], utils::tail(newbrks, 1))))
   brks <- rev(brks)
   
   # fixes behaviour when K_factor is very large and allows for a flat structure
@@ -380,7 +380,7 @@ get_K_factor <- function(K_fine){
     abs(y - x^x)
   }
 
-  ceiling(optimize(bar, c(1, (10 + log10(K_fine))), y = K_fine)$minimum)
+  ceiling(stats::optimize(bar, c(1, (10 + log10(K_fine))), y = K_fine)$minimum)
 
 }
 
