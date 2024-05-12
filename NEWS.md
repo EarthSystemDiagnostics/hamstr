@@ -2,6 +2,7 @@
 
 * Allow flat structure by setting K_factor > K_fine
 * Update stan code to reflect new array syntax
+* Allow t-dist degrees of freedom to be passed as argument to BchronCalibrate from calibrate_14C_age and compare_14C_PDF
 
 # hamstr 0.8.0
 

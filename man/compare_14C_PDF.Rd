@@ -11,7 +11,8 @@ compare_14C_PDF(
   offset.se = 0,
   cal_curve = "intcal20",
   nu = 6,
-  return.type = c("plot", "list")
+  return.type = c("plot", "list"),
+  dfs = rep(100, length(age.14C))
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ hamstr is 6}
 
 \item{return.type}{return a ggplot object or a list containing the ggplot
 object and two data frames with the empirical and t-distributions}
+
+\item{dfs}{Degrees-of-freedom values for the t-distribution associated with the calibration calculation. A large value indicates Gaussian distributions assumed for the 14C ages}
 }
 \value{
 A ggplot2 object or list with data and ggplot2 object
