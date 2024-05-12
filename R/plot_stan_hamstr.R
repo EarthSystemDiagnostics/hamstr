@@ -148,7 +148,9 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
     t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top") +
-      ggplot2::labs(x = "Iteration")
+      ggplot2::labs(x = "Iteration") +
+      ggplot2::scale_colour_manual("Chain",
+        values = structure(c("#FBA72A", "#D3D4D8", "#CB7A5C", "#5785C1"), class = "palette", name = "AsteroidCity3"))
     
     diag.list <- list(t.lp, p.acc, p.mem)
     
@@ -276,7 +278,7 @@ add_datapoints <- function(gg, dat){
                             show.legend = FALSE,
                             group = NA,
                             inherit.aes = FALSE,
-                            linewidth = 1.25) +
+                            linewidth = 1) +
     ggplot2::geom_point(
       data = dat, ggplot2::aes(
         y = .data$age,
@@ -417,12 +419,42 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 ## Accumulation rates ----
 
+clrs_GBH <- as.character(structure(c("#F1BB7B", "#FD6467", "#5B1A18", "#D67236"), 
+                                   class = "palette", name = "GrandBudapest1"))
+pal_GBH <- c(clrs_GBH[c(3, 3, 1, 1, 2, 1, 2, 2, 2)], 
+             structure(c("#FBA72A", "#D3D4D8", "#CB7A5C", "#5785C1"), 
+                       class = "palette", name = "AsteroidCity3")[1:4])
+
+lbls_GBH <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "50%", "Age models",
+            "Chain 1","Chain 2","Chain 3","Chain 4")
+
+pal_GBH[which(lbls_GBH == "95%")] <- adjustcolor(pal_GBH[which(lbls_GBH == "Median")], alpha.f = 0.25)
+pal_GBH[which(lbls_GBH == "50%")] <- adjustcolor(pal_GBH[which(lbls_GBH == "Median")], alpha.f = 0.5)
+
+
+
+pal_PiYG <- c(c("#C51B7D", "#E9A3C9", "#FDE0EF", "#E6F5D0", "#A1D76A", "#4D9221")[c(1,1,2,3,4, 6,6,4,4)],
+              structure(c("#FBA72A", "#D3D4D8", "#CB7A5C", "#5785C1"), 
+                        class = "palette", name = "AsteroidCity3")[1:4])
+pal_PiYG[5] <- "black"
+lblsPiYG <- c("Age models","Median", "50%", "95%",
+              "Mean", 
+              "Age point", "Obs age", "Latent age", "Infl err", 
+              "Chain 1","Chain 2","Chain 3","Chain 4") 
+
+
+
+
+
 add_colour_scale <- function(gg){
 
-  clrs <- c("DarkBlue", "Blue", "Orange", "Red", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
-            "1", "2", "3", "4")
-  lbls <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "50%", "Age models",
-            "Chain 1","Chain 2","Chain 3","Chain 4")
+  # clrs <- c("DarkBlue", "Blue", "Orange", "Red", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
+  #           "1", "2", "3", "4")
+  # lbls <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "50%", "Age models",
+  #           "Chain 1","Chain 2","Chain 3","Chain 4")
+  
+  clrs <- pal_PiYG
+  lbls <- lblsPiYG
 
   gg +
     ggplot2::scale_fill_manual(name = "Interval",
@@ -631,8 +663,11 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
     ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
                   colour = "Hierarchical\nlevel") +
     ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
-  
+    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top") +
+    ggplot2::guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
+    ggplot2::scale_color_manual(values = structure(c("#C52E19", "#AC9765", "#54D8B1", "#b67c3b", "#175149", 
+                                                     "#AF4E24"), class = "palette", name = "AsteroidCity2"))
+    #ggplot2::scale_colour_brewer(palette = "Set1")
   
   return(out)
 }
