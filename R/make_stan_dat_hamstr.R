@@ -190,6 +190,195 @@ make_stan_dat_hamstr <- function(...) {
   return(l)
 }
 
+
+##
+make_stan_dat_hamstr_fit_acc_shape <- function(...) {
+  
+  # take the calling environment and create the data required for stan
+  l <- c(as.list(parent.frame()))
+  
+  # get defaults
+  default.args <- formals(hamstr_fit_acc_shape)
+  default.arg.nms <- names(default.args)
+  
+  
+  # Overwrite the defaults with non-null passed arguments
+  
+  l <- l[lapply(l, is.null) == FALSE]
+  
+  default.args[names(l)] <- l
+  
+  l <- default.args
+  
+  
+  # expand hamstr_control
+  hc.default.args <- formals(hamstr_control)
+  hc.default.arg.nms <- names(hc.default.args)
+  
+  hc <- l$hamstr_control
+  hc <- hc[lapply(hc, is.null) == FALSE]
+  
+  hc.default.args[names(hc)] <- hc
+  
+  hc <- hc.default.args
+  
+  l <- append(l, hc)
+  
+  l <- l[names(l)!= "hamstr.control"]
+  
+  # If prior for mean acc rate is provided, estimate one from the data
+  if (is.null(l$acc_mean_prior)){
+    
+    d <- data.frame(depth = l$depth, obs_age = l$obs_age)
+    acc_mean <- stats::coef(MASS::rlm(obs_age~depth, data = d))[2]
+    
+    acc_mean <- signif(acc_mean, 2)
+    
+    # if negative replace with 20
+    if (acc_mean <= 0) {
+      warning("Estimated mean accumulation rate is negative - using value = 20")
+      acc_mean <- 20
+    }
+    l$acc_mean_prior <- acc_mean
+  }
+  
+  # ensure the age control points are in depth order
+  ord <- order(l$depth)
+  
+  l$depth <- l$depth[ord]
+  l$obs_age <- l$obs_age[ord]
+  l$obs_err <- l$obs_err[ord]
+  
+  
+  if (l$model_bioturbation == TRUE){
+    
+    # check parameters
+    if (is.null(l$L_prior_sigma) == FALSE)
+      message("L_prior_shape is being overriden by L_prior_sigma.")
+    
+    if (length(c(l$L_prior_sigma, l$L_prior_shape)) == 0)
+      stop("One of either L_prior_sigma or L_prior_shape must be specified.
+             Set either to 0 to impose a fixed mixing depth.")
+    
+    if ((length(l$n_ind) == 1 | length(l$n_ind) == length(l$obs_age)) == FALSE)
+      stop("n_ind must be either a single value or a vector the same length as obs_age")
+    
+    if (length(l$n_ind == 1)) l$n_ind <- rep(l$n_ind, length(l$obs_age))
+    
+    l$n_ind <- l$n_ind[ord]
+    
+    if (is.null(l$L_prior_sigma) == FALSE) {
+      if (l$L_prior_sigma == 0) l$L_prior_shape <- 0 else
+        l$L_prior_shape <- gamma_sigma_shape(mean = l$L_prior_mean,
+                                             sigma = l$L_prior_sigma)$shape
+    }
+    
+  } else if(l$model_bioturbation == FALSE){
+    l$n_ind <- numeric(0)
+  }
+  
+  
+  if (is.null(l$infl_sigma_sd)){
+    l$infl_sigma_sd <- 10 * mean(l$obs_err)
+  }
+  
+  if (l$min_age > min(l$obs_age)) {
+    warning("min_age is older than minimum obs_age")
+  }
+  
+  
+  if (is.null(l$top_depth)) l$top_depth <- l$depth[1] #- buff
+  
+  if (is.null(l$bottom_depth)) l$bottom_depth <- utils::tail(l$depth, 1) #+ buff
+  
+  depth_range <- l$bottom_depth - l$top_depth
+  
+  if(l$top_depth > min(l$depth)) stop("top_depth must be above or equal to the shallowest data point")
+  if(l$bottom_depth < max(l$depth)) stop("bottom_depth must be deeper or equal to the deepest data point")
+  
+  
+  if (is.null(l$K_fine)){
+    
+    K_fine_1 <- l$bottom_depth - l$top_depth
+    
+    # set resolution so that there are only 16
+    # sections between the median spaced 2 data points
+    median.d.depth <- stats::median(diff(sort(unique(l$depth))))
+    K_fine_2 <- round(16 * K_fine_1 / median.d.depth )
+    
+    K_fine <- min(c(K_fine_1, K_fine_2))
+    
+    # prevent default values higher than 900
+    if (K_fine > 900) K_fine <- 900
+    
+    l$K_fine <- K_fine
+  }
+  
+  
+  if (is.null(l$K_factor)){
+    
+    l$K_factor <- get_K_factor(l$K_fine)
+    
+  }
+  
+  
+  # Setup hierarchical structure for modelled sections
+  l$N <- length(l$depth)
+  stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))
+  
+  brks <- GetBrksHalfOffset(K_fine = l$K_fine, K_factor = l$K_factor)
+  alpha_idx <- GetIndices(brks = brks)
+  
+  l$K_tot <- sum(alpha_idx$nK)
+  l$K_fine <- utils::tail(alpha_idx$nK, 1)
+  l$c <- 1:l$K_fine
+  
+  
+  # Transformed arguments
+  l$mem_alpha = l$mem_strength * l$mem_mean
+  l$mem_beta = l$mem_strength * (1-l$mem_mean)
+  
+  l$mem_mean = l$mem_mean
+  l$mem_strength = l$mem_strength
+  
+  l$delta_c = depth_range / l$K_fine
+  
+  # depth at top and bottom of each modelled section
+  l$c_depth_bottom = l$delta_c * l$c + l$top_depth
+  l$c_depth_top = c(l$top_depth, l$c_depth_bottom[1:(l$K_fine-1)])
+  
+  l$modelled_depths <- c(l$c_depth_top[1], l$c_depth_bottom)
+  
+  # Index for which sections the age control points are in
+  l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))
+  
+  l <- append(l, alpha_idx)
+  
+  l$n_lvls <- length(l$nK) -1
+  l$scale_shape = as.numeric(l$scale_shape)
+  l$model_bioturbation = as.numeric(l$model_bioturbation)
+  l$model_displacement = as.numeric(l$model_displacement)
+  
+  # Model hiatus? and set upper/lower limits for position of hiatus 
+  l$model_hiatus = as.numeric(l$model_hiatus)
+  if (is.null(l$H_top)) l$H_top = l$top_depth
+  if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
+  
+  # set scale of smoothing of acc_rates for bioturbation calculation
+  l$smooth_s = as.numeric(l$smooth_s)
+  
+  if (l$smooth_s == 1){
+    l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
+    l$I <- nrow(l$smooth_i)
+  } else {
+    l$smooth_i <- rbind(rep(1, l$N))
+    l$I <- 1
+  }
+  
+  return(l)
+}
+
+
 # Internal functions ---------
 
 # new K_fine and parent calculation -----
@@ -551,6 +740,49 @@ get_inits_hamstr <- function(stan_dat){
     l$infl = numeric(0)
   }
 
+  return(l)
+}
+
+
+
+get_inits_hamstr_fit_acc_shape <- function(stan_dat){
+  
+  # robust lm to get age0
+  d <- data.frame(depth = stan_dat$depth, obs_age = stan_dat$obs_age)
+  rlm1 <- MASS::rlm(obs_age~depth, data = d)
+  sigma <- summary(rlm1)$sigma
+  
+  
+  l <- list(
+    R = stats::runif(1, 0.1, 0.9),
+    
+    acc_shape = stats::rgamma(1, shape = 1.5, rate = 1.5/5),
+    
+    # create starting alpha values +- 3 SD from the overal prior mean (but always +ve)
+    alpha = with(stan_dat, abs(stats::rnorm(K_tot, acc_mean_prior, acc_mean_prior/3))),
+    #record_acc_mean = (abs(rnorm(1, stan_dat$acc_mean_prior, stan_dat$acc_mean_prior/3))),
+    
+    age0 = as.numeric(
+      stats::predict(rlm1,
+                     newdata = data.frame(depth = stan_dat$top_depth))
+    ) + stats::rnorm(1, 0, sigma)
+    
+  )
+  
+  
+  if (l$age0 < stan_dat$min_age) l$age0 <- stan_dat$min_age + abs(stats::rnorm(1, 0, 2))
+  
+  # need to make this conditional and make sure initial values are arrays!
+  if (stan_dat$inflate_errors == 1){
+    l$infl_mean = as.array(abs(stats::rnorm(1, 0, 0.1)))
+    l$infl_shape = as.array(1+abs(stats::rnorm(1, 0, 0.1)))
+    l$infl = abs(stats::rnorm(stan_dat$N, 0, 0.1))
+  } else {
+    l$infl_mean = numeric(0)
+    l$infl_sd = numeric(0)
+    l$infl = numeric(0)
+  }
+  
   return(l)
 }
 
