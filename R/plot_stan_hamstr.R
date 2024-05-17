@@ -657,7 +657,7 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
     dplyr::ungroup()
   
   out <- out %>% 
-    ggplot2::ggplot(aes(x=.data$depth, y=mean, colour = factor(.data$lvl))) +
+    ggplot2::ggplot(aes(x=.data$depth, y=mean, colour = factor(.data$lvl-1))) +
     ggplot2::geom_step() +
     ggplot2::expand_limits(y = 0) +
     ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
