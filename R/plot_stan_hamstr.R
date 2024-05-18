@@ -77,6 +77,14 @@ lblsPiYG <- c("Age models","Median", "50%", "95%",
               "Mean", 
               "Age point", "Obs age", "Latent age", "Infl err") 
 
+
+pal_PiYG_acc <- c("#C51B7D", "#E9A3C9", "#FDE0EF", "#E6F5D0", "#A1D76A", "#4D9221")[c(6,6,5,4,3, 1,1,3,3)]
+pal_PiYG_acc[5] <- "black"
+lblsPiYG_acc <- c("Age models","Median", "50%", "95%",
+              "Mean", 
+              "Age point", "Obs age", "Latent age", "Infl err") 
+
+
 pal_PRGn <- c("#762A83", "#AF8DC3", "#E7D4E8", "#D9F0D3", "#7FBF7B", "#1B7837")[c(1,1,2,3,4, 6,6,4,4)]
 pal_PRGn[5] <- "#7FBF7B"
 lblsPRGn <- c("Age models","Median", "50%", "95%",
@@ -93,15 +101,17 @@ pal_Glasby <- c("#0000FF", "#FF0000", "#00FF00", "#000033", "#FF00B6", "#005300"
 
 
 
-add_colour_scale <- function(gg){
+add_colour_scale <- function(gg, 
+                             clrs = pal_PiYG,
+                             lbls = lblsPiYG){
   
   # clrs <- c("DarkBlue", "Blue", "Orange", "Red", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
   #           "1", "2", "3", "4")
   # lbls <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "50%", "Age models",
   #           "Chain 1","Chain 2","Chain 3","Chain 4")
   
-  clrs <- pal_PiYG
-  lbls <- lblsPiYG
+  #clrs <- pal_PiYG
+  #lbls <- lblsPiYG
   
   gg +
     ggplot2::scale_fill_manual(name = "Interval",
@@ -297,7 +307,7 @@ plot_summary_age_models <- function(hamstr_fit){
   age_summary <- summarise_age_models(hamstr_fit)
 
   p.age.sum <- plot_downcore_summary(age_summary)
-
+  p.age.sum <- add_colour_scale(p.age.sum)
 
   if (hamstr_fit$data$inflate_errors == 1 | hamstr_fit$data$model_displacement == 1){
 
@@ -512,7 +522,6 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
     ggplot2::theme_bw() +
     ggplot2::theme(panel.grid = ggplot2::element_blank())
 
-  p <- add_colour_scale(p)
 
   return(p)
 }
@@ -559,6 +568,8 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
       ggplot2::facet_wrap(~.data$acc_rate_unit, scales = "free_y") +
       ggplot2::geom_rug(data = rug_dat, aes(x = .data$d, colour = "Age point"),
                         inherit.aes = FALSE)
+    
+    p.depth <- add_colour_scale(p.depth) 
 
     if ("hamstr_fit" %in% class(hamstr_fit)){
       p.depth <- add_subdivisions(p.depth, hamstr_fit = hamstr_fit)
@@ -584,6 +595,9 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
       plot_downcore_summary(axis = "age") +
       ggplot2::labs(x = "Age", y = "Accumulation rate") +
       ggplot2::facet_wrap(~.data$acc_rate_unit, scales = "free_y") #+
+    
+    p.age <- add_colour_scale(p.age) 
+    
     
     if ("hamstr_fit" %in% class(hamstr_fit)){
       rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
@@ -726,7 +740,9 @@ plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
       colour = "",
       fill = ""
     ) +
-      expand_limits(y = 0) +
+    ggplot2::guides(colour = ggplot2::guide_legend(order = 2), 
+                      shape = ggplot2::guide_legend(order = 1)) +
+    ggplot2::expand_limits(y = 0) +
     ggplot2::theme_bw()
 }
 
