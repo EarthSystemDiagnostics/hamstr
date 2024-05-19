@@ -77,14 +77,14 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "intcal20")+
   ggplot2::labs(title = "Intcal20")
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.svg" width="100%" />
+<img src="man/figures/README-t_approx_intcal-1.svg" width="100%" />
 
 ``` r
 compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
   ggplot2::labs(title = "Marine20")
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.svg" width="100%" />
+<img src="man/figures/README-t_approx_marine-1.svg" width="100%" />
 
 ### Fitting age-models with **hamstr**
 
@@ -112,9 +112,11 @@ along the top of the age-model plot.
 
 ``` r
 plot(hamstr_fit_1)
+#> Scale for colour is already present.
+#> Adding another scale for colour, which will replace the existing scale.
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.svg" width="100%" />
+<img src="man/figures/README-plot_default-1.svg" width="100%" />
 
 A “spaghetti” plot can be created instead of shaded regions. This shows
 a random sample of iterations from the posterior distribution
@@ -124,9 +126,11 @@ Additionally, plotting of the diagnostic plots can be switched off.
 
 ``` r
 plot(hamstr_fit_1, summarise = FALSE, plot_diagnostics = FALSE)
+#> Warning: No shared levels found between `names(values)` of the manual scale and the
+#> data's fill values.
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-plot_realisations-1.png" width="100%" />
 
 #### Mean accumulation rate
 
@@ -151,7 +155,7 @@ distribution should be much narrower than the weakly informative prior.
 plot(hamstr_fit_1, type = "acc_mean_prior_post")
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.svg" width="100%" />
+<img src="man/figures/README-plot_acc_mean-1.svg" width="100%" />
 
 #### Other hyperparameters
 
@@ -304,7 +308,7 @@ plot(hamstr_fit_1, type = "acc_rates")
 #> Joining with `by = join_by(depth)`
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.svg" width="100%" />
+<img src="man/figures/README-plot_acc_rates-1.svg" width="100%" />
 
 ``` r
 summary(hamstr_fit_1, type = "acc_rates") 
@@ -338,7 +342,7 @@ options.
 plot(hamstr_fit_1, type = "hier_acc")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.svg" width="100%" />
+<img src="man/figures/README-plot_hier_acc-1.svg" width="100%" />
 
 #### Plot memory prior and posterior
 
@@ -349,7 +353,7 @@ cm thick, there is not much difference between R and w.
 plot(hamstr_fit_1, type = "mem")
 ```
 
-<img src="man/figures/README-unnamed-chunk-17-1.svg" width="100%" />
+<img src="man/figures/README-plot_mem-1.svg" width="100%" />
 
 ### Other `rstan` functions
 
@@ -366,7 +370,7 @@ rstan::stan_rhat(hamstr_fit_1$fit)
 #> `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 ```
 
-<img src="man/figures/README-unnamed-chunk-18-1.svg" width="100%" />
+<img src="man/figures/README-stan_diags-1.svg" width="100%" />
 
 The first `alpha` parameter is the overall mean accumulation rate.
 
@@ -375,7 +379,7 @@ rstan::traceplot(hamstr_fit_1$fit, par = c("alpha[1]"),
                  inc_warmup = TRUE)
 ```
 
-<img src="man/figures/README-unnamed-chunk-19-1.svg" width="100%" />
+<img src="man/figures/README-first_alpha-1.svg" width="100%" />
 
 ### References
 
