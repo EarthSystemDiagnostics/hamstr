@@ -54,6 +54,86 @@ plot.hamstr_fit <- function(x,
   }
 
 
+
+# Palettes ------
+
+clrs_GBH <- as.character(structure(c("#F1BB7B", "#FD6467", "#5B1A18", "#D67236"), 
+                                   class = "palette", name = "GrandBudapest1"))
+pal_GBH <- c(clrs_GBH[c(3, 3, 1, 1, 2, 1, 2, 2, 2)], 
+             structure(c("#FBA72A", "#D3D4D8", "#CB7A5C", "#5785C1"), 
+                       class = "palette", name = "AsteroidCity3")[1:4])
+
+lbls_GBH <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "68%", "Age models",
+              "Chain 1","Chain 2","Chain 3","Chain 4")
+
+pal_GBH[which(lbls_GBH == "95%")] <- adjustcolor(pal_GBH[which(lbls_GBH == "Median")], alpha.f = 0.25)
+pal_GBH[which(lbls_GBH == "68%")] <- adjustcolor(pal_GBH[which(lbls_GBH == "Median")], alpha.f = 0.5)
+
+
+
+pal_PiYG <- c("#C51B7D", "#E9A3C9", "#FDE0EF", "#E6F5D0", "#A1D76A", "#4D9221")[c(1,1,2,3,4, 6,6,4,4)]
+pal_PiYG[5] <- "black"
+lblsPiYG <- c("Age models","Median", "68%", "95%",
+              "Mean", 
+              "Age point", "Obs age", "Latent age", "Infl err") 
+
+
+pal_PiYG_acc <- c("#C51B7D", "#E9A3C9", "#FDE0EF", "#E6F5D0", "#A1D76A", "#4D9221")[c(6,6,5,4,3, 1,1,3,3)]
+pal_PiYG_acc[5] <- "black"
+lblsPiYG_acc <- c("Age models","Median", "68%", "95%",
+              "Mean", 
+              "Age point", "Obs age", "Latent age", "Infl err") 
+
+
+pal_PRGn <- c("#762A83", "#AF8DC3", "#E7D4E8", "#D9F0D3", "#7FBF7B", "#1B7837")[c(1,1,2,3,4, 6,6,4,4)]
+pal_PRGn[5] <- "#7FBF7B"
+lblsPRGn <- c("Age models","Median", "68%", "95%",
+              "Mean", 
+              "Age point", "Obs age", "Latent age", "Infl err") 
+
+
+pal_Glasby <- c("#0000FF", "#FF0000", "#00FF00", "#000033", "#FF00B6", "#005300", 
+             "#FFD300", "#009FFF", "#9A4D42", "#00FFBE", "#783FC1", "#1F9698", 
+             "#FFACFD", "#B1CC71", "#F1085C", "#FE8F42", "#DD00FF", "#201A01", 
+             "#720055", "#766C95", "#02AD24", "#C8FF00", "#886C00", "#FFB79F", 
+             "#858567", "#A10300", "#14F9FF", "#00479E", "#DC5E93", "#93D4FF", 
+             "#004CFF", "#F2F318")
+
+
+hamstr_pal <- c("Age models" = "darkgrey", "Median" = "black",
+                "68%" = "darkgrey", "95%" = "lightgrey",
+                "Mean" = "#A1D76A", 
+                "Age point" = "#5785C1", "Obs age" = "#5785C1", "Latent age" = "#FBA72A", "Infl err" = "#FBA72A") 
+
+add_colour_scale <- function(gg, 
+                             clrs = hamstr_pal,
+                             lbls = names(hamstr_pal)){
+  
+  # clrs <- c("DarkBlue", "Blue", "Orange", "Red", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
+  #           "1", "2", "3", "4")
+  # lbls <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "50%", "Age models",
+  #           "Chain 1","Chain 2","Chain 3","Chain 4")
+  
+  #clrs <- pal_PiYG
+  #lbls <- lblsPiYG
+  
+  gg +
+    ggplot2::scale_fill_manual(name = "Interval",
+                               values = clrs,
+                               breaks = lbls,
+                               labels = lbls,
+                               guide = "legend") +
+    ggplot2::scale_colour_manual(name = "",
+                                 values = clrs,
+                                 breaks = lbls,
+                                 labels = lbls,
+                                 guide = "legend")+ 
+    guides(colour = guide_legend(override.aes = list(alpha = 1)))
+  
+}
+
+
+
 # Functions ------
 
 #' Plot an hamstr_fit object
@@ -123,10 +203,10 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
       ggplot2::geom_violin(data = tmp,
                            ggplot2::aes(x = .data$depth, y = .data$value,
                                         group = as.factor(.data$dpt),
-                      colour = "Latent age"), fill = NA,
-                  scale = "area",
-                  position = ggplot2::position_identity(), alpha = 0.5,
-                  show.legend = FALSE)
+                                        colour = "Latent age"), fill = NA,
+                           scale = "area",
+                           position = ggplot2::position_identity(), alpha = 0.75,
+                           show.legend = TRUE, key_glyph = draw_key_linerange)
 
   }
 
@@ -145,10 +225,13 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
     if (hamstr_fit$data$sample_posterior){
      p.acc <- plot_hierarchical_acc_rate(hamstr_fit)
 
-    t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE) +
+    t.lp <- rstan::traceplot(hamstr_fit$fit, pars = c("lp__"), include = TRUE, alpha = 0.75) +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "top") +
-      ggplot2::labs(x = "Iteration")
+      ggplot2::labs(x = "Iteration", colour = "Chain") +
+      #ggplot2::scale_colour_manual(values = pal_Glasby) +
+      ggplot2::scale_colour_brewer(name = "Set1", type = "qual", direction = -1) +
+      ggplot2::guides(color = guide_legend(override.aes = list(alpha = 1)))
     
     diag.list <- list(t.lp, p.acc, p.mem)
     
@@ -183,6 +266,32 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
   }
 }
 
+
+#' Title
+#'
+#' @param hamstr_fit 
+#'
+#' @return
+#' @keywords internal
+#'
+#' @examples
+get_obs_ages <- function(hamstr_fit){
+  obs_ages <- data.frame(
+    depth = hamstr_fit$data$depth,
+    age = hamstr_fit$data$obs_age,
+    err = hamstr_fit$data$obs_err)
+  
+  obs_ages <- dplyr::mutate(obs_ages,
+                            age_upr1 = .data$age + 1*.data$err,
+                            age_lwr1 = .data$age - 1*.data$err,
+                            age_upr2 = .data$age + 2*.data$err,
+                            age_lwr2 = .data$age - 2*.data$err)
+  
+  return(obs_ages)
+}
+
+
+
 #' Plot Summary of Posterior Age Models
 #'
 #' @inheritParams plot_hamstr
@@ -201,21 +310,24 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
 #' }
 plot_summary_age_models <- function(hamstr_fit){
 
-  obs_ages <- data.frame(
-    depth = hamstr_fit$data$depth,
-    age = hamstr_fit$data$obs_age,
-    err = hamstr_fit$data$obs_err)
-
-  obs_ages <- dplyr::mutate(obs_ages,
-                            age_upr = .data$age + 2*.data$err,
-                            age_lwr = .data$age - 2*.data$err)
-
+  # obs_ages <- data.frame(
+  #   depth = hamstr_fit$data$depth,
+  #   age = hamstr_fit$data$obs_age,
+  #   err = hamstr_fit$data$obs_err)
+  # 
+  # obs_ages <- dplyr::mutate(obs_ages,
+  #                           age_upr1 = .data$age + 1*.data$err,
+  #                           age_lwr1 = .data$age - 1*.data$err,
+  #                           age_upr2 = .data$age + 2*.data$err,
+  #                           age_lwr2 = .data$age - 2*.data$err)
+  
+  obs_ages <- get_obs_ages(hamstr_fit)
 
   if (hamstr_fit$data$sample_posterior == FALSE){
 
     gg <- ggplot2::ggplot(obs_ages, aes(x = .data$depth, y = .data$age)) +
       geom_blank() +
-      theme_bw()
+      theme_bw() 
 
     gg <- add_datapoints(gg, obs_ages)
     gg <- add_subdivisions(gg, hamstr_fit)
@@ -228,26 +340,28 @@ plot_summary_age_models <- function(hamstr_fit){
   age_summary <- summarise_age_models(hamstr_fit)
 
   p.age.sum <- plot_downcore_summary(age_summary)
-
+  p.age.sum <- add_colour_scale(p.age.sum)
 
   if (hamstr_fit$data$inflate_errors == 1 | hamstr_fit$data$model_displacement == 1){
 
-    infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
-      tibble::as_tibble(rownames = "par") %>%
-      dplyr::mutate(dat_idx = get_par_idx(.data$par))
-
-    obs_ages <- obs_ages %>%
-      dplyr::mutate(infl_err = infl_errs$mean,
-                    age_lwr_infl = .data$age + 2*.data$infl_err,
-                    age_upr_infl = .data$age - 2*.data$infl_err)
-
-    p.age.sum <- p.age.sum +
-      ggplot2::geom_linerange(
-        data = obs_ages,
-        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
-                     colour = "Infl err"), show.legend = FALSE,
-        group = NA,
-        alpha = 0.5, inherit.aes = F)
+    # infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
+    #   tibble::as_tibble(rownames = "par") %>%
+    #   dplyr::mutate(dat_idx = get_par_idx(.data$par))
+    # 
+    # obs_ages <- obs_ages %>%
+    #   dplyr::mutate(infl_err = infl_errs$mean,
+    #                 age_lwr_infl = .data$age + 2*.data$infl_err,
+    #                 age_upr_infl = .data$age - 2*.data$infl_err)
+    # 
+    # p.age.sum <- p.age.sum +
+    #   ggplot2::geom_linerange(
+    #     data = obs_ages,
+    #     ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
+    #                  colour = "Infl err"), show.legend = FALSE,
+    #     group = NA,
+    #     alpha = 0.5, inherit.aes = F)
+    
+    p.age.sum <- add_infl_err(p.age.sum, hamstr_fit, obs_ages)
   }
 
   p.age.sum <- add_datapoints(p.age.sum, obs_ages)
@@ -269,17 +383,59 @@ add_datapoints <- function(gg, dat){
   gg +
     ggplot2::geom_linerange(data = dat,
                             ggplot2::aes(x = .data$depth,
-                                         ymax = .data$age_upr, ymin = .data$age_lwr,
+                                         ymax = .data$age_upr2, ymin = .data$age_lwr2,
                                          colour = "Obs age"),
                             show.legend = FALSE,
                             group = NA,
-                            inherit.aes = FALSE, linewidth = 1.25) +
-    ggplot2::geom_point(data = dat, ggplot2::aes(y = .data$age,
-                                                 group = NA,
-                                                 colour = "Obs age")
+                            inherit.aes = FALSE,
+                            linewidth = 0.5) +
+    ggplot2::geom_linerange(data = dat,
+                            ggplot2::aes(x = .data$depth,
+                                         ymax = .data$age_upr1, ymin = .data$age_lwr1,
+                                         colour = "Obs age"),
+                            show.legend = FALSE,
+                            group = NA,
+                            inherit.aes = FALSE,
+                            linewidth = 1) +
+    ggplot2::geom_point(
+      data = dat, ggplot2::aes(
+        y = .data$age,
+        group = NA,
+        colour = "Obs age")
     ) +
     ggplot2::labs(x = "Depth", y = "Age")
 }
+
+add_infl_err <- function(gg, hamstr_fit, obs_ages){
+  
+  infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
+      tibble::as_tibble(rownames = "par") %>%
+      dplyr::mutate(dat_idx = get_par_idx(.data$par))
+    
+  obs_ages <- obs_ages %>%
+      dplyr::mutate(infl_err = infl_errs$mean,
+                    age_lwr_infl1 = .data$age + 1*.data$infl_err,
+                    age_upr_infl1 = .data$age - 1*.data$infl_err,
+                    age_lwr_infl2 = .data$age + 2*.data$infl_err,
+                    age_upr_infl2 = .data$age - 2*.data$infl_err)
+    
+  gg <- gg +
+      ggplot2::geom_linerange(
+        data = obs_ages,
+        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl2, ymin = .data$age_lwr_infl2,
+                     colour = "Infl err"), show.legend = TRUE,
+        group = NA,
+        lwd = 0.5, inherit.aes = F)+
+    ggplot2::geom_linerange(
+      data = obs_ages,
+      ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl1, ymin = .data$age_lwr_infl1,
+                   colour = "Infl err"), show.legend = TRUE,
+      group = NA,
+      lwd = 1,      inherit.aes = F)
+ 
+  return(gg)
+}
+
 
 #' Plot Age Models as Spaghetti Plot
 #'
@@ -302,18 +458,22 @@ add_datapoints <- function(gg, dat){
 plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 
-  obs_ages <- dplyr::tibble(
-    depth = hamstr_fit$data$depth,
-    age = hamstr_fit$data$obs_age,
-    err = hamstr_fit$data$obs_err)
-
-  obs_ages <- dplyr::mutate(obs_ages,
-                            age_upr = .data$age + 2*.data$err,
-                            age_lwr = .data$age - 2*.data$err)
+  # obs_ages <- dplyr::tibble(
+  #   depth = hamstr_fit$data$depth,
+  #   age = hamstr_fit$data$obs_age,
+  #   err = hamstr_fit$data$obs_err)
+  # 
+  # obs_ages <- dplyr::mutate(obs_ages,
+  #                           age_upr = .data$age + 2*.data$err,
+  #                           age_lwr = .data$age - 2*.data$err)
+  
+  obs_ages <- get_obs_ages(hamstr_fit)
 
   if (hamstr_fit$data$sample_posterior == FALSE){
 
-    gg <- ggplot2::ggplot(obs_ages, aes(x = .data$depth, y = .data$age)) +
+    gg <- ggplot2::ggplot(
+      obs_ages,
+      aes(x = .data$depth, y = .data$age)) +
       geom_blank() +
       theme_bw()
 
@@ -331,35 +491,41 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 
   p.fit <- posterior_ages %>%
-
     dplyr::filter(.data$iter %in% sample(unique(.data$iter), n.iter, replace = FALSE)) %>%
-    ggplot2::ggplot(ggplot2::aes(x = .data$depth, y = .data$age, group = .data$iter))
-
+    ggplot2::ggplot(
+      ggplot2::aes(
+        x = .data$depth, y = .data$age, group = .data$iter
+        )
+      )
 
   p.fit <- p.fit +
-    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter), aes(colour = "Age models"))
+    ggplot2::geom_line(alpha = 0.5 / sqrt(n.iter),
+                       aes(colour = "Age models"),
+                       key_glyph = "abline"
+                       )
 
 
   if (hamstr_fit$data$inflate_errors == 1){
 
-    infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
-      tibble::as_tibble(.data$., rownames = "par") %>%
-      dplyr::mutate(dat_idx = get_par_idx(.data$par))
-
-
-    obs_ages <- obs_ages %>%
-      dplyr::mutate(infl_err = infl_errs$mean,
-                    age_lwr_infl = .data$age + 2*.data$infl_err,
-                    age_upr_infl = .data$age - 2*.data$infl_err)
-
-    p.fit <- p.fit +
-      ggplot2::geom_linerange(
-        data = obs_ages,
-        ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
-                     colour = "Infl err"),
-        group = NA,
-        colour = "Infl err",
-        alpha = 0.5, inherit.aes = F)
+    p.fit <- add_infl_err(p.fit, hamstr_fit, obs_ages)
+    # infl_errs <- rstan::summary(hamstr_fit$fit, par = "obs_err_infl")$summary %>%
+    #   tibble::as_tibble(.data$., rownames = "par") %>%
+    #   dplyr::mutate(dat_idx = get_par_idx(.data$par))
+    # 
+    # 
+    # obs_ages <- obs_ages %>%
+    #   dplyr::mutate(infl_err = infl_errs$mean,
+    #                 age_lwr_infl = .data$age + 2*.data$infl_err,
+    #                 age_upr_infl = .data$age - 2*.data$infl_err)
+    # 
+    # p.fit <- p.fit +
+    #   ggplot2::geom_linerange(
+    #     data = obs_ages,
+    #     ggplot2::aes(x = .data$depth, ymax = .data$age_upr_infl, ymin = .data$age_lwr_infl,
+    #                  colour = "Infl err"),
+    #     group = NA,
+    #     #colour = "Infl err",
+    #     alpha = 0.5, inherit.aes = F)
   }
 
 
@@ -381,25 +547,6 @@ plot_age_models <- function(hamstr_fit, n.iter = 1000){
 
 ## Accumulation rates ----
 
-add_colour_scale <- function(gg){
-
-  clrs <- c("DarkBlue", "Blue", "Orange", "Red", "Black", "Green", "Lightgrey", "Darkgrey", "grey0",
-            "1", "2", "3", "4")
-  lbls <- c("Age point", "Obs age", "Latent age", "Infl err", "Median", "Mean", "95%", "50%", "Age models",
-            "Chain 1","Chain 2","Chain 3","Chain 4")
-
-  gg +
-    ggplot2::scale_fill_manual(name = "Interval",
-                               values = clrs,
-                               breaks = lbls,
-                               labels = lbls,
-                               guide = "legend") +
-    ggplot2::scale_colour_manual(name = "",
-                                 values = clrs,
-                                 breaks = lbls,
-                                 labels = lbls,
-                                 guide = "legend")
-}
 
 
 #' Plot Downcore Summary
@@ -412,15 +559,20 @@ plot_downcore_summary <- function(ds, axis = c("depth", "age")){
   axis <- match.arg(axis)
 
   p <- ds %>%
-    ggplot2::ggplot(ggplot2::aes(x = .data[[axis]], y = .data[["mean"]])) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`, fill = "95%")) +
-    ggplot2::geom_ribbon(ggplot2::aes(ymax = .data$`75%`, ymin = .data$`25%`, fill = "50%")) +
-    ggplot2::geom_line(aes(colour = "Mean")) +
-    ggplot2::geom_line(ggplot2::aes(y = .data$`50%`, colour = "Median")) +
+    ggplot2::ggplot(ggplot2::aes(x = .data[[axis]], y = .data[["mean"]]), show.legend = FALSE) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymax = .data$`2.5%`, ymin = .data$`97.5%`,
+                   fill = "95%")) +
+    ggplot2::geom_ribbon(
+      ggplot2::aes(ymax = .data$`15.9%`, ymin = .data$`84.1%`,
+                   fill = "68%")) +
+    ggplot2::geom_line(aes(colour = "Mean"),
+                       key_glyph = "abline") +
+    ggplot2::geom_line(ggplot2::aes(y = .data$`50%`, colour = "Median"),
+                       key_glyph = "abline") +
     ggplot2::theme_bw() +
     ggplot2::theme(panel.grid = ggplot2::element_blank())
 
-  p <- add_colour_scale(p)
 
   return(p)
 }
@@ -450,7 +602,7 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
   kern <- match.arg(kern)
 
   acc_rates <- summarise_hamstr_acc_rates(hamstr_fit, tau = tau, kern=kern,
-                                          probs = c(0.025, 0.25, 0.5, 0.75, 0.975))
+                                          probs = c(0.025, 0.159, 0.25, 0.5, 0.75, 0.841, 0.975))
 
   if ("depth" %in% axis){
     acc_rates_long <- acc_rates %>%
@@ -466,7 +618,9 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
       ggplot2::labs(x = "Depth", y = "Accumulation rate") +
       ggplot2::facet_wrap(~.data$acc_rate_unit, scales = "free_y") +
       ggplot2::geom_rug(data = rug_dat, aes(x = .data$d, colour = "Age point"),
-                        inherit.aes = FALSE)
+                        inherit.aes = FALSE, key_glyph = draw_key_vline)
+    
+    p.depth <- add_colour_scale(p.depth) 
 
     if ("hamstr_fit" %in% class(hamstr_fit)){
       p.depth <- add_subdivisions(p.depth, hamstr_fit = hamstr_fit)
@@ -493,11 +647,14 @@ plot_hamstr_acc_rates <- function(hamstr_fit,
       ggplot2::labs(x = "Age", y = "Accumulation rate") +
       ggplot2::facet_wrap(~.data$acc_rate_unit, scales = "free_y") #+
     
+    p.age <- add_colour_scale(p.age) 
+    
+    
     if ("hamstr_fit" %in% class(hamstr_fit)){
       rug_dat <- data.frame(a = hamstr_fit$data$obs_age)
       p.age <- p.age +
         ggplot2::geom_rug(data = rug_dat, aes(x = .data$a, colour = "Age point"),
-                          inherit.aes = FALSE)
+                          inherit.aes = FALSE, key_glyph = draw_key_vline)
     }
   }
 
@@ -581,14 +738,18 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
     dplyr::ungroup()
   
   out <- out %>% 
-    ggplot2::ggplot(aes(x=.data$depth, y=mean, colour = factor(.data$lvl))) +
+    ggplot2::ggplot(aes(x=.data$depth, y=mean, colour = factor(.data$lvl-1))) +
     ggplot2::geom_step() +
     ggplot2::expand_limits(y = 0) +
     ggplot2::labs(y = "Acc. rate [age/depth]", x = "Depth",
                   colour = "Hierarchical\nlevel") +
     ggplot2::theme_bw() +
-    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top")
-  
+    ggplot2::theme(panel.grid = ggplot2::element_blank(), legend.position = "top") +
+    ggplot2::guides(colour=guide_legend(nrow=2,byrow=TRUE)) +
+    #ggplot2::scale_colour_manual(values=pal_Glasby) 
+    #ggplot2::scale_color_manual(values = structure(c("#C52E19", "#AC9765", "#54D8B1", "#b67c3b", "#175149", 
+    #                                                 "#AF4E24"), class = "palette", name = "AsteroidCity2"))
+    ggplot2::scale_colour_brewer(palette = "Dark2")
   
   return(out)
 }
@@ -604,7 +765,7 @@ plot_hierarchical_acc_rate <- function(hamstr_fit){
 #' @import ggplot2
 #' @importFrom stats density
 plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
-  clrs <- c("Posterior" = "Blue", "Prior" = "Red")
+  clrs <- c("Posterior" = "#5785C1", "Prior" = "#CB7A5C")
 
   gg <- ggplot2::ggplot()
 
@@ -616,21 +777,23 @@ plot_prior_posterior_hist <- function(prior, posterior, bins = 50){
                    ggplot2::aes(x = .data$x, ggplot2::after_stat(density),
                    fill = "Posterior"),
                    colour = NA,
-                   alpha = 0.5, binwidth = bw)
+                   alpha = 0.75, binwidth = bw)
   }
     gg +
     ggplot2::geom_line(data = prior, ggplot2::aes(x = .data$x, y = .data$d,
                                                   colour = "Prior")) +
     ggplot2::facet_wrap(~.data$par, scales = "free_y", ncol = 1) +
-    ggplot2::scale_colour_manual("", values = clrs[2], aesthetics = c("colour")) +
-    ggplot2::scale_fill_manual("", values = clrs[1], aesthetics = c("fill")) +
+    ggplot2::scale_colour_manual("", values = clrs[2]) +
+    ggplot2::scale_fill_manual("", values = clrs[1]) +
     ggplot2::labs(
       x = "Value",
       y = "Density",
       colour = "",
       fill = ""
     ) +
-      expand_limits(y = 0) +
+    ggplot2::guides(colour = ggplot2::guide_legend(order = 2), 
+                      shape = ggplot2::guide_legend(order = 1)) +
+    ggplot2::expand_limits(y = 0) +
     ggplot2::theme_bw()
 }
 
