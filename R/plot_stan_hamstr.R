@@ -926,12 +926,13 @@ plot_gamma_prior_posterior <- function(hamstr_fit, par) {
   par_prior_shape <- paste0(par, "_prior_shape")
   par_prior_mean <- paste0(par, "_prior_mean")
   
-  if (hamstr_fit$data[[par_prior_shape]] > 0){
+  if (any(hamstr_fit$data[[par_prior_shape]] > 0)){
     post <- as.data.frame(hamstr_fit$fit, pars = c(par)) %>%
       dplyr::as_tibble() %>%
       tidyr::pivot_longer(cols = dplyr::everything(),
                           names_to = par, values_to = "x") %>%
-      dplyr::mutate(dpt = get_par_idx(par),
+      dplyr::mutate(#i = readr::parse_number(par),
+                    dpt = get_par_idx(par),
                     par = par)
     
     
