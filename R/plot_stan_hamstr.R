@@ -47,8 +47,8 @@ plot.hamstr_fit <- function(x,
          hier_acc_rates = plot_hierarchical_acc_rate(x),
          acc_mean_prior_post = plot_acc_mean_prior_posterior(x),
          mem_prior_post = plot_memory_prior_posterior(x),
-         L_prior_post = plot_L_prior_posterior(x),
-         D_prior_post = plot_D_prior_posterior(x),
+         L_prior_post = plot_gamma_prior_posterior(x, "L"),
+         D_prior_post = plot_gamma_prior_posterior(x, "D"),
          PDF_14C = plot_14C_PDF(x, ...)
   )
   }
@@ -192,7 +192,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
    
 
     if (hamstr_fit$data$model_bioturbation == 1){
-      p.L <- plot_L_prior_posterior(hamstr_fit) +
+      p.L <- plot_gamma_prior_posterior(hamstr_fit, "L") +
         theme(legend.position = "top")
 
         diag.nest <- diag.nest | p.L
@@ -200,7 +200,7 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
     }
 
     if (hamstr_fit$data$model_displacement == 1){
-      p.D <- plot_D_prior_posterior(hamstr_fit) +
+      p.D <- plot_gamma_prior_posterior(hamstr_fit, "D") +
         theme(legend.position = "top")
        
       diag.nest <- diag.nest | p.D
@@ -911,107 +911,68 @@ plot_memory_prior_posterior <- function(hamstr_fit){
 }
 
 
-#' Plot Mixing Depth Prior and Posterior
+
+
+#' Plot A Gamma Prior and Posterior
 #'
 #' @inheritParams plot_hamstr
-#'
+#' @param par parameter to plot
 #' @return A ggplot2 object
 #' @import ggplot2
 #' @importFrom rlang .data
 #' @keywords internal
-plot_L_prior_posterior <- function(hamstr_fit){
-
-  if (hamstr_fit$data$L_prior_shape > 0){
-    post <- as.data.frame(hamstr_fit$fit, pars = c("L")) %>%
-    dplyr::as_tibble() %>%
-    tidyr::pivot_longer(cols = dplyr::everything(),
-                        names_to = "par", values_to = "x") %>%
-    dplyr::mutate(dpt = get_par_idx(.data$par),
-           par = "L")
-
-
-  L_shp <- hamstr_fit$data$L_prior_shape
-  L_mean <- hamstr_fit$data$L_prior_mean
-
-  L_prior_rng <- stats::qgamma(c(0, 0.999),
-                               shape = L_shp,
-                               scale = L_mean / L_shp)
-
-  L_prior_rng[1] <- min(c(L_prior_rng[1]), post$x)
-  L_prior_rng[2] <- max(c(L_prior_rng[2]), post$x)
-
-  L_prior <-  tibble::tibble(
-    x = seq(L_prior_rng[1], L_prior_rng[2], length.out = 1000)
+plot_gamma_prior_posterior <- function(hamstr_fit, par) {
+  
+  par_prior_shape <- paste0(par, "_prior_shape")
+  par_prior_mean <- paste0(par, "_prior_mean")
+  
+  if (hamstr_fit$data[[par_prior_shape]] > 0){
+    post <- as.data.frame(hamstr_fit$fit, pars = c(par)) %>%
+      dplyr::as_tibble() %>%
+      tidyr::pivot_longer(cols = dplyr::everything(),
+                          names_to = par, values_to = "x") %>%
+      dplyr::mutate(dpt = get_par_idx(par),
+                    par = par)
+    
+    
+    par_shp <- hamstr_fit$data[[par_prior_shape]]
+    par_mean <- hamstr_fit$data[[par_prior_mean]]
+    
+    par_prior_rng <- stats::qgamma(c(0, 0.999),
+                                 shape = par_shp,
+                                 scale = par_mean / par_shp)
+    
+    par_prior_rng[1] <- min(c(par_prior_rng[1]), post$x)
+    par_prior_rng[2] <- max(c(par_prior_rng[2]), post$x)
+    
+    par_prior <-  tibble::tibble(
+      x = seq(par_prior_rng[1], par_prior_rng[2], length.out = 1000)
     ) %>%
-    dplyr::mutate(
-      par = "L",
-      d = stats::dgamma(
-        .data$x,
-        shape = L_shp,
-        scale = L_mean / L_shp)
+      dplyr::mutate(
+        par = par,
+        d = stats::dgamma(
+          .data$x,
+          shape = par_shp,
+          scale = par_mean / par_shp)
       )
-
-  plot_prior_posterior_hist(L_prior, post)+
-    ggplot2::theme(
-      strip.background = ggplot2::element_blank(),
-      strip.text.x = ggplot2::element_blank()
-    ) +
-    ggplot2::labs(x = "Mixing depth [L]")
+    
+    plot_prior_posterior_hist(par_prior, post)+
+      ggplot2::theme(
+        strip.background = ggplot2::element_blank(),
+        strip.text.x = ggplot2::element_blank()
+      ) +
+      ggplot2::labs(x = par)
   } else {
-
-    ggplot2::ggplot(data = tibble::tibble(x = hamstr_fit$data$L_prior_mean * c(1, 1), y = c(0, 1))) +
+    
+    ggplot2::ggplot(data = tibble::tibble(x = hamstr_fit$data$par_prior_mean * c(1, 1), y = c(0, 1))) +
       ggplot2::geom_line( aes(x = .data$x , y = .data$y, colour = "Fixed")) +
-      ggplot2::expand_limits(x = c(0, 2*hamstr_fit$data$L_prior_mean))+
-      ggplot2::labs(x = "Mixing depth [L]", y = "Density") +
+      ggplot2::expand_limits(x = c(0, 2*hamstr_fit$data$par_prior_mean))+
+      ggplot2::labs(x = par, y = "Density") +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_manual("", values = c(Fixed = "Red"))
-
+    
   }
-
-  }
-
-
-#' Plot Displacement Depth Prior and Posterior
-#'
-#' @inheritParams plot_hamstr
-#'
-#' @return A ggplot2 object
-#' @import ggplot2
-#' @importFrom rlang .data
-#' @keywords internal
-plot_D_prior_posterior <- function(hamstr_fit) {
-
-  prior_mean <- hamstr_fit$data$D_prior_scale
-
-  prior_rng <- stats::qnorm(c(0.999), mean = 0, sd = prior_mean)
-
-  prior <-  tibble::tibble(
-    x = seq(0, prior_rng[1], length.out = 1000)
-  ) %>%
-
-    dplyr::mutate(
-      par = "D",
-      d = 2 * stats::dnorm(.data$x, 0, prior_mean)
-    )
-
-  prior$d[prior$x <= 0] <- 0
-
-  if (hamstr_fit$data$sample_posterior == TRUE){
-    post <-
-      tibble::tibble(x = as.vector(rstan::extract(hamstr_fit$fit, "D[1]")[[1]]))
-  } else {
-    post <- NULL
-  }
-
-  p <- plot_prior_posterior_hist(prior, post) +
-    theme(
-      strip.background = element_blank(),
-      strip.text.x = element_blank()
-    ) +
-    labs(x = "Displacement [D]", y = "Density")
-
-  return(p)
-
+  
 }
 
 

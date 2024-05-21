@@ -24,7 +24,9 @@ hamstr(
   L_prior_shape = 2,
   L_prior_sigma = NULL,
   model_displacement = FALSE,
-  D_prior_scale = 10,
+  D_prior_mean = 2,
+  D_prior_shape = 1,
+  D_prior_sigma = NULL,
   model_hiatus = FALSE,
   H_top = NULL,
   H_bottom = NULL,
@@ -104,9 +106,14 @@ rather than being sampled.}
 not scale with the number of individual particles in a sample, for example
 due to incomplete mixing.}
 
-\item{D_prior_scale}{scale of the half-normal prior on additional error on
-observed ages. The mean and standard deviation of a half-normal are equal
-to the scale. Units are those of the depth variable, e.g. cm.}
+\item{D_prior_mean}{mean of the gamma prior on additional error on observed
+ages. Units are those of the depth variable, e.g. cm.}
+
+\item{D_prior_shape, D_prior_sigma}{shape and standard deviation of the gamma
+prior on the additional error on observed ages. Set only one of these, the
+other will be calculated. Defaults to shape = 1. If either the shape or
+sigma parameter is set to zero, the additional error if fixed at the value
+of D_prior_mean, rather than being sampled.}
 
 \item{model_hiatus}{optionally model a hiatus.}
 
@@ -121,10 +128,10 @@ model. Defaults to TRUE}
 \item{hamstr_control}{additional arguments to hamstr useful for debugging or
 development. See \code{\link{hamstr_control}} for details.}
 
-\item{stan_sampler_args}{additional arguments to \link[rstan]{sampling} passed as a
-named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000
-iterations instead of the default 4 chains of 2000 iterations.
-See \code{\link{get_stan_sampler_args}} for details.}
+\item{stan_sampler_args}{additional arguments to \link[rstan]{sampling}
+passed as a named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC
+chains of 4000 iterations instead of the default 4 chains of 2000
+iterations. See \code{\link{get_stan_sampler_args}} for details.}
 }
 \value{
 Returns an object of class "hamstr_fit", which is a list composed of
@@ -135,8 +142,8 @@ sampler, .$data
 \code{hamstr} is used to fit an age-depth model to a set of
 age-control points. Ages should already be on the desired scale, e.g.
 calendar ages, and will not be calibrated. The function
-\code{\link{calibrate_14C_age}} can be used to calibrate radiocarbon dates prior
-to fitting a hamstr model.
+\code{\link{calibrate_14C_age}} can be used to calibrate radiocarbon dates
+prior to fitting a hamstr model.
 }
 \examples{
 \dontrun{

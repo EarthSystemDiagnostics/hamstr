@@ -73,7 +73,8 @@ data{
 
   // Additional data for modelling displacement
   int<lower=0, upper=1> model_displacement;
-  real<lower = 0> D_prior_scale;
+  real<lower = 0> D_prior_mean;
+  real<lower = 0> D_prior_shape;
 
   int<lower=0, upper=1> smooth_s;
 
@@ -288,7 +289,7 @@ model {
 
   // parameters that are zero length do not get sampled
   L ~ gamma(L_prior_shape, L_rate);
-  D ~ normal(0, D_prior_scale);
+  D ~ gamma(D_prior_shape, D_prior_shape / D_prior_mean);
 
   // additional error in ages due to age-heterogeneity
   bt_error ~ gamma(n_ind, n_ind ./ age_het);

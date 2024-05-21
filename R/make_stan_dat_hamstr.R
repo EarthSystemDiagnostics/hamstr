@@ -62,6 +62,28 @@ make_stan_dat_hamstr <- function(...) {
   l$obs_err <- l$obs_err[ord]
   
   
+  # Displacement / depth uncertainty
+  
+  if (l$model_displacement == TRUE){
+    
+    # check parameters
+    if (is.null(l$D_prior_sigma) == FALSE)
+      message("D_prior_shape is being overriden by D_prior_sigma.")
+    
+    if (length(c(l$D_prior_sigma, l$D_prior_shape)) == 0)
+      stop("One of either D_prior_sigma or D_prior_shape must be specified.
+             Set either to 0 to impose a fixed depth uncertainty.")
+    
+    if (is.null(l$D_prior_sigma) == FALSE) {
+      if (l$D_prior_sigma == 0) l$D_prior_shape <- 0 else
+        l$D_prior_shape <- gamma_sigma_shape(mean = l$D_prior_mean,
+                                             sigma = l$D_prior_sigma)$shape
+    }
+    
+  }
+  
+  
+  
   if (l$model_bioturbation == TRUE){
     
     # check parameters
