@@ -77,31 +77,19 @@ make_stan_dat_hamstr <- function(...) {
       stop("One of either D_prior_sigma or D_prior_shape must be specified.
              Set either to 0 to impose a fixed depth uncertainty.")
     
-   
-    
     if (is.null(l$D_prior_sigma) == FALSE) {
       l$D_prior_shape <- ifelse(
         l$D_prior_sigma == 0, 0,
-        sapply(1:length(l$D_prior_mean), function(i) {
-          gamma_sigma_shape(mean = l$D_prior_mean[i],
-                            sigma = l$D_prior_sigma[i])$shape})
-                                )
-                                }
+        gamma_sigma_shape(mean = l$D_prior_mean,
+                          sigma = l$D_prior_sigma)$shape
+      )}
     
-    if (is.null(l$D_prior_sigma) == FALSE & length(l$D_prior_sigma) == 1){
-      l$D_prior_sigma <- rep(l$D_prior_sigma, l$N)
-    }
+    #l$D_prior_mean <- as.array(l$D_prior_mean)
+    #l$D_prior_shape <- as.array(l$D_prior_shape)
     
-    if (length(l$D_prior_mean) == 1){
-      l$D_prior_mean <- rep(l$D_prior_mean, l$N)
-    }
-    
-    if (length(l$D_prior_shape) == 1){
-      l$D_prior_shape <- rep(l$D_prior_shape, l$N)
-    }
   } else if(l$model_displacement == FALSE){
-    l$D_prior_mean <- numeric(0)
-    l$D_prior_shape <- numeric(0)
+    #l$D_prior_mean <- numeric(0)
+    #l$D_prior_shape <- numeric(0)
   }
   
   
@@ -594,7 +582,7 @@ get_inits_hamstr <- function(stan_dat){
     l$infl_sd = numeric(0)
     l$infl = numeric(0)
   }
-
+  
   return(l)
 }
 
