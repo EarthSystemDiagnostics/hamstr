@@ -141,7 +141,7 @@ parameters {
   vector<lower = 0>[inflate_errors ? N : 0] infl;
 
   array[model_bioturbation * sample_L] real<lower = 0> L;
-
+  
   vector<lower = 0>[model_bioturbation ? N : 0] bt_error;
 
   array[model_displacement] real<lower = 0> D;
@@ -290,9 +290,14 @@ model {
   // bioturbation error model
 
   // parameters that are zero length do not get sampled
-  L ~ gamma(L_prior_shape, L_rate);
+  // this seems broken now 2024.05.29 adding if clause
+  
+  if (sample_L == 1){
+     L ~ gamma(L_prior_shape, L_rate);
+     }
   
   D ~ gamma(D_prior_shape, D_prior_shape / D_prior_mean);
+  //D ~ normal(0, D_prior_sigma);
   
   if (model_displacement == 1){
     D_i ~ normal(0, D[1]);

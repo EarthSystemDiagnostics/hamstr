@@ -42,6 +42,28 @@ test_that("sample_posterior = FALSE works", {
   
 })
 
+test_that("Fixed L works", {
+  
+  library(hamstr)
+  
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
+                                          obs_age = seq(1000, 10000, length.out = 10),
+                                          obs_err = rep(100, 10), 
+                                          # the seed argument for the sampler is set here so that
+                                          # this example always returns the same numerical result,
+                                          model_bioturbation = TRUE,
+                                          L_prior_shape = 0,
+                                          n_ind = rep(10, 10),
+                                          stan_sampler_args = list(seed = 1, iter = 20, cores = 1)))
+  
+  
+  
+  p1 <- plot(hamstr_fit_1)
+  testthat::expect_equal(class(p1), c("patchwork", "plot_filler", "gg", "ggplot"))
+  
+  testthat::expect_equal(class(hamstr_fit_1), c("hamstr_fit", "list"))
+
+  })
 
 
 test_that("posterior and plotting functions work", {

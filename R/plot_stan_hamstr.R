@@ -965,9 +965,9 @@ plot_gamma_prior_posterior <- function(hamstr_fit, par) {
       ggplot2::labs(x = par)
   } else {
     
-    ggplot2::ggplot(data = tibble::tibble(x = hamstr_fit$data$par_prior_mean * c(1, 1), y = c(0, 1))) +
+    ggplot2::ggplot(data = tibble::tibble(x = hamstr_fit$data[[par_prior_mean]] * c(1, 1), y = c(0, 1))) +
       ggplot2::geom_line( aes(x = .data$x , y = .data$y, colour = "Fixed")) +
-      ggplot2::expand_limits(x = c(0, 2*hamstr_fit$data$par_prior_mean))+
+      ggplot2::expand_limits(x = c(0, 2*hamstr_fit$data[[par_prior_mean]]))+
       ggplot2::labs(x = par, y = "Density") +
       ggplot2::theme_bw() +
       ggplot2::scale_colour_manual("", values = c(Fixed = "Red"))
