@@ -63,6 +63,7 @@
 #' @param model_hiatus optionally model a hiatus.
 #' @param H_top,H_bottom limits to the location of a hiatus. By default these
 #'   are set to the top and bottom data points but can be set by the user
+#' @param H_max maximum length of the hiatus in age units   
 #' @param sample_posterior if set to FALSE, hamstr skips sampling the model and
 #'   returns only the data, model structure and prior parameters so that data
 #'   and prior distributions can be plotted and checked prior to running a
@@ -104,7 +105,7 @@ hamstr <- function(depth, obs_age, obs_err,
                    model_displacement = FALSE,
                    D_prior_scale = 10,
                    model_hiatus = FALSE,
-                   H_top = NULL, H_bottom = NULL,
+                   H_top = NULL, H_bottom = NULL, H_max = NULL,
                    sample_posterior = TRUE,
                    hamstr_control = list(),
                    stan_sampler_args = list()
