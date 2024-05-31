@@ -208,6 +208,8 @@ make_stan_dat_hamstr <- function(...) {
   if (is.null(l$H_top)) l$H_top = l$top_depth
   if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
   
+  if (is.null(l$H_max)) l$H_max = ceiling(diff(range(l$obs_age)))
+  
   # set scale of smoothing of acc_rates for bioturbation calculation
   l$smooth_s = as.numeric(l$smooth_s)
   

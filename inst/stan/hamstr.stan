@@ -84,13 +84,14 @@ data{
   int<lower=0, upper=1> model_hiatus;
   real H_top;
   real H_bottom;
+  real H_max;
 
 }
 transformed data{
 
   real min_depth = min(c_depth_top);
   real max_depth = max(c_depth_bottom);
-  real data_age_range = max(obs_age) - min(obs_age);
+  //real data_age_range = max(obs_age) - min(obs_age);
 
   // inverse scale of the prior on L
   real L_rate;
@@ -148,7 +149,7 @@ parameters {
   vector<lower = 0>[model_displacement ? N : 0] D_i;
 
   array[model_hiatus] real<lower = H_top, upper = H_bottom> H_depth;
-  array[model_hiatus] real<lower = 0, upper = data_age_range> H_length;
+  array[model_hiatus] real<lower = 0, upper = H_max> H_length;
 }
 
 transformed parameters{

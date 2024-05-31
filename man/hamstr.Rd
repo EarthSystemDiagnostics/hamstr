@@ -30,6 +30,7 @@ hamstr(
   model_hiatus = FALSE,
   H_top = NULL,
   H_bottom = NULL,
+  H_max = NULL,
   sample_posterior = TRUE,
   hamstr_control = list(),
   stan_sampler_args = list()
@@ -119,6 +120,8 @@ of D_prior_mean, rather than being sampled.}
 
 \item{H_top, H_bottom}{limits to the location of a hiatus. By default these
 are set to the top and bottom data points but can be set by the user}
+
+\item{H_max}{maximum length of the hiatus in age units}
 
 \item{sample_posterior}{if set to FALSE, hamstr skips sampling the model and
 returns only the data, model structure and prior parameters so that data
