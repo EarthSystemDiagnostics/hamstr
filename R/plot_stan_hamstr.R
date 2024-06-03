@@ -60,7 +60,7 @@ plot.hamstr_fit <- function(x,
 hamstr_pal <- c("Age models" = "darkgrey", "Median" = "black",
                 "68%" = "darkgrey", "95%" = "lightgrey",
                 "Mean" = "#A1D76A", 
-                "Age point" = "#5785C1", "Obs age" = "#5785C1", "Latent age" = "#FBA72A", "Infl err" = "#FBA72A") 
+                "Age point" = "#5785C1", "Obs age" = "#5785C1", "Latent age" = "#ff7f00", "Infl err" = "#4daf4a") 
 
 add_colour_scale <- function(gg, 
                              clrs = hamstr_pal,
@@ -152,9 +152,12 @@ plot_hamstr <- function(hamstr_fit, summarise = TRUE,
                            ggplot2::aes(x = .data$depth, y = .data$value,
                                         group = as.factor(.data$dpt),
                                         colour = "Latent age"), fill = NA,
-                           scale = "area",
+                           scale = "width",
                            position = ggplot2::position_identity(), alpha = 0.75,
                            show.legend = TRUE, key_glyph = draw_key_linerange)
+    
+    obs_ages <- get_obs_age_err(hamstr_fit)
+    p.fit <- add_datapoints(p.fit, dat = obs_ages)
 
   }
 
@@ -317,9 +320,11 @@ add_datapoints <- function(gg, dat){
                             linewidth = 1) +
     ggplot2::geom_point(
       data = dat, ggplot2::aes(
+        x = .data$depth,
         y = .data$age,
         group = NA,
-        colour = "Obs age")
+        colour = "Obs age"),
+      inherit.aes = FALSE
     ) +
     ggplot2::labs(x = "Depth", y = "Age")
 }
