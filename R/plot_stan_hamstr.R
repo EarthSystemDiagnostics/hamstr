@@ -60,7 +60,7 @@ plot.hamstr_fit <- function(x,
 hamstr_pal <- c("Age models" = "darkgrey", "Median" = "black",
                 "68%" = "darkgrey", "95%" = "lightgrey",
                 "Mean" = "#A1D76A", 
-                "Age point" = "#5785C1", "Obs age" = "#5785C1", "Latent age" = "#ff7f00", "Infl err" = "#4daf4a") 
+                "Age point" = "#5785C1", "Obs age" = "#5785C1", "Latent age" = "#ff7f00", "Infl err" = "red") 
 
 add_colour_scale <- function(gg, 
                              clrs = hamstr_pal,
