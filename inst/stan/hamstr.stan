@@ -146,7 +146,7 @@ parameters {
   vector<lower = 0>[model_bioturbation ? N : 0] bt_error;
 
   array[model_displacement] real<lower = 0> D;
-  vector<lower = 0>[model_displacement ? N : 0] D_i;
+  //vector<lower = 0>[model_displacement ? N : 0] D_i;
 
   array[model_hiatus] real<lower = H_top, upper = H_bottom> H_depth;
   array[model_hiatus] real<lower = 0, upper = H_max> H_length;
@@ -247,7 +247,7 @@ transformed parameters{
   }
 
   if (inflate_errors == 1 && model_displacement == 1){
-    disp_yrs = D_i .* smooth_x;
+    disp_yrs = D[1] .* smooth_x;
     obs_err_infl = sqrt((obs_err .* obs_err) + (infl .* infl) + (disp_yrs .* disp_yrs));
     infl_shape[1] = infl_shape_1[1] + 1;
   } else if (inflate_errors == 1 && model_displacement == 0){
@@ -255,7 +255,7 @@ transformed parameters{
     obs_err_infl[n] = sqrt((obs_err[n])^2 + (infl[n])^2);
     infl_shape[1] = infl_shape_1[1] + 1;
   } else if (inflate_errors == 0 && model_displacement == 1){
-    disp_yrs = D_i .* smooth_x;
+    disp_yrs = D[1] .* smooth_x;
     obs_err_infl = sqrt((obs_err .* obs_err) + (disp_yrs .* disp_yrs));
   }
 
@@ -300,9 +300,9 @@ model {
   D ~ gamma(D_prior_shape, D_prior_shape / D_prior_mean);
   //D ~ normal(0, D_prior_sigma);
   
-  if (model_displacement == 1){
-    D_i ~ normal(0, D[1]);
-    }
+  // if (model_displacement == 1){
+  //   D_i ~ normal(0, D[1]);
+  //   }
   
   // additional error in ages due to age-heterogeneity
   bt_error ~ gamma(n_ind, n_ind ./ age_het);
