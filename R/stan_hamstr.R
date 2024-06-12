@@ -28,7 +28,7 @@
 #'   mean accumulation rate estimated by fitting a robust linear model using
 #'   \link[MASS]{rlm}.
 #' @param acc_shape hyperparameter for the shape of the priors on accumulation
-#'   rates. Defaults to 1.5 - as for Bacon 2.2.
+#'   rates. Defaults to 4.
 #' @param mem_mean hyperparameter; a parameter of the Beta prior distribution on
 #'   "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 #'   The prior on the correlation between layers is scaled according to the
@@ -48,10 +48,10 @@
 #'   sample that was dated by e.g. radiocarbon dating. This can be a single
 #'   value or a vector the same length as obs_age. Only used if
 #'   model_bioturbation = TRUE.
-#' @param L_prior_mean mean of the gamma prior on mixing depth, defaults to 10.
+#' @param L_prior_mean mean of the gamma prior on mixing depth, defaults to 7.5.
 #' @param L_prior_shape,L_prior_sigma shape and standard deviation of the gamma
 #'   prior on the mixing depth. Set only one of these, the other will be
-#'   calculated. Defaults to shape = 2. If either the shape or sigma parameter
+#'   calculated. Defaults to shape = 2.5. If either the shape or sigma parameter
 #'   is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 #'   rather than being sampled.
 #' @param model_displacement model additional error on observed ages that does
@@ -61,7 +61,7 @@
 #'   ages. Units are those of the depth variable, e.g. cm.
 #' @param D_prior_shape,D_prior_sigma shape and standard deviation of the gamma
 #'   prior on the additional error on observed ages. Set only one of these, the
-#'   other will be calculated. Defaults to shape = 1. If either the shape or
+#'   other will be calculated. Defaults to shape = 1.5. If either the shape or
 #'   sigma parameter is set to zero, the additional error if fixed at the value
 #'   of D_prior_mean, rather than being sampled.
 #' @param model_hiatus optionally model a hiatus.
@@ -99,16 +99,16 @@ hamstr <- function(depth, obs_age, obs_err,
                    K_fine = NULL, K_factor = NULL, K,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
-                   acc_shape = 1.5,
+                   acc_shape = 4,
                    mem_mean = 0.5, mem_strength = 10,
                    model_bioturbation = FALSE,
                    n_ind = NULL,
-                   L_prior_mean = 10,
-                   L_prior_shape = 2,
+                   L_prior_mean = 7.5,
+                   L_prior_shape = 2.5,
                    L_prior_sigma = NULL,
                    model_displacement = FALSE,
                    D_prior_mean = 2,
-                   D_prior_shape = 1,
+                   D_prior_shape = 1.5,
                    D_prior_sigma = NULL,
                    model_hiatus = FALSE,
                    H_top = NULL, H_bottom = NULL, H_max = NULL,
