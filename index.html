@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">hamstr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,32 +94,35 @@
 <code class="sourceCode R"><span><span class="va">i</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">40</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">floor</a></span><span class="op">(</span><span class="fl">40</span><span class="op">/</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
 <span><span class="fu"><a href="reference/compare_14C_PDF.html">compare_14C_PDF</a></span><span class="op">(</span><span class="va">MSB2K</span><span class="op">$</span><span class="va">age</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="va">MSB2K</span><span class="op">$</span><span class="va">error</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, cal_curve <span class="op">=</span> <span class="st">"intcal20"</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Intcal20"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-4-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-t_approx_intcal-1.svg" width="100%"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/compare_14C_PDF.html">compare_14C_PDF</a></span><span class="op">(</span><span class="va">MSB2K</span><span class="op">$</span><span class="va">age</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, <span class="va">MSB2K</span><span class="op">$</span><span class="va">error</span><span class="op">[</span><span class="va">i</span><span class="op">]</span>, cal_curve <span class="op">=</span> <span class="st">"marine20"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Marine20"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-5-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-t_approx_marine-1.svg" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="fitting-age-models-with-hamstr">Fitting age-models with <strong>hamstr</strong>
 <a class="anchor" aria-label="anchor" href="#fitting-age-models-with-hamstr"></a>
 </h3>
-<p>Age-depth (sediment accumulation) models are fit with the function <code>hamstr</code>. A vectors of depth, observed age and age uncertainty are passed as arguments to the function.</p>
+<p>Age-depth (sediment accumulation) models are fit with the function <code>hamstr</code>. Vectors of depth, observed age and age uncertainty are passed as arguments to <code><a href="reference/hamstr.html">hamstr()</a></code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hamstr_fit_1</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/hamstr.html">hamstr</a></span><span class="op">(</span>depth <span class="op">=</span> <span class="va">MSB2K_cal</span><span class="op">$</span><span class="va">depth</span>,</span>
 <span>                       obs_age <span class="op">=</span> <span class="va">MSB2K_cal</span><span class="op">$</span><span class="va">age.14C.cal</span>,</span>
 <span>                       obs_err <span class="op">=</span> <span class="va">MSB2K_cal</span><span class="op">$</span><span class="va">age.14C.cal.se</span>, </span>
 <span>                       <span class="co"># the seed argument for the sampler is set here so that</span></span>
 <span>                       <span class="co"># this example always returns the same numerical result</span></span>
+<span>                       <span class="co"># you should not normally do this </span></span>
 <span>                       stan_sampler_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; the prior and posterior of the memory parameter. By default the age-models are summarised to show the mean, median, 25% and 95% posterior intervals. The data are shown as points with their 1-sigma uncertainties. The structure of the sections is shown along the top of the age-model plot.</p>
+<p>The default plotting method shows the fitted age models together with some diagnostic plots: a traceplot of the log-posterior to assess convergence of the overall model; a plot of accumulation rate against depth at each hierarchical level; and the prior and posterior of the memory parameter(s). By default the age-models are summarised to show the mean, median, 68% and 95% posterior intervals (equivalent to 1- and 2-sigma uncertainty). The data are shown as points with their 1- and 2-sigma uncertainties. The structure of the sections is shown as tick marks along the top of the age-model plot.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-7-1.svg" width="100%"></p>
-<p>A “spaghetti” plot can be created instead of shaded regions. This shows a random sample of iterations from the posterior distribution (realisation of the age-depth model). This can be slow if lots of iterations are plotted, the default is to plot 1000 iterations. Additionally, plotting of the diagnostic plots can be switched off.</p>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Scale for colour is already present.</span></span>
+<span><span class="co">#&gt; Adding another scale for colour, which will replace the existing scale.</span></span></code></pre></div>
+<p><img src="reference/figures/README-plot_default-1.svg" width="100%"></p>
+<p>A “spaghetti” plot can be created instead of shaded regions. This shows a random sample of iterations from the posterior distribution (realisations of the age-depth model). This can be slow if lots of iterations are plotted, the default is to plot 1000 iterations. Additionally, plotting of the diagnostic plots can be switched off.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, summarise <span class="op">=</span> <span class="cn">FALSE</span>, plot_diagnostics <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-8-1.png" width="100%"></p>
+<p><img src="reference/figures/README-plot_realisations-1.png" width="100%"></p>
 <div class="section level4">
 <h4 id="mean-accumulation-rate">Mean accumulation rate<a class="anchor" aria-label="anchor" href="#mean-accumulation-rate"></a>
 </h4>
@@ -128,12 +131,12 @@
 <p>This prior can be checked visually against the posterior. The posterior distribution should be much narrower than the weakly informative prior.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"acc_mean_prior_post"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-9-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-plot_acc_mean-1.svg" width="100%"></p>
 </div>
 <div class="section level4">
 <h4 id="other-hyperparameters">Other hyperparameters<a class="anchor" aria-label="anchor" href="#other-hyperparameters"></a>
 </h4>
-<p>Default parameter values for the shape of the gamma distributed accumulation rates <code>acc_shape = 1.5</code>, the memory mean <code>mem_mean = 0.5</code> and memory strength <code>mem_strength = 10</code>, are the same as for Bacon &gt;= 2.5.1.</p>
+<p><code>acc_shape</code>, the shape of the gamma distributed prior on accumulation rates has a default value of 4 <code>acc_shape = 4</code>. The memory mean <code>mem_mean = 0.5</code> and memory strength <code>mem_strength = 10</code>, are the same as for Bacon &gt;= 2.5.1.</p>
 </div>
 </div>
 <div class="section level3">
@@ -141,7 +144,7 @@
 </h3>
 <p>One of the more critical tuning parameters in the <strong>Bacon</strong> model is the parameter <code>thick</code>, which determines the thickness and number of discrete down-core sediment sections modelled. Finding a good or optimal value for a given core is often critical to getting a good age-depth model. Too few sections and the resulting age-model is very “blocky” and can miss changes in sedimentation rate; however, counter-intuitively, too many very thin sections can also often result in an age-model that “under-fits” the data - a straight line through the age-control points when a lower resolution model shows variation in accumulation rate.</p>
 <p>The key structural difference between <strong>Bacon</strong> and <strong>hamstr</strong> models is that with <strong>hamstr</strong> the sediment core is modelled at multiple resolutions simultaneously - removing the need to trade-off smoothness and flexibility. The resolutions have a hierarchical structure whereby coarse resolution “parent” sections act as priors for higher resolution “child” sections.</p>
-<p>For <strong>hamstr</strong> version 0.8.0 and onwards, the parameter <code>K_fine</code> controls the number of discrete sections at the highest resolution level, while <code>K_factor</code> controls how much thicker the discrete sections are at each subsequent level. Sufficient levels are modelled so that the coarsest level has just one section - an overal mean accumulation rate.</p>
+<p>For <strong>hamstr</strong> version 0.8.0 and onwards, the parameter <code>K_fine</code> controls the number of discrete sections at the highest resolution level, while <code>K_factor</code> controls how much thicker the discrete sections are at each subsequent level. Sufficient levels are modelled so that the coarsest level has just one section - an overall mean accumulation rate.</p>
 <p>The structure is hierarchical in the sense that the modelled accumulation rates for the parent sections act as priors for their child sections; specifically, the estimated accumulation rate for a coarse parent section acts as the mean of the gamma prior for its child sections. In turn, the overall mean accumulation rate for the whole core is itself a parameter estimated by the fitting process. The hierarchical structure of increasing resolution allows the model to adapt to low-frequency changes in the accumulation rate, that is changes between “regimes” of high or low accumulation that persist for long periods.</p>
 <p>By default, the number of sections at the highest resolution (<code>K_fine</code>) is set so that the sections have approximately unit thickness, i.e. if the depths are in cm, the sections are 1 cm thick. This applies up to a maximum of 900 sections above which the default remains 900 sections and a coarser resolution is used. This can be changed from the default via the parameter <code>K_fine</code>.</p>
 <p><code>K_factor</code> is set so that the total number of modelled sections is approximately 1.2 times <code>K_fine</code>, or</p>
@@ -157,16 +160,16 @@
 <span><span class="co">#&gt; # A tibble: 396,000 × 3</span></span>
 <span><span class="co">#&gt;     iter depth   age</span></span>
 <span><span class="co">#&gt;    &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1     1   1.5 4525.</span></span>
-<span><span class="co">#&gt;  2     1   2.5 4537.</span></span>
-<span><span class="co">#&gt;  3     1   3.5 4548.</span></span>
-<span><span class="co">#&gt;  4     1   4.5 4556.</span></span>
-<span><span class="co">#&gt;  5     1   5.5 4580.</span></span>
-<span><span class="co">#&gt;  6     1   6.5 4607.</span></span>
-<span><span class="co">#&gt;  7     1   7.5 4628.</span></span>
-<span><span class="co">#&gt;  8     1   8.5 4648.</span></span>
-<span><span class="co">#&gt;  9     1   9.5 4673.</span></span>
-<span><span class="co">#&gt; 10     1  10.5 4697.</span></span>
+<span><span class="co">#&gt;  1     1   1.5 4546.</span></span>
+<span><span class="co">#&gt;  2     1   2.5 4553.</span></span>
+<span><span class="co">#&gt;  3     1   3.5 4561.</span></span>
+<span><span class="co">#&gt;  4     1   4.5 4570.</span></span>
+<span><span class="co">#&gt;  5     1   5.5 4579.</span></span>
+<span><span class="co">#&gt;  6     1   6.5 4588.</span></span>
+<span><span class="co">#&gt;  7     1   7.5 4597.</span></span>
+<span><span class="co">#&gt;  8     1   8.5 4609.</span></span>
+<span><span class="co">#&gt;  9     1   9.5 4624.</span></span>
+<span><span class="co">#&gt; 10     1  10.5 4641.</span></span>
 <span><span class="co">#&gt; # ℹ 395,990 more rows</span></span></code></pre></div>
 <p><code>summary</code> returns the age model summarised over the realisations.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -174,16 +177,16 @@
 <span><span class="co">#&gt; # A tibble: 99 × 15</span></span>
 <span><span class="co">#&gt;    depth   idx par         mean se_mean    sd `2.5%` `15.9%` `25%` `50%` `75%`</span></span>
 <span><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1   1.5     1 c_ages[1]  4508.   1.67   65.7  4362.   4445. 4468. 4514. 4555.</span></span>
-<span><span class="co">#&gt;  2   2.5     2 c_ages[2]  4520.   1.54   61.3  4388.   4460. 4482. 4523. 4563.</span></span>
-<span><span class="co">#&gt;  3   3.5     3 c_ages[3]  4531.   1.42   57.8  4407.   4475. 4496. 4534. 4572.</span></span>
-<span><span class="co">#&gt;  4   4.5     4 c_ages[4]  4543.   1.32   55.0  4425.   4489. 4509. 4545. 4582.</span></span>
-<span><span class="co">#&gt;  5   5.5     5 c_ages[5]  4554.   1.21   52.8  4440.   4503. 4521. 4557. 4592.</span></span>
-<span><span class="co">#&gt;  6   6.5     6 c_ages[6]  4566.   1.11   50.6  4459.   4516. 4534. 4568. 4602.</span></span>
-<span><span class="co">#&gt;  7   7.5     7 c_ages[7]  4577.   1.02   48.8  4475.   4530. 4545. 4579. 4611.</span></span>
-<span><span class="co">#&gt;  8   8.5     8 c_ages[8]  4589.   0.943  47.5  4489.   4542. 4558. 4591. 4622.</span></span>
-<span><span class="co">#&gt;  9   9.5     9 c_ages[9]  4601.   0.881  46.1  4506.   4555. 4572. 4604. 4634.</span></span>
-<span><span class="co">#&gt; 10  10.5    10 c_ages[10] 4616.   0.824  44.2  4527.   4573. 4587. 4618. 4647.</span></span>
+<span><span class="co">#&gt;  1   1.5     1 c_ages[1]  4461.   1.48   65.6  4316.   4398. 4422. 4466. 4505.</span></span>
+<span><span class="co">#&gt;  2   2.5     2 c_ages[2]  4477.   1.37   61.4  4343.   4419. 4440. 4482. 4520.</span></span>
+<span><span class="co">#&gt;  3   3.5     3 c_ages[3]  4494.   1.26   57.8  4370.   4438. 4459. 4497. 4533.</span></span>
+<span><span class="co">#&gt;  4   4.5     4 c_ages[4]  4511.   1.17   54.7  4394.   4459. 4477. 4515. 4548.</span></span>
+<span><span class="co">#&gt;  5   5.5     5 c_ages[5]  4528.   1.07   52.1  4416.   4477. 4495. 4531. 4563.</span></span>
+<span><span class="co">#&gt;  6   6.5     6 c_ages[6]  4544.   0.980  49.6  4439.   4496. 4514. 4547. 4579.</span></span>
+<span><span class="co">#&gt;  7   7.5     7 c_ages[7]  4561.   0.894  47.4  4461.   4514. 4532. 4563. 4593.</span></span>
+<span><span class="co">#&gt;  8   8.5     8 c_ages[8]  4578.   0.820  45.8  4484.   4531. 4549. 4579. 4609.</span></span>
+<span><span class="co">#&gt;  9   9.5     9 c_ages[9]  4595.   0.760  44.3  4505.   4550. 4567. 4597. 4625.</span></span>
+<span><span class="co">#&gt; 10  10.5    10 c_ages[10] 4615.   0.715  42.7  4528.   4572. 4587. 4616. 4643.</span></span>
 <span><span class="co">#&gt; # ℹ 89 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 4 more variables: `84.1%` &lt;dbl&gt;, `97.5%` &lt;dbl&gt;, n_eff &lt;dbl&gt;, Rhat &lt;dbl&gt;</span></span></code></pre></div>
 <p>The hierarchical structure of the sections makes it difficult to specify the exact depth resolution that you want for your resulting age-depth model. The <code>predict</code> method takes an additional argument <code>depth</code> to interpolate to a specific set of depths. The function returns NA for depths that are outside the modelled depths.</p>
@@ -197,14 +200,14 @@
 <span><span class="co">#&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt;  1     0  NaN   NA      NA      NA    NA    NA    NA      NA      NA </span></span>
 <span><span class="co">#&gt;  2     1  NaN   NA      NA      NA    NA    NA    NA      NA      NA </span></span>
-<span><span class="co">#&gt;  3     2 4514.  63.4  4376.   4452. 4475. 4518. 4558.   4575.   4623.</span></span>
-<span><span class="co">#&gt;  4     3 4525.  59.4  4398.   4467. 4489. 4529. 4567.   4583.   4630.</span></span>
-<span><span class="co">#&gt;  5     4 4537.  56.3  4415.   4482. 4502. 4540. 4577.   4592.   4636.</span></span>
-<span><span class="co">#&gt;  6     5 4549.  53.8  4432.   4497. 4516. 4552. 4587.   4601.   4643.</span></span>
-<span><span class="co">#&gt;  7     6 4560.  51.6  4449.   4510. 4528. 4563. 4597.   4610.   4652.</span></span>
-<span><span class="co">#&gt;  8     7 4571.  49.6  4467.   4523. 4539. 4574. 4606.   4620.   4661.</span></span>
-<span><span class="co">#&gt;  9     8 4583.  48.0  4482.   4536. 4552. 4586. 4617.   4630.   4670.</span></span>
-<span><span class="co">#&gt; 10     9 4595.  46.7  4498.   4548. 4565. 4597. 4628.   4641.   4679.</span></span>
+<span><span class="co">#&gt;  3     2 4469.  63.4  4328.   4408. 4432. 4474. 4512.   4531.   4581.</span></span>
+<span><span class="co">#&gt;  4     3 4486.  59.5  4355.   4429. 4449. 4490. 4527.   4545.   4591.</span></span>
+<span><span class="co">#&gt;  5     4 4503.  56.2  4382.   4449. 4468. 4506. 4541.   4558.   4603.</span></span>
+<span><span class="co">#&gt;  6     5 4519.  53.3  4406.   4468. 4486. 4523. 4555.   4571.   4614.</span></span>
+<span><span class="co">#&gt;  7     6 4536.  50.8  4428.   4487. 4504. 4539. 4571.   4586.   4627.</span></span>
+<span><span class="co">#&gt;  8     7 4553.  48.4  4450.   4505. 4522. 4555. 4586.   4600.   4641.</span></span>
+<span><span class="co">#&gt;  9     8 4569.  46.5  4475.   4523. 4540. 4571. 4601.   4615.   4655.</span></span>
+<span><span class="co">#&gt; 10     9 4586.  45.0  4496.   4541. 4558. 4588. 4617.   4631.   4669.</span></span>
 <span><span class="co">#&gt; # ℹ 91 more rows</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -215,23 +218,23 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"acc_rates"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(idx)`</span></span>
 <span><span class="co">#&gt; Joining with `by = join_by(depth)`</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-14-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-plot_acc_rates-1.svg" width="100%"></p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"acc_rates"</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; Joining with `by = join_by(idx)`</span></span>
 <span><span class="co">#&gt; # A tibble: 196 × 15</span></span>
 <span><span class="co">#&gt;    depth c_depth_top c_depth_bottom acc_rate_unit   idx   tau  mean    sd `2.5%`</span></span>
 <span><span class="co">#&gt;    &lt;dbl&gt;       &lt;dbl&gt;          &lt;dbl&gt; &lt;chr&gt;         &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1   1.5         1.5            2.5 depth_per_ti…     1     0 155.  150.    29.3</span></span>
-<span><span class="co">#&gt;  2   2.5         2.5            3.5 depth_per_ti…     2     0 138.  117.    31.8</span></span>
-<span><span class="co">#&gt;  3   3.5         3.5            4.5 depth_per_ti…     3     0 134.  112.    32.4</span></span>
-<span><span class="co">#&gt;  4   4.5         4.5            5.5 depth_per_ti…     4     0 124.   89.2   35.3</span></span>
-<span><span class="co">#&gt;  5   5.5         5.5            6.5 depth_per_ti…     5     0 121.   82.2   37.2</span></span>
-<span><span class="co">#&gt;  6   6.5         6.5            7.5 depth_per_ti…     6     0 123.   87.8   36.1</span></span>
-<span><span class="co">#&gt;  7   7.5         7.5            8.5 depth_per_ti…     7     0 127.   94.7   35.6</span></span>
-<span><span class="co">#&gt;  8   8.5         8.5            9.5 depth_per_ti…     8     0  97.8  52.7   34.8</span></span>
-<span><span class="co">#&gt;  9   9.5         9.5           10.5 depth_per_ti…     9     0  81.7  40.2   31.6</span></span>
-<span><span class="co">#&gt; 10  10.5        10.5           11.5 depth_per_ti…    10     0  77.8  40.7   29.5</span></span>
+<span><span class="co">#&gt;  1   1.5         1.5            2.5 depth_per_ti…     1     0  75.7  40.6   28.3</span></span>
+<span><span class="co">#&gt;  2   2.5         2.5            3.5 depth_per_ti…     2     0  72.6  36.1   29.1</span></span>
+<span><span class="co">#&gt;  3   3.5         3.5            4.5 depth_per_ti…     3     0  71.4  34.1   28.9</span></span>
+<span><span class="co">#&gt;  4   4.5         4.5            5.5 depth_per_ti…     4     0  69.2  29.0   31.4</span></span>
+<span><span class="co">#&gt;  5   5.5         5.5            6.5 depth_per_ti…     5     0  68.8  27.3   32.2</span></span>
+<span><span class="co">#&gt;  6   6.5         6.5            7.5 depth_per_ti…     6     0  69.4  28.3   32.4</span></span>
+<span><span class="co">#&gt;  7   7.5         7.5            8.5 depth_per_ti…     7     0  69.7  29.2   31.6</span></span>
+<span><span class="co">#&gt;  8   8.5         8.5            9.5 depth_per_ti…     8     0  62.3  20.5   32.6</span></span>
+<span><span class="co">#&gt;  9   9.5         9.5           10.5 depth_per_ti…     9     0  55.8  16.5   31.0</span></span>
+<span><span class="co">#&gt; 10  10.5        10.5           11.5 depth_per_ti…    10     0  53.8  16.1   29.2</span></span>
 <span><span class="co">#&gt; # ℹ 186 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 6 more variables: `15.9%` &lt;dbl&gt;, `25%` &lt;dbl&gt;, `50%` &lt;dbl&gt;, `75%` &lt;dbl&gt;,</span></span>
 <span><span class="co">#&gt; #   `84.1%` &lt;dbl&gt;, `97.5%` &lt;dbl&gt;</span></span></code></pre></div>
@@ -245,7 +248,7 @@
 </h4>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"hier_acc"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-16-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-plot_hier_acc-1.svg" width="100%"></p>
 </div>
 <div class="section level4">
 <h4 id="plot-memory-prior-and-posterior">Plot memory prior and posterior<a class="anchor" aria-label="anchor" href="#plot-memory-prior-and-posterior"></a>
@@ -253,7 +256,7 @@
 <p>As for this example the highest resolution sections are approximately 1 cm thick, there is not much difference between R and w.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span>, type <span class="op">=</span> <span class="st">"mem"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-17-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-plot_mem-1.svg" width="100%"></p>
 </div>
 </div>
 <div class="section level3">
@@ -267,12 +270,12 @@
 <span></span>
 <span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stan_plot_diagnostics.html" class="external-link">stan_rhat</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-18-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-stan_diags-1.svg" width="100%"></p>
 <p>The first <code>alpha</code> parameter is the overall mean accumulation rate.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">rstan</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/rstan/reference/stanfit-method-traceplot.html" class="external-link">traceplot</a></span><span class="op">(</span><span class="va">hamstr_fit_1</span><span class="op">$</span><span class="va">fit</span>, par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"alpha[1]"</span><span class="op">)</span>,</span>
 <span>                 inc_warmup <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-19-1.svg" width="100%"></p>
+<p><img src="reference/figures/README-first_alpha-1.svg" width="100%"></p>
 </div>
 <div class="section level3">
 <h3 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

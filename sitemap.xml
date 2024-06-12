@@ -52,6 +52,9 @@
     <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_inits_hamstr.html</loc>
   </url>
   <url>
+    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_obs_age_err.html</loc>
+  </url>
+  <url>
     <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_par_idx.html</loc>
   </url>
   <url>
@@ -91,12 +94,6 @@
     <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot.hamstr_fit.html</loc>
   </url>
   <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_D_prior_posterior.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_L_prior_posterior.html</loc>
-  </url>
-  <url>
     <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_acc_mean_prior_posterior.html</loc>
   </url>
   <url>
@@ -104,6 +101,9 @@
   </url>
   <url>
     <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_downcore_summary.html</loc>
+  </url>
+  <url>
+    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_gamma_prior_posterior.html</loc>
   </url>
   <url>
     <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_hamstr.html</loc>

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">hamstr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,18 @@
       
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.8.1" id="hamstr-081">hamstr 0.8.1<a class="anchor" aria-label="anchor" href="#hamstr-081"></a></h2>
+<ul><li>Default prior value for acc_shape changed to 4 in light of calibration tests</li>
+<li>Default values for prior on bioturbation ‘L’ changed following analyis of Solan et al. 2019 data. L_prior_mean = 7.5, L_prior_shape = 2.5</li>
+<li>Update stan code to reflect new array syntax</li>
+<li>Allow flat structure by setting K_factor &gt; K_fine</li>
+<li>Allow t-dist degrees of freedom to be passed as argument to BchronCalibrate from calibrate_14C_age and compare_14C_PDF</li>
+<li>Change prior on ‘D’ from half-normal to Gamma with shape = 1.5, mean = 2</li>
+<li>Displacement / depth uncertainty is now hierarchically modelled</li>
+<li>Add ability to put a maximum length on a hiatus (in age units) - increases stability</li>
+<li>Changes to plotting colours</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.0" id="hamstr-080">hamstr 0.8.0<a class="anchor" aria-label="anchor" href="#hamstr-080"></a></h2>
 <ul><li>Hierarchical structure of sections changed so that child sections are offset from parents. This will eventually break backwards compatibility, for now if the old argument “K” is used, “K_fine” is calculated from “K”. The change improves the age models by reducing the influence of the positions of the breaks in the low resolution layers.</li>
