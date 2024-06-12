@@ -2,8 +2,8 @@
 #' @description \code{hamstr} is used to fit an age-depth model to a set of
 #'   age-control points. Ages should already be on the desired scale, e.g.
 #'   calendar ages, and will not be calibrated. The function
-#'   \code{\link{calibrate_14C_age}} can be used to calibrate radiocarbon dates prior
-#'   to fitting a hamstr model.
+#'   \code{\link{calibrate_14C_age}} can be used to calibrate radiocarbon dates
+#'   prior to fitting a hamstr model.
 #' @param depth depths of observed ages (age control points)
 #' @param obs_age observed age at each depth (age control points)
 #' @param obs_err error associated with each observed age (1 standard error)
@@ -18,7 +18,7 @@
 #'   shallowest and deepest data points.
 #' @param K_fine the number of sections at the highest resolution of the model.
 #' @param K_factor the rate at which the thickness of the sections grows between
-#' subsequent levels. 
+#'   subsequent levels.
 #' @param K deprecated, use K_fine and K_factor instead.
 #' @param acc_mean_prior hyperparameter for the prior on the overall mean
 #'   accumulation rate for the record. Units are obs_age / depth. E.g. if depth
@@ -28,7 +28,7 @@
 #'   mean accumulation rate estimated by fitting a robust linear model using
 #'   \link[MASS]{rlm}.
 #' @param acc_shape hyperparameter for the shape of the priors on accumulation
-#'   rates. Defaults to 1.5 - as for Bacon 2.2.
+#'   rates. Defaults to 4.
 #' @param mem_mean hyperparameter; a parameter of the Beta prior distribution on
 #'   "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 #'   The prior on the correlation between layers is scaled according to the
@@ -48,31 +48,36 @@
 #'   sample that was dated by e.g. radiocarbon dating. This can be a single
 #'   value or a vector the same length as obs_age. Only used if
 #'   model_bioturbation = TRUE.
-#' @param L_prior_mean mean of the gamma prior on mixing depth, defaults to 10.
+#' @param L_prior_mean mean of the gamma prior on mixing depth, defaults to 7.5.
 #' @param L_prior_shape,L_prior_sigma shape and standard deviation of the gamma
 #'   prior on the mixing depth. Set only one of these, the other will be
-#'   calculated. Defaults to shape = 2. If either the shape or sigma parameter
+#'   calculated. Defaults to shape = 2.5. If either the shape or sigma parameter
 #'   is set to zero, the mixing depth is fixed at the value of L_prior_mean,
 #'   rather than being sampled.
 #' @param model_displacement model additional error on observed ages that does
-#' not scale with the number of individual particles in a sample, for example
-#' due to incomplete mixing.
-#' @param D_prior_scale scale of the half-normal prior on additional error on
-#'   observed ages. The mean and standard deviation of a half-normal are equal
-#'   to the scale. Units are those of the depth variable, e.g. cm.
+#'   not scale with the number of individual particles in a sample, for example
+#'   due to incomplete mixing.
+#' @param D_prior_mean mean of the gamma prior on additional error on observed
+#'   ages. Units are those of the depth variable, e.g. cm.
+#' @param D_prior_shape,D_prior_sigma shape and standard deviation of the gamma
+#'   prior on the additional error on observed ages. Set only one of these, the
+#'   other will be calculated. Defaults to shape = 1.5. If either the shape or
+#'   sigma parameter is set to zero, the additional error if fixed at the value
+#'   of D_prior_mean, rather than being sampled.
 #' @param model_hiatus optionally model a hiatus.
 #' @param H_top,H_bottom limits to the location of a hiatus. By default these
 #'   are set to the top and bottom data points but can be set by the user
+#' @param H_max maximum length of the hiatus in age units   
 #' @param sample_posterior if set to FALSE, hamstr skips sampling the model and
 #'   returns only the data, model structure and prior parameters so that data
 #'   and prior distributions can be plotted and checked prior to running a
 #'   model. Defaults to TRUE
 #' @param hamstr_control additional arguments to hamstr useful for debugging or
-#' development. See \code{\link{hamstr_control}} for details.
-#' @param stan_sampler_args additional arguments to \link[rstan]{sampling} passed as a
-#' named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC chains of 4000
-#' iterations instead of the default 4 chains of 2000 iterations.
-#' See \code{\link{get_stan_sampler_args}} for details.
+#'   development. See \code{\link{hamstr_control}} for details.
+#' @param stan_sampler_args additional arguments to \link[rstan]{sampling}
+#'   passed as a named list. e.g. list(chains = 8, iter = 4000) to run 8 MCMC
+#'   chains of 4000 iterations instead of the default 4 chains of 2000
+#'   iterations. See \code{\link{get_stan_sampler_args}} for details.
 #' @return Returns an object of class "hamstr_fit", which is a list composed of
 #'   the output from the stan sampler .$fit, and the list of data passed to the
 #'   sampler, .$data
@@ -94,17 +99,19 @@ hamstr <- function(depth, obs_age, obs_err,
                    K_fine = NULL, K_factor = NULL, K,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
-                   acc_shape = 1.5,
+                   acc_shape = 4,
                    mem_mean = 0.5, mem_strength = 10,
                    model_bioturbation = FALSE,
                    n_ind = NULL,
-                   L_prior_mean = 10,
-                   L_prior_shape = 2,
+                   L_prior_mean = 7.5,
+                   L_prior_shape = 2.5,
                    L_prior_sigma = NULL,
                    model_displacement = FALSE,
-                   D_prior_scale = 10,
+                   D_prior_mean = 2,
+                   D_prior_shape = 1.5,
+                   D_prior_sigma = NULL,
                    model_hiatus = FALSE,
-                   H_top = NULL, H_bottom = NULL,
+                   H_top = NULL, H_bottom = NULL, H_max = NULL,
                    sample_posterior = TRUE,
                    hamstr_control = list(),
                    stan_sampler_args = list()
@@ -113,7 +120,7 @@ hamstr <- function(depth, obs_age, obs_err,
   if (!missing(K)) {
     warning("argument K is deprecated; K_fine has been calculated from K but please use K_fine instead.", 
             call. = FALSE)
-    K_fine <- tail(cumprod(K), 1)
+    K_fine <- utils::tail(cumprod(K), 1)
   }
   
   if (is.null(K_fine)== FALSE){

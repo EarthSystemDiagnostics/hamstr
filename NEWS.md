@@ -1,3 +1,15 @@
+# hamstr 0.8.1
+
+* Default prior value for acc_shape changed to 4 in light of calibration tests
+* Default values for prior on bioturbation 'L' changed following analyis of Solan et al. 2019 data. L_prior_mean = 7.5, L_prior_shape = 2.5
+* Update stan code to reflect new array syntax
+* Allow flat structure by setting K_factor > K_fine
+* Allow t-dist degrees of freedom to be passed as argument to BchronCalibrate from calibrate_14C_age and compare_14C_PDF
+* Change prior on 'D' from half-normal to Gamma with shape = 1.5, mean = 2
+* Displacement / depth uncertainty is now hierarchically modelled
+* Add ability to put a maximum length on a hiatus (in age units) - increases stability
+* Changes to plotting colours
+
 # hamstr 0.8.0
 
 * Hierarchical structure of sections changed so that child sections are offset from parents. This will eventually break backwards compatibility, for now if the old argument "K" is used, "K_fine" is calculated from "K". The change improves the age models by reducing the influence of the positions of the breaks in the low resolution layers.

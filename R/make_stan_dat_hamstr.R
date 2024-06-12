@@ -39,6 +39,9 @@ make_stan_dat_hamstr <- function(...) {
   l <- l[names(l)!= "hamstr.control"]
   
   
+  l$N <- length(l$depth)
+  
+  # If prior for mean acc rate is provided, estimate one from the data
   if (is.null(l$acc_mean_prior)){
     
     d <- data.frame(depth = l$depth, obs_age = l$obs_age)
@@ -54,12 +57,42 @@ make_stan_dat_hamstr <- function(...) {
     l$acc_mean_prior <- acc_mean
   }
   
-  
+  # ensure the age control points are in depth order
   ord <- order(l$depth)
   
   l$depth <- l$depth[ord]
   l$obs_age <- l$obs_age[ord]
   l$obs_err <- l$obs_err[ord]
+  
+  
+  # Displacement / depth uncertainty
+  
+  if (l$model_displacement == TRUE){
+    
+    # check parameters
+    if (is.null(l$D_prior_sigma) == FALSE)
+      message("D_prior_shape is being overriden by D_prior_sigma.")
+    
+    if (length(c(l$D_prior_sigma, l$D_prior_shape)) == 0)
+      stop("One of either D_prior_sigma or D_prior_shape must be specified.
+             Set either to 0 to impose a fixed depth uncertainty.")
+    
+    if (is.null(l$D_prior_sigma) == FALSE) {
+      l$D_prior_shape <- ifelse(
+        l$D_prior_sigma == 0, 0,
+        gamma_sigma_shape(mean = l$D_prior_mean,
+                          sigma = l$D_prior_sigma)$shape
+      )}
+    
+    #l$D_prior_mean <- as.array(l$D_prior_mean)
+    #l$D_prior_shape <- as.array(l$D_prior_shape)
+    
+  } else if(l$model_displacement == FALSE){
+    #l$D_prior_mean <- numeric(0)
+    #l$D_prior_shape <- numeric(0)
+  }
+  
+  
   
   
   if (l$model_bioturbation == TRUE){
@@ -134,20 +167,18 @@ make_stan_dat_hamstr <- function(...) {
   }
   
   
-  # Transformed arguments
-  l$N <- length(l$depth)
-  
+  # Setup hierarchical structure for modelled sections
   stopifnot(l$N == length(l$obs_err), l$N == length(l$obs_age))
   
   brks <- GetBrksHalfOffset(K_fine = l$K_fine, K_factor = l$K_factor)
-  
   alpha_idx <- GetIndices(brks = brks)
-  
   
   l$K_tot <- sum(alpha_idx$nK)
   l$K_fine <- utils::tail(alpha_idx$nK, 1)
   l$c <- 1:l$K_fine
   
+  
+  # Transformed arguments
   l$mem_alpha = l$mem_strength * l$mem_mean
   l$mem_beta = l$mem_strength * (1-l$mem_mean)
   
@@ -155,12 +186,14 @@ make_stan_dat_hamstr <- function(...) {
   l$mem_strength = l$mem_strength
   
   l$delta_c = depth_range / l$K_fine
+  
+  # depth at top and bottom of each modelled section
   l$c_depth_bottom = l$delta_c * l$c + l$top_depth
   l$c_depth_top = c(l$top_depth, l$c_depth_bottom[1:(l$K_fine-1)])
   
   l$modelled_depths <- c(l$c_depth_top[1], l$c_depth_bottom)
   
-  # Index for which sections the target depth is in
+  # Index for which sections the age control points are in
   l$which_c = sapply(l$depth, function(d) which.max((l$c_depth_bottom < d) * (l$c_depth_bottom - d) ))
   
   l <- append(l, alpha_idx)
@@ -169,18 +202,21 @@ make_stan_dat_hamstr <- function(...) {
   l$scale_shape = as.numeric(l$scale_shape)
   l$model_bioturbation = as.numeric(l$model_bioturbation)
   l$model_displacement = as.numeric(l$model_displacement)
-  l$smooth_s = as.numeric(l$smooth_s)
+  
+  # Model hiatus? and set upper/lower limits for position of hiatus 
   l$model_hiatus = as.numeric(l$model_hiatus)
   if (is.null(l$H_top)) l$H_top = l$top_depth
   if (is.null(l$H_bottom)) l$H_bottom = l$bottom_depth
   
+  if (is.null(l$H_max)) l$H_max = ceiling(diff(range(l$obs_age)))
+  
+  # set scale of smoothing of acc_rates for bioturbation calculation
+  l$smooth_s = as.numeric(l$smooth_s)
   
   if (l$smooth_s == 1){
     l$smooth_i <- get_smooth_i(l, l$L_prior_mean)
     l$I <- nrow(l$smooth_i)
-  } 
-  
-  else {
+  } else {
     l$smooth_i <- rbind(rep(1, l$N))
     l$I <- 1
   }
@@ -352,9 +388,15 @@ GetBrksHalfOffset <- function(K_fine, K_factor){
     
   }
   
-  brks <- c(brks, list(c(newbrks[1], tail(newbrks, 1))))
+  brks <- c(brks, list(c(newbrks[1], utils::tail(newbrks, 1))))
   brks <- rev(brks)
   
+  # fixes behaviour when K_factor is very large and allows for a flat structure
+  if (length(brks[[1]]) == length(brks[[2]])){
+    if (all(brks[[1]] == brks[[2]])){
+      brks <- brks[2:length(brks)]
+    }
+  }
   return(brks)
 }
 
@@ -372,7 +414,7 @@ get_K_factor <- function(K_fine){
     abs(y - x^x)
   }
 
-  ceiling(optimize(bar, c(1, (10 + log10(K_fine))), y = K_fine)$minimum)
+  ceiling(stats::optimize(bar, c(1, (10 + log10(K_fine))), y = K_fine)$minimum)
 
 }
 
@@ -542,7 +584,7 @@ get_inits_hamstr <- function(stan_dat){
     l$infl_sd = numeric(0)
     l$infl = numeric(0)
   }
-
+  
   return(l)
 }
 

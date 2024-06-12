@@ -42,6 +42,28 @@ test_that("sample_posterior = FALSE works", {
   
 })
 
+test_that("Fixed L works", {
+  
+  library(hamstr)
+  
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
+                                          obs_age = seq(1000, 10000, length.out = 10),
+                                          obs_err = rep(100, 10), 
+                                          # the seed argument for the sampler is set here so that
+                                          # this example always returns the same numerical result,
+                                          model_bioturbation = TRUE,
+                                          L_prior_shape = 0,
+                                          n_ind = rep(10, 10),
+                                          stan_sampler_args = list(seed = 1, iter = 20, cores = 1)))
+  
+  
+  
+  p1 <- plot(hamstr_fit_1)
+  testthat::expect_equal(class(p1), c("patchwork", "plot_filler", "gg", "ggplot"))
+  
+  testthat::expect_equal(class(hamstr_fit_1), c("hamstr_fit", "list"))
+
+  })
 
 
 test_that("posterior and plotting functions work", {
@@ -121,8 +143,9 @@ test_that("posterior and plotting functions work", {
 
 test_that("inflate_errors", {
   
-  hamstr_fit_1 <- suppressWarnings(hamstr(depth = 1:10,
-                         obs_age = seq(1000, 10000, length.out = 10),
+  hamstr_fit_1 <- suppressWarnings(hamstr(depth = rep(1:5, 2),
+                         obs_age = c(seq(1000, 10000, length.out = 5),
+                                     seq(1000, 10000, length.out = 5) + 1000),
                          obs_err = rep(100, 10), 
                          # the seed argument for the sampler is set here so that
                          # this example always returns the same numerical result,
@@ -130,6 +153,9 @@ test_that("inflate_errors", {
                         stan_sampler_args = list(seed = 1, iter = 20, cores = 1)))
   
   p1 <- plot(hamstr_fit_1, plot_diagnostics = FALSE)
+  
+  p1b <- plot(hamstr_fit_1, plot_diagnostics = FALSE,
+              summarise = FALSE, n = 4)
   
   p2 <- hamstr:::plot_infl_prior_posterior(hamstr_fit_1)
   
@@ -193,6 +219,21 @@ testthat::test_that("deprecated K", {
            K = c(3,3,3),
            sample_posterior = FALSE), "argument K is deprecated; K_fine has been calculated from K but please use K_fine instead."
   ))
+  
+})
+
+
+testthat::test_that("Flat K structure", {
+  
+  
+   h1 <- suppressWarnings(hamstr(depth = 1:10,
+                obs_age = seq(1000, 10000, length.out = 10),
+                obs_err = rep(100, 10),
+                K_fine = 10, K_factor = 11,
+                sample_posterior = FALSE))
+   
+   expect_length(h1$data$brks, 2)
+  
   
 })
 

@@ -176,8 +176,8 @@ summarise_age_models <- function(hamstr_fit, probs = c(0.025, 0.159, 0.25, 0.5, 
 #' Summarise Hamstr Parameters
 #'
 #' @param object A hamstr_fit object
-#' @param par Character vector of parameters to include
-#'
+#' @param pars Character vector of parameters to include
+#' @inheritParams stats::quantile
 #' @return a tibble of summarised posterior of hamstr parameters
 #' @keywords internal
 summarise_hamstr_parameters <- function(object,

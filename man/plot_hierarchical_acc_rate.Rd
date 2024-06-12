@@ -23,6 +23,9 @@ fit <- hamstr(
   obs_err = MSB2K$error)
 
 plot_hierarchical_acc_rate(fit)
+
+plot_hierarchical_acc_rate(hamstr_fit = fit) +
+ facet_wrap(~lvl)
 }
 }
 \keyword{internal}

@@ -13,7 +13,11 @@ summarise_hamstr_parameters(
 \arguments{
 \item{object}{A hamstr_fit object}
 
-\item{par}{Character vector of parameters to include}
+\item{pars}{Character vector of parameters to include}
+
+\item{probs}{numeric vector of probabilities with values in
+    \eqn{[0,1]}.  (Values up to \samp{2e-14} outside that
+    range are accepted and moved to the nearby endpoint.)}
 }
 \value{
 a tibble of summarised posterior of hamstr parameters
