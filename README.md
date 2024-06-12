@@ -89,8 +89,8 @@ compare_14C_PDF(MSB2K$age[i], MSB2K$error[i], cal_curve = "marine20") +
 ### Fitting age-models with **hamstr**
 
 Age-depth (sediment accumulation) models are fit with the function
-`hamstr`. A vectors of depth, observed age and age uncertainty are
-passed as arguments to the function.
+`hamstr`. Vectors of depth, observed age and age uncertainty are passed
+as arguments to `hamstr()`.
 
 ``` r
 hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
@@ -98,17 +98,19 @@ hamstr_fit_1 <- hamstr(depth = MSB2K_cal$depth,
                        obs_err = MSB2K_cal$age.14C.cal.se, 
                        # the seed argument for the sampler is set here so that
                        # this example always returns the same numerical result
+                       # you should not normally do this 
                        stan_sampler_args = list(seed = 1))
 ```
 
 The default plotting method shows the fitted age models together with
 some diagnostic plots: a traceplot of the log-posterior to assess
 convergence of the overall model; a plot of accumulation rate against
-depth at each hierarchical level; the prior and posterior of the memory
-parameter. By default the age-models are summarised to show the mean,
-median, 25% and 95% posterior intervals. The data are shown as points
-with their 1-sigma uncertainties. The structure of the sections is shown
-along the top of the age-model plot.
+depth at each hierarchical level; and the prior and posterior of the
+memory parameter(s). By default the age-models are summarised to show
+the mean, median, 68% and 95% posterior intervals (equivalent to 1- and
+2-sigma uncertainty). The data are shown as points with their 1- and
+2-sigma uncertainties. The structure of the sections is shown as tick
+marks along the top of the age-model plot.
 
 ``` r
 plot(hamstr_fit_1)
@@ -120,7 +122,7 @@ plot(hamstr_fit_1)
 
 A “spaghetti” plot can be created instead of shaded regions. This shows
 a random sample of iterations from the posterior distribution
-(realisation of the age-depth model). This can be slow if lots of
+(realisations of the age-depth model). This can be slow if lots of
 iterations are plotted, the default is to plot 1000 iterations.
 Additionally, plotting of the diagnostic plots can be switched off.
 
@@ -185,7 +187,7 @@ For **hamstr** version 0.8.0 and onwards, the parameter `K_fine`
 controls the number of discrete sections at the highest resolution
 level, while `K_factor` controls how much thicker the discrete sections
 are at each subsequent level. Sufficient levels are modelled so that the
-coarsest level has just one section - an overal mean accumulation rate.
+coarsest level has just one section - an overall mean accumulation rate.
 
 The structure is hierarchical in the sense that the modelled
 accumulation rates for the parent sections act as priors for their child
