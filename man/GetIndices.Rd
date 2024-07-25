@@ -4,11 +4,9 @@
 \alias{GetIndices}
 \title{Get Indices Structure For Hamstr Model from a Set of Breaks}
 \usage{
-GetIndices(nK = NULL, brks = NULL)
+GetIndices(brks = NULL)
 }
 \arguments{
-\item{nK}{List of number of breaks in each level}
-
 \item{brks}{List of breakpoints in each level}
 }
 \description{

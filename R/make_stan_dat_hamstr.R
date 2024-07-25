@@ -256,22 +256,21 @@ GetWts <- function(a, b){
 
 #' Get Indices Structure For Hamstr Model from a Set of Breaks
 #'
-#' @param nK List of number of breaks in each level
 #' @param brks List of breakpoints in each level
 #' @keywords internal
-GetIndices <- function(nK = NULL, brks = NULL) {
+GetIndices <- function(brks = NULL) {
   
-  if (is.null(brks)){
-    
-    lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
-    brks <- (lapply(nK, function(x) seq(0, 1, length.out = x + 1)))
-    
-  }
+  # if (is.null(brks)){
+  # 
+  #   lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
+  #   brks <- (lapply(nK, function(x) seq(0, 1, length.out = x + 1)))
+  # 
+  # }
   
-  if (is.null(nK)){
+  #if (is.null(nK)){
     nK <- sapply(brks, length)-1
     lvl <- unlist(lapply(seq_along(nK), function(i) rep(i, times = nK[i])))
-  }
+  #}
   
   # get the left hand parent
   parenta <- lapply(seq_along(brks)[-1], function(x) {
