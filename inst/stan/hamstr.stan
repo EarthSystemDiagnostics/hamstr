@@ -280,6 +280,13 @@ model {
   // the memory parameters
   R ~ beta(mem_alpha, mem_beta);
 
+
+  // weak priors on Hiatus parameters
+  
+  H_depth ~ uniform(H_top, H_bottom);
+  H_length ~ normal(0, H_max);
+
+
   // the observation error inflation model
 
   if (inflate_errors){
