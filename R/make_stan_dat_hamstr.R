@@ -584,6 +584,10 @@ get_inits_hamstr <- function(stan_dat){
     l$infl = numeric(0)
   }
   
+  if (stan_dat$acc_shape_shape != 0){
+    l$acc_shape_fit = as.array(stats::rgamma(1, shape = stan_dat$acc_shape, rate = stan_dat$acc_shape_shape/stan_dat$acc_shape))
+  }
+  
   return(l)
 }
 
