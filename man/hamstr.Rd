@@ -16,6 +16,7 @@ hamstr(
   bottom_depth = NULL,
   acc_mean_prior = NULL,
   acc_shape = 4,
+  acc_shape_shape = 0,
   mem_mean = 0.5,
   mem_strength = 10,
   model_bioturbation = FALSE,
@@ -71,6 +72,10 @@ mean accumulation rate estimated by fitting a robust linear model using
 
 \item{acc_shape}{hyperparameter for the shape of the priors on accumulation
 rates. Defaults to 4.}
+
+\item{acc_shape_shape}{hyperparameter for the shape of the prior on acc_shape
+if acc_shape should be fitted. Defaults to 0, which mean acc_shape is fixed at
+the value of the argument acc_shape.}
 
 \item{mem_mean}{hyperparameter; a parameter of the Beta prior distribution on
 "memory", i.e. the autocorrelation parameter in the underlying AR1 model.

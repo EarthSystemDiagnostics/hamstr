@@ -32,6 +32,7 @@ plot.hamstr_fit <- function(x,
                               "mem_prior_post",
                               "L_prior_post",
                               "D_prior_post",
+                              "acc_shape_prior_post",
                               "PDF_14C"
                               ),
                             summarise = TRUE,
@@ -49,6 +50,7 @@ plot.hamstr_fit <- function(x,
          mem_prior_post = plot_memory_prior_posterior(x),
          L_prior_post = plot_gamma_prior_posterior(x, "L"),
          D_prior_post = plot_gamma_prior_posterior(x, "D"),
+         acc_shape_prior_post = plot_gamma_prior_posterior(x, "acc_shape_fit[1]"),
          PDF_14C = plot_14C_PDF(x, ...)
   )
   }
@@ -930,6 +932,12 @@ plot_gamma_prior_posterior <- function(hamstr_fit, par) {
   
   par_prior_shape <- paste0(par, "_prior_shape")
   par_prior_mean <- paste0(par, "_prior_mean")
+  
+  if (par == "acc_shape_fit[1]"){
+    par_prior_shape <- "acc_shape_shape"
+    par_prior_mean <- "acc_shape"
+    
+  }
   
   if (any(hamstr_fit$data[[par_prior_shape]] > 0)){
     post <- as.data.frame(hamstr_fit$fit, pars = c(par)) %>%

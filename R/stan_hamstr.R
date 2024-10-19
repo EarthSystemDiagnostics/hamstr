@@ -29,6 +29,9 @@
 #'   \link[MASS]{rlm}.
 #' @param acc_shape hyperparameter for the shape of the priors on accumulation
 #'   rates. Defaults to 4.
+#' @param acc_shape_shape hyperparameter for the shape of the prior on acc_shape 
+#' if acc_shape should be fitted. Defaults to 0, which mean acc_shape is fixed at
+#' the value of the argument acc_shape.
 #' @param mem_mean hyperparameter; a parameter of the Beta prior distribution on
 #'   "memory", i.e. the autocorrelation parameter in the underlying AR1 model.
 #'   The prior on the correlation between layers is scaled according to the
@@ -100,6 +103,7 @@ hamstr <- function(depth, obs_age, obs_err,
                    top_depth = NULL, bottom_depth = NULL,
                    acc_mean_prior = NULL,
                    acc_shape = 4,
+                   acc_shape_shape = 0,
                    mem_mean = 0.5, mem_strength = 10,
                    model_bioturbation = FALSE,
                    n_ind = NULL,

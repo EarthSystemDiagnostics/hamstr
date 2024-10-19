@@ -1,6 +1,7 @@
 // Hamstr with arbitrary breaks at each level
-// 25.03.20203 Andrew Dolman
-
+// 25.03.2023 Andrew Dolman
+// Hamstr with optional fitting of acc_shape
+// 2024.10.19
 data{
   // age control points
   int<lower=0> N;
@@ -33,6 +34,8 @@ data{
 
   // shape of the gamma distributions
   real<lower = 0> acc_shape;
+  real<lower = 0> acc_shape_shape;
+  
   real<lower = 0> multi_parent_adj;
 
   // scale the shape parameter to control the total variance of the alpha
@@ -106,13 +109,6 @@ transformed data{
   // position of the first highest resolution innovation (alpha)
   int<lower = 1> first_K_fine = K_tot - K_fine+1;
 
-  // scale shape
-  real<lower = 1> acc_shape_adj;
-  if (scale_shape == 1){
-    acc_shape_adj = acc_shape * n_lvls / multi_parent_adj;
-  } else{
-    acc_shape_adj = acc_shape;
-  }
 
   L_rate = L_prior_shape / L_prior_mean;
 
@@ -122,12 +118,25 @@ transformed data{
   } else {
     sample_L = 1;
   }
+  
+  
+  // acc_shape can be fixed rather than sampled
+  int<lower = 0, upper = 1> sample_acc_shape;
+  
+  if (acc_shape_shape == 0) {
+    sample_acc_shape = 0;
+  } else {
+    sample_acc_shape = 1;
+  }
 
 }
 parameters {
   // AR1 coeffiecient at 1 depth unit
   real<lower = 0, upper = 1> R;
-
+  
+  // acc_shape if modelled
+  array[sample_acc_shape] real<lower = 1> acc_shape_fit;
+  
   // the hierarchical gamma innovations in one long vector that will be indexed
   vector<lower = 0>[K_tot] alpha;
 
@@ -153,6 +162,25 @@ parameters {
 }
 
 transformed parameters{
+
+  // scale shape
+  real<lower = 1> acc_shape_adj;
+  if (sample_acc_shape == 0){
+  if (scale_shape == 1){
+    acc_shape_adj = acc_shape * n_lvls / multi_parent_adj;
+  } else{
+    acc_shape_adj = acc_shape;
+  }
+  } else if (sample_acc_shape == 1){
+  
+  if (scale_shape == 1){
+    acc_shape_adj = acc_shape_fit[1] * n_lvls / multi_parent_adj;
+  } else{
+    acc_shape_adj = acc_shape_fit[1];
+  }
+    
+  }
+  
 
   // the AR1 coefficient scaled for the thickness of the modelled sediment sections
   real<lower = 0, upper = 1> w;
@@ -266,9 +294,14 @@ model {
   // the overall mean accumulation rate
   // weak half normal prior
   alpha[1] ~ normal(0, 10*acc_mean_prior);
+  
+  
+  if (sample_acc_shape == 1){
+     acc_shape_fit ~ gamma(acc_shape_shape, acc_shape_shape / acc_shape);
+    }
+   
 
   // the gamma distributed innovations
-
   {
   vector[K_tot-1] parent_mean;
   parent_mean = alpha[parent1] .* wts1 + alpha[parent2] .* wts2;
