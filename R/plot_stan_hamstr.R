@@ -886,7 +886,8 @@ plot_memory_prior_posterior <- function(hamstr_fit){
     dplyr::mutate(d = stats::dbeta(.data$x,
                                    shape1 = hamstr_fit$data$mem_alpha,
                                    shape2 = hamstr_fit$data$mem_beta),
-                  par = "Memory at 1 depth unit")
+                  par = "Memory at 1 depth unit")%>% 
+    dplyr::filter(is.finite(d))
 
 
   if (hamstr_fit$data$sample_posterior == TRUE){
