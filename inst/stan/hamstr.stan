@@ -135,7 +135,7 @@ parameters {
   real<lower = 0, upper = 1> R;
   
   // acc_shape if modelled
-  array[sample_acc_shape] real<lower = 1.5> acc_shape_fit;
+  array[sample_acc_shape] real<lower = 0> acc_shape_fit;
   
   // the hierarchical gamma innovations in one long vector that will be indexed
   vector<lower = 0>[K_tot] alpha;
@@ -164,7 +164,7 @@ parameters {
 transformed parameters{
 
   // scale shape
-  real<lower = 1> acc_shape_adj;
+  real<lower = 0> acc_shape_adj;
   if (sample_acc_shape == 0){
   if (scale_shape == 1){
     acc_shape_adj = acc_shape * n_lvls / multi_parent_adj;
