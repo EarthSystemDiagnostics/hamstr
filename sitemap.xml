@@ -1,153 +1,53 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/404.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/index.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/GetBrksHalfOffset.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/GetIndices.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/GetWts.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/MSB2K.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/SummariseEmpiricalPDF.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/add_datapoints.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/add_subdivisions.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/calibrate_14C_age.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/compare_14C_PDF.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/filter_hamstr_acc_rates.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/gamma_sigma_shape.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_K_factor.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_inits_hamstr.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_obs_age_err.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_par_idx.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_posterior_acc_rates.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_posterior_ages.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_smooth_i.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_stan_sampler_args.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hamstr-package.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hamstr.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hamstr_control.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hierarchical_depths.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/interpolate_age_models.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/make_stan_dat_hamstr.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot.hamstr_fit.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_acc_mean_prior_posterior.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_age_models.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_downcore_summary.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_gamma_prior_posterior.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_hamstr.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_hamstr_acc_rates.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_hierarchical_acc_rate.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_infl_prior_posterior.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_memory_prior_posterior.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_prior_posterior_hist.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_summary_age_models.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/predict.hamstr_fit.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_age_models.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_hamstr_acc_rates.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_hamstr_parameters.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_new_ages.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_q.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summary.hamstr_fit.html</loc>
-  </url>
-  <url>
-    <loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summary.hamstr_interpolated_ages.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/404.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/authors.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/index.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/news/index.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/GetBrksHalfOffset.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/GetIndices.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/GetWts.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/MSB2K.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/SummariseEmpiricalPDF.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/add_datapoints.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/add_subdivisions.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/calibrate_14C_age.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/compare_14C_PDF.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/filter_hamstr_acc_rates.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/gamma_sigma_shape.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_K_factor.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_inits_hamstr.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_obs_age_err.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_par_idx.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_posterior_acc_rates.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_posterior_ages.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_smooth_i.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/get_stan_sampler_args.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hamstr-package.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hamstr.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hamstr_control.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/hierarchical_depths.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/index.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/interpolate_age_models.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/make_stan_dat_hamstr.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot.hamstr_fit.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_acc_mean_prior_posterior.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_age_models.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_downcore_summary.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_gamma_prior_posterior.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_hamstr.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_hamstr_acc_rates.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_hierarchical_acc_rate.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_infl_prior_posterior.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_memory_prior_posterior.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_prior_posterior_hist.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/plot_summary_age_models.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/predict.hamstr_fit.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_age_models.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_hamstr_acc_rates.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_hamstr_parameters.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_new_ages.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summarise_q.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summary.hamstr_fit.html</loc></url>
+<url><loc>https://earthsystemdiagnostics.github.io/hamstr/reference/summary.hamstr_interpolated_ages.html</loc></url>
 </urlset>
+
