@@ -192,8 +192,8 @@ transformed parameters{
 
   // the remaining innovations with the AR1 parameter applied
   for(i in 2:K_fine){
-    x[i] = (w*x[i-1] + alpha[i + first_K_fine -1]) * (1/(1+w));
-    }
+    x[i] = w*x[i-1] + (1-w)*alpha[i + first_K_fine -1];
+  }
 
 
   // the cumulative sum of the highest resolution innovations
