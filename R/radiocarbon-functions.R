@@ -1,22 +1,21 @@
-#' @title Calibrate Radiocarbon Dates with Bchron::BchronCalibrate
-#' @description Calibrates a set of 14C ages using BchronCalibrate and
+#' @title Calibrate Radiocarbon Dates with rcarbon::calibrate
+#' @description Calibrates a set of 14C ages using rcarbon::calibrate and
 #'   optionally summarises the empirical PDFs of calendar age to mean and
 #'   standard deviation and appends these to the input dataframe
 #' @param dat A dataframe containing the radiocarbon dates and uncertainties
 #' @param age.14C Name of column with 14C ages, Default: 'age.14C'
 #' @param age.14C.se Name of column with 1se 14C age uncertainty, Default:
 #'   'age.14C.se'
-#' @param cal_curve Calibration curve, Default: 'intcal13', see
-#'   \code{\link[Bchron]{BchronCalibrate}}
+#' @param cal_curve Calibration curve, Default: 'intcal20', see
+#'   \code{\link[rcarbon]{calibrate}}
 #' @param return.type Return the ammended dataframe or additionally the list of
 #'   PDFs, Default: 'dat'
 #' @param offset Name of offset column, e.g. reservoir age. If column does not 
 #' exist, no offset is applied. 
 #' @param offset.se Name of offset uncertainty column, e.g. sigmaDelatR. If
 #'  column does not exist, no offset uncertainty is applied.
-#' @inheritParams Bchron::BchronCalibrate
 #' @return A dataframe or list
-#' @details A wrapper for Bchron::BchronCalibrate
+#' @details A wrapper for rcarbon::calibrate
 #' @examples
 #' # With defaults
 #' dat <- data.frame(age.14C = c(2000, 20000),
@@ -28,8 +27,8 @@
 #'
 #' # Return the PDFs
 #' cal.lst <- calibrate_14C_age(dat, cal_curve = "marine13", return = "list")
-#' with(cal.lst[[2]][[1]][[1]], {plot(ageGrid, densities)})
-#'
+#' cal.lst
+
 #' # Use different column names
 #' dat <- data.frame(radiocarbon.age = c(2000, 20000),
 #'                  se = c(100, 200))
@@ -39,91 +38,91 @@
 #'  #EXAMPLE1
 #'  }
 #' }
-#' @seealso \code{\link[Bchron]{BchronCalibrate}}
+#' @seealso \code{\link[rcarbon]{calibrate}}
 #' @rdname calibrate_14C_age
 #' @export
-#' @importFrom Bchron BchronCalibrate
-calibrate_14C_age <- function(dat, age.14C = "age.14C",
-                              age.14C.se = "age.14C.se",
-                              cal_curve = "intcal20",
-                              offset = "offset", offset.se = "offset.se",
-                              return.type = "dat",
-                              dfs = NULL
-                              ){
-
-  return.type <- match.arg(return.type, choices = c("data.frame", "list"))
+calibrate_14C_age <- function(dat,
+                                age.14C = "age.14C",
+                                age.14C.se = "age.14C.se",
+                                cal_curve = "intcal20",
+                                return.type = "dat",
+                                offset = "offset", 
+                                offset.se = "offset.se") {
+  return.type <-
+    match.arg(return.type, choices = c("data.frame", "list"))
   cal_curve <-
-    match.arg(cal_curve,
-              choices = c("intcal20", "marine20", "shcal20",
-                          "intcal13", "marine13", "shcal13",
-                          "normal"))
-
-  if (is.null(dat[[offset]])){
-    dat$offset <- 0
+    match.arg(
+      cal_curve,
+      choices = c(
+        "intcal20",
+        "marine20",
+        "shcal20",
+        "intcal13",
+        "marine13",
+        "shcal13",
+        "normal"
+      )
+    )
+  
+  if (is.null(dat[[offset]])) {
+    dat$offset <- rep(0, nrow(dat))
   } else{
     dat$offset <- dat[[offset]]
   }
   
-  if (is.null(dat[[offset.se]])){
-    dat$offset.se <- 0
+  if (is.null(dat[[offset.se]])) {
+    dat$offset.se <- rep(0, nrow(dat))
   } else{
-    dat$offset.se <- dat[[offset.se]]
+    dat$offset.se <- dat[[offset]]
   }
-
-  if (is.null(dfs)){
-    dfs <- rep(100, nrow(dat))
-  } else if (length(dfs)==1){
-    dfs <- rep(dfs, nrow(dat))
+  
+  
+  cal2tib <- function(cal){
+    a <- dplyr::as_tibble(cal[[1]])
+    b <- dplyr::bind_rows(cal[[2]], .id = "DateID") 
+    dplyr::left_join(a, b, by = "DateID")
   }
-
+  
+  ## need to catch errors on a per point basis
   cal.ages <- lapply(1:nrow(dat), function(x) {
-    tryCatch(Bchron::BchronCalibrate(
-      ages = dat[[age.14C]][x] + dat[["offset"]][x],
-      
-      # add uncertainty in offeset (e.g sigmaDeltaR) to 14C uncertainty
-      ageSds = sqrt((dat[[age.14C.se]][x])^2 + (dat[["offset.se"]][x])^2),
-      #ageSds = dat[[age.14C.se]][x],
-      
-      calCurves = cal_curve,
-      ids = x,
-      dfs = dfs[x]),
-      error = function(i){
-        cat(strsplit(as.character(i), " : ", fixed = TRUE)[[1]][2])
-
-        NA
-      })
+    tryCatch(rcarbon::calibrate(dat[[age.14C]][x], dat[[age.14C.se]][x],
+                                resOffsets = -dat[["offset"]][x],
+                                resErrors = dat[["offset.se"]][x],
+                                calCurves = cal_curve, ids = x, verbose = FALSE),
+             error = function(i){
+               cat(strsplit(as.character(i), " : ", fixed = TRUE)[[1]][2])
+               NA
+             })
   })
+  
+  cal.ages <- lapply(cal.ages, cal2tib) %>%
+    dplyr::bind_rows(.) %>%
+    dplyr::mutate(DateID = as.numeric(DateID))
 
-
-  # Use mean and sd of empirical PDFs as point estimates of calendar ages
-  dat$age.14C.cal <- sapply(cal.ages, function(x){
-    if (is.na(x) == FALSE)
-    {
-      # suppress warnings about modes as mode not used anyway
-      suppressWarnings(
-        SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["median"]
-      )
-    } else {NA}
-  })
-
-  dat$age.14C.cal.se <- sapply(cal.ages, function(x){
-    if (is.na(x) == FALSE) {
-      # suppress warnings about modes as mode not used anyway
-      suppressWarnings(
-        SummariseEmpiricalPDF(x[[1]]$ageGrid, x[[1]]$densities)["sd"]
-      )
-    } else {NA}
-  })
-
-  if (return.type == "data.frame"){
+  cal.ages.sum <- cal.ages %>%
+    dplyr::group_by(DateID) %>%
+    dplyr::summarise(dplyr::as_tibble(as.list(
+      suppressWarnings(hamstr:::SummariseEmpiricalPDF(calBP, PrDens))
+    ))) %>%
+    dplyr::select(-mode,-mean)
+  
+  dat <- cal.ages.sum %>%
+    dplyr::mutate(DateID = as.numeric(DateID)) %>%
+    dplyr::arrange(DateID) %>%
+    dplyr::bind_cols(dat, .) %>%
+    dplyr::mutate(age.14C.cal = median, age.14C.cal.se = sd) %>%
+    dplyr::select(-median,-sd)
+  
+  if (return.type == "data.frame") {
     out <- dat
   }
-
-  if (return.type == "list"){
+  
+  if (return.type == "list") {
     out <- list(dat = dat, cal.ages = cal.ages)
   }
-
+  
   return(out)
+  
 }
 
 
@@ -214,7 +213,6 @@ SummariseEmpiricalPDF <- function(x, p){
 #'   hamstr is 6
 #' @param return.type return a ggplot object or a list containing the ggplot
 #'   object and two data frames with the empirical and t-distributions
-#' @inheritParams Bchron::BchronCalibrate
 #' @return A ggplot2 object or list with data and ggplot2 object
 #' @export
 #' @importFrom rlang .data
@@ -224,8 +222,7 @@ SummariseEmpiricalPDF <- function(x, p){
 compare_14C_PDF <- function(age.14C, age.14C.se,
                             offset = 0, offset.se = 0,
                             cal_curve = "intcal20", nu = 6,
-                            return.type = c("plot", "list"),
-                            dfs = rep(100, length(age.14C))
+                            return.type = c("plot", "list")
                             ){
 
   dt_ls <- function(x, dat=1, mu=0, sigma=1) {
@@ -249,8 +246,7 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
 
   calib <- calibrate_14C_age(cal.dat,
                              return.type = "list",
-                             cal_curve = cal_curve,
-                             dfs = dfs)
+                             cal_curve = cal_curve)
 
   # The summarised calendar ages are appended to the input data
   C14 <- calib$dat
@@ -259,16 +255,15 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
   # These are the full PDFs
   cal.ages <- calib$cal.ages
 
-  cal.ages.df <- dplyr::tibble(cal = cal.ages) %>%
-
-  dplyr::mutate(id = 1:length(cal.ages))
+  cal.ages.df <- cal.ages %>% 
+    dplyr::mutate(id = DateID)
 
   cali.pdf.dat <- cal.ages.df %>%
     dplyr::group_by(.data$id) %>%
     dplyr::reframe(
-      age = if(is.na(.data$cal[[1]]) == FALSE)  .data$cal[[1]][[1]]$ageGrid else 0,
-      density = if(is.na(.data$cal[[1]]) == FALSE) .data$cal[[1]][[1]]$densities else 0
-    )
+      age = calBP,
+      density = PrDens
+        )
 
 
   tdist_df <- C14 %>%

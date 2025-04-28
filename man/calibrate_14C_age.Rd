@@ -2,17 +2,16 @@
 % Please edit documentation in R/radiocarbon-functions.R
 \name{calibrate_14C_age}
 \alias{calibrate_14C_age}
-\title{Calibrate Radiocarbon Dates with Bchron::BchronCalibrate}
+\title{Calibrate Radiocarbon Dates with rcarbon::calibrate}
 \usage{
 calibrate_14C_age(
   dat,
   age.14C = "age.14C",
   age.14C.se = "age.14C.se",
   cal_curve = "intcal20",
-  offset = "offset",
-  offset.se = "offset.se",
   return.type = "dat",
-  dfs = NULL
+  offset = "offset",
+  offset.se = "offset.se"
 )
 }
 \arguments{
@@ -23,30 +22,28 @@ calibrate_14C_age(
 \item{age.14C.se}{Name of column with 1se 14C age uncertainty, Default:
 'age.14C.se'}
 
-\item{cal_curve}{Calibration curve, Default: 'intcal13', see
-\code{\link[Bchron]{BchronCalibrate}}}
+\item{cal_curve}{Calibration curve, Default: 'intcal20', see
+\code{\link[rcarbon]{calibrate}}}
+
+\item{return.type}{Return the ammended dataframe or additionally the list of
+PDFs, Default: 'dat'}
 
 \item{offset}{Name of offset column, e.g. reservoir age. If column does not
 exist, no offset is applied.}
 
 \item{offset.se}{Name of offset uncertainty column, e.g. sigmaDelatR. If
 column does not exist, no offset uncertainty is applied.}
-
-\item{return.type}{Return the ammended dataframe or additionally the list of
-PDFs, Default: 'dat'}
-
-\item{dfs}{Degrees-of-freedom values for the t-distribution associated with the calibration calculation. A large value indicates Gaussian distributions assumed for the 14C ages}
 }
 \value{
 A dataframe or list
 }
 \description{
-Calibrates a set of 14C ages using BchronCalibrate and
+Calibrates a set of 14C ages using rcarbon::calibrate and
 optionally summarises the empirical PDFs of calendar age to mean and
 standard deviation and appends these to the input dataframe
 }
 \details{
-A wrapper for Bchron::BchronCalibrate
+A wrapper for rcarbon::calibrate
 }
 \examples{
 # With defaults
@@ -59,8 +56,7 @@ calibrate_14C_age(dat, cal_curve = "marine13")
 
 # Return the PDFs
 cal.lst <- calibrate_14C_age(dat, cal_curve = "marine13", return = "list")
-with(cal.lst[[2]][[1]][[1]], {plot(ageGrid, densities)})
-
+cal.lst
 # Use different column names
 dat <- data.frame(radiocarbon.age = c(2000, 20000),
                  se = c(100, 200))
@@ -72,5 +68,5 @@ if(interactive()){
 }
 }
 \seealso{
-\code{\link[Bchron]{BchronCalibrate}}
+\code{\link[rcarbon]{calibrate}}
 }

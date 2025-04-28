@@ -264,7 +264,7 @@ testthat::test_that("calibrate_14C_age", {
   cal_ages_2 <- calibrate_14C_age(dat2)
  
   testthat::expect_equal(cal_ages_2$age.14C.cal - cal_ages$age.14C.cal,
-                         c(133, 361))
+                         c(132, 366))
   
   
   dat3 <- data.frame(age.14C = c(2000, 20000),
