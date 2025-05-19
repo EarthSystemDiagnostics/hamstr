@@ -1,3 +1,6 @@
+# hamstr 0.8.3
+
+* Switch package dependency from Bchron to rcarbon for radiocarbon calibration
 
 # hamstr 0.8.2
 

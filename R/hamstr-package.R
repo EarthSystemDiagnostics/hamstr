@@ -8,7 +8,6 @@
 #'   Models Using an Autoregressive Gamma Process.'  Bayesian Analysis 6 (3):
 #'   457-74. \doi{doi:10.1214/ba/1339616472}
 #'
-#' @docType package
 #' @name hamstr-package
 #' @useDynLib hamstr, .registration = TRUE
 #' @import methods
@@ -20,4 +19,5 @@
 #' @references
 #' Stan Development Team (2019). RStan: the R interface to Stan. R package version 2.19.2. <https://mc-stan.org>
 #'
-NULL
+#' @keywords internal 
+"_PACKAGE"
