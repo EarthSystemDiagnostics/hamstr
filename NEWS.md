@@ -1,3 +1,8 @@
+
+# hamstr 0.8.2
+
+* Revert change to AR1 structure back to match bacon
+
 # hamstr 0.8.1
 
 * Default prior value for acc_shape changed to 4 in light of calibration tests
