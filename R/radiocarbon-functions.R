@@ -14,6 +14,7 @@
 #' exist, no offset is applied. 
 #' @param offset.se Name of offset uncertainty column, e.g. sigmaDelatR. If
 #'  column does not exist, no offset uncertainty is applied.
+#' @importFrom rcarbon calibrate
 #' @return A dataframe or list
 #' @details A wrapper for rcarbon::calibrate
 #' @examples
