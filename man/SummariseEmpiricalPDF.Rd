@@ -27,7 +27,7 @@ probability, the first is returned.
 \dontrun{
 df <- data.frame(x = 1:10)
 df$p <- dnorm(df$x, 5, 2)
-hamstr:::SummariseEmpiricalPDF(df$x, df$p)
+SummariseEmpiricalPDF(df$x, df$p)
 
 x <- 1:100
 y <- dnorm(x, 50, 10)

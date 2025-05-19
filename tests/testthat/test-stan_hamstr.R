@@ -251,7 +251,7 @@ testthat::test_that("calibrate_14C_age", {
   
   cal_ages <- calibrate_14C_age(dat)
   
-  testthat::expect_equal(class(cal_ages), c("data.frame"))
+  testthat::expect_equal(class(cal_ages), c("tbl_df", "tbl", "data.frame"))
   
   cal_ages.lst <- calibrate_14C_age(dat, return.type = "list")
   testthat::expect_equal(class(cal_ages.lst), c("list"))

@@ -15,6 +15,7 @@
 #' @param offset.se Name of offset uncertainty column, e.g. sigmaDelatR. If
 #'  column does not exist, no offset uncertainty is applied.
 #' @importFrom rcarbon calibrate
+#' @importFrom rlang .data
 #' @return A dataframe or list
 #' @details A wrapper for rcarbon::calibrate
 #' @examples
@@ -97,21 +98,21 @@ calibrate_14C_age <- function(dat,
   })
   
   cal.ages <- lapply(cal.ages, cal2tib) %>%
-    dplyr::bind_rows(.) %>%
-    dplyr::mutate(DateID = as.numeric(DateID))
+    dplyr::bind_rows() %>%
+    dplyr::mutate(DateID = as.numeric(.data$DateID))
 
   cal.ages.sum <- cal.ages %>%
-    dplyr::group_by(DateID) %>%
+    dplyr::group_by(.data$DateID) %>%
     dplyr::summarise(dplyr::as_tibble(as.list(
-      suppressWarnings(hamstr:::SummariseEmpiricalPDF(calBP, PrDens))
+      suppressWarnings(SummariseEmpiricalPDF(.data$calBP, .data$PrDens))
     ))) %>%
     dplyr::select(-mode,-mean)
   
   dat <- cal.ages.sum %>%
-    dplyr::mutate(DateID = as.numeric(DateID)) %>%
-    dplyr::arrange(DateID) %>%
-    dplyr::bind_cols(dat, .) %>%
-    dplyr::mutate(age.14C.cal = median, age.14C.cal.se = sd) %>%
+    dplyr::mutate(DateID = as.numeric(.data$DateID)) %>%
+    dplyr::arrange(.data$DateID) %>%
+    dplyr::bind_cols(dat, ) %>%
+    dplyr::mutate(age.14C.cal = .data$median, age.14C.cal.se = .data$sd) %>%
     dplyr::select(-median,-sd)
   
   if (return.type == "data.frame") {
@@ -141,7 +142,7 @@ calibrate_14C_age <- function(dat,
 #' \dontrun{
 #' df <- data.frame(x = 1:10)
 #' df$p <- dnorm(df$x, 5, 2)
-#' hamstr:::SummariseEmpiricalPDF(df$x, df$p)
+#' SummariseEmpiricalPDF(df$x, df$p)
 #'
 #' x <- 1:100
 #' y <- dnorm(x, 50, 10)
@@ -257,13 +258,13 @@ compare_14C_PDF <- function(age.14C, age.14C.se,
   cal.ages <- calib$cal.ages
 
   cal.ages.df <- cal.ages %>% 
-    dplyr::mutate(id = DateID)
+    dplyr::mutate(id = .data$DateID)
 
   cali.pdf.dat <- cal.ages.df %>%
     dplyr::group_by(.data$id) %>%
     dplyr::reframe(
-      age = calBP,
-      density = PrDens
+      age = .data$calBP,
+      density = .data$PrDens
         )
 
 
